@@ -1,0 +1,18 @@
+[
+    {
+        "monsterName": "Beelzebub",
+        "loot" : [ "Basic Sword", "Rotten Bandage", "Simple Rock" ]
+    },
+    {
+        "monsterName": "Dead Knight",
+        "loot" : [ "Healing Potion", "Rotten Bandage", "Simple Rock" ]
+    },
+    {
+        "monsterName": "Elder",
+        "loot" : [ "Attack Potion", "Rotten Bandage", "Simple Rock" ]
+    },
+    {
+        "monsterName": "Cyclops",
+        "loot" : [ "Defense Potion", "Rotten Bandage", "Simple Rock" ]
+    }
+]

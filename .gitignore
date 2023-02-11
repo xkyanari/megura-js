@@ -1,0 +1,7 @@
+node_modules
+memoria
+config-hidden.json
+config.json
+*.sqlite
+*.db
+.devcontainer

@@ -1,0 +1,46 @@
+[
+    {
+        "monsterName": "Beelzebub",
+        "location": "Monster Avenue",
+        "faction": "Margaretha",
+        "level": 1,
+        "totalHealth": 1000,
+        "totalAttack": 100,
+        "totalDefense": 100,
+        "expDropped": 10,
+        "iuraDropped":10
+    },
+    {
+        "monsterName": "Dead Knight",
+        "location": "Wilderness",
+        "faction": "Margaretha",
+        "level": 1,
+        "totalHealth": 1000,
+        "totalAttack": 100,
+        "totalDefense": 100,
+        "expDropped": 10,
+        "iuraDropped": 10
+    },
+    {
+        "monsterName": "Elder",
+        "location": "Wilderness",
+        "faction": "Margaretha",
+        "level": 1,
+        "totalHealth": 1000,
+        "totalAttack": 100,
+        "totalDefense": 100,
+        "expDropped": 10,
+        "iuraDropped": 10
+    },
+    {
+        "monsterName": "Cyclops",
+        "location": "Wilderness",
+        "faction": "Margaretha",
+        "level": 1,
+        "totalHealth": 1000,
+        "totalAttack": 100,
+        "totalDefense": 100,
+        "expDropped": 10,
+        "iuraDropped": 10
+    }
+]

@@ -1,0 +1,23 @@
+{
+  "name": "megura",
+  "version": "1.0.0",
+  "description": "Megura NFT Discord Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "nodemon index.js"
+  },
+  "author": "Kyanari",
+  "license": "GPL-3.0-or-later",
+  "dependencies": {
+    "discord.js": "^14.7.1",
+    "dotenv": "^16.0.3",
+    "openai": "^3.1.0",
+    "sequelize": "^6.28.0",
+    "sqlite3": "^5.1.4"
+  },
+  "devDependencies": {
+    "eslint": "^8.31.0",
+    "nodemon": "^2.0.20"
+  }
+}
