@@ -1,5 +1,10 @@
 module.exports = (sequelize, DataTypes) => {
     const Monster = sequelize.define('Monster', {
+        monsterID: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true
+        },
         monsterName: DataTypes.TEXT,
         location: DataTypes.TEXT,
         faction: DataTypes.TEXT,

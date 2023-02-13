@@ -33,11 +33,17 @@ module.exports = {
                 message.reply(`${gptResponse.data.choices[0].text}`);
             }
         } catch(error) {
-            if (error.response.status === 429) {
+            if (error.APIerror) {
+                console.log(`OpenAI returned an API Error: ${error.APIerror}`);
+            } else if (error.APIConnectionError) {
+                console.log(`Failed to connect to OpenAI API: ${error.APIConnectionError}`);
+            } else if (error.RateLimitError) {
+                console.log(`${error.response.status}: ${error.response.statusText}`);
                 message.reply(`Sorry, I'm getting a lot of requests right now. Please try again later.`);
-            } else {
+            }
+            else {
                 message.reply(`What are we talking about?`);
-                console.log(error);
+                console.log(`${error.response.status}: ${error.response.statusText}`);
             }
         }
 	},

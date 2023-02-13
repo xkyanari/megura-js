@@ -5,13 +5,19 @@ const { token  } = require('./config.json');
 const fs = require('node:fs');
 const path = require('node:path');
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
+const client = new Client({
+	intents: [GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMembers,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.MessageContent]
+	});
 
 // For registering and loading slash commands -----------------
 
 client.commands = new Collection();
 client.subCommands = new Collection();
 client.buttons = new Collection();
+client.menus = new Collection();
 
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
@@ -44,12 +50,12 @@ for (const file of eventFiles) {
 // // For running components -----------------
 
 const componentsPath = fs.readdirSync(`./components`);
-
 for (const folder of componentsPath) {
 	const componentFiles = fs.readdirSync(`./components/${folder}`).filter(file => file.endsWith('.js'));
 
-	const { buttons } = client;
+	const { buttons, menus } = client;
 
+	// buttons
 	switch (folder) {
 		case "buttons":
 			for (const file of componentFiles) {
@@ -61,8 +67,19 @@ for (const folder of componentsPath) {
 		default:
 			break;
 	}
+
+	// select menus
+	switch (folder) {
+		case "menus":
+			for (const file of componentFiles) {
+				const menu = require(`./components/${folder}/${file}`);
+				menus.set(menu.data.name, menu);
+			}
+			break;
+		
+		default:
+			break;
+	}
 }
-
-
 
 client.login(token);
