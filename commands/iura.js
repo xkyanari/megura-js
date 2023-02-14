@@ -67,7 +67,7 @@ module.exports = {
         const guild = interaction.guild;
         
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
-        const numFormat = (value) => new Intl.NumberFormat('en-US', { maximumSignificantDigits: 2 }).format(value === null ? 0 : value);
+        const numFormat = (value) => new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
 
         const wallet_name = interaction.options.getString('name');
         const wallet_deposit = interaction.options.getInteger('deposit');

@@ -83,6 +83,12 @@ module.exports = {
 		// .then((dataH) => {
 		// 	return dataH.createIura({ walletName: 'Altz', bankName: 'Altz'});
 		// })
+		// .then(() => {
+		// 	return Player.create({ guildID: '1032034043686035508', discordID: '111289101176565760', playerName: 'Nyasuri', faction: 'Cerberon' });
+		// })
+		// .then((dataI) => {
+		// 	return dataI.createIura({ walletName: 'Nyasuri', bankName: 'Nyasuri'});
+		// })
 		// .then(() => console.log("Profiles created successfully."))
 		.catch((error) => {
 			console.log("Error database connection.");
