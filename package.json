@@ -5,13 +5,15 @@
   "main": "index.js",
   "scripts": {
     "test": "node .",
+    "deploy": "node deploy.js",
     "start:dev": "nodemon index.js"
   },
   "author": "Kyanari",
   "license": "GPL-3.0-or-later",
   "dependencies": {
-    "captcha-canvas": "^3.2.1",
+    "alchemy-sdk": "^2.4.3",
     "discord.js": "^14.7.1",
+    "discord.js-captcha": "^3.0.4",
     "dotenv": "^16.0.3",
     "openai": "^3.1.0",
     "sequelize": "^6.28.0",
