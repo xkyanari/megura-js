@@ -28,6 +28,17 @@ module.exports = {
             } catch (error) {
                 console.error(error);
             }
+        } else if (interaction.isStringSelectMenu()) {
+            const { menus } = interaction.client;
+            const { customId } = interaction;
+            const menu = menus.get(customId);
+            if (!menu) return new Error('There is no code for this menu');
+
+            try {
+                await menu.execute(interaction);
+            } catch (error) {
+                console.error(error);
+            }
         }
 
 

@@ -85,6 +85,9 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             defaultValue: 0
         },
+        walletAddress: DataTypes.TEXT,
+        tokenID: DataTypes.INTEGER,
+        imageURL: DataTypes.TEXT,
     },
     {
         freezeTableName: true,
