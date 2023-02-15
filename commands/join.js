@@ -31,12 +31,8 @@ module.exports = {
             const options = {
                 contractAddresses: [
                     '0x160c404b2b49cbc3240055ceaee026df1e8497a0', // PXN
-<<<<<<< HEAD
                     // '0xd8a5d498ab43ed060cb6629b97a19e3e4276dd9f', TGOA
                     // '0x2da00b0140c52f2321838f9fEF95671d215e07f6', GingerTail's Hidden Secrets
-=======
-                    // '0xd8a5d498ab43ed060cb6629b97a19e3e4276dd9f',
->>>>>>> 271b663ee27f477bcdb9e6670f6c3fe4369bb79b
                 ],
             };
             const nfts = await alchemy.nft.getNftsForOwner(getWallet, options);
