@@ -15,10 +15,13 @@ module.exports = {
         const getPlayer = interaction.options.getUser('player');
         const member = getPlayer === null ? interaction.user : getPlayer;
         const numFormat = (value) => new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
-
         const guild = interaction.guild;
+
+        const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
+
+        if (!player) return interaction.reply("This user does not have a player profile in this world yet.");
+
         try {
-            const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
                 .setTitle('**ADVENTURER ID CARD**')
@@ -39,7 +42,6 @@ module.exports = {
 
             await interaction.reply({ embeds: [embed] });
         } catch (error) {
-            interaction.reply("This user does not have a player profile in this world yet.");
             console.log(error);
         }
 	}

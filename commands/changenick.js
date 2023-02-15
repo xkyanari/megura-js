@@ -11,9 +11,9 @@ module.exports = {
         const channel = interaction.channel;
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }});
 
-        if (player !== null) {
-            const nick = player.playerName;
+        if (!player) return interaction.reply("You do not have a player profile in this world yet. Wanna `/start`?");
 
+            const nick = player.playerName;
             await interaction.reply(`You want to change your name from \`${nick}\`? Okay. What should I call you?\nYou have 3 attempts.`)
                 .catch(console.error);
             
@@ -55,8 +55,5 @@ module.exports = {
             } catch (error) {
                 await channel.send("Do you need more time? That's okay. Just run the command again when you're ready.");
             }
-        } else {
-            await interaction.reply("You do not have a player profile in this world yet. Wanna `/start`?");
-        }
     }
 };
