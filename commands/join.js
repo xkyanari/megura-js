@@ -19,7 +19,7 @@ module.exports = {
             .setName('wallet')
             .setDescription('Enter your wallet address.')
             .setRequired(true)),
-
+    cooldown: 3000,
 	async execute(interaction) {
         const getWallet = interaction.options.getString('wallet');
         const member = interaction.member;
@@ -54,6 +54,7 @@ module.exports = {
                 await channel.send({ content: `This is so cool! I don't know much about NFTs, but it looks like a really fun way to get involved with the crypto world.\n\nI'm going to put this to the database now.`, embeds: [embed2] });
 
                 await Player.update({ weapon: nfts.ownedNfts[0].rawMetadata.attributes[8].value, armor: nfts.ownedNfts[0].rawMetadata.attributes[7].value, walletAddress: walletAddress.content, tokenID: nfts.ownedNfts[0].tokenId, imageURL: nfts.ownedNfts[0].rawMetadata.image }, { where: { discordID: member.id, guildID: guild.id }});
+                await Player.increment({ totalAttack: 200, totalDefense: 200 }, { where: { discordID: member.id, guildID: guild.id }});
 
             } catch (error) {
                 console.log(error);

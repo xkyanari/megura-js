@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const { Player } = require('../src/db');
 
 module.exports = {
@@ -10,8 +10,32 @@ module.exports = {
             .setName('player')
             .setDescription('Choose the player you want to check.')
             .setRequired(false)),
-            
+    cooldown: 3000,
 	async execute(interaction) {
+        const button = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('inventory')
+                    .setEmoji('🛄')
+                    .setLabel('Inventory')
+                    .setStyle(ButtonStyle.Success),
+                new ButtonBuilder()
+                .setCustomId('wallet')
+                .setEmoji('💰')
+                .setLabel('Wallet')
+                .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                .setCustomId('bank')
+                .setEmoji('🏦')
+                .setLabel('Bank')
+                .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                .setCustomId('shop')
+                .setEmoji('🛒')
+                .setLabel('Shop')
+                .setStyle(ButtonStyle.Danger)
+            );
+
         const getPlayer = interaction.options.getUser('player');
         const member = getPlayer === null ? interaction.user : getPlayer;
         const numFormat = (value) => new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
@@ -37,10 +61,17 @@ module.exports = {
                     { name: '💠 Armor', value: `${player.armor}`, inline: false },
                     { name: '💰 Iura', value: `$${numFormat(player.iura.walletAmount)}`, inline: false },
                 )
-                .setImage(`${player.imageURL}`)
                 .setFooter({ text: 'This bot was made by megura.xyz.' });
+            
+            if (player.imageURL) {
+                embed.setImage(`${player.imageURL}`);
+            }
 
-            await interaction.reply({ embeds: [embed] });
+            await interaction.reply({
+                embeds: [embed],
+                components: [button]
+            });
+
         } catch (error) {
             console.log(error);
         }

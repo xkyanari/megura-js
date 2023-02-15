@@ -10,7 +10,7 @@ module.exports = {
 				.setName('channel')
 				.setDescription('Enter name of channel')
         .setRequired(true)),
-
+  cooldown: 0,
 	async execute(interaction) {
     const channel_name = interaction.options.getString('channel');
     const member = interaction.member;

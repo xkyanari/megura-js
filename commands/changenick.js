@@ -5,6 +5,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('changenick')
 		.setDescription('Update your profile'),
+    cooldown: 3000,
 	async execute(interaction) {
         const member = interaction.member;
         const guild = interaction.guild;

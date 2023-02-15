@@ -6,6 +6,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('attack')
 		.setDescription('Attack a random monster'),
+    cooldown: 25000,
 	async execute(interaction) {
         const wait = require('node:timers/promises').setTimeout;
         const channel = interaction.channel;

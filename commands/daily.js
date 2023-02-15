@@ -5,13 +5,10 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('daily')
 		.setDescription("Complete a daily quest!"),
-
+    cooldown: 86400000,
 	async execute(interaction) {
         const member = interaction.member;
         const guild = interaction.guild;
-
-        // const cooldown = new Set();
-        // const cooldownTime = 60000;
 
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
 
@@ -26,19 +23,12 @@ module.exports = {
                     .setFooter({ text: 'This bot was made by megura.xyz.' })
                     .addFields({name: `**DAILY QUEST**`, value: `\`${player.playerName}\` found a cat searching for food at an alley so they went to a store and gave the cat a can of cat food. The cat was delighted and purred a lot!\n\n✨**Reward:**✨\n- 200 IURA`});
                 
-                // if (cooldown.has(member.id)) {
-                //     interaction.reply({ content: `You received your daily reward today!`, ephemeral: true });
-                // } else {
                     await interaction.reply({ embeds: [embed] })
                         .catch(console.error);
-                    await Iura.increment({ walletAmount: 200 }, { where: { accountID: player.iura.accountID } });
-                //     cooldown.add(member.id);
-                //     setTimeout(() => {
-                //         cooldown.delete(member.id);
-                //     }, cooldownTime);
-                // }
+                    await Iura.increment({ walletAmount: 100 }, { where: { accountID: player.iura.accountID } });
+
             } catch (error) {
-                console.log(console.error);
+                console.log(error);
             }
 	}
 };

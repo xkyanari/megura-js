@@ -142,7 +142,7 @@ module.exports = {
                             { name: 'Bank', value: 'bank' }
                         ))
             ),
-
+    cooldown: 3000,
 	async execute(interaction) {
         const member = interaction.member;
         const guild = interaction.guild;
