@@ -1,5 +1,5 @@
-const { Events } = require('discord.js');
-const { sequelize, Monster, Player, Item } = require('../src/db');
+const { Events, ActivityType } = require('discord.js');
+const { sequelize, Monster, Player, Shop } = require('../src/db');
 
 let Discord;
 try {
@@ -15,7 +15,7 @@ module.exports = {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client) {
-		client.user.setPresence({ activities: [{ name: 'Stray' }], status: 'dnd' });
+		client.user.setPresence({ activities: [{ name: 'Messinia Graciene', type: ActivityType.Playing }], status: 'dnd' });
 	console.log( `You're now connected as ${client.user.tag}.\nNode version: ${process.version}\nDiscord.js version: ${Discord.version}` );
 
 	sequelize.sync() // { alter/force: true }
@@ -30,7 +30,7 @@ module.exports = {
 		// .then(() => {
 		// 	const items = require('../assets/item_db.json');
 		// 	for (let item = 0; item < items.length; item++) {
-		// 		Item.create(items[item]);
+		// 		Shop.create(items[item]);
 		// 	}
 		// 	console.log("Item data import completed.")
 		// })
@@ -45,7 +45,7 @@ module.exports = {
 		// 	return Player.create({ guildID: '1032034043686035508', discordID: '566767755915821056', playerName: 'boo', faction: 'Cerberon' });
 		// })
 		// .then((dataA) => {
-		// 	dataA.createIura({ walletName: 'boo', bankName: 'boo', walletAmount: '10000000' });
+		// 	dataA.createIura({ walletName: 'boo', bankName: 'boo' });
 		// 	return Player.create({ guildID: '1032034043686035508', discordID: '919448412502519808', playerName: 'Julio Valiente', faction: 'Cerberon' });
 		// })
 		// .then((dataB) => {
@@ -76,6 +76,18 @@ module.exports = {
 		// })
 		// .then((dataG) => {
 		// 	return dataG.createIura({ walletName: 'Lone Drifter', bankName: 'Lone Drifter' });
+		// })
+		// .then(() => {
+		// 	return Player.create({ guildID: '1032034043686035508', discordID: '248890983985577984', playerName: 'Altz', faction: 'Cerberon' });
+		// })
+		// .then((dataH) => {
+		// 	return dataH.createIura({ walletName: 'Altz', bankName: 'Altz'});
+		// })
+		// .then(() => {
+		// 	return Player.create({ guildID: '1032034043686035508', discordID: '111289101176565760', playerName: 'Nyasuri', faction: 'Cerberon' });
+		// })
+		// .then((dataI) => {
+		// 	return dataI.createIura({ walletName: 'Nyasuri', bankName: 'Nyasuri'});
 		// })
 		// .then(() => console.log("Profiles created successfully."))
 		.catch((error) => {
