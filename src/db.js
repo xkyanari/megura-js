@@ -14,10 +14,11 @@ const Monster = require('../models/monster')(sequelize, Sequelize.DataTypes);
 const Item = require('../models/item')(sequelize, Sequelize.DataTypes);
 const Iura = require('../models/iura')(sequelize, Sequelize.DataTypes);
 const Shop = require('../models/shop')(sequelize, Sequelize.DataTypes);
+const Contract = require('../models/contract')(sequelize, Sequelize.DataTypes);
 
 Player.hasOne(Iura, { as: 'iura', foreignKey: 'accountID', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 Player.hasMany(Item, { as: 'item', foreignKey: 'accountID' });
 Shop.hasMany(Item, { as: 'itemShop', foreignKey: 'itemID' });
-// Monster.hasMany(Item, { as: 'loot', foreignKey: 'lootID' });
+// Monster.hasMany(Loot, { as: 'loot', foreignKey: 'lootID' });
 
-module.exports = { sequelize, Player, Monster, Item, Iura, Shop };
+module.exports = { sequelize, Player, Monster, Item, Iura, Shop, Contract };

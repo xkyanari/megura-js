@@ -34,7 +34,7 @@ async function getItems(interaction, item_id) {
 
 module.exports = {
     data: {
-        name: `shop-menu`,
+        name: `shop`,
     },
     async execute(interaction) {
                 
