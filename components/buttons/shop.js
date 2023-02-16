@@ -20,7 +20,7 @@ module.exports = {
                         "type": 1,
                         "components": [{
                             "type": 3,
-                            "custom_id": "shop-menu",
+                            "custom_id": "shop",
                             "placeholder": "Choose an item.",
                             "options": [
                                 {
