@@ -24,7 +24,6 @@ module.exports = {
         const getWallet = interaction.options.getString('wallet');
         const member = interaction.member;
         const guild = interaction.guild;
-        const channel = interaction.channel;
 
         await interaction.deferReply();
 
@@ -37,9 +36,9 @@ module.exports = {
 
                 const options = {
                     contractAddresses: [
-                        // '0xa698b4de86e27be81f6deb2efaf98b4a010cfd0f', // Capsule House
                         '0x160c404b2b49cbc3240055ceaee026df1e8497a0', // PXN
                         '0xd8a5d498ab43ed060cb6629b97a19e3e4276dd9f', // TGOA
+                        // '0xa698b4de86e27be81f6deb2efaf98b4a010cfd0f', // Capsule House
                         // '0x2da00b0140c52f2321838f9fEF95671d215e07f6', // GingerTail's Hidden Secrets
                     ],
                 };

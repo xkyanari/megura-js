@@ -1,31 +1,36 @@
 const { Player, Iura, Shop, Item } = require('../../src/db');
 
-async function getItems(interaction, item_id) {
+async function getItems(interaction, item_name) {
     const member = interaction.member;
     const guild = interaction.guild;
     
     try {
         // get the item_id from the database
-        const { itemName, totalHealth, totalAttack, totalDefense, price } = await Shop.findOne({ where: { itemID: item_id }});
+        const { itemID, totalHealth, totalAttack, totalDefense, price } = await Shop.findOne({ where: { itemName: item_name }});
 
         // lookup the player data
         const currentPlayer = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
 
-        const lookup = await Item.findOne({ where: { itemID: item_id, accountID: currentPlayer.accountID }});
+        const lookup = await Item.findOne({ where: { itemName: item_name, accountID: currentPlayer.accountID }});
 
         if (lookup) {
-            await interaction.editReply(`This item already exists in your inventory!`);
+            // pull the amount from its wallet
+            await Iura.decrement({ walletAmount: price }, { where: { accountID: currentPlayer.iura.accountID } });
+
+            // updates the quantity of the item
+            await Item.increment({ quantity: 1 }, { where: { itemName: item_name, accountID: currentPlayer.accountID } });
+            await Player.increment({ totalHealth, totalAttack, totalDefense }, { where: { accountID: currentPlayer.accountID }});
+            await interaction.editReply(`\`${item_name}\` has been purchased.`);
         } else{
             // pull the amount from its wallet
             await Iura.decrement({ walletAmount: price }, { where: { accountID: currentPlayer.iura.accountID } });
-    
-            await interaction.editReply(`\`${itemName}\` has been purchased.`);
         
             // else, create item data assigned to player
-            await currentPlayer.createItem({ itemID: item_id, itemName, quantity: 1 });
+            await currentPlayer.createItem({ itemID, itemName: item_name, quantity: 1 });
         
             // also update the player's stats
             await Player.increment({ totalHealth, totalAttack, totalDefense }, { where: { accountID: currentPlayer.accountID }});
+            await interaction.editReply(`\`${item_name}\` has been purchased.`);
         }
     } catch (error) {
         console.log(error);
@@ -41,16 +46,6 @@ module.exports = {
         const selected = await interaction.values[0];
         await interaction.deferReply();
 
-        if (selected === 'basic_sword') {
-            await getItems(interaction, 1);
-        } else if (selected === 'cheap_bow') {
-            await getItems(interaction, 3);
-        } else if (selected === 'rotten_bandage') {
-            await getItems(interaction, 4);
-        } else if (selected === 'boiled_egg') {
-            await getItems(interaction, 5);
-        } else if (selected === 'rock') {
-            await getItems(interaction, 6);
-        }
+        await getItems(interaction, selected);
     }
 };
