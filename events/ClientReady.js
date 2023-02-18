@@ -15,7 +15,7 @@ module.exports = {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client) {
-		client.user.setPresence({ activities: [{ name: 'Messinia Graciene', type: ActivityType.Playing }], status: 'dnd' });
+		client.user.setPresence({ activities: [{ name: `\/start | \/info to play!`, type: ActivityType.Listening }], status: 'dnd' });
 	console.log( `You're now connected as ${client.user.tag}.\nNode version: ${process.version}\nDiscord.js version: ${Discord.version}` );
 
 	sequelize.sync({force: true}) // { alter/force: true }

@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { Player } = require('../../src/db');
 const { Network, Alchemy } = require('alchemy-sdk');
 const { AlchemyApiKey } = require('../../config.json');
@@ -36,8 +36,7 @@ module.exports = {
                 { name: `Weapon:`, value: `${nfts.rawMetadata.attributes[8].value}`, inline: true },
                 { name: `Armor:`, value: `${nfts.rawMetadata.attributes[7].value}`, inline: true });
             await Player.update({ weapon: nfts.rawMetadata.attributes[8].value, armor: nfts.rawMetadata.attributes[7].value, walletAddress, tokenID: selected, imageURL: nfts.rawMetadata.image }, { where: { discordID: member.id, guildID: guild.id }});
-            await Player.increment({ totalAttack: 200, totalDefense: 200 }, { where: { discordID: member.id, guildID: guild.id }});
-
+            
         } else if (nfts.contract.openSea.collectionName === 'The Girls of Armament: GENE_SIS') {
             // console.log(nfts.rawMetadata.attributes);
             embed.addFields(
@@ -45,15 +44,21 @@ module.exports = {
                 { name: `Weapon:`, value: `${nfts.rawMetadata.attributes[9].value}`, inline: true },
                 { name: `Armor:`, value: `${nfts.rawMetadata.attributes[6].value}`, inline: true });
             await Player.update({ weapon: nfts.rawMetadata.attributes[9].value, armor: nfts.rawMetadata.attributes[6].value, walletAddress, tokenID: selected, imageURL: nfts.rawMetadata.image }, { where: { discordID: member.id, guildID: guild.id }});
-            await Player.increment({ totalAttack: 200, totalDefense: 200 }, { where: { discordID: member.id, guildID: guild.id }});
         }
 
-        await interaction.update({
-            content: `Your profile has been updated.`,
-            embeds: [embed]
+        const button = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setCustomId('confirm')
+                    .setEmoji('✅')
+                    .setLabel('Update')
+                    .setStyle(ButtonStyle.Success)
+            );
+
+        await interaction.reply({
+            embeds: [embed],
+            components: [button]
         });
-        
-        // await interaction.update({ content: `\u200b`, embeds: [embed2], components: [] });
         
     }
 };

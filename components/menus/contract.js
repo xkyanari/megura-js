@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { Player, Contract } = require('../../src/db');
 const { Network, Alchemy } = require('alchemy-sdk');
 const { AlchemyApiKey } = require('../../config.json');
@@ -48,21 +48,17 @@ module.exports = {
 
         tokenList.addFields({ name: selected, value: nftList.join(''), inline: false });
 
+        const menu = new ActionRowBuilder()
+            .addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId('join')
+                    .setPlaceholder('Please select an NFT.')
+                    .setOptions(nftOptions)
+            );
+
         await interaction.editReply({
             embeds: [tokenList],
-            components: [
-                {
-                    "type": 1,
-                    "components": [
-                        {
-                            "type": 3,
-                            "custom_id": "join",
-                            "placeholder": "Please select an NFT.",
-                            "options": nftOptions
-                        },
-                    ]
-                }
-            ]
+            components: [menu]
         });
     }
 };
