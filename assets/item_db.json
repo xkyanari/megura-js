@@ -9,15 +9,6 @@
         "description": "A cheap sword for starters."
     },
     {
-        "itemName": "Excalibur Sword",
-        "level": 100,
-        "totalHealth": 0,
-        "totalAttack": 500,
-        "totalDefense": 0,
-        "price": 50000,
-        "description": "One of the legendary swords created by Marcus, a famous swordsmith in Eldelvain. To this day, no one knows how it was made."
-    },
-    {
         "itemName": "Cheap Bow",
         "level": 1,
         "totalHealth": 0,
@@ -52,32 +43,5 @@
         "totalDefense": 0,
         "price": 1,
         "description": "A rock. Duh."
-    },
-    {
-        "itemName": "Healing Potion",
-        "level": 1,
-        "totalHealth": 100,
-        "totalAttack": 0,
-        "totalDefense": 0,
-        "price": 50,
-        "description": "A healing potion that does not wear off as long as you wear it."
-    },
-    {
-        "itemName": "Attack Potion",
-        "level": 1,
-        "totalHealth": 0,
-        "totalAttack": 100,
-        "totalDefense": 0,
-        "price": 50,
-        "description": "An attack potion that does not wear off as long as you wear it."
-    },
-    {
-        "itemName": "Defense Potion",
-        "level": 1,
-        "totalHealth": 0,
-        "totalAttack": 0,
-        "totalDefense": 100,
-        "price": 50,
-        "description": "A defense potion that does not wear off as long as you wear it."
     }
 ]

@@ -7,7 +7,7 @@ module.exports = {
 		.setDescription('Purchase items here!'),
     cooldown: 3000,
 	async execute(interaction) {
-
+        const numFormat = (value) => new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
         const embed = new EmbedBuilder()
         .setColor(0x0099FF)
         .setTitle('🛒 **ITEM SHOP:** 🛒');
@@ -27,7 +27,7 @@ module.exports = {
             if (item.totalDefense > 0) {
                 itemStats.push(`Total Defense: ${item.totalDefense}\n`);
             }
-            itemStats.push(`Price: ${item.price} IURA\n`);
+            itemStats.push(`Price: $${numFormat(item.price)} IURA\n`);
             itemStats.push(`Description: ${item.description}`);
             itemOptions.push({ "label": item.itemName, "value": item.itemName });
 

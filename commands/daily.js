@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { Player, Iura } = require('../src/db');
+const { Player, Iura, Quest, sequelize } = require('../src/db');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -15,17 +15,18 @@ module.exports = {
         if (!player) return interaction.reply("This user does not have a player profile in this world yet.");
 
             try {
+                const quest = await Quest.findAll({ order: sequelize.random(), limit: 1 });
                 
                 const embed = new EmbedBuilder()
                     .setColor(0xFF0000)
                     .setAuthor({ name: `${interaction.user.tag}` })
+                    .setTitle(`**DAILY QUEST**`)
                     .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
                     .setFooter({ text: 'This bot was made by megura.xyz.' })
-                    .addFields({name: `**DAILY QUEST**`, value: `\`${player.playerName}\` found a cat searching for food at an alley so they went to a store and gave the cat a can of cat food. The cat was delighted and purred a lot!\n\n✨**Reward:**✨\n- 200 IURA`});
+                    .addFields({name: `__**${quest[0]["questName"]}**__`, value: `${quest[0]["questDescription"]}\n\n✨**Reward:**✨\n- ${quest[0]["questReward"]} IURA`, inline: false});
                 
-                    await interaction.reply({ embeds: [embed] })
-                        .catch(console.error);
-                    await Iura.increment({ walletAmount: 100 }, { where: { accountID: player.iura.accountID } });
+                    await interaction.reply({ embeds: [embed] });
+                    await Iura.increment({ walletAmount: quest[0]["questReward"] }, { where: { accountID: player.iura.accountID } });
 
             } catch (error) {
                 console.log(error);

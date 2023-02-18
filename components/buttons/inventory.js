@@ -18,12 +18,15 @@ module.exports = {
                     .setColor(0xFF0000)
                     .setAuthor({ name: `${interaction.user.tag}` })
                     .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
-                    .setTitle('**🛄 INVENTORY LIST:**')
+                    .setTitle('**🛄 INVENTORY LIST**')
                     .setFooter({ text: 'This bot was made by megura.xyz.' });
                 
-                player.item.forEach(item => {
-                    embed.addFields({name: item.itemName, value: `Quantity: ${item.quantity}`, inline: false });
-                });
+                if (player.item.length === 0) {
+                    embed.addFields({name: `\u200b`, value: `Nothing here!`, inline: false });
+                }
+                    player.item.forEach(item => {
+                        embed.addFields({name: item.itemName, value: `Quantity: ${item.quantity}`, inline: false });
+                    });
 
                 await interaction.reply({ embeds: [embed] });
             } catch (error) {
