@@ -5,6 +5,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('start')
 		.setDescription('Create your own profile!'),
+    cooldown: 3000,
 	async execute(interaction) {
         const guild = interaction.guild;
         const member = interaction.member;
@@ -13,8 +14,10 @@ module.exports = {
 
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id } });
 
-        if (player === null) {
-            if (member.roles.cache.some(role => role.name === 'Margaretha' || role.name === 'Cerberon')) {
+        if (player) return interaction.reply("You're all set!");
+
+            if (!member.roles.cache.some(role => role.name === 'Margaretha' || role.name === 'Cerberon')) return interaction.reply("You don't seem to have a proper faction yet. Please choose your faction then `/start` again.");
+            
                 const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
                 .setTitle('Start your Adventure!')
@@ -71,12 +74,6 @@ module.exports = {
                     channel.send("Do you need more time? That's okay. Just run the command again when you're ready.");
                     console.log(error);
                 };
-                
-            } else {
-                await interaction.reply("You don't seem to have a proper faction yet. Please choose your faction then `/start` again.");
-            }
-        } else {
-            interaction.reply("You're all set!");
-        }
+        
 	}
 };

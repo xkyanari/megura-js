@@ -12,7 +12,6 @@ module.exports = (sequelize, DataTypes) => {
         walletAmount: {
             type: DataTypes.INTEGER,
             defaultValue: 0,
-            allowNull: false
         },
         bankName: {
             type: DataTypes.TEXT,
@@ -21,12 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         bankAmount: {
             type: DataTypes.INTEGER,
             defaultValue: 0,
-            allowNull: false
         },
         stakedAmount: {
             type: DataTypes.INTEGER,
             defaultValue: 0,
-            allowNull: false
         }
     },
     {

@@ -1,12 +1,11 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { Player } = require('../src/db');
+const { EmbedBuilder } = require('discord.js');
+const { Player } = require('../../src/db');
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('inventory')
-		.setDescription("Check what you have in your bag."),
-    cooldown: 3000,
-	async execute(interaction) {
+    data: {
+        name: `inventory`,
+    },
+    async execute(interaction) {
         const member = interaction.member;
         const guild = interaction.guild;
 
@@ -33,5 +32,5 @@ module.exports = {
             } catch (error) {
                 console.log(error);
             }
-	}
+    }
 };

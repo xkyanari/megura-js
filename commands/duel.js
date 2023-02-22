@@ -17,27 +17,27 @@ module.exports = {
             .setName('target')
             .setDescription('Choose the player you want to fight.')
             .setRequired(true)),
-
+    cooldown: 1800000,
 	async execute(interaction) {
-        await interaction.deferReply();
-
         const wait = require('node:timers/promises').setTimeout;
         const channel = interaction.channel;
         const player1 = interaction.member;
         const player2 = interaction.options.getMember('target');
-        if (player1.id === player2.id) {
-            await interaction.editReply("There is a saying that goes:```“The attempt to force human beings to despise themselves is what I call hell.” ― Andre Malraux```Sorry, I cannot allow that.");
-        } else if (interaction.client.user.id === player2.id) {
-            await interaction.editReply("I don't engage in battles.")
-        } else {
-            try {
 
-                let players = [player1.id, player2.id];
-                searchplayers = [];
-                for (i in players) {
-                    let player = await Player.findOne({ where: { discordID: players[i]}, include: 'iura' });
-                    searchplayers.push(player);
-                }
+        await interaction.deferReply();
+
+        let players = [player1.id, player2.id];
+        searchplayers = [];
+        for (i in players) {
+            let player = await Player.findOne({ where: { discordID: players[i]}, include: 'iura' });
+            searchplayers.push(player);
+        }
+
+        if (!player1 || !player2) return interaction.editReply("This user does not have a player profile in this world yet.");
+        if (player1.id === player2.id) return interaction.editReply("There is a saying that goes:```“The attempt to force human beings to despise themselves is what I call hell.” ― Andre Malraux```Sorry, I cannot allow that.");
+        if (interaction.client.user.id === player2.id) return interaction.editReply("I don't engage in battles.");
+
+            try {
 
                 const accountID = searchplayers[0].iura.accountID;
                 
@@ -140,9 +140,7 @@ module.exports = {
                     }
                 }
             } catch (error) {
-                await channel.send("This user does not have a player profile in this world yet.");
                 console.log(error);
             }
-        }
 	}
 };

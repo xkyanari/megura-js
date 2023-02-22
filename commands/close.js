@@ -4,7 +4,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('close')
 		.setDescription('Closes a portal'),
-
+    cooldown: 13000,
 	async execute(interaction) {
         const channel = interaction.channel;
         const member = interaction.member;

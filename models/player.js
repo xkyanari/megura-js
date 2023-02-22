@@ -86,6 +86,7 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 0
         },
         walletAddress: DataTypes.TEXT,
+        contractAddress: DataTypes.TEXT,
         tokenID: DataTypes.INTEGER,
         imageURL: DataTypes.TEXT,
     },

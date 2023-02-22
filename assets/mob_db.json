@@ -42,5 +42,71 @@
         "totalDefense": 100,
         "expDropped": 10,
         "iuraDropped": 10
+    },
+    {
+        "monsterName": "Chimera",
+        "location": "Monster Avenue",
+        "faction": "Cerberon",
+        "level": 1,
+        "totalHealth": 2000,
+        "totalAttack": 100,
+        "totalDefense": 100,
+        "expDropped": 10,
+        "iuraDropped":10
+    },
+    {
+        "monsterName": "Wyvern",
+        "location": "Monster Avenue",
+        "faction": "Cerberon",
+        "level": 1,
+        "totalHealth": 2000,
+        "totalAttack": 100,
+        "totalDefense": 100,
+        "expDropped": 10,
+        "iuraDropped": 10
+    },
+    {
+        "monsterName": "Kraken",
+        "location": "Monster Avenue",
+        "faction": "Cerberon",
+        "level": 1,
+        "totalHealth": 2000,
+        "totalAttack": 100,
+        "totalDefense": 100,
+        "expDropped": 10,
+        "iuraDropped": 10
+    },
+    {
+        "monsterName": "Manticore",
+        "location": "Monster Avenue",
+        "faction": "Cerberon",
+        "level": 1,
+        "totalHealth": 2000,
+        "totalAttack": 100,
+        "totalDefense": 100,
+        "expDropped": 10,
+        "iuraDropped": 10
+    },
+    {
+        "monsterName": "Cockatrice",
+        "location": "Monster Avenue",
+        "faction": "Cerberon",
+        "level": 1,
+        "totalHealth": 2000,
+        "totalAttack": 100,
+        "totalDefense": 100,
+        "expDropped": 10,
+        "iuraDropped":10
+    },
+    {
+        "monsterName": "Harpy",
+        "location": "Monster Avenue",
+        "faction": "Cerberon",
+        "level": 1,
+        "totalHealth": 2000,
+        "totalAttack": 100,
+        "totalDefense": 100,
+        "expDropped": 10,
+        "iuraDropped": 10
     }
 ]
