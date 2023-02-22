@@ -29,7 +29,6 @@ module.exports = {
 
         // gets the nfts based from wallet address
         const nfts = await alchemy.nft.getNftsForOwner(walletAddress, options);
-        // console.log(nfts);
 
         const tokenList = new EmbedBuilder()
             .setColor(0x0099FF)

@@ -10,6 +10,7 @@ module.exports = {
         const guild = interaction.guild;
 
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'item' });
+        const items = await player.getItems();
 
         if (!player) return interaction.reply("This user does not have a player profile in this world yet.");
 
@@ -21,12 +22,12 @@ module.exports = {
                     .setTitle('**🛄 INVENTORY LIST**')
                     .setFooter({ text: 'This bot was made by megura.xyz.' });
                 
-                if (player.item.length === 0) {
+                if (items.length === 0) {
                     embed.addFields({name: `\u200b`, value: `Nothing here!`, inline: false });
                 }
-                    player.item.forEach(item => {
-                        embed.addFields({name: item.itemName, value: `Quantity: ${item.quantity}`, inline: false });
-                    });
+                items.forEach(item => {
+                    embed.addFields({name: item.itemName, value: `Quantity: ${item.quantity}`, inline: false });
+                });
 
                 await interaction.reply({ embeds: [embed] });
             } catch (error) {

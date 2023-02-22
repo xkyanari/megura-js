@@ -23,7 +23,6 @@ module.exports = {
         const { contractAddress, walletAddress } = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }});
 
         const nfts = await alchemy.nft.getNftMetadata(contractAddress, selected);
-        // console.log(nfts);
 
         const embed = new EmbedBuilder()
         .setColor(0x0099FF)
@@ -38,7 +37,6 @@ module.exports = {
             await Player.update({ weapon: nfts.rawMetadata.attributes[8].value, armor: nfts.rawMetadata.attributes[7].value, walletAddress, tokenID: selected, imageURL: nfts.rawMetadata.image }, { where: { discordID: member.id, guildID: guild.id }});
             
         } else if (nfts.contract.openSea.collectionName === 'The Girls of Armament: GENE_SIS') {
-            // console.log(nfts.rawMetadata.attributes);
             embed.addFields(
                 { name: `Token ID:`, value: `${selected}`, inline: false },
                 { name: `Weapon:`, value: `${nfts.rawMetadata.attributes[9].value}`, inline: true },
