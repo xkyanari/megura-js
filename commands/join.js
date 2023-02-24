@@ -45,6 +45,7 @@ module.exports = {
 
                 // gets the nfts based from wallet address
                 const nfts = await alchemy.nft.getNftsForOwner(getWallet, options);
+                if (nfts.ownedNfts.length === 0) return interaction.editReply({ content: `You do not have a supported NFT from my list.`, ephemeral: true });
 
                 const projectList = new EmbedBuilder()
                     .setColor(0x0099FF)
@@ -60,6 +61,8 @@ module.exports = {
                         collectionOptions.push({ "label": `${collectionName}`, "value": `${collectionName}`});
                     }
                 });
+
+                // if (collectionList.length === '0') return interaction.reply({ content: `You do not have a supported NFT from my list.`, ephemeral: true });
 
                 projectList.addFields({ name: `List of Supported NFT Collections`, value: collectionList.join(''), inline: false });
 
