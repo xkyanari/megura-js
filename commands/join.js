@@ -39,7 +39,6 @@ module.exports = {
                         '0x160c404b2b49cbc3240055ceaee026df1e8497a0', // PXN
                         '0xd8a5d498ab43ed060cb6629b97a19e3e4276dd9f', // TGOA
                         // '0xa698b4de86e27be81f6deb2efaf98b4a010cfd0f', // Capsule House
-                        // '0x2da00b0140c52f2321838f9fEF95671d215e07f6', // GingerTail's Hidden Secrets
                     ],
                 };
 
@@ -62,8 +61,6 @@ module.exports = {
                     }
                 });
 
-                // if (collectionList.length === '0') return interaction.reply({ content: `You do not have a supported NFT from my list.`, ephemeral: true });
-
                 projectList.addFields({ name: `List of Supported NFT Collections`, value: collectionList.join(''), inline: false });
 
                 await interaction.editReply({
@@ -81,7 +78,6 @@ module.exports = {
                             ]
                         }
                     ],
-                    // fetchReply: true
                 });
 
             } catch (error) {
