@@ -1,17 +1,11 @@
-const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
-const { Player } = require('../src/db');
+const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
+const { Player } = require('../../src/db');
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('profile')
-		.setDescription("Show a player's profile")
-        .addUserOption(option =>
-            option
-            .setName('player')
-            .setDescription('Choose the player you want to check.')
-            .setRequired(false)),
-    cooldown: 3000,
-	async execute(interaction) {
+    data: {
+        name: `profile`,
+    },
+    async execute(interaction) {
         const button = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
@@ -36,8 +30,7 @@ module.exports = {
                 .setStyle(ButtonStyle.Danger)
             );
 
-        const getPlayer = interaction.options.getUser('player');
-        const member = getPlayer === null ? interaction.user : getPlayer;
+        const member = interaction.user;
         const numFormat = (value) => new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
         const guild = interaction.guild;
 
@@ -75,5 +68,5 @@ module.exports = {
         } catch (error) {
             console.log(error);
         }
-	}
+    }
 };

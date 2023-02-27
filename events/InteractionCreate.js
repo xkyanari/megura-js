@@ -1,22 +1,34 @@
 const { Events } = require('discord.js');
+const ms = require('ms');
 
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
 		if (interaction.isChatInputCommand()) {
-            const command = interaction.client.commands.get(interaction.commandName);
-    
+            const client = interaction.client;
+            const command = client.commands.get(interaction.commandName);
+
             if (!command) {
-                console.error(`No command matching ${interaction.commandName} was found.`);
+                console.error(`No command matching \`${interaction.commandName}\` was found.`);
                 return;
             }
-    
-            try {
-                await command.execute(interaction);
-            } catch (error) {
-                console.error(error);
-                await interaction.reply({ content: `Error executing ${interaction.commandName}`, ephemeral: true });
+
+            const cooldownData = `${interaction.commandName}${interaction.user.id}`;
+
+            if (client.cooldown.has(cooldownData)) {
+                const timer = ms(client.cooldown.get(cooldownData) - Date.now());
+                return interaction.reply({content: `You are on cooldown for another ${timer}.`, ephemeral: true});
             }
+
+                try {
+                    await command.execute(interaction);
+                    client.cooldown.set(cooldownData, Date.now() + command.cooldown);
+                    setTimeout(() => client.cooldown.delete(cooldownData), command.cooldown);
+
+                } catch (error) {
+                    console.error(error);
+                    await interaction.reply({ content: `Error executing \`${interaction.commandName}\``, ephemeral: true });
+                }                    
         } else if (interaction.isButton()) {
             const { buttons } = interaction.client;
             const { customId } = interaction;
@@ -40,7 +52,6 @@ module.exports = {
                 console.error(error);
             }
         }
-
 
 	},
 };

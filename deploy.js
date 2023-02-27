@@ -12,6 +12,7 @@ for (const file of commandFiles) {
 
 const rest = new REST({ version: '10' }).setToken(token);
 
+// for refreshing/registering commands
 (async () => {
 	try {
 		console.log(`Started refreshing ${commands.length} application (/) commands.`);
@@ -30,6 +31,19 @@ const rest = new REST({ version: '10' }).setToken(token);
 // For deleting registered slash commands -----------------
 // comment/uncomment whenever
 
+// removing a single slash command template
+// replace commandId with the ID you get from Settings > Apps > Integrations
+// // for guild-based commands
+// rest.delete(Routes.applicationGuildCommand(clientId, guildId, 'commandId'))
+// 	.then(() => console.log('Successfully deleted guild command'))
+// 	.catch(console.error);
+
+// // for global commands
+// rest.delete(Routes.applicationCommand(clientId, 'commandId'))
+// 	.then(() => console.log('Successfully deleted application command'))
+// 	.catch(console.error);
+
+// // for deleting all slash commands
 // // for guild-based commands
 // rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: [] })
 // 	.then(() => console.log('Successfully deleted all guild commands.'))

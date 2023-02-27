@@ -1,5 +1,5 @@
 const { Events, ActivityType } = require('discord.js');
-const { sequelize, Monster, Player, Shop } = require('../src/db');
+const { sequelize, Monster, Player, Shop, Contract, Quest } = require('../src/db');
 
 let Discord;
 try {
@@ -15,7 +15,7 @@ module.exports = {
 	name: Events.ClientReady,
 	once: true,
 	async execute(client) {
-		client.user.setPresence({ activities: [{ name: 'Messinia Graciene', type: ActivityType.Playing }], status: 'dnd' });
+		client.user.setPresence({ activities: [{ name: `\/start | \/info`, type: ActivityType.Listening }], status: 'dnd' });
 	console.log( `You're now connected as ${client.user.tag}.\nNode version: ${process.version}\nDiscord.js version: ${Discord.version}` );
 
 	sequelize.sync({ alter: true }) // { alter/force: true }
@@ -28,18 +28,10 @@ module.exports = {
 		// 	console.log("Quest data import completed.")
 		// })
 		// .then(() => {
-		// 	const monsters = require('../assets/mob_db.json');
-		// 	for (let monster = 0; monster < monsters.length; monster++) {
-		// 		Monster.create(monsters[monster]);
-		// 	}
-		// 	console.log("Monster data import completed.")
+		// 	return Player.create({ guildID: '1032034043686035508', discordID: 'copyid', playerName: 'username', faction: 'Cerberon' });
 		// })
-		// .then(() => {
-		// 	const items = require('../assets/item_db.json');
-		// 	for (let item = 0; item < items.length; item++) {
-		// 		Shop.create(items[item]);
-		// 	}
-		// 	console.log("Item data import completed.")
+		// .then((data1) => {
+		// 	return data1.createIura({ walletName: 'username', bankName: 'username', walletAmount: '100' });
 		// })
 		// .then(() => {
 		// 	const contracts = require('../assets/contracts.json');

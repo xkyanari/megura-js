@@ -1,17 +1,15 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { Shop } = require('../src/db');
+const { EmbedBuilder } = require('discord.js');
+const { Shop } = require('../../src/db');
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('shop')
-		.setDescription('Purchase items here!'),
-    cooldown: 3000,
-	async execute(interaction) {
+    data: {
+        name: `shop`,
+    },
+    async execute(interaction) {
         const numFormat = (value) => new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
         const embed = new EmbedBuilder()
         .setColor(0x0099FF)
         .setTitle('🛒 **ITEM SHOP:** 🛒');
-
         const shop = await Shop.findAll();
 
         let itemOptions = [];
@@ -74,5 +72,5 @@ module.exports = {
                 }
             ]
         });
-	}
+    }
 };
