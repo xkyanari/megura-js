@@ -49,7 +49,7 @@ Reflect.defineProperty(Player.prototype, 'addItem', {
 			return purchasedItem.save();
 		}
 
-		return await this.createItem({ itemName: item, quantity: 1 });
+		await this.createItem({ itemName: item, quantity: 1 });
 	}
 });
 

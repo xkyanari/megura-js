@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { min_atk_rate, min_def_rate, blessing, crit_rate } = require('../src/vars');
 const { Player, Monster, Iura, sequelize } = require('../src/db');
 
@@ -19,6 +19,35 @@ module.exports = {
         if (!player) return interaction.editReply("This user does not have a player profile in this world yet.");
 
             try {
+                const button = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder()
+                        .setCustomId('profile')
+                        .setEmoji('👤')
+                        .setLabel('Profile')
+                        .setStyle(ButtonStyle.Success),
+                        new ButtonBuilder()
+                            .setCustomId('inventory')
+                            .setEmoji('🛄')
+                            .setLabel('Inventory')
+                            .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                        .setCustomId('wallet')
+                        .setEmoji('💰')
+                        .setLabel('Wallet')
+                        .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                        .setCustomId('bank')
+                        .setEmoji('🏦')
+                        .setLabel('Bank')
+                        .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                        .setCustomId('shop')
+                        .setEmoji('🛒')
+                        .setLabel('Shop')
+                        .setStyle(ButtonStyle.Danger)
+                );
+
                 const monster = await Monster.findAll({ order: sequelize.random(), limit: 1 });
                 
                 const p1_name = player.playerName;
@@ -67,8 +96,7 @@ module.exports = {
                 }
                 await wait(2000);
                 await channel.send("The battle has concluded.");
-                await interaction.followUp(`Well done! You received the following from the battle: \n\n- \`${p2_expGained} EXP\`\n- \`${p2_iuraGained} IURA\``);
-                await channel.send("```“The supreme art of war is to subdue the enemy without fighting.”\n― Sun Tzu, The Art of War```");
+                await interaction.followUp({ content: `Well done! You received the following from the battle: \n\n- \`${p2_expGained} EXP\`\n- \`${p2_iuraGained} IURA\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`, components: [button]});
                 await Iura.increment({ walletAmount: p2_iuraGained }, { where: { accountID: player.iura.accountID } });
             } catch (error) {
                 console.log(error);

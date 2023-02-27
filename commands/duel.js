@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const {
     min_atk_rate,
     min_def_rate,
@@ -36,8 +36,37 @@ module.exports = {
         if (!player1 || !player2) return interaction.editReply("This user does not have a player profile in this world yet.");
         if (player1.id === player2.id) return interaction.editReply("There is a saying that goes:```“The attempt to force human beings to despise themselves is what I call hell.” ― Andre Malraux```Sorry, I cannot allow that.");
         if (interaction.client.user.id === player2.id) return interaction.editReply("I don't engage in battles.");
+        if (player2.user.bot) return interaction.editReply(`You cannot duel with bots.`);
 
             try {
+                const button = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder()
+                        .setCustomId('profile')
+                        .setEmoji('👤')
+                        .setLabel('Profile')
+                        .setStyle(ButtonStyle.Success),
+                        new ButtonBuilder()
+                            .setCustomId('inventory')
+                            .setEmoji('🛄')
+                            .setLabel('Inventory')
+                            .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                        .setCustomId('wallet')
+                        .setEmoji('💰')
+                        .setLabel('Wallet')
+                        .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                        .setCustomId('bank')
+                        .setEmoji('🏦')
+                        .setLabel('Bank')
+                        .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                        .setCustomId('shop')
+                        .setEmoji('🛒')
+                        .setLabel('Shop')
+                        .setStyle(ButtonStyle.Danger)
+                );
 
                 const accountID = searchplayers[0].iura.accountID;
                 
@@ -78,8 +107,7 @@ module.exports = {
                             await channel.send("The battle has concluded.");
                             await channel.send(`🎉 **YOU WIN!**`);
                             await wait(1000);
-                            await interaction.followUp(`🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${duel_iuraGained} IURA\``);
-                            await channel.send("```“The supreme art of war is to subdue the enemy without fighting.”\n― Sun Tzu, The Art of War```");
+                            await interaction.followUp({content: `🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${duel_iuraGained} IURA\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`, components: [button]});
                             await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID } });
                             break;
                         }
@@ -94,8 +122,7 @@ module.exports = {
                             await channel.send("The battle has concluded.");
                             await channel.send(`🎉 **YOU WIN!**`);
                             await wait(1000);
-                            await interaction.followUp(`🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${duel_iuraGained} IURA\``);
-                            await channel.send("```“The supreme art of war is to subdue the enemy without fighting.”\n― Sun Tzu, The Art of War```");
+                            await interaction.followUp({content: `🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${duel_iuraGained} IURA\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`, components: [button]});
                             await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID } });
                             break;
                         }
@@ -117,8 +144,7 @@ module.exports = {
                             await message.edit(`${p1_name} dodged the final attack and gave up.`);
                             await wait(1000);
                             await channel.send("👎 **YOU LOST!**");
-                            await interaction.followUp(`As a result, you lost:\n\n- \`${duel_iuraGained} IURA\``);
-                            await channel.send("```“It's not whether you get knocked down; it's whether you get up.”\n― Vince Lombardi```");
+                            await interaction.followUp({content: `As a result, you lost:\n\n- \`${duel_iuraGained} IURA\`\n\n> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
                             await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID } });
                             break;
                         }
@@ -131,8 +157,7 @@ module.exports = {
                             await message.edit(`${p1_name} dodged the final attack and gave up.`);
                             await wait(1000);
                             await channel.send("👎 **YOU LOST!**");
-                            await interaction.followUp(`As a result, you lost:\n\n- \`${duel_iuraGained} IURA\``);
-                            await channel.send("```“It's not whether you get knocked down; it's whether you get up.”\n― Vince Lombardi```");
+                            await interaction.followUp({content: `As a result, you lost:\n\n- \`${duel_iuraGained} IURA\`\n\n> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
                             await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID } });
                             break;
                         }

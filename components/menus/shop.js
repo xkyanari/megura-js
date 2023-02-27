@@ -16,7 +16,7 @@ module.exports = {
             const { price } = await Shop.findOne({ where: { itemName: selected } });
 
             if (!player) return interaction.editReply("This user does not have a player profile in this world yet.");
-            if (price > player.iura.walletAmount) return interaction.reply({ content: `You do not have sufficient balance!`, ephemeral: true });
+            if (price > player.iura.walletAmount) return interaction.editReply(`You do not have sufficient balance!`);
 
             await player.withdraw(-price);
             await player.addItem(selected);
