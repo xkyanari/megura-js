@@ -1,87 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { Player, Iura } = require('../src/db');
 
-async function updateName(interaction, player, type, name) {
-    if (type === 'wallet') {
-        Iura.update({ walletName: name }, { where: { accountID: player.iura.accountID } })
-            .then(() => Iura.findOne({ where: { accountID: player.iura.accountID } }))
-            .then((create_wallet) => interaction.reply(`Wallet: \`${create_wallet.walletName}\` has been updated successfully.`));
-    } else {
-        Iura.update({ bankName: name }, { where: { accountID: player.iura.accountID } })
-                    .then(() => Iura.findOne({ where: { accountID: player.iura.accountID } }))
-                    .then((create_bank) => interaction.reply(`Bank: \`${create_bank.bankName}\` has been updated successfully.`));
-    }
-};
-
-async function depositIura(interaction, numFormat, player, type, amount) {
-    if (type === 'wallet') {
-        Iura.decrement({ walletAmount: amount }, { where: { accountID: player.iura.accountID } })
-            .then(() => Iura.increment({ bankAmount: amount }, { where: { accountID: player.iura.accountID } }))
-            .then(() => Iura.findOne({ where: { accountID: player.iura.accountID } }))
-            .then((update) => {
-                const valueWallet = numFormat(update.walletAmount);
-                const valueBank = numFormat(update.bankAmount);
-                const valueStaked = numFormat(update.stakedAmount);
-                const embed = new EmbedBuilder()
-                    .setTitle('Deposited.')
-                    .setDescription(
-                        `**$${numFormat(amount)} IURA** has been deposited to \`${update.bankName}\` account.\n\n💰 **Wallet:** $${valueWallet} IURA\n🏦 **Bank:** $${valueBank} IURA\n💵 **Staked:** $${valueStaked} IURA`);
-                interaction.reply({ embeds: [embed] })
-                    .catch(console.error);
-            });
-    } else {
-        Iura.decrement({ bankAmount: amount }, { where: { accountID: player.iura.accountID } })
-            .then(() => Iura.increment({ stakedAmount: amount }, { where: { accountID: player.iura.accountID } }))
-            .then(() => Iura.findOne({ where: { accountID: player.iura.accountID } }))
-            .then((update) => {
-                const valueWallet = numFormat(update.walletAmount);
-                const valueBank = numFormat(update.bankAmount);
-                const valueStaked = numFormat(update.stakedAmount);
-                const embed = new EmbedBuilder()
-                    .setTitle('Staked.')
-                    .setDescription(
-                        `**$${numFormat(amount)} IURA** has been added to your Stake account.\n\n💰 **Wallet:** $${valueWallet} IURA\n🏦 **Bank:** $${valueBank} IURA\n💵 **Staked:** $${valueStaked} IURA`);
-                interaction.reply({ embeds: [embed] })
-                    .catch(console.error);
-            });
-    }
-};
-
-async function withdrawIura(interaction, numFormat, player, type, amount) {
-    if (type === 'wallet') {
-        Iura.decrement({ bankAmount: amount }, { where: { accountID: player.iura.accountID } })
-            .then(() => Iura.increment({ walletAmount: amount }, { where: { accountID: player.iura.accountID } }) )
-            .then(() => Iura.findOne({ where: { accountID: player.iura.accountID } }))
-            .then((update) => {
-                const valueWallet = numFormat(update.walletAmount);
-                const valueBank = numFormat(update.bankAmount);
-                const valueStaked = numFormat(update.stakedAmount);
-                const embed = new EmbedBuilder()
-                    .setTitle('Withdrawn.')
-                    .setDescription(
-                        `**$${numFormat(amount)} IURA** has been withdrawn from \`${update.bankName}\` account.\n\n💰 **Wallet:** $${valueWallet} IURA\n🏦 **Bank:** $${valueBank} IURA\n💵 **Staked:** $${valueStaked} IURA`);
-                interaction.reply({ embeds: [embed] })
-                    .catch(console.error);
-            });
-    } else {
-        Iura.decrement({ stakedAmount: amount }, { where: { accountID: player.iura.accountID } })
-            .then(() => Iura.increment({ bankAmount: amount }, { where: { accountID: player.iura.accountID } }) )
-            .then(() => Iura.findOne({ where: { accountID: player.iura.accountID } }))
-            .then((update) => {
-                const valueWallet = numFormat(update.walletAmount);
-                const valueBank = numFormat(update.bankAmount);
-                const valueStaked = numFormat(update.stakedAmount);
-                const embed = new EmbedBuilder()
-                    .setColor(0x0099FF)
-                    .setTitle('Unstaked.')
-                    .setDescription(
-                        `**$${numFormat(amount)} IURA** has been withdrawn from your Stake account.\n\n💰 **Wallet:** $${valueWallet} IURA\n🏦 **Bank:** $${valueBank} IURA\n💵 **Staked:** $${valueStaked} IURA`);
-                interaction.reply({ embeds: [embed] })
-                    .catch(console.error);
-            });
-    }
-};
-
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('iura')
@@ -148,6 +67,7 @@ module.exports = {
         const guild = interaction.guild;
         
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
+        const balance = await player.balance();
 
         if (!player) return interaction.reply(`Please create a player profile first!`);
 
@@ -167,12 +87,29 @@ module.exports = {
                 }
                 else if (wallet_deposit) {
                     // wallet ----> bank
-                    await depositIura(interaction, numFormat, player, interaction.options.getSubcommand(), wallet_deposit);
-                        
+                    if (wallet_deposit > balance.walletAmount) return interaction.reply({content: `You do not have sufficient balance!`, ephemeral: true });
+
+                    await player.deposit(wallet_deposit, interaction.options.getSubcommand());
+                    
+                    const embed = new EmbedBuilder()
+                    .setTitle('Deposited.')
+                    .setDescription(
+                        `**$${numFormat(wallet_deposit)} IURA** has been deposited to \`${balance.bankName}\` account.`);
+                    await interaction.reply({ embeds: [embed], ephemeral: true })
+                        .catch(console.error);
                 }
                 else {
                     // bank ----> wallet
-                    await withdrawIura(interaction, numFormat, player, interaction.options.getSubcommand(), wallet_withdraw);
+                    if (wallet_withdraw > balance.bankAmount) return interaction.reply({content: `You do not have sufficient balance!`, ephemeral: true });
+
+                    await player.withdraw(wallet_withdraw, interaction.options.getSubcommand());
+                    
+                    const embed = new EmbedBuilder()
+                    .setTitle('Withdrawn.')
+                    .setDescription(
+                        `**$${numFormat(wallet_withdraw)} IURA** has been removed from \`${balance.bankName}\` account.`);
+                    await interaction.reply({ embeds: [embed], ephemeral: true })
+                        .catch(console.error);
                 }
             }
             else if (interaction.options.getSubcommand() === 'bank') {
@@ -181,29 +118,44 @@ module.exports = {
                 }
                 else if (bank_deposit) {
                     // bank ----> stake
-                    await depositIura(interaction, numFormat, player, interaction.options.getSubcommand(), bank_deposit);
+                    if (bank_deposit > balance.bankAmount) return interaction.reply({content: `You do not have sufficient balance!`, ephemeral: true });
+
+                    await player.deposit(bank_deposit, interaction.options.getSubcommand());
+
+                    const embed = new EmbedBuilder()
+                    .setTitle('Staked.')
+                    .setDescription(
+                        `**$${numFormat(bank_deposit)} IURA** has been added to your Stake account.`);
+                    await interaction.reply({ embeds: [embed], ephemeral: true })
+                    .catch(console.error);
                 }
                 else {
                     // stake ----> bank
-                    await withdrawIura(interaction, numFormat, player, interaction.options.getSubcommand(), bank_withdraw);
+                    if (bank_withdraw > balance.stakedAmount) return interaction.reply({content: `You do not have sufficient balance!`, ephemeral: true });
+
+                    await player.withdraw(bank_withdraw, interaction.options.getSubcommand());
+
+                    const embed = new EmbedBuilder()
+                    .setTitle('Withdrawn.')
+                    .setDescription(
+                        `**$${numFormat(bank_withdraw)} IURA** has been removed from your Stake account.`);
+                    await interaction.reply({ embeds: [embed], ephemeral: true })
+                    .catch(console.error);
                 }
             }
             else if (interaction.options.getSubcommand() === 'balance') {
                 if (check_balance === 'wallet') {
-                    const balanceWallet = numFormat(player.iura.walletAmount);
                     const embed = new EmbedBuilder()
                         .setTitle('Balance')
-                        .setDescription(`💰 **Wallet:** $${balanceWallet} IURA`);
-                    await interaction.reply({ embeds: [embed] })
+                        .setDescription(`💰 **Wallet:** $${numFormat(balance.walletAmount)} IURA`);
+                    await interaction.reply({ embeds: [embed], ephemeral: true })
                         .catch(console.error);
                 }
                 else if (check_balance === 'bank') {
-                    const balanceBank = numFormat(player.iura.bankAmount);
-                    const balanceStaked = numFormat(player.iura.stakedAmount);
                     const embed = new EmbedBuilder()
                             .setTitle('Balance')
-                            .setDescription(`🏦 **Bank:** $${balanceBank} IURA\n💵 **Staked:** $${balanceStaked} IURA`);
-                    await interaction.reply({ embeds: [embed] })
+                            .setDescription(`🏦 **Bank:** $${numFormat(balance.bankAmount)} IURA\n💵 **Staked:** $${numFormat(balance.stakedAmount)} IURA`);
+                    await interaction.reply({ embeds: [embed], ephemeral: true })
                         .catch(console.error);
                 }
             }

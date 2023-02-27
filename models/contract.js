@@ -5,6 +5,14 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true,
             primaryKey: true
         },
+        blockchain: {
+            type: DataTypes.TEXT,
+            allowNull: false
+        },
+        collectionID: {
+            type: DataTypes.TEXT,
+            allowNull: true
+        },
         contractName: {
             type: DataTypes.TEXT,
             allowNull: false
@@ -13,6 +21,8 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT,
             allowNull: false
         },
+        traitWeapon: DataTypes.TEXT,
+        traitArmor: DataTypes.TEXT
     },
     {
         freezeTableName: true,

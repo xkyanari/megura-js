@@ -1,18 +1,10 @@
 const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { Player, Contract } = require('../../src/db');
-const { Network, Alchemy } = require('alchemy-sdk');
-const { AlchemyApiKey } = require('../../config.json');
-
-const settings = {
-    apiKey: AlchemyApiKey,
-    network: Network.ETH_MAINNET,
-};
-
-const alchemy = new Alchemy(settings);
+const { solscanApiToken } = require('../../config.json');
 
 module.exports = {
     data: {
-        name: `contract`,
+        name: `collection`,
     },
     async execute(interaction) {
         const member = interaction.member;
@@ -21,15 +13,22 @@ module.exports = {
                 
         const selected = await interaction.values[0];
 
-        const { contractAddress } = await Contract.findOne({ where: { contractName: selected }});
+        const { collectionID, contractAddress } = await Contract.findOne({ where: { contractName: selected }});
         const { walletAddress } = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }});
         await Player.update({ contractAddress }, { where: { discordID: member.id, guildID: guild.id }});
 
-        const options = { contractAddresses: [ contractAddress ] };
+        const options = {
+            method: 'GET',
+            headers: {
+                accept: 'application/json',
+                'content-type': 'application/json',
+                // 'token': solscanApiToken
+            }
+        };
 
-        // gets the nfts based from wallet address
-        const nfts = await alchemy.nft.getNftsForOwner(walletAddress, options);
-
+        const nftResult = await fetch(`https://api-mainnet.magiceden.dev/v2/wallets/${walletAddress}/tokens?offset=0&limit=100&listStatus=unlisted`, options);
+        const nfts = await nftResult.json();
+        
         const tokenList = new EmbedBuilder()
             .setColor(0x0099FF)
             .setAuthor({ name: `${interaction.user.tag}` })
@@ -37,20 +36,23 @@ module.exports = {
         
         let nftList = [];
         let nftOptions = [];
-        nfts.ownedNfts.forEach(collection => {
-            let nftToken = collection.title;
-            let nftTokenId = collection.tokenId;
-
-            nftList.push(`${nftToken}\n`);
-            nftOptions.push({ "label": `${nftToken}`, "value": `${nftTokenId}`});
+        nfts.forEach( thisNFT => {
+            if (thisNFT.collection === collectionID) {
+                if (!nftList.includes(`${thisNFT.name}\n`)) {
+                    nftList.push(`${thisNFT.name}\n`);
+                    nftOptions.push({ "label": `${thisNFT.name}`, "value": `${thisNFT.name}`});
+                }
+            }
         });
+        nftList.sort();
+        nftOptions.sort();
 
         tokenList.addFields({ name: selected, value: nftList.join(''), inline: false });
 
         const menu = new ActionRowBuilder()
             .addComponents(
                 new StringSelectMenuBuilder()
-                    .setCustomId('ethereum')
+                    .setCustomId('solana')
                     .setPlaceholder('Please select an NFT.')
                     .setOptions(nftOptions)
             );

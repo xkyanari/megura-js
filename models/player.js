@@ -85,6 +85,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             defaultValue: 0
         },
+        linked: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: 0
+        },
         walletAddress: DataTypes.TEXT,
         contractAddress: DataTypes.TEXT,
         tokenID: DataTypes.INTEGER,
