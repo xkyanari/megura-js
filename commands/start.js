@@ -22,7 +22,7 @@ module.exports = {
                 .setColor(0x0099FF)
                 .setTitle('Start your Adventure!')
                 .setDescription(
-                    `***Welcome to Eldelvain's Adventurers Guild.***\n\nI see that you belong to the \`${faction.name}\` faction. Before you can start your journey, I need to get information from you first.\n\nPlease enter your \`Character Name\`.\n\nYou can have a name with up to 20 characters including spaces and numbers. You cannot use any special symbols as I will address you by this name moving forward.`
+                    `***Welcome to Eldelvain's Voyagers Guild.***\n\nI see that you belong to the \`${faction.name}\` faction. Before you can start your journey, I need to get information from you first.\n\nPlease enter your \`Character Name\`.\n\nYou can have a name with up to 20 characters including spaces and numbers. You cannot use any special symbols as I will address you by this name moving forward.`
                     );
                 await interaction.reply({ embeds: [embed] });
 
@@ -50,7 +50,7 @@ module.exports = {
                             await channel.send({ embeds: [embed1] });
                             await wait(3000);
                             const embed2 = new EmbedBuilder()
-                                .setDescription("I will carry your Adventurer ID so you will be reminded of your identity.\nUse `/profile` for yourself or when you find your friends and enemies.\n\nIf you're searching for a Conflict, use `/attack`. There's also `/duel` to challenge other adventurers.\n\nI highly recommend that you explore the areas outside Eldelvain or challenge other adventurers using `/open` so you don't interfere with other adventurers. Take heed that it closes momentarily.\n\nIf you need to leave early, use the `/close` command. You will be reminded how to use them with care.\n\nLastly, you can use `/info` to see the list of commands to call me.");
+                                .setDescription("I will carry your Voyagers ID so you will be reminded of your identity.\nUse `/profile` for yourself or when you find your friends and enemies.\n\nIf you're searching for a Conflict, use `/attack`. There's also `/duel` to challenge other voyagers.\n\nI highly recommend that you explore the areas outside Eldelvain or challenge other voyagers using `/open` so you don't interfere with other voyagers. Take heed that it closes momentarily.\n\nIf you need to leave early, use the `/close` command. You will be reminded how to use them with care.\n\nLastly, you can use `/info` to see the list of commands to call me.");
                             await channel.send({ embeds: [embed2] });
                             await wait(4000);
                             await channel.send(`For now, you will travel to the \`past\`. Please take care, \`${player_name.content}\`.`);
