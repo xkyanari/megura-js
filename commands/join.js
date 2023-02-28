@@ -141,9 +141,7 @@ module.exports = {
 
                     const nftResult = await fetch(`https://pro-api.solscan.io/v1.0/nft/wallet/list_nft/${getWallet}?history=false`, options);
                     const nfts = await nftResult.json();
-
-                    if (nfts.data.list_nfts.length === 0) return interaction.editReply({ content: `You do not have a supported NFT from my list.`});
-
+                    
                     let found = [];
                     contractList.forEach( thisCollection => {
                         const foundItem = nfts.data.list_nfts.find(item => item.nft_collection_id === thisCollection);
@@ -151,6 +149,8 @@ module.exports = {
                             found.push(foundItem.nft_collection_id);
                         }
                     });
+                    
+                    if (found.length === 0) return interaction.editReply({ content: `You do not have a supported NFT from my list.`});
         
                     const projectList = new EmbedBuilder()
                         .setColor(0x0099FF)
@@ -168,7 +168,6 @@ module.exports = {
                         }
 
                     }
-
                     collections.sort();
                     collectionOptions.sort();
         
@@ -203,8 +202,6 @@ module.exports = {
         
                     const nftResult = await fetch(`https://api-mainnet.magiceden.dev/v2/wallets/${getWallet}/tokens?offset=0&limit=100&listStatus=unlisted`, options);
                     const nfts = await nftResult.json();
-                    
-                    if (nfts.length === 0) return interaction.editReply({ content: `You do not have a supported NFT from my list.`});
 
                     let found = [];
                     collectionList.forEach( thisCollection => {
@@ -213,6 +210,8 @@ module.exports = {
                             found.push(foundItem.collection);
                         }
                     });
+
+                    if (found.length === 0) return interaction.editReply({ content: `You do not have a supported NFT from my list.`});
         
                     const projectList = new EmbedBuilder()
                         .setColor(0x0099FF)
@@ -230,9 +229,6 @@ module.exports = {
                             console.log(item);
                         }
                     }
-
-                    console.log(collections);
-                    console.log(collectionOptions);
                     collections.sort();
                     collectionOptions.sort();
         

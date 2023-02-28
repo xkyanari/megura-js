@@ -2,6 +2,7 @@
   "name": "megura",
   "version": "1.0.0",
   "description": "Megura NFT Discord Bot",
+  "homepage": "https://docs.megura.xyz",
   "main": "index.js",
   "scripts": {
     "test": "node deploy && node .",
@@ -10,6 +11,10 @@
   },
   "author": "Kyanari",
   "license": "GPL-3.0-or-later",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/xkyanari/megura-js.git"
+  },
   "dependencies": {
     "@solana/web3.js": "^1.73.3",
     "alchemy-sdk": "^2.4.3",

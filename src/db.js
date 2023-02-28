@@ -2,12 +2,38 @@ const Sequelize = require('sequelize');
 
 // Connecting to the database using Sequelize -----------------
 
-const sequelize = new Sequelize('megura', 'user', 'password', {
+const sequelize = new Sequelize('megura', 'user', 'password',
+// {
+// 	"development": {
+// 	  "username": "root",
+// 	  "password": null,
+// 	  "database": "database_development",
+// 	  "host": "127.0.0.1",
+// 	  "dialect": "sqlite"
+// 	},
+// 	"test": {
+// 	  "username": "root",
+// 	  "password": null,
+// 	  "database": "database_test",
+// 	  "host": "127.0.0.1",
+// 	  "dialect": "sqlite"
+// 	},
+// 	"production": {
+// 	  "username": "root",
+// 	  "password": null,
+// 	  "database": "database_production",
+// 	  "host": "127.0.0.1",
+// 	  "dialect": "sqlite"
+// 	}
+//   }
+  
+{
 	host: 'localhost',
 	dialect: 'sqlite',
 	logging: (...msg) => console.log(msg),
 	storage: 'megura.db', // database filename
-});
+}
+);
 
 const Player = require('../models/player')(sequelize, Sequelize.DataTypes);
 const Monster = require('../models/monster')(sequelize, Sequelize.DataTypes);
@@ -37,7 +63,7 @@ Reflect.defineProperty(Player.prototype, 'getItems', {
 
 // adds only the item (no deduction of payment yet)
 Reflect.defineProperty(Player.prototype, 'addItem', {
-	value: async function addItem(item) {
+	value: async function addItem(item, amount = 1) {
 		const { itemID } = await Shop.findOne({ where: { itemName: item }});
 
 		if (!itemID) return;
@@ -45,11 +71,11 @@ Reflect.defineProperty(Player.prototype, 'addItem', {
 		const purchasedItem = await Item.findOne({ where: { accountID: this.accountID, itemID }});
 
 		if (purchasedItem) {
-			purchasedItem.quantity += 1;
+			purchasedItem.quantity += amount;
 			return purchasedItem.save();
 		}
 
-		await this.createItem({ itemName: item, quantity: 1 });
+		await this.createItem({ itemName: item, quantity: amount });
 	}
 });
 
@@ -93,12 +119,15 @@ Reflect.defineProperty(Player.prototype, 'withdraw', {
 });
 
 Reflect.defineProperty(Player.prototype, 'updateStats', {
-	value: async function updateStats(item) {
+	value: async function updateStats(item, amount = 1) {
 		const { itemID, totalHealth, totalAttack, totalDefense } = await Shop.findOne({ where: { itemName: item }});
+		const newTotalHealth = totalHealth * amount;
+		const newTotalAttack = totalAttack * amount;
+		const newTotalDefense = totalDefense * amount;
 
 		if (!itemID) return;
 
-		await this.increment({ totalHealth, totalAttack, totalDefense }, { where: { accountID: this.accountID }})
+		await this.increment({ totalHealth: newTotalHealth, totalAttack: newTotalAttack, totalDefense: newTotalDefense }, { where: { accountID: this.accountID }})
 		return this.save();
 	}
 });
