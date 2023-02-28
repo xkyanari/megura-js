@@ -33,7 +33,6 @@ module.exports = {
             itemStats.push(`Description: ${item.description}\n`);
             itemStats.push(`Item ID: \`${item.item_ID}\``);
             itemOptions.push({ "label": item.itemName, "value": item.itemName });
-            console.log(itemOptions);
 
             embed.addFields({ name: `__**${item.itemName}**__`, value: itemStats.join(''), inline: false });
         });

@@ -26,7 +26,8 @@ module.exports = {
                 itemStats.push(`Total Defense: ${item.totalDefense}\n`);
             }
             itemStats.push(`Price: $${numFormat(item.price)} IURA\n`);
-            itemStats.push(`Description: ${item.description}`);
+            itemStats.push(`Description: ${item.description}\n`);
+            itemStats.push(`Item ID: \`${item.item_ID}\``);
             itemOptions.push({ "label": item.itemName, "value": item.itemName });
 
             embed.addFields({ name: `__**${item.itemName}**__`, value: itemStats.join(''), inline: false });

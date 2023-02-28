@@ -68,7 +68,7 @@ Reflect.defineProperty(Player.prototype, 'addItem', {
 
 		if (!itemID) return;
 
-		const purchasedItem = await Item.findOne({ where: { accountID: this.accountID, itemID }});
+		const purchasedItem = await Item.findOne({ where: { accountID: this.accountID, itemName: item }});
 
 		if (purchasedItem) {
 			purchasedItem.quantity += amount;

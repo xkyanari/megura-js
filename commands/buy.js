@@ -22,7 +22,7 @@ module.exports = {
         const id = interaction.options.getString('id');
         const amount = interaction.options.getInteger('amount');
 
-        const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }});
+        const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
         const { price, itemName } = await Shop.findOne({ where: { item_ID: id } });
 
         if (!player) return interaction.reply({content: "You do not have a player profile in this world yet. Wanna `/start`?", ephemeral: true });
