@@ -48,7 +48,8 @@ module.exports = {
                         .setStyle(ButtonStyle.Danger)
                 );
 
-                const monster = await Monster.findAll({ order: sequelize.random(), limit: 1 });
+                const levelCheck = player.totalAttack < 2500 ? 1 : 2;
+                const monster = await Monster.findAll({ order: sequelize.random(), limit: 1, where: { level: levelCheck }});
                 
                 const p1_name = player.playerName;
                 const p2_name = monster[0]["monsterName"];

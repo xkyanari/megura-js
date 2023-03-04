@@ -1,7 +1,5 @@
 node_modules
-assets/item_extra.json
 memoria
-config-hidden.json
 config.json
 *.sqlite
 *.db

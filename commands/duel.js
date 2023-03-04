@@ -7,6 +7,7 @@ const {
     // duel_expGained,
     duel_iuraGained } = require('../src/vars');
 const { Player, Iura } = require('../src/db');
+const player = require('../models/player');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -30,13 +31,21 @@ module.exports = {
         searchplayers = [];
         for (i in players) {
             let player = await Player.findOne({ where: { discordID: players[i]}, include: 'iura' });
-            searchplayers.push(player);
+            if (player) {
+                searchplayers.push(player);
+            }
         }
 
-        if (!player1 || !player2) return interaction.editReply("This user does not have a player profile in this world yet.");
+        if (searchplayers.length !== 2) return interaction.editReply("One of the users does not have a player profile in this world yet.");
         if (player1.id === player2.id) return interaction.editReply("There is a saying that goes:```“The attempt to force human beings to despise themselves is what I call hell.” ― Andre Malraux```Sorry, I cannot allow that.");
         if (interaction.client.user.id === player2.id) return interaction.editReply("I don't engage in battles.");
-        if (player2.user.bot) return interaction.editReply(`You cannot duel with bots.`);
+        if (player2.user.bot) return interaction.editReply("You cannot duel with bots.");
+
+        if ((searchplayers[1]['totalHealth'] - searchplayers[0]['totalHealth']) >= 5000) return interaction.editReply("Your rank is too low to fight this player.");
+        if ((searchplayers[1]['totalHealth'] - searchplayers[0]['totalHealth']) <= 4999) return interaction.editReply("Your rank is too high to fight this player.");
+
+        if (searchplayers[0].iura.walletAmount <= 100) return interaction.editReply("You do not have sufficient balance to duel! Please carry at least $100 IURA first.");
+        if (searchplayers[1].iura.walletAmount <= 100) return interaction.editReply("This player no longer have enough balance to be attacked.");
 
             try {
                 const button = new ActionRowBuilder()
@@ -68,7 +77,8 @@ module.exports = {
                         .setStyle(ButtonStyle.Danger)
                 );
 
-                const accountID = searchplayers[0].iura.accountID;
+                const accountID1 = searchplayers[0].iura.accountID;
+                const accountID2 = searchplayers[1].iura.accountID;
                 
                 const p1_name = searchplayers[0]['playerName'];
                 const p2_name = searchplayers[1]['playerName'];
@@ -88,6 +98,7 @@ module.exports = {
 
                 let p1_health = searchplayers[0]['totalHealth'];
                 let p2_health = searchplayers[1]['totalHealth'];
+
                 while (p1_health > 0 && p2_health > 0) {
                     let a1 = Math.round((Math.random() * p1_max_atk) + p1_min_atk);
                     let d1 = Math.round((Math.random() * p2_max_def) + p2_min_def);
@@ -108,7 +119,8 @@ module.exports = {
                             await channel.send(`🎉 **YOU WIN!**`);
                             await wait(1000);
                             await interaction.followUp({content: `🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${duel_iuraGained} IURA\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`, components: [button]});
-                            await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID } });
+                            await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID2 } });
+                            await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID1 } });
                             break;
                         }
                         p2_health -= atk_1;
@@ -123,7 +135,8 @@ module.exports = {
                             await channel.send(`🎉 **YOU WIN!**`);
                             await wait(1000);
                             await interaction.followUp({content: `🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${duel_iuraGained} IURA\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`, components: [button]});
-                            await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID } });
+                            await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID2 } });
+                            await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID1 } });
                             break;
                         }
                         p2_health -= atk1;
@@ -145,7 +158,8 @@ module.exports = {
                             await wait(1000);
                             await channel.send("👎 **YOU LOST!**");
                             await interaction.followUp({content: `As a result, you lost:\n\n- \`${duel_iuraGained} IURA\`\n\n> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
-                            await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID } });
+                            await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID2 } });
+                            await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID1 } });
                             break;
                         }
                         p1_health -= atk_2;
@@ -158,7 +172,8 @@ module.exports = {
                             await wait(1000);
                             await channel.send("👎 **YOU LOST!**");
                             await interaction.followUp({content: `As a result, you lost:\n\n- \`${duel_iuraGained} IURA\`\n\n> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
-                            await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID } });
+                            await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID2 } });
+                            await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID1 } });
                             break;
                         }
                         p1_health -= atk2;

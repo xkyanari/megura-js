@@ -25,8 +25,9 @@ module.exports = {
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
         const { price, itemName } = await Shop.findOne({ where: { item_ID: id } });
 
-        if (!player) return interaction.reply({content: "You do not have a player profile in this world yet. Wanna `/start`?", ephemeral: true });
-        if ((price * amount) > player.iura.walletAmount) return interaction.reply(`You do not have sufficient balance!`);
+        if (!player) return interaction.reply({ content: "You do not have a player profile in this world yet. Wanna `/start`?", ephemeral: true });
+        if ((price * amount) > player.iura.walletAmount) return interaction.reply({ content: `You do not have sufficient balance!`, ephemeral: true });
+        if (amount <= 0) return interaction.reply({ content: `Item quantity entered should be at least 1.`, ephemeral: true });
 
         await player.withdraw(-(price * amount));
         await player.addItem(itemName, amount);

@@ -12,13 +12,14 @@
   "author": "Kyanari",
   "license": "GPL-3.0-or-later",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/xkyanari/megura-js.git"
+    "type": "git",
+    "url": "https://github.com/xkyanari/megura-js.git"
   },
   "dependencies": {
     "@solana/web3.js": "^1.73.3",
     "alchemy-sdk": "^2.4.3",
     "api": "^5.0.7",
+    "config": "^3.3.9",
     "discord.js": "^14.7.1",
     "discord.js-captcha": "^3.0.4",
     "dotenv": "^16.0.3",

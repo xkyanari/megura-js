@@ -26,7 +26,7 @@ module.exports = {
                     setTimeout(() => client.cooldown.delete(cooldownData), command.cooldown);
 
                 } catch (error) {
-                    console.error(error);
+                    console.log(error);
                     await interaction.reply({ content: `Error executing \`${interaction.commandName}\``, ephemeral: true });
                 }                    
         } else if (interaction.isButton()) {

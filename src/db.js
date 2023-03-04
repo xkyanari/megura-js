@@ -2,31 +2,7 @@ const Sequelize = require('sequelize');
 
 // Connecting to the database using Sequelize -----------------
 
-const sequelize = new Sequelize('megura', 'user', 'password',
-// {
-// 	"development": {
-// 	  "username": "root",
-// 	  "password": null,
-// 	  "database": "database_development",
-// 	  "host": "127.0.0.1",
-// 	  "dialect": "sqlite"
-// 	},
-// 	"test": {
-// 	  "username": "root",
-// 	  "password": null,
-// 	  "database": "database_test",
-// 	  "host": "127.0.0.1",
-// 	  "dialect": "sqlite"
-// 	},
-// 	"production": {
-// 	  "username": "root",
-// 	  "password": null,
-// 	  "database": "database_production",
-// 	  "host": "127.0.0.1",
-// 	  "dialect": "sqlite"
-// 	}
-//   }
-  
+const sequelize = new Sequelize('megura', 'user', 'password',  
 {
 	host: 'localhost',
 	dialect: 'sqlite',

@@ -27,7 +27,7 @@ module.exports = {
         console.log(recipient);
 
         const player1 = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura'});
-        const player2 = await Player.findOne({ where: { discordID: recipient.id, guildID: guild.id }});
+        const player2 = await Player.findOne({ where: { discordID: recipient.id, guildID: guild.id }, include: 'iura'});
 
         if (!player1 || !player2) return interaction.reply({ content: "This user does not have a player profile in this world yet.", ephemeral: true });
         if (member.id === recipient.id) return interaction.reply({ content: "You can't transfer money to yourself!", ephemeral: true });

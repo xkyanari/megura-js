@@ -9,7 +9,10 @@ module.exports = {
         const numFormat = (value) => new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
         const embed = new EmbedBuilder()
         .setColor(0x0099FF)
-        .setTitle('🛒 **ITEM SHOP:** 🛒');
+        .setTitle('🛒 **ITEM SHOP:** 🛒')
+        .setDescription(`Type \`/buy <item ID> <amount>\` to buy in bulk.`)
+        .setFooter({ text: 'This bot was made by megura.xyz.' });
+
         const shop = await Shop.findAll();
 
         let itemOptions = [];
