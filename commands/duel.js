@@ -18,7 +18,7 @@ module.exports = {
             .setName('target')
             .setDescription('Choose the player you want to fight.')
             .setRequired(true)),
-    cooldown: 1800000,
+    cooldown: 0,
 	async execute(interaction) {
         const wait = require('node:timers/promises').setTimeout;
         const channel = interaction.channel;
@@ -42,10 +42,10 @@ module.exports = {
         if (player2.user.bot) return interaction.editReply("You cannot duel with bots.");
 
         if ((searchplayers[1]['totalHealth'] - searchplayers[0]['totalHealth']) >= 5000) return interaction.editReply("Your rank is too low to fight this player.");
-        if ((searchplayers[1]['totalHealth'] - searchplayers[0]['totalHealth']) <= 4999) return interaction.editReply("Your rank is too high to fight this player.");
+        if ((searchplayers[1]['totalHealth'] - searchplayers[0]['totalHealth']) <= -5000) return interaction.editReply("Your rank is too high to fight this player.");
 
-        if (searchplayers[0].iura.walletAmount <= 100) return interaction.editReply("You do not have sufficient balance to duel! Please carry at least $100 IURA first.");
-        if (searchplayers[1].iura.walletAmount <= 100) return interaction.editReply("This player no longer have enough balance to be attacked.");
+        if (searchplayers[0].iura.walletAmount <= 500) return interaction.editReply("You do not have sufficient balance to duel! Please carry at least $500 IURA first.");
+        if (searchplayers[1].iura.walletAmount <= 100) return interaction.editReply("This player does not have enough balance to be attacked.");
 
             try {
                 const button = new ActionRowBuilder()
