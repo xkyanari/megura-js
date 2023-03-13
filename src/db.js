@@ -6,7 +6,8 @@ const sequelize = new Sequelize('megura', 'user', 'password',
 {
 	host: 'localhost',
 	dialect: 'sqlite',
-	logging: (...msg) => console.log(msg),
+	// logging: (...msg) => console.log(msg),
+	logging: false,
 	storage: 'megura.db', // database filename
 }
 );

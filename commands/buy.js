@@ -32,6 +32,7 @@ module.exports = {
         await player.withdraw(-(price * amount));
         await player.addItem(itemName, amount);
         await player.updateStats(itemName, amount);
+        await Player.increment({ iuraSpent: price }, { where: { discordID: member.id }});
 
         await interaction.reply(`\`${itemName}\` has been purchased.`);
     }

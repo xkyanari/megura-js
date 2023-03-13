@@ -4,7 +4,7 @@ const { Player } = require('../src/db');
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('transfer')
-		.setDescription('Buy items in bulk')
+		.setDescription('Transfer Iura to another player.')
         .addUserOption(option => option
             .setName('player')
             .setDescription('Select player.')
@@ -36,6 +36,6 @@ module.exports = {
         await player1.withdraw(-amount);
         await player2.withdraw(amount);
 
-        await interaction.reply(`\`${numFormat(amount)} IURA\` has been transferred to ${player2.playerName}.`);
+        await interaction.reply(`\`${numFormat(amount)} IURA\` has been transferred to \`${player2.playerName}.\``);
     }
 };
