@@ -9,16 +9,11 @@ module.exports = {
 	async execute(interaction) {
 
         const allPlayers = await Player.findAll({
-            order: [['monsterKills', 'DESC']], 
+            order: [['duelKills', 'DESC']], 
             limit: 10
         });
 
-        let playerRanks = [];
-        allPlayers.forEach(player => {
-            let i = 1;
-            playerRanks.push(`${i}. **${player.playerName}** - ${player.monsterKills} Wins\n`);
-            i++;
-        });
+        const playerRanks = allPlayers.map((player, i) => `${i+1}. **${player.playerName}** - ${player.monsterKills} Wins\n` );
 
         const embed = new EmbedBuilder()
             .setColor(0x0099FF)
