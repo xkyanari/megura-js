@@ -41,11 +41,11 @@ module.exports = {
         if (interaction.client.user.id === player2.id) return interaction.editReply("I don't engage in battles.");
         if (player2.user.bot) return interaction.editReply("You cannot duel with bots.");
 
-        if ((searchplayers[1]['totalHealth'] - searchplayers[0]['totalHealth']) >= 5000) return interaction.editReply("Your rank is too low to fight this player.");
-        if ((searchplayers[1]['totalHealth'] - searchplayers[0]['totalHealth']) <= -5000) return interaction.editReply("Your rank is too high to fight this player.");
+        // if ((searchplayers[1]['totalHealth'] - searchplayers[0]['totalHealth']) >= 5000) return interaction.editReply("Your rank is too low to fight this player.");
+        // if ((searchplayers[1]['totalHealth'] - searchplayers[0]['totalHealth']) <= -5000) return interaction.editReply("Your rank is too high to fight this player.");
 
-        if (searchplayers[0].iura.walletAmount < 100) return interaction.editReply("You do not have sufficient balance to duel! Please carry at least $100 IURA first.");
-        if (searchplayers[1].iura.walletAmount < 100) return interaction.editReply("This player does not have enough balance to be attacked.");
+        // if (searchplayers[0].iura.walletAmount < 100) return interaction.editReply("You do not have sufficient balance to duel! Please carry at least $100 IURA first.");
+        // if (searchplayers[1].iura.walletAmount < 100) return interaction.editReply("This player does not have enough balance to be attacked.");
 
             try {
                 const button = new ActionRowBuilder()
@@ -119,7 +119,7 @@ module.exports = {
                             await channel.send(`🎉 **YOU WIN!**`);
                             await wait(1000);
                             await interaction.followUp({content: `🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${duel_iuraGained} IURA\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`, components: [button]});
-                            await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID2 } });
+                            // await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID2 } });
                             await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID1 } });
                             await Player.increment({ iuraEarned: duel_iuraGained, duelKills: 1 }, { where: { discordID: player1.id }});
                             break;
@@ -136,7 +136,7 @@ module.exports = {
                             await channel.send(`🎉 **YOU WIN!**`);
                             await wait(1000);
                             await interaction.followUp({content: `🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${duel_iuraGained} IURA\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`, components: [button]});
-                            await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID2 } });
+                            // await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID2 } });
                             await Iura.increment({ walletAmount: duel_iuraGained}, { where: { accountID: accountID1 } });
                             await Player.increment({ iuraEarned: duel_iuraGained, duelKills: 1 }, { where: { discordID: player1.id }});
                             break;
@@ -161,7 +161,7 @@ module.exports = {
                             await channel.send("👎 **YOU LOST!**");
                             await interaction.followUp({content: `As a result, you lost:\n\n- \`${duel_iuraGained} IURA\`\n\n> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
                             await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID2 } });
-                            await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID1 } });
+                            // await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID1 } });
                             break;
                         }
                         p1_health -= atk_2;
@@ -175,7 +175,7 @@ module.exports = {
                             await channel.send("👎 **YOU LOST!**");
                             await interaction.followUp({content: `As a result, you lost:\n\n- \`${duel_iuraGained} IURA\`\n\n> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
                             await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID2 } });
-                            await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID1 } });
+                            // await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID1 } });
                             break;
                         }
                         p1_health -= atk2;
