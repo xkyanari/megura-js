@@ -21,8 +21,13 @@ module.exports = {
             }
 
                 try {
-                    await command.execute(interaction);
+                    // if (interaction.commandName === "duel") {
+                    //     console.log(`Test!`);
+                    //     await command.execute(interaction);
+                    // }
+
                     client.cooldown.set(cooldownData, Date.now() + command.cooldown);
+                    await command.execute(interaction);
                     setTimeout(() => client.cooldown.delete(cooldownData), command.cooldown);
 
                 } catch (error) {

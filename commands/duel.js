@@ -4,8 +4,9 @@ const {
     min_def_rate,
     blessing,
     crit_rate,
-    // duel_expGained,
-    duel_iuraGained } = require('../src/vars');
+    duel_expGained,
+    duel_iuraGained,
+    levelUp } = require('../src/vars');
 const { Player, Iura } = require('../src/db');
 const player = require('../models/player');
 
@@ -18,7 +19,8 @@ module.exports = {
             .setName('target')
             .setDescription('Choose the player you want to fight.')
             .setRequired(true)),
-    cooldown: 0,
+    cooldown: 600000, // 10mins
+    // cooldown: 3000, // 3secs
 	async execute(interaction) {
         const wait = require('node:timers/promises').setTimeout;
         const channel = interaction.channel;
@@ -26,6 +28,10 @@ module.exports = {
         const player2 = interaction.options.getMember('target');
 
         await interaction.deferReply();
+
+        if (player1.id === player2.id) return interaction.editReply("There is a saying that goes:```“The attempt to force human beings to despise themselves is what I call hell.” ― Andre Malraux```Sorry, I cannot allow that.");
+        if (interaction.client.user.id === player2.id) return interaction.editReply("I don't engage in battles.");
+        if (player2.user.bot) return interaction.editReply("You cannot duel with bots.");
 
         let players = [player1.id, player2.id];
         searchplayers = [];
@@ -37,9 +43,6 @@ module.exports = {
         }
 
         if (searchplayers.length !== 2) return interaction.editReply("One of the users does not have a player profile in this world yet.");
-        if (player1.id === player2.id) return interaction.editReply("There is a saying that goes:```“The attempt to force human beings to despise themselves is what I call hell.” ― Andre Malraux```Sorry, I cannot allow that.");
-        if (interaction.client.user.id === player2.id) return interaction.editReply("I don't engage in battles.");
-        if (player2.user.bot) return interaction.editReply("You cannot duel with bots.");
 
         // if ((searchplayers[1]['totalHealth'] - searchplayers[0]['totalHealth']) >= 5000) return interaction.editReply("Your rank is too low to fight this player.");
         // if ((searchplayers[1]['totalHealth'] - searchplayers[0]['totalHealth']) <= -5000) return interaction.editReply("Your rank is too high to fight this player.");
@@ -121,7 +124,18 @@ module.exports = {
                             await interaction.followUp({content: `🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${duel_iuraGained} IURA\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`, components: [button]});
                             // await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID2 } });
                             await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID1 } });
-                            await Player.increment({ iuraEarned: duel_iuraGained, duelKills: 1 }, { where: { discordID: player1.id }});
+                            await Player.increment({ iuraEarned: duel_iuraGained, expGained: duel_expGained, duelKills: 1 }, { where: { discordID: player1.id }});
+
+                            if (searchplayers[0].expGained > levelUp(searchplayers[0].level)) {
+                                const checkLevel = await Player.findOne({ where: { discordID: player1.id }});
+
+                                checkLevel.expGained = 0;
+                                checkLevel.level += 1;
+
+                                await channel.send(`${p1_name}, you have leveled up to **${checkLevel.level}**!`);
+                                return checkLevel.save();
+                            }
+
                             break;
                         }
                         p2_health -= atk_1;
@@ -138,7 +152,18 @@ module.exports = {
                             await interaction.followUp({content: `🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${duel_iuraGained} IURA\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`, components: [button]});
                             // await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID2 } });
                             await Iura.increment({ walletAmount: duel_iuraGained}, { where: { accountID: accountID1 } });
-                            await Player.increment({ iuraEarned: duel_iuraGained, duelKills: 1 }, { where: { discordID: player1.id }});
+                            await Player.increment({ iuraEarned: duel_iuraGained, expGained: duel_expGained, duelKills: 1 }, { where: { discordID: player1.id }});
+
+                            if (searchplayers[0].expGained > levelUp(searchplayers[0].level)) {
+                                const checkLevel = await Player.findOne({ where: { discordID: player1.id }});
+
+                                checkLevel.expGained = 0;
+                                checkLevel.level += 1;
+
+                                await channel.send(`${p1_name}, you have leveled up to **${checkLevel.level}**!`);
+                                return checkLevel.save();
+                            }
+
                             break;
                         }
                         p2_health -= atk1;
@@ -159,7 +184,8 @@ module.exports = {
                             await message.edit(`${p1_name} dodged the final attack and gave up.`);
                             await wait(1000);
                             await channel.send("👎 **YOU LOST!**");
-                            await interaction.followUp({content: `As a result, you lost:\n\n- \`${duel_iuraGained} IURA\`\n\n> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
+                            // await interaction.followUp({content: `As a result, you lost:\n\n- \`${duel_iuraGained} IURA\`\n\n> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
+                            await interaction.followUp({content: `> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
                             await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID2 } });
                             // await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID1 } });
                             break;
@@ -173,7 +199,8 @@ module.exports = {
                             await message.edit(`${p1_name} dodged the final attack and gave up.`);
                             await wait(1000);
                             await channel.send("👎 **YOU LOST!**");
-                            await interaction.followUp({content: `As a result, you lost:\n\n- \`${duel_iuraGained} IURA\`\n\n> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
+                            // await interaction.followUp({content: `As a result, you lost:\n\n- \`${duel_iuraGained} IURA\`\n\n> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
+                            await interaction.followUp({content: `> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
                             await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID2 } });
                             // await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: accountID1 } });
                             break;
