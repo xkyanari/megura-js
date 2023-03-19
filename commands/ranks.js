@@ -11,9 +11,9 @@ module.exports = {
         const allPlayers = await Player.findAll({
             order: [['duelKills', 'DESC']], 
             limit: 10,
-            where: {
-                guildID: interaction.guild.id
-            }
+            // where: {
+            //     guildID: interaction.guild.id
+            // }
         });
 
         const playerRanks = allPlayers.map((player, i) => `${i+1}. **${player.playerName}** - ${player.duelKills} Wins\n` );
