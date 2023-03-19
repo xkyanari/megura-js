@@ -18,7 +18,7 @@ module.exports = {
 		client.user.setPresence({ activities: [{ name: `\/start | \/info`, type: ActivityType.Listening }], status: 'dnd' });
 	console.log( `You're now connected as ${client.user.tag}.\nNode version: ${process.version}\nDiscord.js version: ${Discord.version}` );
 
-	sequelize.sync() // { alter/force: true }
+	sequelize.sync({alter:true}) // { alter/force: true }
 		.then((data) => console.log("Database connection successful."))
 		// .then(() => {
 		// 	const quests = require('../assets/quest_db.json');
