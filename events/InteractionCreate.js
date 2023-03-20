@@ -21,12 +21,12 @@ module.exports = {
             }
 
                 try {
-                    await client.cooldown.set(cooldownData, Date.now() + command.cooldown);
+                    client.cooldown.set(cooldownData, Date.now() + command.cooldown);
                     await command.execute(interaction);
                     setTimeout(() => client.cooldown.delete(cooldownData), command.cooldown);
 
                 } catch (error) {
-                    console.log("You got an error", error);
+                    console.log(error);
                     await interaction.reply({ content: `Error executing \`${interaction.commandName}\``, ephemeral: true });
                 }                    
         } else if (interaction.isButton()) {
