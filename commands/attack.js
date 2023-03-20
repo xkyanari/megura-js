@@ -48,7 +48,8 @@ module.exports = {
                         .setStyle(ButtonStyle.Danger)
                 );
 
-                const monster = await Monster.findAll({ order: sequelize.random(), limit: 1 });
+                const levelCheck = player.totalAttack < 2500 ? 1 : 2;
+                const monster = await Monster.findAll({ order: sequelize.random(), limit: 1, where: { level: levelCheck }});
                 
                 const p1_name = player.playerName;
                 const p2_name = monster[0]["monsterName"];
@@ -97,7 +98,8 @@ module.exports = {
                 await wait(2000);
                 await channel.send("The battle has concluded.");
                 await interaction.followUp({ content: `Well done! You received the following from the battle: \n\n- \`${p2_expGained} EXP\`\n- \`${p2_iuraGained} IURA\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`, components: [button]});
-                await Iura.increment({ walletAmount: p2_iuraGained }, { where: { accountID: player.iura.accountID } });
+                await Iura.increment({ walletAmount: p2_iuraGained}, { where: { accountID: player.iura.accountID } });
+                await Player.increment({ iuraEarned: p2_iuraGained, monsterKills: 1 }, { where: { discordID: member.id }});
             } catch (error) {
                 console.log(error);
             }

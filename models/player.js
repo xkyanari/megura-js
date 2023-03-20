@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         faction: DataTypes.TEXT,
         level: {
             type: DataTypes.INTEGER,
-            defaultValue: 1
+            defaultValue: 0
         },
         totalHealth: {
             type: DataTypes.INTEGER,
@@ -62,6 +62,10 @@ module.exports = (sequelize, DataTypes) => {
             defaultValue: 0
         },
         maxDamagedealt: {
+            type: DataTypes.INTEGER,
+            defaultValue: 0
+        },
+        expGained: {
             type: DataTypes.INTEGER,
             defaultValue: 0
         },

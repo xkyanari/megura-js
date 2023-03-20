@@ -108,5 +108,115 @@
         "totalDefense": 100,
         "expDropped": 10,
         "iuraDropped": 10
+    },
+    {
+        "monsterName": "Necronomicon",
+        "location": "Monster Avenue",
+        "faction": "Margaretha",
+        "level": 2,
+        "totalHealth": 5000,
+        "totalAttack": 200,
+        "totalDefense": 200,
+        "expDropped": 20,
+        "iuraDropped":20
+    },
+    {
+        "monsterName": "Minotaur",
+        "location": "Monster Avenue",
+        "faction": "Cerberon",
+        "level": 2,
+        "totalHealth": 5000,
+        "totalAttack": 200,
+        "totalDefense": 200,
+        "expDropped": 20,
+        "iuraDropped":20
+    },
+    {
+        "monsterName": "Hydra",
+        "location": "Wilderness",
+        "faction": "Margaretha",
+        "level": 2,
+        "totalHealth": 5000,
+        "totalAttack": 200,
+        "totalDefense": 200,
+        "expDropped": 20,
+        "iuraDropped":20
+    },
+    {
+        "monsterName": "Valraven",
+        "location": "Wilderness",
+        "faction": "Margaretha",
+        "level": 2,
+        "totalHealth": 5000,
+        "totalAttack": 200,
+        "totalDefense": 200,
+        "expDropped": 20,
+        "iuraDropped":20
+    },
+    {
+        "monsterName": "Gorgon",
+        "location": "Wilderness",
+        "faction": "Cerberon",
+        "level": 2,
+        "totalHealth": 5000,
+        "totalAttack": 200,
+        "totalDefense": 200,
+        "expDropped": 20,
+        "iuraDropped":20
+    },
+    {
+        "monsterName": "Basilisk",
+        "location": "Wilderness",
+        "faction": "Cerberon",
+        "level": 2,
+        "totalHealth": 5000,
+        "totalAttack": 200,
+        "totalDefense": 200,
+        "expDropped": 20,
+        "iuraDropped":20
+    },
+    {
+        "monsterName": "Wraith",
+        "location": "Wilderness",
+        "faction": "Cerberon",
+        "level": 2,
+        "totalHealth": 5000,
+        "totalAttack": 200,
+        "totalDefense": 200,
+        "expDropped": 20,
+        "iuraDropped":20
+    },
+    {
+        "monsterName": "Goblin",
+        "location": "Wilderness",
+        "faction": "Cerberon",
+        "level": 2,
+        "totalHealth": 5000,
+        "totalAttack": 200,
+        "totalDefense": 200,
+        "expDropped": 20,
+        "iuraDropped":20
+    },
+    {
+        "monsterName": "Ogre",
+        "location": "Wilderness",
+        "faction": "Cerberon",
+        "level": 2,
+        "totalHealth": 5000,
+        "totalAttack": 200,
+        "totalDefense": 200,
+        "expDropped": 20,
+        "iuraDropped":20
+    },
+    {
+        "monsterName": "Zombie",
+        "location": "Wilderness",
+        "faction": "Cerberon",
+        "level": 2,
+        "totalHealth": 5000,
+        "totalAttack": 200,
+        "totalDefense": 200,
+        "expDropped": 20,
+        "iuraDropped":20
     }
 ]

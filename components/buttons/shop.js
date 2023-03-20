@@ -9,7 +9,10 @@ module.exports = {
         const numFormat = (value) => new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
         const embed = new EmbedBuilder()
         .setColor(0x0099FF)
-        .setTitle('🛒 **ITEM SHOP:** 🛒');
+        .setTitle('🛒 **ITEM SHOP:** 🛒')
+        .setDescription(`Type \`/buy <item ID> <amount>\` to buy in bulk.`)
+        .setFooter({ text: 'This bot was made by megura.xyz.' });
+
         const shop = await Shop.findAll();
 
         let itemOptions = [];
@@ -26,7 +29,8 @@ module.exports = {
                 itemStats.push(`Total Defense: ${item.totalDefense}\n`);
             }
             itemStats.push(`Price: $${numFormat(item.price)} IURA\n`);
-            itemStats.push(`Description: ${item.description}`);
+            itemStats.push(`Description: ${item.description}\n`);
+            itemStats.push(`Item ID: \`${item.item_ID}\``);
             itemOptions.push({ "label": item.itemName, "value": item.itemName });
 
             embed.addFields({ name: `__**${item.itemName}**__`, value: itemStats.join(''), inline: false });

@@ -38,6 +38,7 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.TEXT,
             allowNull: false
         },
+        item_ID: DataTypes.TEXT
     },
     {
         freezeTableName: true,

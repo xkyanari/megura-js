@@ -41,7 +41,7 @@ module.exports = {
         try {
             const embed = new EmbedBuilder()
                 .setColor(0xFF0000)
-                .setTitle('**ADVENTURER ID CARD**')
+                .setTitle('**VOYAGER ID CARD**')
                 .setAuthor({ name: `${member.tag}` })
                 .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
                 .addFields(

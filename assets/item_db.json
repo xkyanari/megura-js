@@ -6,7 +6,8 @@
         "totalAttack": 50,
         "totalDefense": 0,
         "price": 50,
-        "description": "A cheap sword for starters."
+        "description": "A cheap sword for starters.",
+        "item_ID": "sword"
     },
     {
         "itemName": "Cheap Bow",
@@ -15,7 +16,8 @@
         "totalAttack": 75,
         "totalDefense": 0,
         "price": 50,
-        "description": "Nothing special. Just a cheap bow."
+        "description": "Nothing special. Just a cheap bow.",
+        "item_ID": "bow"
     },
     {
         "itemName": "Rotten Bandage",
@@ -24,7 +26,8 @@
         "totalAttack": 0,
         "totalDefense": 0,
         "price": 75,
-        "description": "These were rumored to be stolen from the tombs of kings in Aescaphone."
+        "description": "These were rumored to be stolen from the tombs of kings in Aescaphone.",
+        "item_ID": "bandage"
     },
     {
         "itemName": "Boiled Egg",
@@ -33,7 +36,8 @@
         "totalAttack": 50,
         "totalDefense": 25,
         "price": 150,
-        "description": "Small adventurers' favorite."
+        "description": "Small adventurers' favorite.",
+        "item_ID": "eggs"
     },
     {
         "itemName": "Simple Rock",
@@ -42,6 +46,7 @@
         "totalAttack": 5,
         "totalDefense": 0,
         "price": 1,
-        "description": "A rock. Duh."
+        "description": "A rock. Duh.",
+        "item_ID": "rock"
     }
 ]

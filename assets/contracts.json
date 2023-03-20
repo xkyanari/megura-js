@@ -3,8 +3,8 @@
         "blockchain": "ethereum",
         "contractName": "PXN: Ghost Division",
         "contractAddress": "0x160c404b2b49cbc3240055ceaee026df1e8497a0",
-        "traitWeapon": "Outfit",
-        "traitArmor": "Back"
+        "traitWeapon": "Back",
+        "traitArmor": "Outfit"
     },
     {
         "blockchain": "ethereum",
