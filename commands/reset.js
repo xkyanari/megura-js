@@ -11,7 +11,7 @@ module.exports = {
             .setDescription('Select a player.')
             .setRequired(true))
         .setDefaultMemberPermissions('0'),
-    cooldown: 0,
+    cooldown: 3000,
 	async execute(interaction) {
         const member = interaction.options.getUser('player');
         const guild = interaction.guild;

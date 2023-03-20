@@ -5,7 +5,7 @@ module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('start')
 		.setDescription('Create your own profile!'),
-    cooldown: 3000,
+    cooldown: 900000,
 	async execute(interaction) {
         const guild = interaction.guild;
         const member = interaction.member;
