@@ -21,17 +21,12 @@ module.exports = {
             }
 
                 try {
-                    // if (interaction.commandName === "duel") {
-                    //     console.log(`Test!`);
-                    //     await command.execute(interaction);
-                    // }
-
-                    client.cooldown.set(cooldownData, Date.now() + command.cooldown);
+                    await client.cooldown.set(cooldownData, Date.now() + command.cooldown);
                     await command.execute(interaction);
                     setTimeout(() => client.cooldown.delete(cooldownData), command.cooldown);
 
                 } catch (error) {
-                    console.log(error);
+                    console.log("You got an error", error);
                     await interaction.reply({ content: `Error executing \`${interaction.commandName}\``, ephemeral: true });
                 }                    
         } else if (interaction.isButton()) {
