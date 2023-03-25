@@ -19,16 +19,6 @@ module.exports = {
                     .setLabel('Inventory')
                     .setStyle(ButtonStyle.Primary),
                 new ButtonBuilder()
-                .setCustomId('wallet')
-                .setEmoji('💰')
-                .setLabel('Wallet')
-                .setStyle(ButtonStyle.Primary),
-                new ButtonBuilder()
-                .setCustomId('bank')
-                .setEmoji('🏦')
-                .setLabel('Bank')
-                .setStyle(ButtonStyle.Primary),
-                new ButtonBuilder()
                 .setCustomId('shop')
                 .setEmoji('🛒')
                 .setLabel('Shop')

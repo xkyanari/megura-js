@@ -57,7 +57,7 @@ module.exports = {
                 });
     
                 const response = result.data.choices[0].message.content;
-                // console.log("Total tokens: ", result.data.usage.total_tokens);
+                console.log("Total tokens: ", result.data.usage.total_tokens);
     
                 if (response.length >= 2000) {
                     const attachment = new AttachmentBuilder(Buffer.from(response, 'utf-8'), { name: 'fromdahliatoyou.txt' });
@@ -66,7 +66,7 @@ module.exports = {
                     message.reply(`${response}`);
                 }
             }
-        } catch(error) {
+        } catch (error) {
             if (error.APIerror) {
                 console.log(`OpenAI returned an API Error: ${error.APIerror}`);
             } else if (error.APIConnectionError) {

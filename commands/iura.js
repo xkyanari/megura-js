@@ -127,7 +127,7 @@ module.exports = {
                     .setDescription(
                         `**$${numFormat(bank_deposit)} IURA** has been added to your Stake account.`);
                     await interaction.reply({ embeds: [embed], ephemeral: true })
-                    .catch(console.error);
+                        .catch(console.error);
                 }
                 else {
                     // stake ----> bank

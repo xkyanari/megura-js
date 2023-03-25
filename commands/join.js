@@ -4,7 +4,6 @@ const { Network, Alchemy } = require('alchemy-sdk');
 const { AlchemyApiKey } = require('../config.json');
 
 const { solscanApiToken } = require('../config.json');
-const contract = require('../models/contract');
 
 const settings = {
     apiKey: AlchemyApiKey,
@@ -47,7 +46,7 @@ module.exports = {
 
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }});
 
-        if (!player) return interaction.editReply("This user does not have a player profile in this world yet.");
+        if (!player) return interaction.editReply("You do not have a player profile in this world yet.");
 
         if (interaction.options.getSubcommand() === 'ethereum') {
             try {

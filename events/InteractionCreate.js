@@ -33,7 +33,7 @@ module.exports = {
             const { buttons } = interaction.client;
             const { customId } = interaction;
             const button = buttons.get(customId);
-            if (!button) return new Error('There is no code for this button');
+            if (!button) return new Error('There is no code for this button.');
 
             try {
                 await button.execute(interaction);
@@ -44,10 +44,21 @@ module.exports = {
             const { menus } = interaction.client;
             const { customId } = interaction;
             const menu = menus.get(customId);
-            if (!menu) return new Error('There is no code for this menu');
+            if (!menu) return new Error('There is no code for this menu.');
 
             try {
                 await menu.execute(interaction);
+            } catch (error) {
+                console.error(error);
+            }
+        } else if (interaction.isModalSubmit()) {
+            const { modals } = interaction.client;
+            const { customId } = interaction;
+            const modal = modals.get(customId);
+            if (!modal) return new Error('There is no code for this modal.');
+
+            try {
+                await modal.execute(interaction);
             } catch (error) {
                 console.error(error);
             }

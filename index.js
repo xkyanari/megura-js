@@ -18,6 +18,7 @@ client.commands = new Collection();
 client.subCommands = new Collection();
 client.buttons = new Collection();
 client.menus = new Collection();
+client.modals = new Collection();
 client.cooldown = new Collection();
 
 const commandsPath = path.join(__dirname, 'commands');
@@ -48,16 +49,17 @@ for (const file of eventFiles) {
 	}
 }
 
-// // For running components -----------------
+// For running components -----------------
 
 const componentsPath = fs.readdirSync(`./components`);
 for (const folder of componentsPath) {
 	const componentFiles = fs.readdirSync(`./components/${folder}`).filter(file => file.endsWith('.js'));
 
-	const { buttons, menus } = client;
+	const { buttons, menus, modals } = client;
 
-	// buttons
 	switch (folder) {
+
+		// buttons
 		case "buttons":
 			for (const file of componentFiles) {
 				const button = require(`./components/${folder}/${file}`);
@@ -65,16 +67,19 @@ for (const folder of componentsPath) {
 			}
 			break;
 		
-		default:
-			break;
-	}
-
-	// select menus
-	switch (folder) {
+		// select menus
 		case "menus":
 			for (const file of componentFiles) {
 				const menu = require(`./components/${folder}/${file}`);
 				menus.set(menu.data.name, menu);
+			}
+			break;
+		
+		// modals
+		case "modals":
+			for (const file of componentFiles) {
+				const modal = require(`./components/${folder}/${file}`);
+				modals.set(modal.data.name, modal);
 			}
 			break;
 		

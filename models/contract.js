@@ -22,7 +22,8 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         traitWeapon: DataTypes.TEXT,
-        traitArmor: DataTypes.TEXT
+        traitArmor: DataTypes.TEXT,
+        collectionURL: DataTypes.TEXT
     },
     {
         freezeTableName: true,

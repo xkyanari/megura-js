@@ -16,7 +16,7 @@ module.exports = {
         await interaction.deferReply();
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
 
-        if (!player) return interaction.editReply("This user does not have a player profile in this world yet.");
+        if (!player) return interaction.editReply("You do not have a player profile in this world yet.");
 
             try {
                 const button = new ActionRowBuilder()
@@ -31,16 +31,6 @@ module.exports = {
                             .setEmoji('🛄')
                             .setLabel('Inventory')
                             .setStyle(ButtonStyle.Primary),
-                        new ButtonBuilder()
-                        .setCustomId('wallet')
-                        .setEmoji('💰')
-                        .setLabel('Wallet')
-                        .setStyle(ButtonStyle.Primary),
-                        new ButtonBuilder()
-                        .setCustomId('bank')
-                        .setEmoji('🏦')
-                        .setLabel('Bank')
-                        .setStyle(ButtonStyle.Primary),
                         new ButtonBuilder()
                         .setCustomId('shop')
                         .setEmoji('🛒')
@@ -85,6 +75,7 @@ module.exports = {
                             break;
                         }
                     }
+                    
                     else {
                         let remainingHealth2 = p2_health - atk;
                         let message = await channel.send(`${p1_name} dealt ${atk1} damage to ${p2_name}! ${p2_name} has ${remainingHealth2} remaining.`);
