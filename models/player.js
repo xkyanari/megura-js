@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         faction: DataTypes.TEXT,
         level: {
             type: DataTypes.INTEGER,
-            defaultValue: 0
+            defaultValue: 1
         },
         totalHealth: {
             type: DataTypes.INTEGER,
