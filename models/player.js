@@ -5,8 +5,8 @@ module.exports = (sequelize, DataTypes) => {
             autoIncrement: true,
             primaryKey: true
         },
-        guildID: DataTypes.INTEGER,
-        discordID: DataTypes.INTEGER,
+        guildID: DataTypes.TEXT,
+        discordID: DataTypes.TEXT,
         playerName: DataTypes.TEXT,
         timeline: {
             type: DataTypes.TEXT,

@@ -13,8 +13,7 @@ module.exports = {
   cooldown: 900000,
 	async execute(interaction) {
     const channel_name = interaction.options.getString('channel');
-    const member = interaction.member;
-    const guild = interaction.guild;
+    const { member, guild } = interaction;
 
     await interaction.deferReply();
 

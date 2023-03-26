@@ -14,7 +14,7 @@ module.exports = {
     cooldown: 3000,
 	async execute(interaction) {
         const member = interaction.options.getUser('player');
-        const guild = interaction.guild;
+        const { guild } = interaction;
 
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
         if (player) {

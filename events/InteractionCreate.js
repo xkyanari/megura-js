@@ -1,6 +1,10 @@
 const { Events } = require('discord.js');
 const ms = require('ms');
 
+/**
+ * This event is fired when a user initiates slash commands.
+ */
+
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {

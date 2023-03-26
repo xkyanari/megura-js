@@ -9,6 +9,10 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
+/**
+ * This event is fired when a user sends a message.
+ */
+
 module.exports = {
 	name: Events.MessageCreate,
 	async execute(message) {
@@ -29,7 +33,7 @@ module.exports = {
     
                 await message.channel.sendTyping();
     
-                let prevChat = await message.channel.messages.fetch({ limit: 5 });
+                let prevChat = await message.channel.messages.fetch({ limit: 15 });
                 prevChat.reverse();
                 
                 prevChat.forEach((msg) => {
@@ -51,7 +55,7 @@ module.exports = {
     
                 const result = await openai.createChatCompletion({
                     model: 'gpt-3.5-turbo',
-                    max_tokens: 300,
+                    max_tokens: 1000,
                     temperature: 0.9,
                     messages: chatLog,
                 });
@@ -59,7 +63,7 @@ module.exports = {
                 const response = result.data.choices[0].message.content;
                 console.log("Total tokens: ", result.data.usage.total_tokens);
     
-                if (response.length >= 2000) {
+                if (response.length >= 1500) {
                     const attachment = new AttachmentBuilder(Buffer.from(response, 'utf-8'), { name: 'fromdahliatoyou.txt' });
                     await message.reply({ content: `I couldn't give my whole answer here so I'm attaching the file for you.`, files: [attachment] });
                 } else {

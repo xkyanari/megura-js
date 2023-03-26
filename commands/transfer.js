@@ -18,8 +18,7 @@ module.exports = {
         .setDefaultMemberPermissions('0'),
     cooldown: 3000,
 	async execute(interaction) {
-        const member = interaction.member;
-        const guild = interaction.guild;
+        const { member, guild } = interaction;
         const numFormat = (value) => new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
         const recipient = interaction.options.getUser('player');
         const amount = interaction.options.getInteger('amount');

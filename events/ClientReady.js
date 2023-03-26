@@ -13,6 +13,10 @@ try {
   process.exit();
 }
 
+/**
+ * This event is fired once the bot is connected.
+ */
+
 module.exports = {
 	name: Events.ClientReady,
 	once: true,

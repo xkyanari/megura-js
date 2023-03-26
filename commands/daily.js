@@ -7,8 +7,7 @@ module.exports = {
 		.setDescription("Complete a daily quest!"),
     cooldown: 86400000,
 	async execute(interaction) {
-        const member = interaction.member;
-        const guild = interaction.guild;
+        const { member, guild } = interaction;
 
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
 

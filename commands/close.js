@@ -6,8 +6,7 @@ module.exports = {
 		.setDescription('Closes a portal'),
     cooldown: 13000,
 	async execute(interaction) {
-        const channel = interaction.channel;
-        const member = interaction.member;
+        const { channel, member } = interaction;
 
         if (member.permissions.has(PermissionFlagsBits.ManageChannels)) {
             const time = 10;
