@@ -9,9 +9,7 @@ module.exports = {
     cooldown: 25000,
 	async execute(interaction) {
         const wait = require('node:timers/promises').setTimeout;
-        const channel = interaction.channel;
-        const member = interaction.member;
-        const guild = interaction.guild;
+        const { channel, member, guild } = interaction;
 
         await interaction.deferReply();
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
@@ -39,23 +37,27 @@ module.exports = {
                 );
 
                 const levelCheck = player.totalAttack < 2500 ? 1 : 2;
-                const monster = await Monster.findAll({ order: sequelize.random(), limit: 1, where: { level: levelCheck }});
-                
                 const p1_name = player.playerName;
-                const p2_name = monster[0]["monsterName"];
-                const p2_expGained = monster[0]["expDropped"];
-                const p2_iuraGained = monster[0]["iuraDropped"];
+
+                const [ monster ] = await Monster.findAll({ order: sequelize.random(), limit: 1, where: { level: levelCheck } });
+                let {
+                    monsterName: p2_name,
+                    expDropped: p2_expGained,
+                    iuraDropped: p2_iuraGained,
+                    totalHealth: p2_health,
+                    totalDefense: p2_max_def
+                } = monster;
 
                 await interaction.editReply("Searching for a monster...");
                 await wait(1000);
                 await channel.send("Target locked. Engaging in 5 seconds...");
                 await wait(5000);
 
-                let p2_health = monster[0]["totalHealth"];
+                // let p2_health = monster[0]["totalHealth"];
                 while (p2_health > 0) {
                     const p1_max_atk = player.totalAttack;
                     const p1_min_atk = p1_max_atk - (p1_max_atk * min_atk_rate);
-                    const p2_max_def = monster[0]["totalDefense"];
+                    // const p2_max_def = monster[0]["totalDefense"];
                     const p2_min_def = p2_max_def - (p2_max_def * min_def_rate);
 
                     let d = Math.round((Math.random() * p1_max_atk) + p1_min_atk);

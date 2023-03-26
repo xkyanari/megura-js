@@ -6,9 +6,10 @@ const {
     crit_rate,
     duel_expGained,
     duel_iuraGained,
-    levelUp } = require('../src/vars');
+    expPoints
+} = require('../src/vars');
+const leveling = require('../functions/level');
 const { Player, Iura } = require('../src/db');
-const player = require('../models/player');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -116,14 +117,9 @@ module.exports = {
                             await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: accountID1 } });
                             await Player.increment({ iuraEarned: duel_iuraGained, expGained: duel_expGained, duelKills: 1 }, { where: { discordID: player1.id }});
 
-                            if (searchplayers[0].expGained > levelUp(searchplayers[0].level)) {
-                                const checkLevel = await Player.findOne({ where: { discordID: player1.id }});
-
-                                checkLevel.expGained = 0;
-                                checkLevel.level += 1;
-
-                                await channel.send(`${p1_name}, you have leveled up to **${checkLevel.level}**!`);
-                                return checkLevel.save();
+                            if (searchplayers[0].expGained > expPoints(searchplayers[0].level)) {
+                                const levelUp = await leveling(player1.id);
+                                await channel.send(`\`${p1_name}\`, you have leveled up to **${levelUp.level}**!`);
                             }
 
                             break;
@@ -144,11 +140,8 @@ module.exports = {
                             await Iura.increment({ walletAmount: duel_iuraGained}, { where: { accountID: accountID1 } });
                             await Player.increment({ iuraEarned: duel_iuraGained, expGained: duel_expGained, duelKills: 1 }, { where: { discordID: player1.id }});
 
-                            if (searchplayers[0].expGained > levelUp(searchplayers[0].level)) {
-                                const checkLevel = await Player.findOne({ where: { discordID: player1.id }});
-
-                                checkLevel.expGained = 0;
-                                checkLevel.level += 1;
+                            if (searchplayers[0].expGained > expPoints(searchplayers[0].level)) {
+                                await leveling(player1.id);
 
                                 await channel.send(`${p1_name}, you have leveled up to **${checkLevel.level}**!`);
                                 return checkLevel.save();
