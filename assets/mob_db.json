@@ -4,10 +4,10 @@
         "location": "Monster Avenue",
         "faction": "Margaretha",
         "level": 1,
-        "totalHealth": 2000,
+        "totalHealth": 2175,
         "totalAttack": 500,
-        "totalDefense": 500,
-        "expDropped": 10,
+        "totalDefense": 510,
+        "expDropped": 50,
         "iuraDropped":10
     },
     {
@@ -15,10 +15,10 @@
         "location": "Wilderness",
         "faction": "Margaretha",
         "level": 1,
-        "totalHealth": 2000,
+        "totalHealth": 2175,
         "totalAttack": 500,
-        "totalDefense": 500,
-        "expDropped": 10,
+        "totalDefense": 510,
+        "expDropped": 50,
         "iuraDropped": 10
     },
     {
@@ -26,10 +26,10 @@
         "location": "Wilderness",
         "faction": "Margaretha",
         "level": 1,
-        "totalHealth": 2000,
+        "totalHealth": 2175,
         "totalAttack": 500,
-        "totalDefense": 500,
-        "expDropped": 10,
+        "totalDefense": 510,
+        "expDropped": 50,
         "iuraDropped": 10
     },
     {
@@ -37,10 +37,10 @@
         "location": "Wilderness",
         "faction": "Margaretha",
         "level": 1,
-        "totalHealth": 2000,
+        "totalHealth": 2175,
         "totalAttack": 500,
-        "totalDefense": 500,
-        "expDropped": 10,
+        "totalDefense": 510,
+        "expDropped": 50,
         "iuraDropped": 10
     },
     {
@@ -48,10 +48,10 @@
         "location": "Monster Avenue",
         "faction": "Cerberon",
         "level": 1,
-        "totalHealth": 2000,
+        "totalHealth": 2175,
         "totalAttack": 500,
-        "totalDefense": 500,
-        "expDropped": 10,
+        "totalDefense": 510,
+        "expDropped": 50,
         "iuraDropped":10
     },
     {
@@ -59,10 +59,10 @@
         "location": "Monster Avenue",
         "faction": "Cerberon",
         "level": 1,
-        "totalHealth": 2000,
+        "totalHealth": 2175,
         "totalAttack": 500,
-        "totalDefense": 500,
-        "expDropped": 10,
+        "totalDefense": 510,
+        "expDropped": 50,
         "iuraDropped": 10
     },
     {
@@ -70,10 +70,10 @@
         "location": "Monster Avenue",
         "faction": "Cerberon",
         "level": 1,
-        "totalHealth": 2000,
+        "totalHealth": 2175,
         "totalAttack": 500,
-        "totalDefense": 500,
-        "expDropped": 10,
+        "totalDefense": 510,
+        "expDropped": 50,
         "iuraDropped": 10
     },
     {
@@ -81,10 +81,10 @@
         "location": "Monster Avenue",
         "faction": "Cerberon",
         "level": 1,
-        "totalHealth": 2000,
+        "totalHealth": 2175,
         "totalAttack": 500,
-        "totalDefense": 500,
-        "expDropped": 10,
+        "totalDefense": 510,
+        "expDropped": 50,
         "iuraDropped": 10
     },
     {
@@ -92,10 +92,10 @@
         "location": "Monster Avenue",
         "faction": "Cerberon",
         "level": 1,
-        "totalHealth": 2000,
+        "totalHealth": 2175,
         "totalAttack": 500,
-        "totalDefense": 500,
-        "expDropped": 10,
+        "totalDefense": 510,
+        "expDropped": 50,
         "iuraDropped":10
     },
     {
@@ -103,10 +103,10 @@
         "location": "Monster Avenue",
         "faction": "Cerberon",
         "level": 1,
-        "totalHealth": 2000,
+        "totalHealth": 2175,
         "totalAttack": 500,
-        "totalDefense": 500,
-        "expDropped": 10,
+        "totalDefense": 510,
+        "expDropped": 50,
         "iuraDropped": 10
     },
     {
@@ -114,109 +114,109 @@
         "location": "Monster Avenue",
         "faction": "Margaretha",
         "level": 2,
-        "totalHealth": 5000,
-        "totalAttack": 800,
-        "totalDefense": 800,
-        "expDropped": 20,
-        "iuraDropped":20
+        "totalHealth": 6375,
+        "totalAttack": 1613,
+        "totalDefense": 750,
+        "expDropped": 50,
+        "iuraDropped": 10
     },
     {
         "monsterName": "Minotaur",
         "location": "Monster Avenue",
         "faction": "Cerberon",
         "level": 2,
-        "totalHealth": 5000,
-        "totalAttack": 800,
-        "totalDefense": 800,
-        "expDropped": 20,
-        "iuraDropped":20
+        "totalHealth": 6375,
+        "totalAttack": 1613,
+        "totalDefense": 750,
+        "expDropped": 50,
+        "iuraDropped": 10
     },
     {
         "monsterName": "Hydra",
         "location": "Wilderness",
         "faction": "Margaretha",
         "level": 2,
-        "totalHealth": 5000,
-        "totalAttack": 800,
-        "totalDefense": 800,
-        "expDropped": 20,
-        "iuraDropped":20
+        "totalHealth": 6375,
+        "totalAttack": 1613,
+        "totalDefense": 750,
+        "expDropped": 50,
+        "iuraDropped": 10
     },
     {
         "monsterName": "Valraven",
         "location": "Wilderness",
         "faction": "Margaretha",
         "level": 2,
-        "totalHealth": 5000,
-        "totalAttack": 800,
-        "totalDefense": 800,
-        "expDropped": 20,
-        "iuraDropped":20
+        "totalHealth": 6375,
+        "totalAttack": 1613,
+        "totalDefense": 750,
+        "expDropped": 50,
+        "iuraDropped": 10
     },
     {
         "monsterName": "Gorgon",
         "location": "Wilderness",
         "faction": "Cerberon",
         "level": 2,
-        "totalHealth": 5000,
-        "totalAttack": 800,
-        "totalDefense": 800,
-        "expDropped": 20,
-        "iuraDropped":20
+        "totalHealth": 6375,
+        "totalAttack": 1613,
+        "totalDefense": 750,
+        "expDropped": 50,
+        "iuraDropped": 10
     },
     {
         "monsterName": "Basilisk",
         "location": "Wilderness",
         "faction": "Cerberon",
         "level": 2,
-        "totalHealth": 5000,
-        "totalAttack": 800,
-        "totalDefense": 800,
-        "expDropped": 20,
-        "iuraDropped":20
+        "totalHealth": 6375,
+        "totalAttack": 1613,
+        "totalDefense": 750,
+        "expDropped": 50,
+        "iuraDropped": 10
     },
     {
         "monsterName": "Wraith",
         "location": "Wilderness",
         "faction": "Cerberon",
         "level": 2,
-        "totalHealth": 5000,
-        "totalAttack": 800,
-        "totalDefense": 800,
-        "expDropped": 20,
-        "iuraDropped":20
+        "totalHealth": 6375,
+        "totalAttack": 1613,
+        "totalDefense": 750,
+        "expDropped": 50,
+        "iuraDropped": 10
     },
     {
         "monsterName": "Goblin",
         "location": "Wilderness",
         "faction": "Cerberon",
         "level": 2,
-        "totalHealth": 5000,
-        "totalAttack": 800,
-        "totalDefense": 800,
-        "expDropped": 20,
-        "iuraDropped":20
+        "totalHealth": 6375,
+        "totalAttack": 1613,
+        "totalDefense": 750,
+        "expDropped": 50,
+        "iuraDropped": 10
     },
     {
         "monsterName": "Ogre",
         "location": "Wilderness",
         "faction": "Cerberon",
         "level": 2,
-        "totalHealth": 5000,
-        "totalAttack": 800,
-        "totalDefense": 800,
-        "expDropped": 20,
-        "iuraDropped":20
+        "totalHealth": 6375,
+        "totalAttack": 1613,
+        "totalDefense": 750,
+        "expDropped": 50,
+        "iuraDropped": 10
     },
     {
         "monsterName": "Zombie",
         "location": "Wilderness",
         "faction": "Cerberon",
         "level": 2,
-        "totalHealth": 5000,
-        "totalAttack": 800,
-        "totalDefense": 800,
-        "expDropped": 20,
-        "iuraDropped":20
+        "totalHealth": 6375,
+        "totalAttack": 1613,
+        "totalDefense": 750,
+        "expDropped": 50,
+        "iuraDropped": 10
     }
 ]
