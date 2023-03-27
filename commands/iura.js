@@ -97,7 +97,7 @@ module.exports = {
                     await interaction.reply({ embeds: [embed], ephemeral: true })
                         .catch(console.error);
                 }
-                else {
+                else if (wallet_withdraw) {
                     // bank ----> wallet
                     if (wallet_withdraw > balance.bankAmount) return interaction.reply({content: `You do not have sufficient balance!`, ephemeral: true });
 
@@ -109,6 +109,13 @@ module.exports = {
                         `**$${numFormat(wallet_withdraw)} IURA** has been removed from \`${balance.bankName}\` account.`);
                     await interaction.reply({ embeds: [embed], ephemeral: true })
                         .catch(console.error);
+                }
+                else {
+                    const embed = new EmbedBuilder()
+                    .setTitle('Error!')
+                    .setDescription(
+                        `Please deposit and withdraw from your wallet balance only. Thanks!`);
+                    await interaction.reply({ embeds: [embed], ephemeral: true });
                 }
             }
             else if (interaction.options.getSubcommand() === 'bank') {
@@ -128,7 +135,7 @@ module.exports = {
                     await interaction.reply({ embeds: [embed], ephemeral: true })
                         .catch(console.error);
                 }
-                else {
+                else if (bank_withdraw) {
                     // stake ----> bank
                     if (bank_withdraw > balance.stakedAmount) return interaction.reply({content: `You do not have sufficient balance!`, ephemeral: true });
 
@@ -140,6 +147,13 @@ module.exports = {
                         `**$${numFormat(bank_withdraw)} IURA** has been removed from your Stake account.`);
                     await interaction.reply({ embeds: [embed], ephemeral: true })
                     .catch(console.error);
+                }
+                else {
+                    const embed = new EmbedBuilder()
+                    .setTitle('Error!')
+                    .setDescription(
+                        `Please stake and unstake from your bank balance only. Thanks!`);
+                    await interaction.reply({ embeds: [embed], ephemeral: true });
                 }
             }
             else if (interaction.options.getSubcommand() === 'balance') {

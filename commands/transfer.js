@@ -23,8 +23,6 @@ module.exports = {
         const recipient = interaction.options.getUser('player');
         const amount = interaction.options.getInteger('amount');
 
-        console.log(recipient);
-
         const player1 = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura'});
         const player2 = await Player.findOne({ where: { discordID: recipient.id, guildID: guild.id }, include: 'iura'});
 
