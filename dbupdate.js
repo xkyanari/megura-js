@@ -1,9 +1,9 @@
-const { Monster, Shop, Contract, Quest, Player, Guild } = require('../src/db');
+const { Monster, Shop, Contract, Quest, Player, Guild } = require('./src/db');
 
 (async () => {
     await Quest.sync({ force: true})
         .then(() => {
-            const quests = require('../assets/quest_db.json');
+            const quests = require('./assets/quest_db.json');
             for (let quest = 0; quest < quests.length; quest++) {
                 Quest.create(quests[quest]);
             }
@@ -13,7 +13,7 @@ const { Monster, Shop, Contract, Quest, Player, Guild } = require('../src/db');
     
     await Contract.sync({ force: true })
         .then(() => {
-            const contracts = require('../assets/contracts.json');
+            const contracts = require('./assets/contracts.json');
             for (let contract = 0; contract < contracts.length; contract++) {
                 Contract.create(contracts[contract]);
             }
