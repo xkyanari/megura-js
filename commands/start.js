@@ -38,7 +38,7 @@ module.exports = {
                     let message = await channel.awaitMessages({ filter, max: 1, time: 120_000, errors: ['time'] });
                     let confirm = message.first();
                     if (confirm.content === 'Y' || confirm.content === 'y') {
-                        interaction.followUp({ content: `Thank you, \`${player_name.content}\`. That's a good name!`, ephemeral: true });
+                        await interaction.followUp({ content: `Thank you, \`${player_name.content}\`. That's a good name!`, ephemeral: true });
                         // creates a player profile in the db
                         const create_profile = await Player.create({ guildID: guild.id, discordID: member.id, playerName: player_name.content, faction: faction });
                         await create_profile.createIura({ walletName: player_name.content, bankName: player_name.content });
