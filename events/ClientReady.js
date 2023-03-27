@@ -2,6 +2,7 @@ const { Events, ActivityType } = require('discord.js');
 const { sequelize, Player } = require('../src/db');
 const cron = require('node-cron');
 const refresh = require('../functions/refresh');
+const dbupdate = require('../dbupdate');
 
 let Discord;
 try {
@@ -29,6 +30,8 @@ module.exports = {
 			alter: { alter: true },
 			force: { force: true }
 		};
+
+		await dbupdate();
 
 		const data = await sequelize.sync(sync.default);
 		console.log("Database connection successful.");
