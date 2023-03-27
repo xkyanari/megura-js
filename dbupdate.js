@@ -1,6 +1,6 @@
 const { Monster, Shop, Contract, Quest, Player, Guild } = require('../src/db');
 
-module.exports = async () => {
+(async () => {
     await Quest.sync({ force: true})
         .then(() => {
             const quests = require('../assets/quest_db.json');
@@ -22,4 +22,4 @@ module.exports = async () => {
         .catch((error) => console.log(error));
     
     await Guild.sync({ alter: true });
-};
+})();
