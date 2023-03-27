@@ -62,7 +62,7 @@ module.exports = {
                         break;
                     }
                 } else {
-                    interaction.followUp({ content: "Your name is too long. I can't put that in our database.", ephemeral: true });
+                    await interaction.followUp({ content: "Your name is too long. I can't put that in our database.", ephemeral: true });
                 }
                 attempt++;
                 if (attempt == 2) {
