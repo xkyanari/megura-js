@@ -56,9 +56,9 @@ To install and run the project, follow these steps:
 1. Clone this repository to your local machine using `git clone https://github.com/xkyanari/megura-js.git`
 2. Navigate to the project directory in your terminal
 3. Install dependencies using `npm install`
-4. Rename config-example.json to config.json and update the values
-5. (Optional) Database name can be changed including the settings in src/db.js.
-6. (Optional) Chapters can be uploaded in chapters/. Otherwise, the bot will simply load the placeholder stories found in samples/.
+4. Rename `config-example.json` to `config.json` and update the values
+5. (Optional) Database name can be changed including the settings in `src/db.js`.
+6. (Optional) Chapters can be uploaded in `chapters/`. Otherwise, the bot will simply load the placeholder stories found in `samples/`.
 
 ## Commands
 - `/info`:  Shows the list of commands.
