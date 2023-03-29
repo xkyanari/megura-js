@@ -2,7 +2,7 @@
 
 Dahlia is a highly sophisticated bot that runs in chatGPT with slash and text commands. She's an all-rounder Discord bot with many utilities but the main one is to serve as a storyteller of a text-based RPG. Players with supported NFT collections can communicate with Dahlia for the game.
 
-## Packages:
+## Packages
 - Node.js
 - Alchemy SDK
 - Solscan API
@@ -20,7 +20,7 @@ Before running the bot, you will need the following:
 - **Alchemy API Key**: You will need an Alchemy API key to access the Alchemy Web3 API. You can obtain a key by creating an account on the Alchemy website at https://alchemyapi.io.
 - **OpenAI API Key**: You will need an OpenAI API key to use the OpenAI package. You can obtain a key by creating an account on the OpenAI website at https://openai.com.
 
-## List of Discord bot features (features pending):
+## List of Discord bot features (features pending)
 - Verification with Captcha
 - Giveaways
 - Raffles
