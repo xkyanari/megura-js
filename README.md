@@ -1,6 +1,6 @@
 # Messinia Graciene: Project DAHLIA
 
-Dahlia is a highly sophisticated bot that runs in chatGPT with slash and text commands. She's an all-rounder Discord bot with many utilities but the main one is to serve as a storyteller of a text-based RPG. Players with supported NFT collections can communicate with Dahlia for the game.
+Dahlia is a state-of-the-art Discord bot that runs on chatGPT and supports both slash and text commands. As an all-rounder bot, she comes with a wide range of utilities, but her main purpose is to serve as a storyteller for a text-based RPG. Dahlia acts as an NPC (non-playable character) in the game, enabling players with supported NFT collections to communicate with her and participate in the game. With her advanced capabilities and cutting-edge technology, Dahlia offers an immersive and engaging experience for players looking to explore the world of text-based RPGs.
 
 ## Packages
 - Node.js
