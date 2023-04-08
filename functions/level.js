@@ -19,29 +19,29 @@ const {
  */
 
 module.exports = async (discordID) => {
-    const checkLevel = await Player.findOne({ where: { discordID }});
+    const player = await Player.findOne({ where: { discordID }});
 
     // adding a level
-    checkLevel.expGained = 0;
-    checkLevel.level += 1;
+    player.expGained = 0;
+    player.level += 1;
 
     // updating the totalAttack
-    const newBaseAttack = attackPerLevel(checkLevel.level);
+    const newBaseAttack = attackPerLevel(player.level);
     const attackAddition = newBaseAttack - baseAttack;
-    checkLevel.totalAttack += attackAddition;
+    player.totalAttack += attackAddition;
 
     // updating the totalDefense
-    const newBaseDefense = defensePerLevel(checkLevel.level);
+    const newBaseDefense = defensePerLevel(player.level);
     const defenseAddition = newBaseDefense - baseDefense;
-    checkLevel.totalDefense += defenseAddition;
+    player.totalDefense += defenseAddition;
 
     // updating the totalHealth
-    const newBaseHealth = healthPerLevel(checkLevel.level);
+    const newBaseHealth = healthPerLevel(player.level);
     const healthAddition = newBaseHealth - baseHealth;
-    checkLevel.totalHealth += healthAddition;
+    player.totalHealth += healthAddition;
 
-    await checkLevel.save();
+    await player.save();
     return {
-        level: checkLevel.level
+        level: player.level
     };
 };

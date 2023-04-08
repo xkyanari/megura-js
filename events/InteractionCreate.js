@@ -17,7 +17,7 @@ module.exports = {
                 return;
             }
 
-            const cooldownData = `${interaction.commandName}${interaction.user.id}`;
+            const cooldownData = `${interaction.commandName}:${interaction.user.id}`;
 
             if (client.cooldown.has(cooldownData)) {
                 const timer = ms(client.cooldown.get(cooldownData) - Date.now());

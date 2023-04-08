@@ -18,9 +18,9 @@ module.exports = {
 				await Item.destroy({ where: { accountID: player.iura.accountID }});
 				await Iura.destroy({ where: { accountID: player.iura.accountID }});
 				await Player.destroy({ where: { discordID: member.user.id, guildID: member.guild.id }});
-				console.log(`<${Date.now().toString()}> Player profile for ${member.user.tag} has been removed.`);
+				console.log(`<${Date.now().toString()}> : Player profile for ${member.user.tag} has been removed.`);
 			} else {
-				console.log(`<${Date.now().toString()}> No player profile under ${member.user.tag} was removed.`);
+				console.log(`<${Date.now().toString()}> : No player profile under ${member.user.tag} was removed.`);
 			}
 		} catch (e) {
 			console.log(e);
