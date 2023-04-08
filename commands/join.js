@@ -39,8 +39,7 @@ module.exports = {
     cooldown: 3000,
 	async execute(interaction) {
         const getWallet = interaction.options.getString('wallet');
-        const member = interaction.member;
-        const guild = interaction.guild;
+        const { member, guild } = interaction;
 
         await interaction.deferReply();
 

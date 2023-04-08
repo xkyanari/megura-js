@@ -1,33 +1,43 @@
 const { EmbedBuilder } = require('discord.js');
-const { Player } = require('../src/db');
+const { Guild } = require('../src/db');
 
 module.exports = async (interaction) => {
-    const member = interaction.member;
-    const guild = interaction.guild;
+	const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id }});
 
-    const margaretha = guild.roles.cache.get('1073827215957032968');
-    const cerberon = guild.roles.cache.get('1073827215957032969');
+		if (!guildCheck.margarethaID || !guildCheck.cerberonID) return interaction.reply({ content: `Please assign roles for Margaretha and/or Cerberon first.`, ephemeral: true });
 
-    const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }});
+		const embed = new EmbedBuilder()
+            .setTitle('Choose your Faction')
+            .setDescription(
+                `Please choose which faction resonates with your principles the most:
+				
+				➡️ **${guildCheck.cerberonName}**
+				${guildCheck.cerberonName} follows __logic__. Members of this faction think that solving problems would help remove the pain and despair. They are willing to take risks to achieve what they want. They deal with life based from the past.
+				
+				➡️ **${guildCheck.margarethaName}**
+				${guildCheck.margarethaName} follows __emotion__. Members of this faction have compassion towards everything. They think moving forward is the best way to get over with grief. They deal with life for the future.
+				`);
 
-    if (!player) return interaction.reply("You do not have a player profile in this world yet.");
-
-        try {
-            if (member.roles.cache.some(role => role.name === margaretha.name)) {
-                await member.roles.remove(margaretha);
-            }
-            if (member.roles.cache.some(role => role.name === cerberon.name)) {
-                return interaction.reply({ content: `You are on ${cerberon.name} faction!` });
-            }
-            
-            await member.roles.add(cerberon);
-            player.faction = "Cerberon";
-            const embed = new EmbedBuilder()
-                .setDescription(`Removed \`${margaretha.name}\`\nAdded \`${cerberon.name}\``);
-            await interaction.reply({ embeds: [embed] });
-            return player.save();
-
-        } catch (error) {
-            console.log(error);
-        }
+		await interaction.reply({
+			embeds: [embed],
+			components: [
+				{
+					"type": 1,
+					"components": [
+						{
+							"type": 2,
+							"custom_id": "cerberon",
+							"label": `${guildCheck.cerberonName}`,
+							"style": 1
+						},
+						{
+							"type": 2,
+							"custom_id": "margaretha",
+							"label": `${guildCheck.cerberonName}`,
+							"style": 1
+						}
+					]
+				}
+			]
+		});
 };

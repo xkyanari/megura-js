@@ -1,20 +1,44 @@
+// wanderer faction - can be changed to anything
+const wanderer = 'Wanderer';
 
 // for attacks and duels
-const min_atk_rate = 0.1;
-const min_def_rate = 0.1;
-const blessing = 50;
-const crit_rate = 0.25;
-const duel_expGained = '20';
-const duel_iuraGained = '25';
+const criticalRate = 0.125;
+const duel_expGained = 50;
+const duel_iuraGained = 25;
 
-const levelUp = (level) => 100 * level || 1;
+// base stats
+const baseHealth = 2000;
+const baseAttack = 500;
+const baseDefense = 500;
+const baseAttackMultiplier = 1.75;
+const attackIncreasePerLevel = 0.05;
+const levelHealthMultiplier = 175;
+const levelDefenseMultiplier = 10;
+const skillMultiplier = 0.05;
+
+// experience points
+const expPoints = (level) => (50 * (level ** 2)) - (50 * level) || 1;
+
+// battle formula
+const attackMultiplier = (level) => baseAttackMultiplier + (skillMultiplier * level);
+const getCriticalHitRate = (level) => Math.min(level * criticalRate, 0.5);
+
+// leveling bonuses
+const attackPerLevel = (level) => baseAttack * (1 + attackIncreasePerLevel) ^ (level - 1);
+const defensePerLevel = (level) => baseDefense + (levelDefenseMultiplier * level);
+const healthPerLevel = (level) => baseHealth + (levelHealthMultiplier * level);
 
 module.exports = {
-    min_atk_rate,
-    min_def_rate,
-    blessing,
-    crit_rate,
+    wanderer,
+    expPoints,
     duel_expGained,
     duel_iuraGained,
-    levelUp
+    baseHealth,
+    baseAttack,
+    baseDefense,
+    attackPerLevel,
+    defensePerLevel,
+    healthPerLevel,
+    attackMultiplier,
+    getCriticalHitRate
 };

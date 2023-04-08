@@ -17,8 +17,15 @@ const rest = new REST({ version: '10' }).setToken(token);
 	try {
 		console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
+		// uncomment if you want to register commands for one guild only
+		// const data = await rest.put(
+		// 	Routes.applicationGuildCommands(clientId, guildId),
+		// 	{ body: commands },
+		// );
+
+		// registering commands to all guilds
 		const data = await rest.put(
-			Routes.applicationGuildCommands(clientId, guildId),
+			Routes.applicationCommands(clientId),
 			{ body: commands },
 		);
 

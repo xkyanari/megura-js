@@ -7,9 +7,7 @@ module.exports = {
 		.setDescription('Update your profile'),
     cooldown: 3000,
 	async execute(interaction) {
-        const member = interaction.member;
-        const guild = interaction.guild;
-        const channel = interaction.channel;
+        const { channel, member, guild } = interaction;
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }});
 
         if (!player) return interaction.reply("You do not have a player profile in this world yet. Wanna `/start`?");

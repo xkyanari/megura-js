@@ -1,6 +1,10 @@
 const { Events } = require('discord.js');
 const ms = require('ms');
 
+/**
+ * This event is fired when a user initiates slash commands.
+ */
+
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
@@ -13,7 +17,7 @@ module.exports = {
                 return;
             }
 
-            const cooldownData = `${interaction.commandName}${interaction.user.id}`;
+            const cooldownData = `${interaction.commandName}:${interaction.user.id}`;
 
             if (client.cooldown.has(cooldownData)) {
                 const timer = ms(client.cooldown.get(cooldownData) - Date.now());

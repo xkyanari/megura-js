@@ -17,8 +17,7 @@ module.exports = {
         ),
     cooldown: 3000,
 	async execute(interaction) {
-        const member = interaction.member;
-        const guild = interaction.guild;
+        const { member, guild } = interaction;
         const id = interaction.options.getString('id');
         const amount = interaction.options.getInteger('amount');
 

@@ -10,9 +10,8 @@ const client = new Client({
 		GatewayIntentBits.GuildMembers,
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.MessageContent
-	]});
-
-// For registering and loading slash commands -----------------
+	],
+});
 
 client.commands = new Collection();
 client.subCommands = new Collection();
@@ -20,6 +19,8 @@ client.buttons = new Collection();
 client.menus = new Collection();
 client.modals = new Collection();
 client.cooldown = new Collection();
+
+// For registering and loading slash commands -----------------
 
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));

@@ -32,10 +32,10 @@ module.exports = async (interaction, member) => {
             .addFields(
                 { name: '👤 Player Name', value: `${player.playerName}`, inline: false },
                 { name: '👥 Faction', value: `${player.faction}`, inline: false },
-                { name: '🩸 Health', value: `${player.totalHealth}`, inline: false },
-                { name: '⚔️ Attack', value: `${player.totalAttack}`, inline: true },
-                { name: '🛡️ Defense', value: `${player.totalDefense}`, inline: true },
-                { name: '🗡️ Weapon', value: `${player.weapon}`, inline: false },
+                { name: '🩸 HP', value: `${player.totalHealth}`, inline: true },
+                { name: '⚔️ ATK', value: `${player.totalAttack}`, inline: true },
+                { name: '🛡️ DEF', value: `${player.totalDefense}`, inline: true },
+                { name: '🗡️ Weapon', value: `${player.weapon}`, inline: true },
                 { name: '💠 Armor', value: `${player.armor}`, inline: false },
                 { name: '💰 Iura', value: `$${numFormat(player.iura.walletAmount)}`, inline: false },
             )

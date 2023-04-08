@@ -1,6 +1,7 @@
 const { Monster, Shop, Contract, Quest, Player } = require('../src/db');
 
 module.exports = async () => {
+
     // creating a test account
     const kyanari = await Player.create({ guildID: '1073827215957032960', discordID: '119671611803697152', playerName: 'Kyanari', faction: 'Margaretha' });
     await kyanari.createIura({ walletName: 'Kyanari', bankName: 'Kyanari' });

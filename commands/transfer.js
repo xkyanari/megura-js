@@ -18,13 +18,10 @@ module.exports = {
         .setDefaultMemberPermissions('0'),
     cooldown: 3000,
 	async execute(interaction) {
-        const member = interaction.member;
-        const guild = interaction.guild;
+        const { member, guild } = interaction;
         const numFormat = (value) => new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
         const recipient = interaction.options.getUser('player');
         const amount = interaction.options.getInteger('amount');
-
-        console.log(recipient);
 
         const player1 = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura'});
         const player2 = await Player.findOne({ where: { discordID: recipient.id, guildID: guild.id }, include: 'iura'});
