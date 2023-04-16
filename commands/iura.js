@@ -1,6 +1,18 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { Player, Iura } = require('../src/db');
 
+async function updateName(interaction, player, type, name) {
+    if (type === 'wallet') {
+        Iura.update({ walletName: name }, { where: { accountID: player.iura.accountID } })
+            .then(() => Iura.findOne({ where: { accountID: player.iura.accountID } }))
+            .then((create_wallet) => interaction.reply(`Wallet: \`${create_wallet.walletName}\` has been updated successfully.`));
+    } else {
+        Iura.update({ bankName: name }, { where: { accountID: player.iura.accountID } })
+                    .then(() => Iura.findOne({ where: { accountID: player.iura.accountID } }))
+                    .then((create_bank) => interaction.reply(`Bank: \`${create_bank.bankName}\` has been updated successfully.`));
+    }
+};
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('iura')
