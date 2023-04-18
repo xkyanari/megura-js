@@ -10,19 +10,22 @@ module.exports = {
 	async execute(interaction) {
         const { channel, member, guild } = interaction;
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id } });
-        const guildCheck = await Guild.findOne({ where: { guildID: guild.id } });
+        // const guildCheck = await Guild.findOne({ where: { guildID: guild.id } });
 
-        if (!guildCheck || !guildCheck.margarethaName || !guildCheck.cerberonName) return interaction.reply(`This world does not seem to have proper faction roles added. I'm assigning you to the \`${wanderer}\` faction.`);
+        // if (!guildCheck || !guildCheck.margarethaName || !guildCheck.cerberonName) return interaction.reply(`This world does not seem to have proper faction roles added. I'm assigning you to the \`${wanderer}\` faction.`);
         
-        const factionCheck = guild.roles.cache.find(role => role.name === guildCheck.margarethaName || role.name === guildCheck.cerberonName);
-        const faction = factionCheck === undefined ? wanderer : factionCheck.name;
+        // const factionCheck = guild.roles.cache.find(role => role.name === guildCheck.margarethaName || role.name === guildCheck.cerberonName);
+        // const faction = factionCheck === undefined ? wanderer : factionCheck.name;
         if (player) return interaction.reply("You're all set!");
             
             const embed = new EmbedBuilder()
             .setColor(0x0099FF)
             .setTitle('Start your Adventure!')
+            // .setDescription(
+            //     `***Welcome to Eldelvain's Voyagers Guild.***\n\nI see that you belong to the \`${faction}\` faction. Before you can start your journey, I need to get information from you first.\n\nPlease enter your \`Character Name\`.\n\nYou can have a name with up to 20 characters including spaces and numbers. You cannot use any special symbols as I will address you by this name moving forward.`
+            //     );
             .setDescription(
-                `***Welcome to Eldelvain's Voyagers Guild.***\n\nI see that you belong to the \`${faction}\` faction. Before you can start your journey, I need to get information from you first.\n\nPlease enter your \`Character Name\`.\n\nYou can have a name with up to 20 characters including spaces and numbers. You cannot use any special symbols as I will address you by this name moving forward.`
+                `***Welcome to Eldelvain's Voyagers Guild.***\n\nBefore you can start your journey, I need to get information from you first.\n\nPlease enter your \`Character Name\`.\n\nYou can have a name with up to 20 characters including spaces and numbers. You cannot use any special symbols as I will address you by this name moving forward.`
                 );
             await interaction.reply({ embeds: [embed], ephemeral: true });
 
@@ -40,9 +43,8 @@ module.exports = {
                     if (confirm.content === 'Y' || confirm.content === 'y') {
                         await interaction.followUp({ content: `Thank you, \`${player_name.content}\`. That's a good name!`, ephemeral: true });
                         // creates a player profile in the db
-                        const create_profile = await Player.create({ guildID: guild.id, discordID: member.id, playerName: player_name.content, faction: faction });
+                        const create_profile = await Player.create({ guildID: guild.id, discordID: member.id, playerName: player_name.content, faction: wanderer });
                         await create_profile.createIura({ walletName: player_name.content, bankName: player_name.content });
-                        console.log("Profile and Iura creation successful!");
                         const wait = require('node:timers/promises').setTimeout;
                         await wait(1000);
                         const embed1 = new EmbedBuilder()
