@@ -1,4 +1,4 @@
-### Setup Command
+# Setup Command
 
 Administrators will have complete control on how Dahlia will work around the server particularly with the audit logs, verification with Captcha, Whitelist shop, Twitter raids and roles. For updating the `/raid` command and adding story chapters, please refer to raid.md and chapters.md, respectively.
 
