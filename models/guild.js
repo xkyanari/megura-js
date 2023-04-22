@@ -6,7 +6,19 @@ module.exports = (sequelize, DataTypes) => {
         verifyChannelID: {
             type: DataTypes.TEXT,
         },
+        logsChannelID: {
+            type: DataTypes.TEXT,
+        },
+        whitelistChannelID: {
+            type: DataTypes.TEXT,
+        },
+        twitterChannelID: {
+            type: DataTypes.TEXT,
+        },
         verifyRoleID: {
+            type: DataTypes.TEXT,
+        },
+        raidRoleID: {
             type: DataTypes.TEXT,
         },
         margarethaID: {

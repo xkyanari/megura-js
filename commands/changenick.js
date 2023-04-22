@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const { SlashCommandBuilder } = require('discord.js');
 const { Player } = require('../src/db');
 
@@ -10,7 +11,7 @@ module.exports = {
         const { channel, member, guild } = interaction;
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }});
 
-        if (!player) return interaction.reply("You do not have a player profile in this world yet. Wanna `/start`?");
+        if (!player) return interaction.reply({ content: "You do not have a player profile in this world yet. Wanna `/start`?", ephemeral: true });
 
             const nick = player.playerName;
             await interaction.reply(`You want to change your name from \`${nick}\`? Okay. What should I call you?\nYou have 3 attempts.`)
@@ -52,7 +53,11 @@ module.exports = {
                     }
                 } while (attempt < 3);
             } catch (error) {
-                await channel.send("Do you need more time? That's okay. Just run the command again when you're ready.");
+                if (error instanceof Discord.Collection) {
+                    await channel.send("Do you need more time? That's okay. Just run the command again when you're ready.");
+                } else {
+                    console.log(error);
+                }
             }
     }
 };

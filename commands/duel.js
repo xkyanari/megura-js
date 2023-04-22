@@ -2,7 +2,6 @@ const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = re
 const { Player, Iura } = require('../src/db');
 const {
     expPoints,
-    duel_iuraGained,
     duel_expGained,
 } = require('../src/vars');
 const { simulateBattle } = require('../functions/battle');
@@ -59,8 +58,8 @@ module.exports = {
                 if ((updatedPlayer2.totalHealth - updatedPlayer1.totalHealth) <= -5000) return interaction.editReply("Your rank is too high to fight this player.");
 
                 // checking balance
-                // if (updatedPlayer1.iura.walletAmount < 100) return interaction.editReply("You do not have sufficient balance to duel! Please carry at least $100 IURA first.");
-                // if (updatedPlayer2.iura.walletAmount < 100) return interaction.editReply("This player does not have enough balance to be attacked.");
+                if (updatedPlayer1.iura.walletAmount < 100) return interaction.editReply("You do not have sufficient balance to duel! Please carry at least $100 IURA first.");
+                if (updatedPlayer2.iura.walletAmount < 100) return interaction.editReply("This player does not have enough balance to be attacked.");
 
                 await interaction.editReply("The battle commences!");
                 await wait(1000);
@@ -87,13 +86,16 @@ module.exports = {
                         .setStyle(ButtonStyle.Danger)
                 );
 
+                const totalIura1 = updatedPlayer2.iura.walletAmount * 0.4;
+                const totalIura2 = updatedPlayer1.iura.walletAmount * 0.4;
+
                 if (winner === updatedPlayer1) {
                     await interaction.channel.send(`The battle has concluded.`);
-                    await interaction.followUp({content: `🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${duel_iuraGained} IURA\`\n\n- \`${duel_expGained} EXP\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`, components: [button]});
+                    await interaction.followUp({content: `🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${totalIura1} IURA\`\n- \`${duel_expGained} EXP\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`, components: [button]});
 
-                    await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: updatedPlayer2.iura.accountID } });
-                    await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: updatedPlayer1.iura.accountID } });
-                    await updatedPlayer1.increment({ iuraEarned: duel_iuraGained, expGained: duel_expGained, duelKills: 1 });
+                    await Iura.decrement({ walletAmount: totalIura1 }, { where: { accountID: updatedPlayer2.iura.accountID } });
+                    await Iura.increment({ walletAmount: totalIura1 }, { where: { accountID: updatedPlayer1.iura.accountID } });
+                    await updatedPlayer1.increment({ iuraEarned: totalIura1, expGained: duel_expGained, duelKills: 1 });
 
                     if (updatedPlayer1.expGained > expPoints(updatedPlayer1.level)) {
                         const levelUp = await leveling(interaction.member.id);
@@ -101,10 +103,9 @@ module.exports = {
                     }
                 } else if (winner === updatedPlayer2) {
                     await interaction.channel.send(`The battle has concluded.`);
-                    await interaction.followUp("👎 **YOU LOST!**");
-                    await interaction.channel.send({content: `> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
-                    await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: updatedPlayer2.iura.accountID } });
-                    await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: updatedPlayer1.iura.accountID } });
+                    await interaction.followUp({ content: `👎 **YOU LOST!** You lost the following from the battle: \n\n- \`${totalIura2} IURA\`\n\n> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
+                    await Iura.increment({ walletAmount: totalIura2 }, { where: { accountID: updatedPlayer2.iura.accountID } });
+                    await Iura.decrement({ walletAmount: totalIura2 }, { where: { accountID: updatedPlayer1.iura.accountID } });
                 }
             } else if (!updatedPlayer1) {
                 await interaction.editReply(`${player1.user.tag} do not have a voyager profile yet.`);

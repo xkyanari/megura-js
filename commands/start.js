@@ -1,3 +1,4 @@
+const Discord = require('discord.js');
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { Player, Guild } = require('../src/db');
 const { wanderer } = require('../src/vars');
@@ -72,9 +73,12 @@ module.exports = {
                 }
                 } while (attempt < 2);
             } catch (error) {
-                // timed out after 2mins
-                await interaction.followUp({ content: "Do you need more time? That's okay. Just run the command again when you're ready.", ephemeral: true });
-                console.log(error);
+                if (error instanceof Discord.Collection) {
+                    // timed out after 2mins
+                    await interaction.followUp({ content: "Do you need more time? That's okay. Just run the command again when you're ready.", ephemeral: true });
+                } else {
+                    console.log(error);
+                }
             };
         
 	}

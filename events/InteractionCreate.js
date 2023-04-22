@@ -32,7 +32,8 @@ module.exports = {
                 } catch (error) {
                     console.log(error);
                     await interaction.reply({ content: `Error executing \`${interaction.commandName}\``, ephemeral: true });
-                }                    
+                    client.cooldown.delete(cooldownData);
+                }
         } else if (interaction.isButton()) {
             const { buttons } = interaction.client;
             const { customId } = interaction;

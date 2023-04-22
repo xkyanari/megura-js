@@ -1,5 +1,6 @@
-const { SlashCommandBuilder, ChannelType } = require('discord.js');
+const { SlashCommandBuilder, ChannelType, PermissionsBitField } = require('discord.js');
 const { Guild } = require('../src/db');
+const captcha = require('../functions/verify');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -9,77 +10,143 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
             .setName('register')
-            .setDescription('Register guild (for demonstration purposes only).')
+            .setDescription('Register guild.')
             )
         .addSubcommand(subcommand =>
             subcommand
-            .setName('verify')
-            .setDescription('Initiate verification.')
+            .setName('disable')
+            .setDescription('Disable the verification.')
+            )
+        .addSubcommand(subcommand =>
+            subcommand
+            .setName('logs')
+            .setDescription('Assign channel for audit logs.')
+            .addChannelOption(option =>
+                option
+                .setName('channel')
+                .setDescription('Choose the channel to log captcha attempts.')
+                .addChannelTypes(ChannelType.GuildText)
+                .setRequired(true))
+            )
+        .addSubcommand(subcommand =>
+            subcommand
+            .setName('captcha')
+            .setDescription('Setup CAPTCHA.')
             .addChannelOption(option =>
                 option
                 .setName('channel')
                 .setDescription('Choose the channel to post the verification message.')
                 .addChannelTypes(ChannelType.GuildText)
-                .setRequired(false))
+                .setRequired(true))
             .addRoleOption(option =>
                 option
                 .setName('role')
                 .setDescription('Select the role for verified users.')
-                .setRequired(false))
+                .setRequired(true))
+            )
+        .addSubcommand(subcommand =>
+            subcommand
+            .setName('shop')
+            .setDescription('Whitelist Shop.')
+            .addChannelOption(option =>
+                option
+                .setName('channel')
+                .setDescription('Choose the channel for the Whitelist Shop.')
+                .addChannelTypes(ChannelType.GuildText)
+                .setRequired(true))
+            )
+        .addSubcommand(subcommand =>
+            subcommand
+            .setName('deploy')
+            .setDescription('Deploy messages for respective channels.')
+            )
+        .addSubcommand(subcommand =>
+            subcommand
+            .setName('factions')
+            .setDescription('Assign factions.')
             .addRoleOption(option =>
                 option
                 .setName('margaretha')
                 .setDescription('Select the role for Margaretha faction.')
-                .setRequired(false))
+                .setRequired(true))
             .addRoleOption(option =>
                 option
                 .setName('cerberon')
                 .setDescription('Select the role for Cerberon faction.')
-                .setRequired(false))
+                .setRequired(true))
             ),
     cooldown: 3000,
 	async execute(interaction) {
-        const channel = interaction.options.getChannel('channel');
-        const role = interaction.options.getRole('role');
-        const margaretha = interaction.options.getRole('margaretha');
-        const cerberon = interaction.options.getRole('cerberon');
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({
+            content: `You do not have permissions to setup the server.`,
+            ephemeral: true
+        });
 
         const guildCheck = await Guild.findOne({ where: {guildID: interaction.guild.id} });
 
-        if (interaction.options.getSubcommand() === 'register') {
-            if (!guildCheck) await Guild.create({ guildID: interaction.guild.id });
-            await interaction.reply({ content: `Guild registered.`, ephemeral: true });
-        }
+        const { options } = interaction;
+        const subCommand = options.getSubcommand();
 
-        if (interaction.options.getSubcommand() === 'verify') {
-            try {
+        switch (subCommand) {
+            case 'register':
+                await Guild.create({ guildID: interaction.guild.id });
+                await interaction.reply({ content: `Guild registered.`, ephemeral: true });
+            break;
 
-                if (channel) {
-                    await guildCheck.update({ verifyChannelID: channel.id });
-                    await interaction.reply({ content: `Verify Channel saved!`, ephemeral: true });
-                }
+            case 'disable':
+                if (!guildCheck) return await interaction.reply({ content: `Dahlia is not yet setup in this server.`, ephemeral: true });
+                await guildCheck.destroy({ where: { guildID: interaction.guild.id }});
+                await interaction.reply({ content: `Verification disabled!`, ephemeral: true });
+            break;
 
-                if (role) {
-                    await guildCheck.update({ verifyRoleID: role.id });
-                    await interaction.reply({ content: `Verified Role saved!`, ephemeral: true });
-                }
+            case 'logs':
+                if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
 
-                if (margaretha) {
-                    await guildCheck.update({ margarethaID: margaretha.id, margarethaName: margaretha.name });
-                    await interaction.reply({ content: `Margaretha Role saved!`, ephemeral: true });
-                }
+                const logsChannel = options.getChannel('channel');
+                
+                await guildCheck.update({ logsChannelID: logsChannel.id });
+                await interaction.reply({ content: `Audit Logs channel assigned.`, ephemeral: true });
+            break;
 
-                if (cerberon) {
-                    await guildCheck.update({ cerberonID: cerberon.id, cerberonName: cerberon.name });
-                    await interaction.reply({ content: `Cerberon Role saved!`, ephemeral: true });
-                }
+            case 'captcha':
+                try {
+                    if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
 
-            } catch (error) {
-                if (error.code === 50001) return interaction.reply({ content: `I don't seem to have sufficient. Is there a mistake?`, ephemeral: true });
-                else {
+                    const verifyChannel = options.getChannel('channel');
+                    const role = options.getRole('role');
+                    
+                    await guildCheck.update({ verifyChannelID: verifyChannel.id, verifyRoleID: role.id });
+                    await interaction.reply({ content: `Captcha settings saved!`, ephemeral: true });
+                } catch (error) {
                     console.log(error);
                 }
-            }
+            break;
+
+            case 'shop':
+                if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
+                
+                const whitelist = options.getChannel('channel');
+
+                await guildCheck.update({ whitelistChannelID: whitelist.id });
+                await interaction.reply({ content: `Verification disabled!`, ephemeral: true });
+            break;
+
+            case 'deploy':
+                if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
+                await captcha(interaction, guildCheck.verifyChannelID);
+                await interaction.reply({ content: `Captcha Verification has been deployed!`, ephemeral: true });
+            break;
+
+            case 'factions':
+                if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
+
+                const margaretha = options.getRole('margaretha');
+                const cerberon = options.getRole('cerberon');
+
+                await guildCheck.update({ margarethaID: margaretha.id, margarethaName: margaretha.name, cerberonID: cerberon.id, cerberonName: cerberon.name });
+                await interaction.reply({ content: `Factions roles have been set successfully!`, ephemeral: true });
+            break;
+
         }
 	}
 };

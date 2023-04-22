@@ -36,8 +36,10 @@ module.exports = async (interaction) => {
             await interaction.followUp({ content: `The captcha code you entered is incorrect. Please try again.`, ephemeral: true });
         }
     });
-    collector.on('end', async collected => {
-        await captchaMessage.delete();
-        await interaction.followUp({ content: `The verification process has timed out. Please try again.`, ephemeral: true });
-    });
+
+    setTimeout(() => {
+        collector.stop();
+        captchaMessage.delete();
+        interaction.followUp({ content: `The verification process has timed out. Please try again.`, ephemeral: true });
+    }, 180000);
 };

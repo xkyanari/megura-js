@@ -1,10 +1,31 @@
 // "use strict"
 
+const express = require('express');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const { token } = require('./config.json');
 const fs = require('node:fs');
 const path = require('node:path');
+const { twitterCallback } = require('./functions/twitter');
 
+// Express server
+const app = express();
+
+app.set('view engine', 'ejs');
+
+app.get('/', (req, res) => {
+	res.send(`Hello from the Express server!`);
+});
+
+app.get('/twitter/auth/callback', async (req, res) => {
+	// res.send('Twitter auth callback received');
+	await twitterCallback(req, res);
+});
+
+app.listen(3000, () => {
+	console.log(`Express server is running on http://localhost:3000`);
+});
+
+// Discord bot
 const client = new Client({
 	intents: [GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMembers,
