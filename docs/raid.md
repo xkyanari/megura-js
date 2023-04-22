@@ -1,4 +1,4 @@
-### Raid Command
+# Raid Command
 
 The Raid command is used for tracking retweets and likes from Discord users. This is helpful for analytical purposes and for engaging with users who see the tweets posted on your Discord server.
 
