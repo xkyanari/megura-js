@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { Player, Guild } = require('../src/db');
-const { wanderer } = require('../src/vars');
+const { Player, Guild } = require('../../src/db');
+const { wanderer } = require('../../src/vars');
 
 module.exports = {
 	data: new SlashCommandBuilder()

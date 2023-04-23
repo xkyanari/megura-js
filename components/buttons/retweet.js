@@ -1,6 +1,7 @@
 const { TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET } = require('../../config.json');
 const { TwitterApi } = require('twitter-api-v2');
 const { Raid, Twitter } = require('../../src/db');
+const { encrypt, decrypt } = require('../../src/crypto-utils');
 
 module.exports = {
     data: {
@@ -11,7 +12,7 @@ module.exports = {
 
         const twitterUser = await Twitter.findOne({ where: { discordID: interaction.member.id }});
 
-        if (!twitterUser) return interaction.reply({ content: `Please login using \`/raid login\` first.`, ephemeral: true });
+        if (!twitterUser) return interaction.reply({ content: `Please login using \`/raid join\` first.`, ephemeral: true });
 
         // Check if the access token has expired
         const now = new Date();

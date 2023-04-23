@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { Player, Shop } = require('../src/db');
+const { Player, Shop } = require('../../src/db');
 
 module.exports = {
 	data: new SlashCommandBuilder()

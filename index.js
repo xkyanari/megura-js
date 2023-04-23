@@ -2,7 +2,7 @@
 
 const express = require('express');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
-const { token } = require('./config.json');
+const { token, port } = require('./config.json');
 const fs = require('node:fs');
 const path = require('node:path');
 const { twitterCallback } = require('./functions/twitter');
@@ -21,8 +21,8 @@ app.get('/twitter/auth/callback', async (req, res) => {
 	await twitterCallback(req, res);
 });
 
-app.listen(3000, () => {
-	console.log(`Express server is running on http://localhost:3000`);
+app.listen(port, () => {
+	console.log(`Express server is running on http://localhost:${port}`);
 });
 
 // Discord bot
@@ -41,19 +41,34 @@ client.menus = new Collection();
 client.modals = new Collection();
 client.cooldown = new Collection();
 
-// For registering and loading slash commands -----------------
+// For registering slash commands -----------------
 
-const commandsPath = path.join(__dirname, 'commands');
-const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+const slashCommandsPath = path.join(__dirname, 'commands', 'slash-commands');
+const slashCommandFiles = fs.readdirSync(slashCommandsPath).filter(file => file.endsWith('.js'));
 
-for (const file of commandFiles) {
-	const filePath = path.join(commandsPath, file);
-	const command = require(filePath);
-	if ('data' in command && 'execute' in command && 'cooldown' in command) {
-		client.commands.set(command.data.name, command);
-	} else {
-		console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" or "cooldown" property.`);
-	}
+for (const file of slashCommandFiles) {
+  const filePath = path.join(slashCommandsPath, file);
+  const command = require(filePath);
+  if ('data' in command && 'execute' in command && 'cooldown' in command) {
+    client.commands.set(command.data.name, command);
+  } else {
+    console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" or "cooldown" property.`);
+  }
+}
+
+// For registering text commands -----------------
+
+const textCommandsPath = path.join(__dirname, 'commands', 'text-commands');
+const textCommandFiles = fs.readdirSync(textCommandsPath).filter(file => file.endsWith('.js'));
+
+for (const file of textCommandFiles) {
+  const filePath = path.join(textCommandsPath, file);
+  const command = require(filePath);
+  if ('name' in command && 'execute' in command) {
+    client.commands.set(command.name, command);
+  } else {
+    console.log(`[WARNING] The command at ${filePath} is missing a required "name" or "execute" property.`);
+  }
 }
 
 // For running events -----------------
@@ -104,9 +119,8 @@ for (const folder of componentsPath) {
 				modals.set(modal.data.name, modal);
 			}
 			break;
-		
-		default:
-			break;
+			default:
+				break;
 	}
 }
 

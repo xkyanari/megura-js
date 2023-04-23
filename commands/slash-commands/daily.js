@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { Player, Iura, Quest, sequelize } = require('../src/db');
+const { Player, Iura, Quest, sequelize } = require('../../src/db');
 
 module.exports = {
 	data: new SlashCommandBuilder()

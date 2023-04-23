@@ -1,3 +1,6 @@
+// text command prefix
+const prefix = '!';
+
 // wanderer faction - can be changed to anything
 const wanderer = 'Wanderer';
 
@@ -29,6 +32,7 @@ const defensePerLevel = (level) => baseDefense + (levelDefenseMultiplier * level
 const healthPerLevel = (level) => baseHealth + (levelHealthMultiplier * level);
 
 module.exports = {
+    prefix,
     wanderer,
     expPoints,
     duel_expGained,

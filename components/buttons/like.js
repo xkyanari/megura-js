@@ -11,7 +11,7 @@ module.exports = {
 
         const twitterUser = await Twitter.findOne({ where: { discordID: interaction.member.id }});
 
-        if (!twitterUser) return interaction.reply({ content: `Please login using \`/raid login\` first.`, ephemeral: true });
+        if (!twitterUser) return interaction.reply({ content: `Please login using \`/raid join\` first.`, ephemeral: true });
 
         // Check if the access token has expired
         const now = new Date();
@@ -44,7 +44,7 @@ module.exports = {
             const twitterClient = new TwitterApi(twitterUser.accessToken);
             const rwClient = twitterClient.readWrite;
 
-            const like = await rwClient.v2.retweet(twitterUser.twitterID, tweetId);
+            const like = await rwClient.v2.like(twitterUser.twitterID, tweetId);
             if (like) {
                 const raidTweet = await Raid.findOne({ where: { tweetUrlID: tweetId } });
                 const likes = raidTweet.likers;

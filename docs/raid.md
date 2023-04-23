@@ -2,7 +2,14 @@
 
 The Raid command is used for tracking retweets and likes from Discord users. This is helpful for analytical purposes and for engaging with users who see the tweets posted on your Discord server.
 
-The Raid command has five subcommands:
+The bot will **NOT**:
+- Un-like tweets for you.
+- Un-retweet or tweet for you.
+- View or send any DMs for you.
+
+You can refer to `commands/slash-commands/raid.js` for more information to confirm. Access and refresh tokens are hashed when stored in the database for security. **We do not save passwords or email addresses.**
+
+The Raid command has six subcommands:
 
 1. Join
    - Usage: `/raid join`
@@ -31,3 +38,7 @@ The Raid command has five subcommands:
    - Description: Select a channel to post tweets for raids.
    - Parameters:
      - `name`: The name of the channel to post tweets for raids (required).
+
+6. Remove
+   - Usage: `/raid remove`
+   - Description: Allows the user to remove the link to their Twitter account.

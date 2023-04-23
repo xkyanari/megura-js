@@ -77,6 +77,6 @@ const twitterCallback = async (req, res) => {
         console.error('Error in twitterCallback:', error);
         res.status(500).send('Server error');
     }
-}
+};
 
 module.exports = { twitterAuth, twitterCallback };

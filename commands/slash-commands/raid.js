@@ -1,8 +1,8 @@
 const { SlashCommandBuilder, PermissionsBitField } = require('discord.js');
-const { twitterAuth } = require('../functions/twitter');
-const { Twitter, Guild } = require('../src/db');
-const post = require('../functions/post');
-const raidCheck = require('../functions/raidcheck');
+const { twitterAuth } = require('../../functions/twitter');
+const { Twitter, Guild } = require('../../src/db');
+const post = require('../../functions/post');
+const raidCheck = require('../../functions/raidcheck');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -12,6 +12,11 @@ module.exports = {
             subcommand
             .setName('join')
             .setDescription('Login to Twitter.')
+        )
+        .addSubcommand(subcommand =>
+            subcommand
+            .setName('remove')
+            .setDescription('Remove link to Twitter.')
         )
         .addSubcommand(subcommand =>
             subcommand
@@ -83,6 +88,15 @@ module.exports = {
                             console.error(error);
                         });
                 }, 180000);
+            break;
+
+            case 'remove':
+                if (twitter) {
+                    await Twitter.destroy({ where: { discordID: interaction.member.id } });
+                    return await interaction.reply({ content: `Your Twitter access has been revoked.`, ephemeral: true });
+                } else {
+                    await interaction.reply({ content: `You do not have a Twitter account linked.`, ephemeral: true });
+                }
             break;
 
             case 'post':

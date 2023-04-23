@@ -1,39 +1,38 @@
-const { REST, Routes } = require('discord.js');
+const { REST } = require('@discordjs/rest');
+const { Routes } = require('discord-api-types/v9');
+const fs = require('fs');
 const { clientId, guildId, token } = require('./config.json');
-const fs = require('node:fs');
 
 const commands = [];
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const slashCommandFiles = fs.readdirSync('./commands/slash-commands').filter(file => file.endsWith('.js'));
 
-for (const file of commandFiles) {
-	const command = require(`./commands/${file}`);
-	commands.push(command.data.toJSON());
+// For slash commands
+for (const file of slashCommandFiles) {
+  const command = require(`./commands/slash-commands/${file}`);
+  if ('data' in command) {
+    commands.push(command.data.toJSON());
+  } else {
+    console.log(`[WARNING] The slash command at ${file} is missing a required "data" property.`);
+  }
 }
 
-const rest = new REST({ version: '10' }).setToken(token);
+const rest = new REST({ version: '9' }).setToken(token);
 
-// for refreshing/registering commands
 (async () => {
-	try {
-		console.log(`Started refreshing ${commands.length} application (/) commands.`);
+  try {
+    console.log(`Started refreshing ${commands.length} application (/) commands.`);
 
-		// uncomment if you want to register commands for one guild only
-		// const data = await rest.put(
-		// 	Routes.applicationGuildCommands(clientId, guildId),
-		// 	{ body: commands },
-		// );
+    await rest.put(
+      Routes.applicationGuildCommands(clientId, guildId),
+      { body: commands },
+    );
 
-		// registering commands to all guilds
-		const data = await rest.put(
-			Routes.applicationCommands(clientId),
-			{ body: commands },
-		);
-
-		console.log(`Successfully reloaded ${data.length} application (/) commands.`);
-	} catch (error) {
-		console.error(error);
-	}
+    console.log(`Successfully reloaded ${commands.length} application (/) commands.`);
+  } catch (error) {
+    console.error(error);
+  }
 })();
+
 
 // For deleting registered slash commands -----------------
 // comment/uncomment whenever

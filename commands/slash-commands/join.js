@@ -1,9 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { Player, Contract } = require('../src/db');
+const { Player, Contract } = require('../../src/db');
 const { Network, Alchemy } = require('alchemy-sdk');
-const { AlchemyApiKey } = require('../config.json');
-
-const { solscanApiToken } = require('../config.json');
+const { AlchemyApiKey, solscanApiToken } = require('../../config.json');
 
 const settings = {
     apiKey: AlchemyApiKey,

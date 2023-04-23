@@ -1,11 +1,11 @@
 const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { Player, Iura } = require('../src/db');
+const { Player, Iura } = require('../../src/db');
 const {
     expPoints,
     duel_expGained,
-} = require('../src/vars');
-const { simulateBattle } = require('../functions/battle');
-const leveling = require('../functions/level');
+} = require('../../src/vars');
+const { simulateBattle } = require('../../functions/battle');
+const leveling = require('../../functions/level');
 
 module.exports = {
     data: new SlashCommandBuilder()

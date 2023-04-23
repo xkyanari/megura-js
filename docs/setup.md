@@ -2,7 +2,7 @@
 
 Administrators will have complete control on how Dahlia will work around the server particularly with the audit logs, verification with Captcha, Whitelist shop, Twitter raids and roles. For updating the `/raid` command and adding story chapters, please refer to raid.md and chapters.md, respectively.
 
-The Setup command has seven subcommands:
+The Setup command has eight subcommands:
 
 1. Register
    - Usage: `/setup register`
@@ -42,6 +42,18 @@ The Setup command has seven subcommands:
      - `margaretha`: The name of the role for the Margaretha faction (required).
      - `cerberon`: The name of the role for the Cerberon faction (required).
 
-Margaretha and Cerberon are placeholder faction names to represent each "sub-guild" per community server. That being said, you can assign your own role name. They are also optional if you do not want to participate on factions or the game itself. Users with no factions will be assigned as "Wanderer".
+8. Twitter
+   - Usage: `/setup twitter`
+   - Description: Log ins to the server's Twitter account (if any).
 
-In rankings, this will show which "faction" has more active members per community.
+## Important Notes
+
+> Margaretha and Cerberon are placeholder faction names to represent each "sub-guild" per community server. That being said, you can assign your own role name. They are also optional if you do not want to participate on factions or the game itself. Users with no factions will be assigned as "Wanderer".
+> 
+> In rankings, this will show which "faction" has more active members per community.
+
+> The `/setup twitter` command allows the server owner (the person who set up the server) to log in as the server's Twitter account from Discord. The tokens then get stored in the server settings. This ensures that the server's Twitter account is secure and that there are no conflicts or confusion regarding who has access to it.
+> 
+> Moreover, **no more than one Discord user can login to one Twitter account.** These restrictions were placed in the event a server was compromised and the server's Twitter account will not be included. Twitter logins are tracked from when they were created on the table and when they were updated for data integrity and security purposes.
+> 
+> It's also important to note that since users need only register themselves once, they can join raids on any server that has the Megura bot.

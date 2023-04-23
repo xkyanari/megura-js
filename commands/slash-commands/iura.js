@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { Player, Iura } = require('../src/db');
+const { Player, Iura } = require('../../src/db');
 
 async function updateName(interaction, player, type, name) {
     if (type === 'wallet') {

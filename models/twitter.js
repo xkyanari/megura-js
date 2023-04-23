@@ -1,36 +1,53 @@
+const { encrypt, decrypt } = require("../src/crypto-utils");
+
 module.exports = (sequelize, DataTypes) => {
     const Twitter = sequelize.define('Twitter', {
-        discordID: {
-            type: DataTypes.INTEGER,
-            unique: true,
-            primaryKey: true
+      discordID: {
+        type: DataTypes.INTEGER,
+        unique: true,
+      },
+      twitterID: {
+        type: DataTypes.TEXT,
+        unique: true,
+      },
+      username: {
+        type: DataTypes.TEXT,
+      },
+      codeVerifier: {
+        type: DataTypes.TEXT,
+      },
+      accessToken: {
+        type: DataTypes.TEXT,
+        get() {
+          const token = this.getDataValue("accessToken");
+          return token ? decrypt(token) : null;
         },
-        twitterID: {
-            type: DataTypes.TEXT,
+        set(value) {
+          this.setDataValue("accessToken", encrypt(value));
         },
-        username: {
-            type: DataTypes.TEXT,
+      },
+      refreshToken: {
+        type: DataTypes.TEXT,
+        get() {
+          const token = this.getDataValue("refreshToken");
+          return token ? decrypt(token) : null;
         },
-        codeVerifier: {
-            type: DataTypes.TEXT,
+        set(value) {
+          this.setDataValue("refreshToken", encrypt(value));
         },
-        accessToken: {
-            type: DataTypes.TEXT,
-        },
-        refreshToken: {
-            type: DataTypes.TEXT,
-        },
-        expiresIn: {
-            type: DataTypes.TEXT,
-        },
-        expirationTime: {
-            type: DataTypes.DATE,
-        },
+      },
+      expiresIn: {
+        type: DataTypes.TEXT,
+      },
+      expirationTime: {
+        type: DataTypes.DATE,
+      },
     },
     {
-        freezeTableName: true,
-        timestamps: true
+      freezeTableName: true,
+      timestamps: true
     });
-
+  
     return Twitter;
-};
+  };
+  
