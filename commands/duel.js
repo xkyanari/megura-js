@@ -1,6 +1,12 @@
-const { SlashCommandBuilder } = require('discord.js');
-const { Player } = require('../src/db');
+const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { Player, Iura } = require('../src/db');
+const {
+    expPoints,
+    duel_iuraGained,
+    duel_expGained,
+} = require('../src/vars');
 const { simulateBattle } = require('../functions/battle');
+const leveling = require('../functions/level');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -48,11 +54,58 @@ module.exports = {
             const updatedPlayer2 = players[1];
 
             if (players.length === 2) {
+                // checking rank
+                if ((updatedPlayer2.totalHealth - updatedPlayer1.totalHealth) >= 5000) return interaction.editReply("Your rank is too low to fight this player.");
+                if ((updatedPlayer2.totalHealth - updatedPlayer1.totalHealth) <= -5000) return interaction.editReply("Your rank is too high to fight this player.");
+
+                // checking balance
+                // if (updatedPlayer1.iura.walletAmount < 100) return interaction.editReply("You do not have sufficient balance to duel! Please carry at least $100 IURA first.");
+                // if (updatedPlayer2.iura.walletAmount < 100) return interaction.editReply("This player does not have enough balance to be attacked.");
+
                 await interaction.editReply("The battle commences!");
                 await wait(1000);
                 await interaction.channel.send("Starting in 10 seconds...");
                 await wait(10000);
-                await simulateBattle(interaction, updatedPlayer1, updatedPlayer2);
+                const winner = await simulateBattle(interaction, updatedPlayer1, updatedPlayer2);
+
+                const button = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder()
+                        .setCustomId('profile')
+                        .setEmoji('👤')
+                        .setLabel('Profile')
+                        .setStyle(ButtonStyle.Success),
+                        new ButtonBuilder()
+                            .setCustomId('inventory')
+                            .setEmoji('🛄')
+                            .setLabel('Inventory')
+                            .setStyle(ButtonStyle.Primary),
+                        new ButtonBuilder()
+                        .setCustomId('shop')
+                        .setEmoji('🛒')
+                        .setLabel('Shop')
+                        .setStyle(ButtonStyle.Danger)
+                );
+
+                if (winner === updatedPlayer1) {
+                    await interaction.channel.send(`The battle has concluded.`);
+                    await interaction.followUp({content: `🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${duel_iuraGained} IURA\`\n\n- \`${duel_expGained} EXP\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`, components: [button]});
+
+                    await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: updatedPlayer2.iura.accountID } });
+                    await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: updatedPlayer1.iura.accountID } });
+                    await updatedPlayer1.increment({ iuraEarned: duel_iuraGained, expGained: duel_expGained, duelKills: 1 });
+
+                    if (updatedPlayer1.expGained > expPoints(updatedPlayer1.level)) {
+                        const levelUp = await leveling(interaction.member.id);
+                        await interaction.channel.send(`\`${updatedPlayer1.playerName}\`, you have leveled up to **${levelUp.level}**!`);
+                    }
+                } else if (winner === updatedPlayer2) {
+                    await interaction.channel.send(`The battle has concluded.`);
+                    await interaction.followUp("👎 **YOU LOST!**");
+                    await interaction.channel.send({content: `> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`, components: [button]});
+                    await Iura.increment({ walletAmount: duel_iuraGained }, { where: { accountID: updatedPlayer2.iura.accountID } });
+                    await Iura.decrement({ walletAmount: duel_iuraGained }, { where: { accountID: updatedPlayer1.iura.accountID } });
+                }
             } else if (!updatedPlayer1) {
                 await interaction.editReply(`${player1.user.tag} do not have a voyager profile yet.`);
             } else if (!updatedPlayer2) {
