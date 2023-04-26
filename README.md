@@ -74,7 +74,7 @@ To install and run the project, follow these steps:
 - `/inventory`: Opens your inventory.
 - `/iura`: Check your wallet or bank.
 - `/join`: Adds your NFT to your player profile.
-- `/open < name of channel>`: Creates a private channel, auto-closes in 10 minutes.
+- `/open <name of channel>`: Creates a private channel, auto-closes in 10 minutes.
 - `/profile`: Show profile of a user (blank for self).
 - `/raid`: Post tweets for people to retweet and/or like.
 - `/ranks`: Show leaderboards.
