@@ -84,6 +84,9 @@ To install and run the project, follow these steps:
 - `/start`: Initiate creating own character.
 - `/transfer`: Transfer IURA to another user.
 
+- `!tweet`: Post a tweet from your server Twitter account (configured from /setup).
+- `!purge`: Remove x amount of old messages in a channel.
+
 ## Contributing
 
 If you'd like to contribute to the project, please follow these steps:
