@@ -10,6 +10,22 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
+const chatUsers = new Set();
+const userTimeouts = {};
+
+const inactivityTimeout = 3 * 60 * 1000; // 15mins of inactivity
+
+const resetUserTimeout = (userID) => {
+    if (userTimeouts[userID]) {
+        clearTimeout(userTimeouts[userID]);
+    }
+
+    userTimeouts[userID] = setTimeout(() => {
+        chatUsers.delete(userID);
+        delete userTimeouts[userID];
+    }, inactivityTimeout);
+};
+
 /**
  * This event is fired when a user sends a message.
  */
@@ -19,8 +35,15 @@ module.exports = {
 	async execute(message) {
         if (message.author.bot) return;
 
-		try {
-            if (message.content.startsWith('Dahlia')) {
+        if (message.content.startsWith('Dahlia')) {
+            chatUsers.add(message.author.id);
+            resetUserTimeout(message.author.id);
+        }
+
+        if (chatUsers.has(message.author.id)) {
+            resetUserTimeout(message.author.id);
+
+            try {
                 let chatLog = [
                     {
                         role: 'system',
@@ -31,12 +54,12 @@ module.exports = {
                         content: 'Hello, how are you doing?'
                     }
                 ];
-    
+        
                 await message.channel.sendTyping();
-    
+        
                 let prevChat = await message.channel.messages.fetch({ limit: 15 });
                 prevChat.reverse();
-                
+        
                 prevChat.forEach((msg) => {
                     if (msg.author.id === message.client.user.id && msg.author.bot) {
                         chatLog.push({
@@ -44,45 +67,44 @@ module.exports = {
                             content: msg.content,
                         });
                     }
-    
+        
                     if (msg.author.id === message.author.id) {
-                        if (!msg.content.startsWith('Dahlia')) return;
                         chatLog.push({
                             role: 'user',
                             content: msg.content,
                         });
                     }
                 });
-    
+        
                 const result = await openai.createChatCompletion({
                     model: 'gpt-3.5-turbo',
                     max_tokens: 1000,
                     temperature: 0.9,
                     messages: chatLog,
                 });
-    
+        
                 const response = result.data.choices[0].message.content;
                 console.log("Total tokens: ", result.data.usage.total_tokens);
-    
+        
                 if (response.length >= 1500) {
                     const attachment = new AttachmentBuilder(Buffer.from(response, 'utf-8'), { name: 'fromdahliatoyou.txt' });
                     await message.reply({ content: `I couldn't give my whole answer here so I'm attaching the file for you.`, files: [attachment] });
                 } else {
                     message.reply(`${response}`);
                 }
-            }
-        } catch (error) {
-            if (error.APIerror) {
-                console.log(`OpenAI returned an API Error: ${error.APIerror}`);
-            } else if (error.APIConnectionError) {
-                console.log(`Failed to connect to OpenAI API: ${error.APIConnectionError}`);
-            } else if (error.RateLimitError) {
-                console.log(`${error.response.status}: ${error.response.statusText}`);
-                message.reply(`Sorry, I'm getting a lot of requests right now. Please try again later.`);
-            }
-            else {
-                message.reply(`Yes?`);
-                console.log(`${error.response.status}: ${error.response.statusText}`);
+            } catch (error) {
+                if (error.APIerror) {
+                    console.log(`OpenAI returned an API Error: ${error.APIerror}`);
+                } else if (error.APIConnectionError) {
+                    console.log(`Failed to connect to OpenAI API: ${error.APIConnectionError}`);
+                } else if (error.RateLimitError) {
+                    console.log(`${error.response.status}: ${error.response.statusText}`);
+                    message.reply(`Sorry, I'm getting a lot of requests right now. Please try again later.`);
+                }
+                else {
+                    message.reply(`Yes?`);
+                    console.log(`${error.response.status}: ${error.response.statusText}`);
+                }
             }
         }
 
