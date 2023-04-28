@@ -36,11 +36,14 @@ module.exports = {
                 const filter = m => m.author.id === member.id;
                 const collected = await channel.awaitMessages({ filter, max: 1, time: 120_000, errors: ['time'] });
                 const player_name = collected.first();
+                await player_name.delete();
                 
                 if (player_name.content.length <= 20) {
                     await interaction.followUp({ content: `\`${player_name.content}\`, right? Y/N`, ephemeral: true });
                     let message = await channel.awaitMessages({ filter, max: 1, time: 120_000, errors: ['time'] });
                     let confirm = message.first();
+                    await confirm.delete();
+
                     if (confirm.content === 'Y' || confirm.content === 'y') {
                         await interaction.followUp({ content: `Thank you, \`${player_name.content}\`. That's a good name!`, ephemeral: true });
                         // creates a player profile in the db
@@ -48,6 +51,7 @@ module.exports = {
                         await create_profile.createIura({ walletName: player_name.content, bankName: player_name.content });
                         const wait = require('node:timers/promises').setTimeout;
                         await wait(1000);
+
                         const embed1 = new EmbedBuilder()
                             .setDescription("You are now part of the **<REDACTED> system v. 35.0.56**.\n\nYou will be assigned to take part in battles against `Conflicts` surrounding Eldelvain. These are simulation created by an unknown entity in this world named _**Messinia Graciene**_. Origin is also unknown.\nAs they say, for as long as life exists, death and Conflicts follow.");
                         await interaction.followUp({ embeds: [embed1], ephemeral: true });

@@ -47,7 +47,7 @@ const { Monster, Shop, Contract, Quest, Player, Guild, Twitter, Raid, Tweet } = 
     //     })
     //     .catch((error) => console.log(error));
 
-    await Guild.sync({ force: true })
+    await Guild.sync({ alter: true })
         .then(() => {
             console.log("Guild table refreshed.");
         })

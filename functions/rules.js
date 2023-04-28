@@ -1,46 +1,35 @@
 const { ActionRowBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
 
 module.exports = async (interaction) => {
-	const rules = new ModalBuilder()
+	const rule = new ModalBuilder()
         .setCustomId('rules')
         .setTitle('Rules');
 
-    const rule1 = new ActionRowBuilder()
+    const intro = new ActionRowBuilder()
     .addComponents(
         new TextInputBuilder()
-            .setCustomId('rule1')
-            .setLabel('Enter Rule #1')
-            .setStyle(TextInputStyle.Short));
-    
-    const rule2 = new ActionRowBuilder()
-    .addComponents(
-        new TextInputBuilder()
-            .setCustomId('rule2')
-            .setLabel('Enter Rule #2')
-            .setStyle(TextInputStyle.Short));
-    
-    const rule3 = new ActionRowBuilder()
-    .addComponents(
-        new TextInputBuilder()
-            .setCustomId('rule3')
-            .setLabel('Enter Rule #3')
-            .setStyle(TextInputStyle.Short));
-    
-    const rule4 = new ActionRowBuilder()
-    .addComponents(
-        new TextInputBuilder()
-            .setCustomId('rule4')
-            .setLabel('Enter Rule #4')
-            .setStyle(TextInputStyle.Short));
-    
-    const rule5 = new ActionRowBuilder()
-    .addComponents(
-        new TextInputBuilder()
-            .setCustomId('rule5')
-            .setLabel('Enter Rule #5')
-            .setStyle(TextInputStyle.Short));
-    
-    rules.addComponents(rule1, rule2, rule3, rule4, rule5);
+            .setCustomId('intro')
+            .setLabel('Enter your introduction about the server.')
+            .setStyle(TextInputStyle.Paragraph)
+            .setMaxLength(300));
 
-    await interaction.showModal(rules);
+    const rules = new ActionRowBuilder()
+    .addComponents(
+        new TextInputBuilder()
+            .setCustomId('rules')
+            .setLabel('Enumerate the rules.')
+            .setStyle(TextInputStyle.Paragraph)
+            .setMaxLength(1000));
+    
+    const closing = new ActionRowBuilder()
+    .addComponents(
+        new TextInputBuilder()
+            .setCustomId('closing')
+            .setLabel('Enter closing.')
+            .setStyle(TextInputStyle.Paragraph)
+            .setMaxLength(500));
+    
+    rule.addComponents(intro, rules, closing);
+
+    await interaction.showModal(rule);
 };

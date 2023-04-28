@@ -2,6 +2,7 @@ const { SlashCommandBuilder, ChannelType, PermissionsBitField } = require('disco
 const { Guild, Twitter } = require('../../src/db');
 const captcha = require('../../functions/verify');
 const { twitterAuth } = require('../../functions/twitter');
+const rules = require('../../functions/rules');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -41,7 +42,7 @@ module.exports = {
             .addChannelOption(option =>
                 option
                 .setName('channel')
-                .setDescription('Choose the channel to post the verification message.')
+                .setDescription('Choose the channel to post the verification and rules message.')
                 .addChannelTypes(ChannelType.GuildText)
                 .setRequired(true))
             .addRoleOption(option =>
@@ -80,6 +81,11 @@ module.exports = {
                 .setName('cerberon')
                 .setDescription('Select the role for Cerberon faction.')
                 .setRequired(true))
+            )
+        .addSubcommand(subcommand =>
+            subcommand
+            .setName('rules')
+            .setDescription('Setup rules for the server.')
             ),
     cooldown: 3000,
 	async execute(interaction) {
@@ -196,6 +202,16 @@ module.exports = {
 
                 await guildCheck.update({ margarethaID: margaretha.id, margarethaName: margaretha.name, cerberonID: cerberon.id, cerberonName: cerberon.name });
                 await interaction.reply({ content: `Factions roles have been set successfully!`, ephemeral: true });
+            break;
+
+            case 'rules':
+                try {
+                    if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
+
+                    await rules(interaction);
+                } catch (error) {
+                    console.log(error);
+                }
             break;
         }
 	}

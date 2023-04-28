@@ -35,6 +35,15 @@ module.exports = (sequelize, DataTypes) => {
         cerberonName: {
             type: DataTypes.TEXT,
         },
+        intro: {
+            type: DataTypes.TEXT,
+        },
+        rules: {
+            type: DataTypes.TEXT,
+        },
+        closing: {
+            type: DataTypes.TEXT,
+        },
         twitterID: {
             type: DataTypes.TEXT,
             unique: true,
