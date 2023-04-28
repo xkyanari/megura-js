@@ -1,5 +1,6 @@
 node_modules
 memoria
+logs/*
 config.json
 *.sqlite
 *.db

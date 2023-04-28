@@ -1,5 +1,12 @@
+// main server ID
+const serverID = '1073827215957032960'; // dev
+// const serverID = '1032034043686035508'; // prod
+
 // text command prefix
 const prefix = '!';
+
+// audit log directory
+const logDir = '../logs';
 
 // wanderer faction - can be changed to anything
 const wanderer = 'Wanderer';
@@ -32,7 +39,9 @@ const defensePerLevel = (level) => baseDefense + (levelDefenseMultiplier * level
 const healthPerLevel = (level) => baseHealth + (levelHealthMultiplier * level);
 
 module.exports = {
+    serverID,
     prefix,
+    logDir,
     wanderer,
     expPoints,
     duel_expGained,

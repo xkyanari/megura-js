@@ -36,9 +36,9 @@ module.exports = {
             const nftInfo = await nftData.json();
 
             const embed = new EmbedBuilder()
-            .setColor(0x0099FF)
-            .setTitle(`${contractName}`)
-            .setImage(`${nftInfo.image}`);
+                .setColor(0x0099FF)
+                .setTitle(`${contractName}`)
+                .setImage(`${nftInfo.image}`);
 
             const weaponValue = nftInfo.attributes.find(item => item.trait_type === traitWeapon)?.value ?? weapon;
             const armorValue = nftInfo.attributes.find(item => item.trait_type === traitArmor)?.value ?? armor;
@@ -48,13 +48,6 @@ module.exports = {
                 { name: `Weapon:`, value: `${weaponValue}`, inline: true },
                 { name: `Armor:`, value: `${armorValue}`, inline: true }
                 );
-            Player.update({
-                weapon: weaponValue,
-                armor: armorValue,
-                walletAddress,
-                tokenID: selected,
-                imageURL: nftInfo.image
-            }, { where: { discordID: member.id, guildID: guild.id }});
 
             const button = new ActionRowBuilder()
                 .addComponents(
@@ -68,6 +61,14 @@ module.exports = {
             await interaction.reply({
                 embeds: [embed],
                 components: [button]
+            });
+
+            interaction.client.userData.set(interaction.user.id, {
+                weapon: weaponValue,
+                armor: armorValue,
+                walletAddress,
+                tokenID: selected,
+                imageURL: nftInfo.image
             });
 
         } catch (error) {

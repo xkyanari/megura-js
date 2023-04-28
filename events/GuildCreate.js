@@ -1,5 +1,7 @@
-const { Events } = require('discord.js');
+const { Events, EmbedBuilder } = require('discord.js');
 const { Guild } = require('../src/db');
+const sendLogs = require('../functions/logs');
+const { serverID } = require('../src/vars');
 
 /**
  * This event is fired when the bot joins a server.
@@ -8,9 +10,20 @@ const { Guild } = require('../src/db');
 module.exports = {
 	name: Events.GuildCreate,
 	async execute(guild) {
-		console.log(`<${Date.now().toString()}> : ${guild.client.user.tag} joined the server <${guild.name}> with guild ID <${guild.id}>.`);
         const guildCheck = await Guild.findOne({ where: {guildID: guild.id }});
-        if (!guildCheck) return await Guild.create({ guildID: guild.id });
-        if (guildCheck) return;
+        if (!guildCheck) {
+			await Guild.create({ guildID: guild.id });
+		}
+
+		const embed = new EmbedBuilder()
+			.setTitle('Guild Joined.')
+			.setColor('Green')
+			.setDescription(`
+				> **Guild Name** : ${guild.name}
+				> **Guild ID** : ${guild.id}
+			`);
+		
+		const logEntry = `${guild.client.user.tag} joined <${guild.name}> - <${guild.id}>.`;
+		return sendLogs(guild.client, serverID, embed, logEntry);
 	},
 };

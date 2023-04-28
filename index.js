@@ -6,6 +6,7 @@ const { token, port } = require('./config.json');
 const fs = require('node:fs');
 const path = require('node:path');
 const { twitterCallback } = require('./functions/twitter');
+const logs = require('discord-logs');
 
 // Express server
 const app = express();
@@ -30,8 +31,14 @@ const client = new Client({
 	intents: [GatewayIntentBits.Guilds,
 		GatewayIntentBits.GuildMembers,
 		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.MessageContent
+		GatewayIntentBits.MessageContent,
+		GatewayIntentBits.GuildPresences,
+		GatewayIntentBits.GuildVoiceStates
 	],
+});
+
+logs(client, {
+	debug: true
 });
 
 client.commands = new Collection();
@@ -40,6 +47,8 @@ client.buttons = new Collection();
 client.menus = new Collection();
 client.modals = new Collection();
 client.cooldown = new Collection();
+
+client.userData = new Collection();
 
 // For registering slash commands -----------------
 
