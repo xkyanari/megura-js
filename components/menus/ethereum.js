@@ -31,7 +31,7 @@ module.exports = {
         const nfts = await alchemy.nft.getNftMetadata(contractAddress, selected);
 
         const embed = new EmbedBuilder()
-            .setColor(0x0099FF)
+            .setColor(0xCD7F32)
             .setTitle(`${nfts.contract.openSea.collectionName}`)
             .setImage(`${nfts.rawMetadata.image}`);
 

@@ -36,7 +36,7 @@ module.exports = {
             const nftInfo = await nftData.json();
 
             const embed = new EmbedBuilder()
-                .setColor(0x0099FF)
+                .setColor(0xCD7F32)
                 .setTitle(`${contractName}`)
                 .setImage(`${nftInfo.image}`);
 

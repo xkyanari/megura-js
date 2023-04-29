@@ -44,7 +44,7 @@ module.exports = async (interaction, channel, role) => {
         const imageUrl = mediaKey ? tweet.includes.media.find(media => media.media_key === mediaKey).url : null;
     
         const embed = new EmbedBuilder()
-            .setColor('#1DA1F2')
+            .setColor(0xCD7F32)
             .setTitle(`Tweet by ${tweet.includes.users[0].name}`)
             .setDescription(tweet.data.text)
             .setURL(`https://twitter.com/${tweet.includes.users[0].username}/status/${tweet.data.id}`)

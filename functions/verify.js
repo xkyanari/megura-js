@@ -1,9 +1,19 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField } = require('discord.js');
 const { Guild } = require('../src/db');
 
 module.exports = async (interaction, channelID) => {
 	const message = interaction.client.channels.cache.get(channelID);
 	const guild = await Guild.findOne({ where: {guildID: interaction.guild.id} });
+
+	if (!message.permissionsFor(interaction.client.user).has([PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages])) return await interaction.reply({
+		content: `I don't seem have permissions to send messages on that channel.`,
+		ephemeral: true
+	});
+
+	if (!guild.intro || !guild.rules || !guild.closing) return interaction.reply({
+		content: `You don't have any rules set yet.`,
+		ephemeral: true
+	});
 
 	try {
 		const embed = new EmbedBuilder()
@@ -27,8 +37,8 @@ module.exports = async (interaction, channelID) => {
 			);
 		
 		await message.send({ embeds: [embed], components: [button] });
+		await interaction.reply({ content: `Captcha Verification has been deployed!`, ephemeral: true });
 	} catch (error) {
-		// await interaction.editReply({ content: `I don't seem have permissions to send a message on that channel.`, ephemeral: true });
 		console.log(error);
 	}
 };

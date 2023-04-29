@@ -19,7 +19,7 @@ module.exports = async (interaction, tweetUrlId) => {
 
     const embed = new EmbedBuilder()
         .setTitle('RT & Like Users')
-        .setColor(0x0099ff);
+        .setColor(0xCD7F32);
 
     const retweetersString = retweeters.map((user) => `<@${user.id}>`).join(' ');
     const likersString = likers.map((user) => `<@${user.id}>`).join(' ');

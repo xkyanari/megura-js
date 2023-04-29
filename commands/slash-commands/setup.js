@@ -191,7 +191,6 @@ module.exports = {
             case 'deploy':
                 if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
                 await captcha(interaction, guildCheck.verifyChannelID);
-                await interaction.reply({ content: `Captcha Verification has been deployed!`, ephemeral: true });
             break;
 
             case 'factions':

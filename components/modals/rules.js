@@ -31,7 +31,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
             .setTitle(`👋 Welcome to __${interaction.guild.name}__!`)
-            .setColor('Aqua')
+            .setColor(0xCD7F32)
             .setDescription(await getRules(intro, rules, closing));
 
         await interaction.reply({ content: `Rules have been saved in the server.`, embeds: [embed], ephemeral: true});

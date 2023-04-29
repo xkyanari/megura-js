@@ -56,7 +56,7 @@ module.exports = {
     
             const embedPages = nftListPages.map((nftPage, index) => {
                 const embed = new EmbedBuilder()
-                    .setColor(0x0099FF)
+                    .setColor(0xCD7F32)
                     .setAuthor({ name: `${interaction.user.tag}` })
                     .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
                     .addFields({
@@ -76,7 +76,7 @@ module.exports = {
 
         } else {
             const tokenList = new EmbedBuilder()
-                .setColor(0x0099FF)
+                .setColor(0xCD7F32)
                 .setAuthor({ name: `${interaction.user.tag}` })
                 .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
                 .addFields({ name: selected, value: nftList.join(''), inline: false });

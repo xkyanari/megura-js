@@ -11,7 +11,8 @@ module.exports = async (interaction) => {
             .setCustomId('intro')
             .setLabel('Enter your introduction about the server.')
             .setStyle(TextInputStyle.Paragraph)
-            .setMaxLength(300));
+            .setMaxLength(300)
+            .setRequired(true));
 
     const rules = new ActionRowBuilder()
     .addComponents(
@@ -19,7 +20,8 @@ module.exports = async (interaction) => {
             .setCustomId('rules')
             .setLabel('Enumerate the rules.')
             .setStyle(TextInputStyle.Paragraph)
-            .setMaxLength(1000));
+            .setMaxLength(1000)
+            .setRequired(true));
     
     const closing = new ActionRowBuilder()
     .addComponents(
@@ -27,7 +29,8 @@ module.exports = async (interaction) => {
             .setCustomId('closing')
             .setLabel('Enter closing.')
             .setStyle(TextInputStyle.Paragraph)
-            .setMaxLength(500));
+            .setMaxLength(500)
+            .setRequired(true));
     
     rule.addComponents(intro, rules, closing);
 

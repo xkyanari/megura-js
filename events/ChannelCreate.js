@@ -32,7 +32,7 @@ module.exports = {
 		// 			timer = setTimeout(() => {
 		// 				channel.delete().then(() => {
 		// 					const embed2 = new EmbedBuilder()
-		// 						.setColor(0x0099FF)
+		// 						.setColor(0xCD7F32)
 		// 						.setTitle('Times Up!')
 		// 						.setDescription('Your portal has been closed. Thanks for using our services!');
 		// 					const notificationChannel = channel.guild.channels.cache.get(CHANNEL_ID);

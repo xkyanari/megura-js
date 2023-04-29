@@ -17,7 +17,7 @@ module.exports = {
                 const quest = await Quest.findAll({ order: sequelize.random(), limit: 1 });
                 
                 const embed = new EmbedBuilder()
-                    .setColor(0xFF0000)
+                    .setColor(0xCD7F32)
                     .setAuthor({ name: `${interaction.user.tag}` })
                     .setTitle(`**DAILY QUEST**`)
                     .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)

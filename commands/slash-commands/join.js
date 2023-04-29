@@ -66,7 +66,7 @@ module.exports = {
                 if (nfts.ownedNfts.length === 0) return interaction.editReply({ content: `You do not have a supported NFT from my list.`, ephemeral: true });
     
                 const projectList = new EmbedBuilder()
-                    .setColor(0x0099FF)
+                    .setColor(0xCD7F32)
                     .setAuthor({ name: `${interaction.user.tag}` })
                     .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`);
                 
@@ -149,7 +149,7 @@ module.exports = {
                     if (found.length === 0) return interaction.editReply({ content: `You do not have a supported NFT from my list.`});
         
                     const projectList = new EmbedBuilder()
-                        .setColor(0x0099FF)
+                        .setColor(0xCD7F32)
                         .setAuthor({ name: `${interaction.user.tag}` })
                         .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`);
                     
@@ -210,7 +210,7 @@ module.exports = {
                     if (found.length === 0) return interaction.editReply({ content: `You do not have a supported NFT from my list.`});
         
                     const projectList = new EmbedBuilder()
-                        .setColor(0x0099FF)
+                        .setColor(0xCD7F32)
                         .setAuthor({ name: `${interaction.user.tag}` })
                         .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`);
                     

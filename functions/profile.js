@@ -30,7 +30,7 @@ module.exports = async (interaction, member) => {
 
     try {
         const embed = new EmbedBuilder()
-            .setColor(0xFF0000)
+            .setColor(0xCD7F32)
             .setTitle('**VOYAGER ID CARD**')
             .setAuthor({ name: `${member.tag}` })
             .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)

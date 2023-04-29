@@ -11,7 +11,7 @@ module.exports = {
         if (member.permissions.has(PermissionFlagsBits.ManageChannels)) {
             const time = 10;
             const embed = new EmbedBuilder()
-                .setColor(0x0099FF)
+                .setColor(0x6E8B3D)
                 .setTitle('Consider it done.')
                 .setDescription(
                     `This channel will be deleted in \`${time}\` seconds.`,

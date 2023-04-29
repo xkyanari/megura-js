@@ -20,7 +20,7 @@ module.exports = {
         if (player) return interaction.reply("You're all set!");
             
             const embed = new EmbedBuilder()
-            .setColor(0x0099FF)
+            .setColor(0xCD7F32)
             .setTitle('Start your Adventure!')
             // .setDescription(
             //     `***Welcome to Eldelvain's Voyagers Guild.***\n\nI see that you belong to the \`${faction}\` faction. Before you can start your journey, I need to get information from you first.\n\nPlease enter your \`Character Name\`.\n\nYou can have a name with up to 20 characters including spaces and numbers. You cannot use any special symbols as I will address you by this name moving forward.`
