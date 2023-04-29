@@ -12,6 +12,7 @@ module.exports = async (interaction) => {
     if (verifiedRole) return interaction.reply({ content: `You're already verified!`, ephemeral: true });
 
     const captcha = new CaptchaGenerator()
+        .setDimension(150, 450)
         .setDecoy({ opacity: 0.5 })
         .setTrace({ color: "deeppink" });
     const buffer = captcha.generateSync();
@@ -19,7 +20,7 @@ module.exports = async (interaction) => {
     const attachment = new AttachmentBuilder(buffer, 'captcha.png');
     const embed = new EmbedBuilder()
         .setTitle('Verification')
-        .setDescription('Please complete the captcha below to verify yourself.')
+        .setDescription('Please complete the captcha by typing the code on the channel to verify yourself.')
         .setImage('attachment://captcha.png');
 
     let isVerified = false;
@@ -33,7 +34,15 @@ module.exports = async (interaction) => {
             const addRole = guild.roles.cache.get(guildCheck.verifyRoleID);
             await member.roles.add(addRole);
             await collectedMessage.delete();
-            await captchaMessage.delete();
+            if (captchaMessage) {
+                try {
+                  await captchaMessage.delete();
+                } catch (error) {
+                  if (error.code !== 10008) { // If the error is not 'Unknown Message', log it
+                    console.error('Error deleting captchaMessage:', error);
+                  }
+                }
+            }
             await interaction.followUp({ content: `You have been successfully verified!`, ephemeral: true });
             isVerified = true;
             collector.stop();
@@ -45,7 +54,15 @@ module.exports = async (interaction) => {
 
     collector.on('end', async () => {
         if (!isVerified) {
-            captchaMessage.delete();
+            if (captchaMessage) {
+                try {
+                  captchaMessage.delete();
+                } catch (error) {
+                  if (error.code !== 10008) { // If the error is not 'Unknown Message', log it
+                    console.error('Error deleting captchaMessage:', error);
+                  }
+                }
+            }
             interaction.followUp({ content: `The verification process has timed out. Please try again.`, ephemeral: true });
         }
     });
