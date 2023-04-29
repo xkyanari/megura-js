@@ -4,7 +4,7 @@ const { Shop } = require('../src/db');
 module.exports = async (interaction) => {
     const numFormat = (value) => new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
     const embed = new EmbedBuilder()
-        .setColor(0x0099FF)
+        .setColor(0xCD7F32)
         .setTitle('🛒 **ITEM SHOP:** 🛒')
         .setDescription(`Type \`/buy <item ID> <amount>\` to buy in bulk.`)
         .setFooter({ text: 'This bot was made by megura.xyz.' });

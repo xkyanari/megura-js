@@ -21,6 +21,8 @@ module.exports = async (interaction) => {
         .setTitle('Verification')
         .setDescription('Please complete the captcha below to verify yourself.')
         .setImage('attachment://captcha.png');
+
+    let isVerified = false;
     
     const captchaMessage = await interaction.reply({ embeds: [embed], files: [attachment], ephemeral: true });
 
@@ -30,14 +32,21 @@ module.exports = async (interaction) => {
         if (collectedMessage.content.toLowerCase() === captcha.text.toLowerCase()) {
             const addRole = guild.roles.cache.get(guildCheck.verifyRoleID);
             await member.roles.add(addRole);
+            await collectedMessage.delete();
+            await captchaMessage.delete();
             await interaction.followUp({ content: `You have been successfully verified!`, ephemeral: true });
+            isVerified = true;
+            collector.stop();
         } else {
             await collectedMessage.delete();
             await interaction.followUp({ content: `The captcha code you entered is incorrect. Please try again.`, ephemeral: true });
         }
     });
-    collector.on('end', async collected => {
-        await captchaMessage.delete();
-        await interaction.followUp({ content: `The verification process has timed out. Please try again.`, ephemeral: true });
+
+    collector.on('end', async () => {
+        if (!isVerified) {
+            captchaMessage.delete();
+            interaction.followUp({ content: `The verification process has timed out. Please try again.`, ephemeral: true });
+        }
     });
 };

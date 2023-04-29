@@ -6,6 +6,8 @@ module.exports = {
         name: `confirm`,
     },
     async execute(interaction) {
+        const userData = interaction.client.userData.get(interaction.user.id);
+
         const button = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
@@ -29,11 +31,23 @@ module.exports = {
         const guild = interaction.guild;
 
         const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
-        
-        if (player.linked) return interaction.reply({ content: `Your NFT has been linked successfully!`, components: [button]});
 
-            await Player.increment({ totalAttack: 200, totalDefense: 200 }, { where: { discordID: member.id, guildID: guild.id }});
-            await Player.update({ linked: 1 }, { where: { discordID: member.id, guildID: guild.id }});
-            await interaction.reply({ content: `Your NFT has been linked successfully!`, components: [button]});
+        player.weapon = userData.weapon;
+        player.armor = userData.armor;
+        player.walletAddress = userData.walletAddress;
+        player.tokenID = userData.tokenID;
+        player.imageURL = userData.imageURL;
+
+        if (player.linked === 1) return interaction.reply({ content: `Your NFT has been linked successfully!`, components: [button]});
+
+        player.totalAttack += 200;
+        player.totalDefense += 200;
+        player.linked = 1;
+
+        interaction.client.userData.delete(interaction.user.id);
+
+        await interaction.reply({ content: `Your NFT has been linked successfully!`, components: [button]});
+
+        return player.save();
     }
 };

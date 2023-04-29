@@ -1,5 +1,6 @@
 const { Events, AttachmentBuilder } = require('discord.js');
 const { openAIkey, openAIorg } = require('../config.json');
+const { prefix } = require('../src/vars');
 
 // Preparing connection to OpenAI API -----------------
 const { Configuration, OpenAIApi } = require('openai');
@@ -83,6 +84,21 @@ module.exports = {
                 message.reply(`Yes?`);
                 console.log(`${error.response.status}: ${error.response.statusText}`);
             }
+        }
+
+        // For text commands
+        const args = message.content.slice(prefix.length).trim().split(/ +/);
+        const commandName = args.shift().toLowerCase();
+
+        const command = message.client.commands.get(commandName) || message.client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+
+        if (!command) return;
+
+        try {
+            await command.execute(message, args);
+        } catch (error) {
+            console.error(error);
+            message.reply({ content: `There was an error trying to execute that command!`, ephemeral: true});
         }
 	},
 };

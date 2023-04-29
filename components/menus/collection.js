@@ -1,6 +1,7 @@
-const { EmbedBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require('discord.js');
+const { EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
 const { Player, Contract } = require('../../src/db');
 const { solscanApiToken } = require('../../config.json');
+const buttonPages = require('../../functions/paginator');
 
 module.exports = {
     data: {
@@ -29,14 +30,9 @@ module.exports = {
         const nftResult = await fetch(`https://api-mainnet.magiceden.dev/v2/wallets/${walletAddress}/tokens?offset=0&limit=100&listStatus=unlisted`, options);
         const nfts = await nftResult.json();
         
-        const tokenList = new EmbedBuilder()
-            .setColor(0x0099FF)
-            .setAuthor({ name: `${interaction.user.tag}` })
-            .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`);
-        
         let nftList = [];
         let nftOptions = [];
-        nfts.forEach( thisNFT => {
+        nfts.forEach(thisNFT => {
             if (thisNFT.collection === collectionID) {
                 if (!nftList.includes(`${thisNFT.name}\n`)) {
                     nftList.push(`${thisNFT.name}\n`);
@@ -47,19 +43,56 @@ module.exports = {
         nftList.sort();
         nftOptions.sort();
 
-        tokenList.addFields({ name: selected, value: nftList.join(''), inline: false });
+        if (nftList.length > 25) {
+            const nftListPages = [];
+            for (let i = 0; i < nftList.length; i+= 25) {
+                nftListPages.push(nftList.slice(i, i + 25));
+            }
+    
+            const optionPages = [];
+            for (let i = 0; i < nftOptions.length; i += 25) {
+                optionPages.push(nftOptions.slice(i, i + 25));
+            }
+    
+            const embedPages = nftListPages.map((nftPage, index) => {
+                const embed = new EmbedBuilder()
+                    .setColor(0xCD7F32)
+                    .setAuthor({ name: `${interaction.user.tag}` })
+                    .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
+                    .addFields({
+                        name: selected,
+                        value: nftPage.join(''),
+                        inline: false
+                    });
+                return embed;
+            });
+    
+            let selectMenu = new StringSelectMenuBuilder()
+                .setCustomId('ethereum')
+                .setPlaceholder('Please select an NFT.')
+                .addOptions(optionPages[0]);
+    
+            buttonPages(interaction, embedPages, selectMenu, optionPages);
 
-        const menu = new ActionRowBuilder()
-            .addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId('solana')
-                    .setPlaceholder('Please select an NFT.')
-                    .setOptions(nftOptions)
-            );
+        } else {
+            const tokenList = new EmbedBuilder()
+                .setColor(0xCD7F32)
+                .setAuthor({ name: `${interaction.user.tag}` })
+                .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
+                .addFields({ name: selected, value: nftList.join(''), inline: false });
 
-        await interaction.editReply({
-            embeds: [tokenList],
-            components: [menu]
-        });
+            const menu = new ActionRowBuilder()
+                .addComponents(
+                    new StringSelectMenuBuilder()
+                        .setCustomId('solana')
+                        .setPlaceholder('Please select an NFT.')
+                        .setOptions(nftOptions)
+                );
+
+            await interaction.editReply({
+                embeds: [tokenList],
+                components: [menu]
+            });
+        }
     }
 };

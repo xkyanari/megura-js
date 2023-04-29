@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
-const { Player } = require('../src/db');
+const { Player } = require('../../src/db');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -45,7 +45,7 @@ module.exports = {
         const time = 10;
         const wait = require('node:timers/promises').setTimeout;
         const embed = new EmbedBuilder()
-            .setColor(0x0099FF)
+            .setColor(0xCD7F32)
             .setTitle('Success!')
             .setDescription(
                 `Portal: **${guild_name}** has been opened.\n\nPlease note that the portal gets closed after \`${time}\` minute/s! Just create another one whenever.\n\nIf you want to close the channel pre-maturely, you can run the \`/close\` command.\n\nSafe travels!`,
@@ -55,7 +55,7 @@ module.exports = {
         await guild_name.delete()
             .then(() => {
               const embed2 = new EmbedBuilder()
-                .setColor(0x0099FF)
+                .setColor(0x6E8B3D)
                 .setTitle('Times Up!')
                 .setDescription(
                     "Your portal has been closed. Thanks for using our services!",
@@ -64,7 +64,7 @@ module.exports = {
             },)
             .catch(() => {
               const embed2 = new EmbedBuilder()
-              .setColor(0xFF0000)
+              .setColor(0x6E8B3D)
               .setTitle('Uh-oh!')
               .setDescription(
                 "Looks like your portal vanished into thin air. Oh well...",

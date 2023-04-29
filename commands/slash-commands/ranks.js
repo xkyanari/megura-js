@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { Player } = require('../src/db');
+const { Player } = require('../../src/db');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -19,7 +19,7 @@ module.exports = {
         const playerRanks = allPlayers.map((player, i) => `${i+1}. **${player.playerName}** - ${player.duelKills} Wins\n` );
 
         const embed = new EmbedBuilder()
-            .setColor(0x0099FF)
+            .setColor(0xCD7F32)
             .setTitle('Top 10 Duel Wins:')
             .setDescription(playerRanks.join(''));
 

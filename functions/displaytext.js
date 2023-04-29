@@ -1,4 +1,3 @@
-const { InteractionCollector } = require('discord.js');
 const findTxtFile = require('../functions/readfile');
 
 function sleep(ms) {

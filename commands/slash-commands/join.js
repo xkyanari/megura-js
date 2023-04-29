@@ -1,9 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { Player, Contract } = require('../src/db');
+const { Player, Contract } = require('../../src/db');
 const { Network, Alchemy } = require('alchemy-sdk');
-const { AlchemyApiKey } = require('../config.json');
-
-const { solscanApiToken } = require('../config.json');
+const { AlchemyApiKey, solscanApiToken } = require('../../config.json');
 
 const settings = {
     apiKey: AlchemyApiKey,
@@ -68,7 +66,7 @@ module.exports = {
                 if (nfts.ownedNfts.length === 0) return interaction.editReply({ content: `You do not have a supported NFT from my list.`, ephemeral: true });
     
                 const projectList = new EmbedBuilder()
-                    .setColor(0x0099FF)
+                    .setColor(0xCD7F32)
                     .setAuthor({ name: `${interaction.user.tag}` })
                     .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`);
                 
@@ -151,7 +149,7 @@ module.exports = {
                     if (found.length === 0) return interaction.editReply({ content: `You do not have a supported NFT from my list.`});
         
                     const projectList = new EmbedBuilder()
-                        .setColor(0x0099FF)
+                        .setColor(0xCD7F32)
                         .setAuthor({ name: `${interaction.user.tag}` })
                         .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`);
                     
@@ -212,7 +210,7 @@ module.exports = {
                     if (found.length === 0) return interaction.editReply({ content: `You do not have a supported NFT from my list.`});
         
                     const projectList = new EmbedBuilder()
-                        .setColor(0x0099FF)
+                        .setColor(0xCD7F32)
                         .setAuthor({ name: `${interaction.user.tag}` })
                         .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`);
                     

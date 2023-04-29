@@ -31,9 +31,9 @@ module.exports = {
         const nfts = await alchemy.nft.getNftMetadata(contractAddress, selected);
 
         const embed = new EmbedBuilder()
-        .setColor(0x0099FF)
-        .setTitle(`${nfts.contract.openSea.collectionName}`)
-        .setImage(`${nfts.rawMetadata.image}`);
+            .setColor(0xCD7F32)
+            .setTitle(`${nfts.contract.openSea.collectionName}`)
+            .setImage(`${nfts.rawMetadata.image}`);
 
         const weaponValue = nfts.rawMetadata.attributes.find(item => item.trait_type === traitWeapon)?.value ?? weapon;
         const armorValue = nfts.rawMetadata.attributes.find(item => item.trait_type === traitArmor)?.value ?? armor;
@@ -43,13 +43,6 @@ module.exports = {
             { name: `Weapon:`, value: `${weaponValue}`, inline: true },
             { name: `Armor:`, value: `${armorValue}`, inline: true }
             );
-        Player.update({
-            weapon: weaponValue,
-            armor: armorValue,
-            walletAddress,
-            tokenID: selected,
-            imageURL: nfts.rawMetadata.image
-        }, { where: { discordID: member.id, guildID: guild.id }});
 
         const button = new ActionRowBuilder()
             .addComponents(
@@ -64,6 +57,13 @@ module.exports = {
             embeds: [embed],
             components: [button]
         });
-        
+
+        interaction.client.userData.set(interaction.user.id, {
+            weapon: weaponValue,
+            armor: armorValue,
+            walletAddress: walletAddress,
+            tokenID: selected,
+            imageURL: nfts.rawMetadata.image,
+        });
     }
 };

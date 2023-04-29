@@ -19,26 +19,29 @@ Before running the bot, you will need the following:
 - **Discord Bot Token**: You will need a Discord bot token to authenticate your bot with the Discord API. You can obtain a token by creating a new bot application on the Discord Developer Portal at https://discord.com/developers/applications.
 - **Alchemy API Key**: You will need an Alchemy API key to access the Alchemy Web3 API. You can obtain a key by creating an account on the Alchemy website at https://alchemyapi.io.
 - **OpenAI API Key**: You will need an OpenAI API key to use the OpenAI package. You can obtain a key by creating an account on the OpenAI website at https://openai.com.
+- **Twitter API Keys and Tokens**: You will need Twitter API keys and tokens to authenticate and integrate the bot with Twitter. You can obtain these by creating a new project and developer account on the Twitter Developer Portal at https://developer.twitter.com.
+- **Database**: You will need a database to store data related to the bot. In this project, SQLite3 is used. You can download and install SQLite3 from the official website at https://www.sqlite.org/download.html. Alternatively, you can use other databases supported by Sequelize, such as PostgreSQL, MySQL, or MariaDB.
 
 ## List of Discord bot features (work in progress)
-- Verification with Captcha
-- Giveaways
-- Raffles
-- Announcements
-- Mini games
-- Auto purge messages
-- Action log
-- Custom commands
-- Reaction roles
-- Forms
-- Auto Message
-- Storytelling
-- Creating and closing private channels
-- Creating, modifying, deleting sub-guilds (channels)
-- Scheduling events
-- Ticketing system
-- Whitelisting
-- Sales tracking
+- [x] Verification with Captcha
+- [x] NFT Verification
+- [ ] Create and manage Giveaways
+- [ ] Create and manage Raffles
+- [x] Post announcements
+- [ ] Mini games
+- [x] Auto purge messages
+- [ ] View Action/Moderation Log
+- [ ] Create and manage Reaction roles
+- [ ] Create and manage Forms
+- [ ] Send Auto Messages
+- [x] Post tweets
+- [x] Raid tracking for Discord users
+- [x] Storytelling
+- [x] Creating and closing private channels
+- [ ] Scheduling events
+- [ ] Ticketing system
+- [ ] Whitelisting
+- [ ] Sales tracking
 
 All of these may not require having administrator role on the bot for security, but they are subject to change without prior notice.
 
@@ -60,7 +63,7 @@ To install and run the project, follow these steps:
 5. (Optional) Database name can be changed including the settings in `src/db.js`.
 6. (Optional) Chapters can be uploaded in `chapters/`. Otherwise, the bot will simply load the placeholder stories found in `samples/`.
 
-## Commands
+## Commands (work in progress)
 - `/info`:  Shows the list of commands.
 - `/start`:  Initiate creating own character.
 - `/profile`:  Show profile of a user (blank for self).

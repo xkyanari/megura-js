@@ -12,7 +12,7 @@ module.exports = async (interaction) => {
 
         try {
             const embed = new EmbedBuilder()
-                .setColor(0xFF0000)
+                .setColor(0xCD7F32)
                 .setAuthor({ name: `${interaction.user.tag}` })
                 .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
                 .setTitle('**🛄 INVENTORY LIST**')
