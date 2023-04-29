@@ -35,7 +35,7 @@ module.exports = {
 	async execute(message) {
         if (message.author.bot) return;
         
-        if (message.content.startsWith('Dahlia stop')) {
+        if (message.content.startsWith('Dahlia stop') || message.content.startsWith('dahlia stop')) {
             if (chatUsers.has(message.author.id)) {
                 chatUsers.delete(message.author.id);
             }
