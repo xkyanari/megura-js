@@ -5,16 +5,21 @@ module.exports = async (interaction, member) => {
     const button = new ActionRowBuilder()
         .addComponents(
             new ButtonBuilder()
+            .setCustomId('profile')
+            .setEmoji('👤')
+            .setLabel('Profile')
+            .setStyle(ButtonStyle.Success),
+            new ButtonBuilder()
                 .setCustomId('inventory')
                 .setEmoji('🛄')
                 .setLabel('Inventory')
-                .setStyle(ButtonStyle.Success),
+                .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
             .setCustomId('shop')
             .setEmoji('🛒')
             .setLabel('Shop')
             .setStyle(ButtonStyle.Danger)
-        );
+    );
     
     const numFormat = (value) => new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
     const guild = interaction.guild;
@@ -25,17 +30,17 @@ module.exports = async (interaction, member) => {
 
     try {
         const embed = new EmbedBuilder()
-            .setColor(0xFF0000)
+            .setColor(0xCD7F32)
             .setTitle('**VOYAGER ID CARD**')
             .setAuthor({ name: `${member.tag}` })
             .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
             .addFields(
                 { name: '👤 Player Name', value: `${player.playerName}`, inline: false },
-                { name: '👥 Faction', value: `${player.faction}`, inline: false },
-                { name: '🩸 Health', value: `${player.totalHealth}`, inline: false },
-                { name: '⚔️ Attack', value: `${player.totalAttack}`, inline: true },
-                { name: '🛡️ Defense', value: `${player.totalDefense}`, inline: true },
-                { name: '🗡️ Weapon', value: `${player.weapon}`, inline: false },
+                // { name: '👥 Faction', value: `${player.faction}`, inline: false },
+                { name: '🩸 HP', value: `${player.totalHealth}`, inline: true },
+                { name: '⚔️ ATK', value: `${player.totalAttack}`, inline: true },
+                { name: '🛡️ DEF', value: `${player.totalDefense}`, inline: true },
+                { name: '🗡️ Weapon', value: `${player.weapon}`, inline: true },
                 { name: '💠 Armor', value: `${player.armor}`, inline: false },
                 { name: '💰 Iura', value: `$${numFormat(player.iura.walletAmount)}`, inline: false },
             )

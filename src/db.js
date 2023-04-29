@@ -19,10 +19,13 @@ const Iura = require('../models/iura')(sequelize, Sequelize.DataTypes);
 const Shop = require('../models/shop')(sequelize, Sequelize.DataTypes);
 const Contract = require('../models/contract')(sequelize, Sequelize.DataTypes);
 const Quest = require('../models/quest')(sequelize, Sequelize.DataTypes);
+const Guild = require('../models/guild')(sequelize, Sequelize.DataTypes);
+const Twitter = require('../models/twitter')(sequelize, Sequelize.DataTypes);
+const Raid = require('../models/raid')(sequelize, Sequelize.DataTypes);
+const Tweet = require('../models/tweet')(sequelize, Sequelize.DataTypes);
 
 Player.hasOne(Iura, { as: 'iura', foreignKey: 'accountID', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 Player.hasMany(Item, { as: 'item', foreignKey: 'accountID' });
-// Monster.hasMany(Loot, { as: 'loot', foreignKey: 'lootID' });
 
 // check balance
 Reflect.defineProperty(Player.prototype, 'balance', {
@@ -109,4 +112,17 @@ Reflect.defineProperty(Player.prototype, 'updateStats', {
 	}
 });
 
-module.exports = { sequelize, Player, Monster, Item, Iura, Shop, Contract, Quest };
+module.exports = {
+	sequelize,
+	Player,
+	Monster,
+	Item,
+	Iura,
+	Shop,
+	Contract,
+	Quest,
+	Guild,
+	Twitter,
+	Raid,
+	Tweet
+};

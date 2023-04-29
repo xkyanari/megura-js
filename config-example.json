@@ -1,9 +1,15 @@
 {
+    "port": "",
     "token": "",
     "clientId": "",
     "guildId": "",
     "openAIkey": "",
     "openAIorg": "",
     "AlchemyApiKey": "",
-    "solscanApiToken": ""
+    "solscanApiToken": "",
+    "TWITTER_CLIENT_ID": "",
+    "TWITTER_CLIENT_SECRET": "",
+    "TWITTER_CALLBACK_URL": "",
+    "TWITTER_BEARER_TOKEN": "",
+    "ENCRYPTION_KEY": ""
 }

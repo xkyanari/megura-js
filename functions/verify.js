@@ -1,37 +1,44 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionsBitField } = require('discord.js');
+const { Guild } = require('../src/db');
 
-module.exports = async (interaction, channel) => {
-	const message = interaction.client.channels.cache.get(channel.id);
-	
-	const embed = new EmbedBuilder()
-		.setTitle(`YOU HAVE ENTERED __ELDELVAIN__, MESSINIA GRACIENE'S DOMAIN.`)
-		.setDescription(`
-			__**RULES -- PLEASE READ!**__
+module.exports = async (interaction, channelID) => {
+	const message = interaction.client.channels.cache.get(channelID);
+	const guild = await Guild.findOne({ where: {guildID: interaction.guild.id} });
 
-			__Be respectful, civil, and welcoming.__
-			We do not tolerate rude and toxic people here.
-			
-			__Do not join the server to promote your content.__
-			We accept collaborations and take them to consideration seriously.
-			
-			__The primary language of this server is English.__
-			We will try to add more language channels in the future.
-			
-			__Do not ping staff members for no reason.__
-			
-			And lastly, please follow the Discord Terms of Service.
-			
-			If you agree to these terms, please click "Verify" to get access to the server.
-		`);
-	
-	const button = new ActionRowBuilder()
-		.addComponents(
-			new ButtonBuilder()
-				.setCustomId('verify')
-				.setEmoji('✅')
-				.setLabel('Verify')
-				.setStyle(ButtonStyle.Success)
-		);
-	
-	await message.send({ embeds: [embed], components: [button] });
+	if (!message.permissionsFor(interaction.client.user).has([PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages])) return await interaction.reply({
+		content: `I don't seem have permissions to send messages on that channel.`,
+		ephemeral: true
+	});
+
+	if (!guild.intro || !guild.rules || !guild.closing) return interaction.reply({
+		content: `You don't have any rules set yet.`,
+		ephemeral: true
+	});
+
+	try {
+		const embed = new EmbedBuilder()
+            .setTitle(`👋 Welcome to __${interaction.guild.name}__!`)
+            .setColor('Aqua')
+            .setDescription(`
+				${guild.intro}
+
+				${guild.rules}
+
+				${guild.closing}
+			`);
+		
+		const button = new ActionRowBuilder()
+			.addComponents(
+				new ButtonBuilder()
+					.setCustomId('captcha')
+					.setEmoji('✅')
+					.setLabel('Verify')
+					.setStyle(ButtonStyle.Success)
+			);
+		
+		await message.send({ embeds: [embed], components: [button] });
+		await interaction.reply({ content: `Captcha Verification has been deployed!`, ephemeral: true });
+	} catch (error) {
+		console.log(error);
+	}
 };

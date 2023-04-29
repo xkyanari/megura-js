@@ -28,5 +28,20 @@
         "questName": "Fire, Water and Earth",
         "questDescription": "There were three magical rings that will help you harness the power of elements but you must venture to a distant part of Eldelvain to obtain them. Dragons and Conflicts were found in sight but you defeated them all. Well done!",
         "questReward": 700
+    },
+    {
+        "questName": "The Conflict in Merio: Part II",
+        "questDescription": "After defeating the Conflict in Merio, you received a message from one of its people that there is a disturbance again caused by a group of bandits. They have been all over the town causing chaos. Your mission was to track them down and bring them to justice.",
+        "questReward": 800
+    },
+    {
+        "questName": "Lord Time's Lost Artifact: Part II",
+        "questDescription": "After the successful recovery of the Lost Artifact, you were approached by the Archduke once again. This time he wanted to run away with the marchioness. You couldn't help but shake your head in disbelief, wondering if it was worth all the trouble just to avoid a little marital strife.",
+        "questReward": 300
+    },
+    {
+        "questName": "The Scapegoat",
+        "questDescription": "A lady accidentally left their favorite hat. You must navigate through time to retrieve it but every time you get close, a funny-looking goat steals it and runs off. Can you outsmart the goat and retrieve her lost treasure?",
+        "questReward": 200
     }
 ]
