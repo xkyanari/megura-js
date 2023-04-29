@@ -1,4 +1,4 @@
-const { AttachmentBuilder, EmbedBuilder, MessageCollector } = require('discord.js');
+const { EmbedBuilder, MessageCollector } = require('discord.js');
 const { CaptchaGenerator } = require('captcha-canvas');
 const { Guild } = require('../src/db');
 const { uploadImage, deleteImage } = require('./upload');
@@ -19,18 +19,12 @@ module.exports = async (interaction) => {
     const flag = `captcha_image`;
 
     const imageURL = await uploadImage(buffer, flag);
-    console.log("imageURL: ", imageURL);
-
-    // const attachment = new AttachmentBuilder(buffer, 'captcha.png');
-
     const embed = new EmbedBuilder()
         .setTitle('Verification')
         .setDescription('Please complete the captcha below to verify yourself.')
         .setImage(imageURL);
 
     let isVerified = false;
-    
-    // const captchaMessage = await interaction.reply({ embeds: [embed], files: [attachment], ephemeral: true });
     const captchaMessage = await interaction.reply({ embeds: [embed], ephemeral: true });
 
     const collector = new MessageCollector(channel, { time: 180000 });
