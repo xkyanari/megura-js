@@ -22,7 +22,7 @@ module.exports = async (interaction) => {
     const imageURL = await uploadImage(buffer, flag);
     const embed = new EmbedBuilder()
         .setTitle('Verification')
-        .setDescription(`Please complete the CAPTCHA by entering the code in the channel. Don't worry about upper or lower case letters.`)
+        .setDescription('Please complete the captcha below to verify yourself.')
         .setImage(imageURL);
 
     let isVerified = false;
@@ -35,7 +35,7 @@ module.exports = async (interaction) => {
             const addRole = guild.roles.cache.get(guildCheck.verifyRoleID);
             await member.roles.add(addRole);
             await collectedMessage.delete();
-            await captchaMessage.delete();
+            if (captchaMessage) await captchaMessage.delete();
             await interaction.followUp({ content: `You have been successfully verified!`, ephemeral: true });
             isVerified = true;
             collector.stop();
@@ -47,8 +47,8 @@ module.exports = async (interaction) => {
 
     collector.on('end', async () => {
         if (!isVerified) {
-            captchaMessage.delete();
-            interaction.followUp({ content: `The verification process has timed out. Please try again.`, ephemeral: true });
+            if (captchaMessage) await captchaMessage.delete();
+            await interaction.followUp({ content: `The verification process has timed out. Please try again.`, ephemeral: true });
         }
     });
 };
