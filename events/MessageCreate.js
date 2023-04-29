@@ -34,8 +34,15 @@ module.exports = {
 	name: Events.MessageCreate,
 	async execute(message) {
         if (message.author.bot) return;
+        
+        if (message.content.startsWith('Dahlia stop')) {
+            if (chatUsers.has(message.author.id)) {
+                chatUsers.delete(message.author.id);
+            }
+            return;
+        }
 
-        if (message.content.startsWith('Dahlia')) {
+        if (message.content.startsWith('Dahlia') || message.content.startsWith('dahlia')) {
             chatUsers.add(message.author.id);
             resetUserTimeout(message.author.id);
         }
