@@ -1,6 +1,7 @@
 const { AttachmentBuilder, EmbedBuilder, MessageCollector } = require('discord.js');
 const { CaptchaGenerator } = require('captcha-canvas');
 const { Guild } = require('../src/db');
+const { uploadImage, deleteImage } = require('./upload');
 
 module.exports = async (interaction) => {
     const { channel, guild, member } = interaction;
@@ -15,16 +16,22 @@ module.exports = async (interaction) => {
         .setDecoy({ opacity: 0.5 })
         .setTrace({ color: "deeppink" });
     const buffer = captcha.generateSync();
+    const flag = `captcha_image`;
 
-    const attachment = new AttachmentBuilder(buffer, 'captcha.png');
+    const imageURL = await uploadImage(buffer, flag);
+    console.log("imageURL: ", imageURL);
+
+    // const attachment = new AttachmentBuilder(buffer, 'captcha.png');
+
     const embed = new EmbedBuilder()
         .setTitle('Verification')
         .setDescription('Please complete the captcha below to verify yourself.')
-        .setImage('attachment://captcha.png');
+        .setImage(imageURL);
 
     let isVerified = false;
     
-    const captchaMessage = await interaction.reply({ embeds: [embed], files: [attachment], ephemeral: true });
+    // const captchaMessage = await interaction.reply({ embeds: [embed], files: [attachment], ephemeral: true });
+    const captchaMessage = await interaction.reply({ embeds: [embed], ephemeral: true });
 
     const collector = new MessageCollector(channel, { time: 180000 });
     collector.on('collect', async collectedMessage => {
@@ -33,7 +40,16 @@ module.exports = async (interaction) => {
             const addRole = guild.roles.cache.get(guildCheck.verifyRoleID);
             await member.roles.add(addRole);
             await collectedMessage.delete();
-            await captchaMessage.delete();
+            if (captchaMessage) {
+                try {
+                  await captchaMessage.delete();
+                } catch (error) {
+                  if (error.code !== 10008) {
+                    console.error('Error deleting captchaMessage:', error);
+                  }
+                }
+            }
+            await deleteImage(flag);
             await interaction.followUp({ content: `You have been successfully verified!`, ephemeral: true });
             isVerified = true;
             collector.stop();
@@ -45,7 +61,16 @@ module.exports = async (interaction) => {
 
     collector.on('end', async () => {
         if (!isVerified) {
-            captchaMessage.delete();
+            if (captchaMessage) {
+                try {
+                  await captchaMessage.delete();
+                  await deleteImage(flag);
+                } catch (error) {
+                  if (error.code !== 10008) {
+                    console.error('Error deleting captchaMessage:', error);
+                  }
+                }
+            }
             interaction.followUp({ content: `The verification process has timed out. Please try again.`, ephemeral: true });
         }
     });
