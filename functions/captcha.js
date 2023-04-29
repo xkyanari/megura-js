@@ -22,7 +22,7 @@ module.exports = async (interaction) => {
     const imageURL = await uploadImage(buffer, flag);
     const embed = new EmbedBuilder()
         .setTitle('Verification')
-        .setDescription('Please complete the captcha below to verify yourself.')
+        .setDescription(`Please complete the CAPTCHA by entering the code in the channel. Don't worry about upper or lower case letters.`)
         .setImage(imageURL);
 
     let isVerified = false;
