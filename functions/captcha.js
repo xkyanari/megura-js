@@ -44,6 +44,7 @@ module.exports = async (interaction) => {
                   }
                 }
             }
+            await deleteImage(flag);
             await interaction.followUp({ content: `You have been successfully verified!`, ephemeral: true });
             isVerified = true;
             collector.stop();
@@ -58,6 +59,7 @@ module.exports = async (interaction) => {
             if (captchaMessage) {
                 try {
                   await captchaMessage.delete();
+                  await deleteImage(flag);
                 } catch (error) {
                   if (error.code !== 10008) {
                     console.error('Error deleting captchaMessage:', error);
