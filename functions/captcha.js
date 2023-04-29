@@ -35,7 +35,15 @@ module.exports = async (interaction) => {
             const addRole = guild.roles.cache.get(guildCheck.verifyRoleID);
             await member.roles.add(addRole);
             await collectedMessage.delete();
-            if (captchaMessage) await captchaMessage.delete();
+            if (captchaMessage) {
+                try {
+                  await captchaMessage.delete();
+                } catch (error) {
+                  if (error.code !== 10008) {
+                    console.error('Error deleting captchaMessage:', error);
+                  }
+                }
+            }
             await interaction.followUp({ content: `You have been successfully verified!`, ephemeral: true });
             isVerified = true;
             collector.stop();
@@ -47,7 +55,15 @@ module.exports = async (interaction) => {
 
     collector.on('end', async () => {
         if (!isVerified) {
-            if (captchaMessage) await captchaMessage.delete();
+            if (captchaMessage) {
+                try {
+                  await captchaMessage.delete();
+                } catch (error) {
+                  if (error.code !== 10008) {
+                    console.error('Error deleting captchaMessage:', error);
+                  }
+                }
+            }
             await interaction.followUp({ content: `The verification process has timed out. Please try again.`, ephemeral: true });
         }
     });
