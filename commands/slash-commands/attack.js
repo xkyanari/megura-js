@@ -3,6 +3,7 @@ const { Player, Monster, Iura, sequelize } = require('../../src/db');
 const { simulateBattle } = require('../../functions/battle');
 const { expPoints } = require('../../src/vars');
 const leveling = require('../../functions/level');
+const levelcheck = require('../../functions/levelup');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -75,7 +76,7 @@ module.exports = {
 
                     if (playerObj.expGained > expPoints(playerObj.level)) {
                         const levelUp = await leveling(interaction.member.id);
-                        await interaction.channel.send(`\`${playerObj.playerName}\`, you have leveled up to **${levelUp.level}**!`);
+                        await levelcheck(interaction, levelUp.level);
                     }
                 } else if (winner === monsterObj) {
                     await interaction.channel.send(`The battle has concluded.`);
