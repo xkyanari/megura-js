@@ -8,7 +8,7 @@ She can be given administrator role but please take caution. Doing this will ove
 
 Please note that Dahlia is still in beta version and improves over time. If you encounter any errors while executing a command, please contact us immediately.
 
-Steps to set up the bot:
+## Steps to set up the bot
 
 1. (Optional) Confirm the server is registered - `/setup register`: By default, the server gets added to the database as soon as the bot joins.
 
