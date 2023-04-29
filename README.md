@@ -64,20 +64,28 @@ To install and run the project, follow these steps:
 6. (Optional) Chapters can be uploaded in `chapters/`. Otherwise, the bot will simply load the placeholder stories found in `samples/`.
 
 ## Commands (work in progress)
-- `/info`:  Shows the list of commands.
-- `/start`:  Initiate creating own character.
-- `/profile`:  Show profile of a user (blank for self).
-- `/changenick`:  Updates player name.
-- `/join`:  Adds your NFT to your player profile.
-- `/daily`:  Do a random quest to increase/decrease stats or gain Iura.
-- `/attack`:  Initiate attack against a random monster.
-- `/duel`:  Initiate a duel against another player.
-- `/open <name of channel>`:  Creates a private channel, auto-closes in 10 minutes.
-- `/close`:  Closes a portal pre-maturely.
-- `/iura`:  Check your wallet or bank.
-- `/shop`:  Opens the Item Shop.
-- `/inventory`:  Opens your inventory.
-- `/buy`:  Lets player to buy items in bulk.
+- `/attack`: Initiate attack against a random monster.
+- `/buy`: Lets player to buy items in bulk.
+- `/changenick`: Updates player name.
+- `/close`: Closes a portal pre-maturely.
+- `/daily`: Do a random quest to increase/decrease stats or gain Iura.
+- `/duel`: Initiate a duel against another player.
+- `/info`: Shows the list of commands.
+- `/inventory`: Opens your inventory.
+- `/iura`: Check your wallet or bank.
+- `/join`: Adds your NFT to your player profile.
+- `/open <name of channel>`: Creates a private channel, auto-closes in 10 minutes.
+- `/profile`: Show profile of a user (blank for self).
+- `/raid`: Post tweets for people to retweet and/or like.
+- `/ranks`: Show leaderboards.
+- `/reset`: Delete voyager profile.
+- `/setup`: Setup server for moderation tools.
+- `/shop`: Opens the Item Shop.
+- `/start`: Initiate creating own character.
+- `/transfer`: Transfer IURA to another user.
+
+- `!tweet`: Post a tweet from your server Twitter account (configured from /setup).
+- `!purge`: Remove x amount of old messages in a channel.
 
 ## Contributing
 
