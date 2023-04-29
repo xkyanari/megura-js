@@ -92,7 +92,7 @@ module.exports = {
         
                 const response = result.data.choices[0].message.content;
                 console.log("Total tokens: ", result.data.usage.total_tokens);
-        
+                
                 if (response.length >= 1500) {
                     const attachment = new AttachmentBuilder(Buffer.from(response, 'utf-8'), { name: 'fromdahliatoyou.txt' });
                     await message.reply({ content: `I couldn't give my whole answer here so I'm attaching the file for you.`, files: [attachment] });
