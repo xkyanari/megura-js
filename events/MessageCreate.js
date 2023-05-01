@@ -1,6 +1,7 @@
 const { Events, AttachmentBuilder } = require('discord.js');
 const { openAIkey, openAIorg } = require('../config.json');
 const { prefix } = require('../src/vars');
+const { Player } = require('../src/db');
 
 // Preparing connection to OpenAI API -----------------
 const { Configuration, OpenAIApi } = require('openai');
@@ -13,7 +14,7 @@ const openai = new OpenAIApi(configuration);
 const chatUsers = new Set();
 const userTimeouts = {};
 
-const inactivityTimeout = 3 * 60 * 1000; // 15mins of inactivity
+const inactivityTimeout = 15 * 60 * 1000; // 15mins of inactivity
 
 const resetUserTimeout = (userID) => {
     if (userTimeouts[userID]) {
@@ -34,6 +35,16 @@ module.exports = {
 	name: Events.MessageCreate,
 	async execute(message) {
         if (message.author.bot) return;
+
+        const player = await Player.findOne({ where: { discordID: message.author.id, guildID: message.guild.id }});
+
+        let playerName = '';
+
+        if (player) {
+            let fullName = player.playerName;
+            let firstName = fullName.split(' ')[0];
+            playerName = `You know the user very well, as they are a voyager who has traveled through time with you on various adventures. You have a close relationship with them, and you usually address them by their name. Their name is ${firstName}`;
+        }
         
         if (message.content.startsWith('Dahlia stop') || message.content.startsWith('dahlia stop')) {
             if (chatUsers.has(message.author.id)) {
@@ -54,7 +65,11 @@ module.exports = {
                 let chatLog = [
                     {
                         role: 'system',
-                        content: `Your name is Dahlia and you're a battle AI from the future who loves to quote famous authors and people. You were created by Cerberon to open and close portals that would connect to different time periods. You respect Margaretha very much. You are smart, reserved, and capable AI. You like reading books and writing stories about Eldelvain where You lives. You can come up with entertaining stories that are engaging, imaginative and captivating for the audience. It can be fairy tales, educational stories or any other type of stories which has the potential to capture people's attention and imagination. You also store items and equipment for voyagers. Your favorite food is ramen and your favorite author is Mark Twain. You don't want anyone know how old you are.`
+                        content: `Your name is Dahlia and you're a battle AI from the future who loves to quote famous authors and people. You were created by Cerberon to open and close portals that would connect to different time periods. You know Margaretha but you don't know where she is. You simulate battles for the voyager to enhance their abilities. ${playerName}
+                        
+                        You are smart, reserved, and capable AI. You like reading books and writing stories about Eldelvain where you live. You also store items and equipment for voyagers. Your favorite food is ramen and your favorite author is Mark Twain. You don't want anyone to know how old you are or your vital statistics.
+                    
+                        If someone asks you about Megura or Messinia Graciene, you will direct users to the Megura Whitepaper or ask the moderators and the System Admin team.`
                     },
                     {
                         role: 'assistant',
@@ -64,17 +79,29 @@ module.exports = {
         
                 await message.channel.sendTyping();
         
-                let prevChat = await message.channel.messages.fetch({ limit: 15 });
-                prevChat.reverse();
-        
-                prevChat.forEach((msg) => {
+                let allMessages = await message.channel.messages.fetch({ limit: 50 });
+                allMessages.reverse();
+
+                let messagesAfterLastCall = [];
+                let foundLastCall = false;
+
+                for (let msg of allMessages.values()) {
+                    if (msg.author.id === message.author.id && (msg.content.startsWith('Dahlia') || msg.content.startsWith('dahlia'))) {
+                        foundLastCall = true;
+                        messagesAfterLastCall = [msg];
+                    } else if (foundLastCall) {
+                        messagesAfterLastCall.push(msg);
+                    }
+                }
+
+                messagesAfterLastCall.forEach((msg) => {
                     if (msg.author.id === message.client.user.id && msg.author.bot) {
                         chatLog.push({
                             role: 'assistant',
                             content: msg.content,
                         });
                     }
-        
+
                     if (msg.author.id === message.author.id) {
                         chatLog.push({
                             role: 'user',
@@ -86,14 +113,15 @@ module.exports = {
                 const result = await openai.createChatCompletion({
                     model: 'gpt-3.5-turbo',
                     max_tokens: 1000,
-                    temperature: 0.9,
+                    temperature: 0.6,
                     messages: chatLog,
+                    // stop: `\n`
                 });
         
                 const response = result.data.choices[0].message.content;
                 console.log("Total tokens: ", result.data.usage.total_tokens);
                 
-                if (response.length >= 1500) {
+                if (response.length >= 2000) {
                     const attachment = new AttachmentBuilder(Buffer.from(response, 'utf-8'), { name: 'fromdahliatoyou.txt' });
                     await message.reply({ content: `I couldn't give my whole answer here so I'm attaching the file for you.`, files: [attachment] });
                 } else {
@@ -107,8 +135,10 @@ module.exports = {
                 } else if (error.RateLimitError) {
                     console.log(`${error.response.status}: ${error.response.statusText}`);
                     message.reply(`Sorry, I'm getting a lot of requests right now. Please try again later.`);
-                }
-                else {
+                } else if (error.response && error.response.status === 400 && error.response.data.error.message.includes("Token limit exceeded")) {
+                    console.log(`${error.response.status}: ${error.response.statusText}`);
+                    message.reply(`Sorry, our conversation has become too long, and I can't process it. Please try a shorter message or remove some context.`);
+                } else {
                     message.reply(`Yes?`);
                     console.log(`${error.response.status}: ${error.response.statusText}`);
                 }
