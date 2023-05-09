@@ -1,7 +1,7 @@
 const { Events, AttachmentBuilder } = require('discord.js');
 const { openAIkey, openAIorg } = require('../config.json');
 const { prefix } = require('../src/vars');
-const { Player } = require('../src/db');
+const { Player, Guild } = require('../src/db');
 
 // Preparing connection to OpenAI API -----------------
 const { Configuration, OpenAIApi } = require('openai');
@@ -35,6 +35,15 @@ module.exports = {
 	name: Events.MessageCreate,
 	async execute(message) {
         if (message.author.bot) return;
+
+        const guildCheck = await Guild.findOne({ where: { guildID: message.guild.id } });
+        if (!guildCheck || !guildCheck.verifyRoleID) return;
+
+        const isOnVerifyChannel = message.channel.id === guildCheck.verifyChannelID;
+    
+        if (isOnVerifyChannel) {
+            await message.delete();
+        }
 
         const player = await Player.findOne({ where: { discordID: message.author.id, guildID: message.guild.id }});
 
@@ -109,13 +118,14 @@ module.exports = {
                         });
                     }
                 });
-        
+                
                 const result = await openai.createChatCompletion({
                     model: 'gpt-3.5-turbo',
                     max_tokens: 1000,
-                    temperature: 0.6,
+                    temperature: 0.4,
                     messages: chatLog,
-                    // stop: `\n`
+                    frequency_penalty: 0.3,
+                    presence_penalty: 0.7
                 });
         
                 const response = result.data.choices[0].message.content;

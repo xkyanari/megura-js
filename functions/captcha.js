@@ -34,7 +34,6 @@ module.exports = async (interaction) => {
         if (collectedMessage.content.toLowerCase() === captcha.text.toLowerCase()) {
             const addRole = guild.roles.cache.get(guildCheck.verifyRoleID);
             await member.roles.add(addRole);
-            await collectedMessage.delete();
             if (captchaMessage) {
                 try {
                   await captchaMessage.delete();
@@ -49,23 +48,14 @@ module.exports = async (interaction) => {
             isVerified = true;
             collector.stop();
         } else {
-            await collectedMessage.delete();
             await interaction.followUp({ content: `The captcha code you entered is incorrect. Please try again.`, ephemeral: true });
         }
     });
 
     collector.on('end', async () => {
         if (!isVerified) {
-            if (captchaMessage) {
-                try {
-                  await captchaMessage.delete();
-                  await deleteImage(flag);
-                } catch (error) {
-                  if (error.code !== 10008) {
-                    console.error('Error deleting captchaMessage:', error);
-                  }
-                }
-            }
+            if (captchaMessage) await captchaMessage.delete();
+            await deleteImage(flag);
             await interaction.followUp({ content: `The verification process has timed out. Please try again.`, ephemeral: true });
         }
     });

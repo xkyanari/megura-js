@@ -27,6 +27,13 @@ const Tweet = require('../models/tweet')(sequelize, Sequelize.DataTypes);
 Player.hasOne(Iura, { as: 'iura', foreignKey: 'accountID', onDelete: 'CASCADE', onUpdate: 'CASCADE' });
 Player.hasMany(Item, { as: 'item', foreignKey: 'accountID' });
 
+// for staking
+Reflect.defineProperty(Player.prototype, 'stake', {
+	value: async function stake() {
+			return Iura.findAll({ where: { guildID: this.guildID }});
+	}
+});
+
 // check balance
 Reflect.defineProperty(Player.prototype, 'balance', {
 	value: async function balance() {

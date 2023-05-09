@@ -1,5 +1,8 @@
 module.exports = (sequelize, DataTypes) => {
     const Iura = sequelize.define('Iura', {
+        guildID: {
+            type: DataTypes.TEXT,
+        },
         accountID: {
             type: DataTypes.INTEGER,
             autoIncrement: true,

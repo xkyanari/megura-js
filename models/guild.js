@@ -77,6 +77,10 @@ module.exports = (sequelize, DataTypes) => {
         expirationTime: {
             type: DataTypes.DATE,
         },
+        walletAmount: {
+            type: DataTypes.INTEGER,
+            defaultValue: 1000000
+        },
     },
     {
         freezeTableName: true,
