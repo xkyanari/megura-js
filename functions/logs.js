@@ -22,15 +22,14 @@ const writeLogs = async (guildId, logEntry) => {
 };
 
 module.exports = async (client, guildId, embed, logEntry) => {
-    const data = await Guild.findOne({ where: { guildID: guildId }});
-    if (!data || !data.logsChannelID) return;
-
-    const channel = client.channels.cache.get(data.logsChannelID);
-
-    if (!channel) return;
-    embed.setTimestamp();
-
     try {
+        const data = await Guild.findOne({ where: { guildID: guildId }});
+        if (!data || !data.logsChannelID) return;
+    
+        const channel = client.channels.cache.get(data.logsChannelID);
+    
+        if (!channel) return;
+        embed.setTimestamp();
         const sentAt = new Date();
         await channel.send({ embeds: [embed] });
         writeLogs(guildId, `<${sentAt.toISOString()}> : ${logEntry}`);

@@ -1,5 +1,3 @@
-// "use strict"
-
 const express = require('express');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const { token, port } = require('./config.json');
