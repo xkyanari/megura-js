@@ -1,7 +1,14 @@
 const { TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET } = require('../../config.json');
 const { TwitterApi } = require('twitter-api-v2');
 const { Raid, Twitter } = require('../../src/db');
-const { encrypt, decrypt } = require('../../src/crypto-utils');
+
+/**
+ * 
+ * According to https://developer.twitter.com/en/docs/authentication/oauth-2-0/authorization-code
+ * By default, the access token you create through the Authorization Code Flow with PKCE
+ * will only stay valid for two hours unless you’ve used the offline.access scope.
+ * 
+ */
 
 module.exports = {
     data: {
@@ -24,6 +31,11 @@ module.exports = {
 
             twitterUser.accessToken = accessToken;
             twitterUser.refreshToken = newRefreshToken;
+
+            const expirationDate = new Date();
+            expirationDate.setHours(expirationDate.getHours() + 2);
+            twitterUser.expirationTime = expirationDate;
+
             await twitterUser.save();
 
             const rwClient = refreshedClient.readWrite;

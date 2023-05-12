@@ -4,6 +4,15 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('
 const { TWITTER_CLIENT_ID, TWITTER_CLIENT_SECRET, TWITTER_CALLBACK_URL } = require('../config.json');
 const { Twitter } = require('../src/db');
 
+/**
+ * 
+ * According to https://developer.twitter.com/en/docs/authentication/oauth-2-0/authorization-code
+ * By default, the access token you create through the Authorization Code Flow with PKCE
+ * will only stay valid for two hours unless you’ve used the offline.access scope.
+ * 
+ */
+
+
 const client = new TwitterApi({ clientId: TWITTER_CLIENT_ID, clientSecret: TWITTER_CLIENT_SECRET });
 
 const keyv = new Keyv();
@@ -12,7 +21,13 @@ keyv.on('error', err => console.error('Keyv connection error:', err));
 const twitterAuth = async (interaction) => {
     const twitter = await Twitter.findOne({ where: { discordID: interaction.member.id }});
 
-    const { url, codeVerifier, state } = client.generateOAuth2AuthLink(TWITTER_CALLBACK_URL, { scope: ['tweet.read', 'tweet.write', 'like.write', 'like.read', 'users.read', 'offline.access'] });
+    const { url, codeVerifier, state } = client.generateOAuth2AuthLink(TWITTER_CALLBACK_URL, { scope: [
+        'tweet.read', // requirement for retweets
+        'tweet.write', // requirement for retweets
+        'users.read', // requirement for retweets and likes
+        'like.write', // requirement for liking tweets
+        'offline.access' // to refresh logins and not asked again
+    ] });
 
     await keyv.set(`codeVerifier:${state}`, codeVerifier, 600000);
 
