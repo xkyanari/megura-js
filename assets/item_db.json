@@ -48,5 +48,15 @@
         "price": 1,
         "description": "A rock. Duh.",
         "item_ID": "rock"
+    },
+    {
+        "itemName": "Yusha's Ben10 Brief",
+        "level": 1,
+        "totalHealth": 0,
+        "totalAttack": 0,
+        "totalDefense": 100,
+        "price": 150,
+        "description": "Your inner kid will feel like they have the strength and agility of an alien superhero. It's like a secret weapon hiding in their brief.",
+        "item_ID": "yusha"
     }
 ]

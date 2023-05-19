@@ -44,7 +44,7 @@ module.exports = async (interaction, member) => {
                 { name: '💠 Armor', value: `${player.armor}`, inline: false },
                 { name: '💰 Iura', value: `$${numFormat(player.iura.walletAmount)}`, inline: false },
             )
-            .setFooter({ text: `------------------------------------------------\nThis bot was made with 🤍 by megura.xyz.\n------------------------------------------------` });
+            .setFooter({ text: `This bot was made with 🤍 by megura.xyz.`, iconURL: 'https://res.cloudinary.com/dnjaazvr7/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1684520734/megura/megura_logo_w02j1n.png' });
 
         if (player.imageURL) {
             const contract = await Contract.findOne({ where: { contractAddress: player.contractAddress }});

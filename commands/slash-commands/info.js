@@ -30,8 +30,12 @@ module.exports = {
                 > **_/iura_**  - Check your wallet or bank.
                 > **_/shop_**  - Opens the Item Shop.
                 > **_/inventory_**  - Opens your inventory.
-                > **_/buy_** - Lets player to buy items in bulk.`
+                > **_/buy_** - Lets player to buy items in bulk.
+                
+                **Messinia Graciene: Project DAHLIA**
+                [Invite Me](https://discord.com/api/oauth2/authorize?client_id=1108464420465692795&permissions=139855260823&scope=bot)🔸[Docs](https://docs.megura.xyz)🔸[Support Server](https://discord.gg/X9eEW6yuhq)`
                 );
+                // 🔸[Vote for Us!](https://top.gg/bot/1108464420465692795)
 
 		await interaction.reply({ embeds: [embed] });
 	}

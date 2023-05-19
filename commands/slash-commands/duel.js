@@ -16,7 +16,7 @@ module.exports = {
             .setName('target')
             .setDescription('Choose the player you want to fight.')
             .setRequired(true)),
-    cooldown: 600000,
+    cooldown: 300000,
     async execute(interaction) {
         const wait = require('node:timers/promises').setTimeout;
         const player1 = interaction.member;

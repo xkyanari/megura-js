@@ -9,7 +9,7 @@ module.exports = {
         const guild = interaction.guild;
 
         const selected = await interaction.values[0];
-        await interaction.deferReply();
+        await interaction.deferReply({ ephemeral: true });
 
         try {
             const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });

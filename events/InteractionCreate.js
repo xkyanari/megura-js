@@ -1,4 +1,4 @@
-const { Events } = require('discord.js');
+const { Events, EmbedBuilder } = require('discord.js');
 const ms = require('ms');
 
 /**
@@ -30,8 +30,14 @@ module.exports = {
                     setTimeout(() => client.cooldown.delete(cooldownData), command.cooldown);
 
                 } catch (error) {
+                    const embed = new EmbedBuilder()
+                        .setColor('Red')
+                        .setDescription(`
+                            Error executing \`${interaction.commandName}\`
+                            Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
+                    
                     console.log(error);
-                    await interaction.reply({ content: `Error executing \`${interaction.commandName}\``, ephemeral: true });
+                    await interaction.reply({ embeds: [embed], ephemeral: true });
                     client.cooldown.delete(cooldownData);
                 }
         } else if (interaction.isButton()) {

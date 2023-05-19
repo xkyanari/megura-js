@@ -87,7 +87,7 @@ const twitterCallback = async (req, res) => {
 
         await keyv.delete(`codeVerifier:${state}`);
 
-        res.render('index');
+        res.render('twitterSuccess');
     } catch (error) {
         console.error('Error in twitterCallback:', error);
         res.status(500).send('Server error');

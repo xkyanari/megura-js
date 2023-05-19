@@ -1,6 +1,10 @@
 const express = require('express');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
-const { token, port } = require('./config.json');
+const { token, port, dblWebhookSecret, dblApiKey } = require('./config.json');
+const { createDjsClient } = require('discordbotlist');
+const rateLimit = require('express-rate-limit');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 const fs = require('node:fs');
 const path = require('node:path');
 const { twitterCallback } = require('./functions/twitter');
@@ -8,16 +12,47 @@ const logs = require('discord-logs');
 
 // Express server
 const app = express();
+const dbl = createDjsClient(dblApiKey, client);
+
+const limiter = rateLimit({
+	windowMs: 60 * 60 * 1000,
+	max: 25
+});
+
+app.use(bodyParser.json());
+app.use(limiter);
+app.use(cors()
+	// for production to limit the request
+    // cors({
+    //     origin: "http://localhost:3000", // Replace with your frontend origin
+    // })
+);
 
 app.set('view engine', 'ejs');
 
 app.get('/', (req, res) => {
-	res.send(`Hello from the Express server!`);
+	res.render("index");
 });
 
 app.get('/twitter/auth/callback', async (req, res) => {
-	// res.send('Twitter auth callback received');
 	await twitterCallback(req, res);
+});
+
+app.post('/dbl/upvote', (req, res) => {
+	if (req.headers.authorization !== dblWebhookSecret) {
+		console.log('Unauthorized request');
+		return res.sendStatus(403);
+	}
+
+	const { admin, avatar, username, id } = req.body;
+
+	console.log(`User ${username} (ID: ${id}) voted.`);
+	console.log(`User is admin: ${admin}`);
+	console.log(`User avatar hash: ${avatar}`);
+
+	// reward the user
+
+	return res.sendStatus(200);
 });
 
 app.listen(port, () => {
@@ -45,7 +80,6 @@ client.buttons = new Collection();
 client.menus = new Collection();
 client.modals = new Collection();
 client.cooldown = new Collection();
-
 client.userData = new Collection();
 
 // For registering slash commands -----------------

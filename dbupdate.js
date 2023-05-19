@@ -1,4 +1,4 @@
-const { Monster, Shop, Contract, Quest, Player, Guild, Twitter, Raid, Tweet } = require('./src/db');
+const { Monster, Shop, Contract, Quest, Player, Iura, Guild, Twitter, Raid, Tweet } = require('./src/db');
 
 (async () => {
     // await Shop.sync({ force: true})
@@ -31,15 +31,15 @@ const { Monster, Shop, Contract, Quest, Player, Guild, Twitter, Raid, Tweet } = 
     //     })
     //     .catch((error) => console.log(error));
     
-    // await Contract.sync({ force: true })
-    //     .then(() => {
-    //         const contracts = require('./assets/contracts.json');
-    //         for (let contract = 0; contract < contracts.length; contract++) {
-    //             Contract.create(contracts[contract]);
-    //         }
-    //         console.log("Contract data import completed.");
-    //     })
-    //     .catch((error) => console.log(error));
+    await Contract.sync({ force: true })
+        .then(() => {
+            const contracts = require('./assets/contracts.json');
+            for (let contract = 0; contract < contracts.length; contract++) {
+                Contract.create(contracts[contract]);
+            }
+            console.log("Contract data import completed.");
+        })
+        .catch((error) => console.log(error));
     
     // await Player.sync({ alter: true })
     //     .then(() => {
@@ -47,25 +47,31 @@ const { Monster, Shop, Contract, Quest, Player, Guild, Twitter, Raid, Tweet } = 
     //     })
     //     .catch((error) => console.log(error));
 
+    await Iura.sync({ alter: true })
+        .then(() => {
+            console.log("Iura table refreshed.");
+        })
+        .catch((error) => console.log(error));
+
     await Guild.sync({ alter: true })
         .then(() => {
             console.log("Guild table refreshed.");
         })
         .catch((error) => console.log(error));
     
-    await Twitter.sync({ force: true })
+    await Twitter.sync({ alter: true })
     .then(() => {
         console.log("Twitter table refreshed.");
     })
     .catch((error) => console.log(error));
 
-    await Raid.sync({ force: true })
+    await Raid.sync({ alter: true })
     .then(() => {
         console.log("Raid table refreshed.");
     })
     .catch((error) => console.log(error));
 
-    await Tweet.sync({ force: true })
+    await Tweet.sync({ alter: true })
     .then(() => {
         console.log("Tweet table refreshed.");
     })

@@ -25,7 +25,7 @@ module.exports = async (interaction) => {
                 embed.addFields({name: item.itemName, value: `Quantity: ${item.quantity}`, inline: false });
             });
 
-            await interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed], ephemeral: true });
         } catch (error) {
             console.log(error);
         }

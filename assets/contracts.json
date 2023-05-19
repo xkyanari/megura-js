@@ -116,12 +116,6 @@
         "collectionURL": "https://opensea.io/collection/nano-agents"
     },
     {
-        "blockchain": "ethereum",
-        "contractName": "Gingertail's Hidden Secrets",
-        "contractAddress": "0x2da00b0140c52f2321838f9fEF95671d215e07f6",
-        "collectionURL": "https://foundation.app/collection/hs-9f20"
-    },
-    {
         "blockchain": "solana",
         "collectionID": "simpl3r",
         "contractName": "Simpl3r: Bounty Hunters",

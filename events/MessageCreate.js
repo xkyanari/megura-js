@@ -3,6 +3,11 @@ const { openAIkey, openAIorg } = require('../config.json');
 const { prefix } = require('../src/vars');
 const { Player, Guild } = require('../src/db');
 
+/**
+ * This event is fired when a user sends a message.
+ */
+
+
 // Preparing connection to OpenAI API -----------------
 const { Configuration, OpenAIApi } = require('openai');
 const configuration = new Configuration({
@@ -27,9 +32,23 @@ const resetUserTimeout = (userID) => {
     }, inactivityTimeout);
 };
 
-/**
- * This event is fired when a user sends a message.
- */
+const generateSummary = async (chatLog) => {
+    const prompt = `Summary of the following conversation: "${chatLog.map(log => `${log.role}: ${log.content}`).join(' ')}"`;
+
+    const result = await openai.createChatCompletion({
+        model: 'gpt-3.5-turbo',
+        max_tokens: 1000,
+        temperature: 0.4,
+        messages: [
+            {role: 'system', content: prompt},
+        ],
+        frequency_penalty: 0.3,
+        presence_penalty: 0.7
+    });
+
+    const summary = result.data.choices[0].message.content;
+    return summary;
+};
 
 module.exports = {
 	name: Events.MessageCreate,
@@ -130,6 +149,15 @@ module.exports = {
         
                 const response = result.data.choices[0].message.content;
                 console.log("Total tokens: ", result.data.usage.total_tokens);
+                console.log("Chat log length: ", chatLog.length);
+
+                if (result.data.usage.total_tokens > 1500 || chatLog.length > 10) {
+                    const summary = await generateSummary(chatLog.slice(0, 6));
+    
+                    chatLog = chatLog.slice(6);
+    
+                    chatLog.unshift({ role: 'assistant', content: summary });
+                }
                 
                 if (response.length >= 2000) {
                     const attachment = new AttachmentBuilder(Buffer.from(response, 'utf-8'), { name: 'fromdahliatoyou.txt' });
@@ -137,6 +165,8 @@ module.exports = {
                 } else {
                     message.reply(`${response}`);
                 }
+
+                console.log(chatLog);
             } catch (error) {
                 if (error.APIerror) {
                     console.log(`OpenAI returned an API Error: ${error.APIerror}`);

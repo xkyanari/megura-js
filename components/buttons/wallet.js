@@ -21,7 +21,7 @@ module.exports = {
                     .setTitle('Wallet Balance')
                     .setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
                     .setDescription(`💰 **Wallet:** $${balanceWallet} IURA`);
-                await interaction.reply({ embeds: [embed] })
+                await interaction.reply({ embeds: [embed], ephemeral: true })
                     .catch(console.error);
             } catch (error) {
                 console.log(error);
