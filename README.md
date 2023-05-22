@@ -1,6 +1,21 @@
 # Messinia Graciene: Project DAHLIA
 
+![Project DAHLIA banner](https://res.cloudinary.com/dnjaazvr7/image/upload/v1684522493/megura/dahlia-twitter_yae5go.png)
+
 Dahlia is a state-of-the-art Discord bot that runs on chatGPT and supports both slash and text commands. As an all-rounder bot, she comes with a wide range of utilities, but her main purpose is to serve as a storyteller for a text-based RPG. Dahlia acts as an NPC (non-playable character) in the game, enabling players with supported NFT collections to communicate with her and participate in the game. With her advanced capabilities and cutting-edge technology, Dahlia offers an immersive and engaging experience for players looking to explore the world of text-based RPGs.
+
+[![Support us on Ko-fi!](https://res.cloudinary.com/dnjaazvr7/image/upload/c_thumb,w_200,g_face/v1684692937/megura/61e11d503cc13747866d338b_Button-2-p-500_nvb2aa.png)](https://ko-fi.com/megura)
+
+🔸[Docs](https://docs.megura.xyz)🔸[Support Server](https://discord.gg/X9eEW6yuhq)🔸[Vote for Us!](https://discordbotlist.com/bots/dahlia/upvote)🔸
+
+## Table of Contents
+- [Packages](#packages)
+- [Pre-requisites](#pre-requisites)
+- [List of Discord bot features (work in progress)](#list-of-discord-bot-features-work-in-progress)
+- [Installation](#installation)
+- [Commands](#commands-work-in-progress)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Packages
 - Node.js
@@ -44,13 +59,6 @@ Before running the bot, you will need the following:
 - [ ] Sales tracking
 
 All of these may not require having administrator role on the bot for security, but they are subject to change without prior notice.
-
-## Table of Contents
-
-- [Installation](#installation)
-- [Commands](#commands)
-- [Contributing](#contributing)
-- [License](#license)
 
 ## Installation
 
