@@ -1,8 +1,9 @@
-const { SlashCommandBuilder, ChannelType, PermissionsBitField } = require('discord.js');
+const { SlashCommandBuilder, ChannelType, PermissionsBitField, EmbedBuilder, channelMention, roleMention } = require('discord.js');
 const { Guild, Twitter } = require('../../src/db');
 const captcha = require('../../functions/verify');
 const { twitterAuth } = require('../../functions/twitter');
 const rules = require('../../functions/rules');
+const guild = require('../../models/guild');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -86,6 +87,11 @@ module.exports = {
             subcommand
             .setName('rules')
             .setDescription('Setup rules for the server.')
+            )
+        .addSubcommand(subcommand =>
+            subcommand
+            .setName('settings')
+            .setDescription('Show current server settings.')
             ),
     cooldown: 3000,
 	async execute(interaction) {
@@ -211,6 +217,35 @@ module.exports = {
                 } catch (error) {
                     console.log(error);
                 }
+            break;
+
+            case 'settings':
+                if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
+
+                const embed = new EmbedBuilder()
+                    .setTitle(`Current settings for ${interaction.guild.name}`);
+
+                const fieldMap = [
+                    { check: 'verifyChannelID', name: 'Verify Channel:', inline: true, valueFunc: channelMention },
+                    { check: 'verifyRoleID', name: 'Verify Role:', inline: true, valueFunc: roleMention },
+                    { check: 'twitterChannelID', name: 'Twitter Channel:', inline: true, valueFunc: channelMention },
+                    { check: 'raidRoleID', name: 'Raid Role:', inline: true, valueFunc: roleMention },
+                    { check: 'username', name: 'Server Twitter Account:', inline: false, valueFunc: (v) => `[@${v}](https://www.twitter.com/${v})` },
+                    { check: 'logsChannelID', name: 'Audit Logs Channel:', inline: false, valueFunc: channelMention },
+                    { check: 'whitelistChannelID', name: 'Whitelist Shop Channel:', inline: false, valueFunc: channelMention },
+                ];
+
+                const fields = fieldMap
+                    .filter(field => guildCheck[field.check])
+                    .map(field => ({ name: field.name, value: field.valueFunc(guildCheck[field.check]), inline: field.inline }));
+
+                if (fields.length === 0) {
+                    embed.addFields({name: `No settings found`, value: `Please configure your guild settings.`, inline: false })
+                } else {
+                    embed.addFields(...fields);
+                }
+
+                await interaction.reply({ embeds: [embed], ephemeral: true });
             break;
         }
 	}

@@ -11,5 +11,10 @@
     "TWITTER_CLIENT_SECRET": "",
     "TWITTER_CALLBACK_URL": "",
     "TWITTER_BEARER_TOKEN": "",
-    "ENCRYPTION_KEY": ""
+    "ENCRYPTION_KEY": "",
+    "cloudName": "",
+    "cloudApiKey": "",
+    "cloudApiSecret": "",
+    "dblApiKey": "",
+    "dblWebhookSecret": ""
 }

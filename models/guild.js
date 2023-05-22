@@ -79,7 +79,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         walletAmount: {
             type: DataTypes.INTEGER,
-            defaultValue: 1000000
+            defaultValue: 0
         },
     },
     {

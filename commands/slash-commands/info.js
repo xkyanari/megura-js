@@ -8,6 +8,7 @@ module.exports = {
 	async execute(interaction) {
         const embed = new EmbedBuilder()
             .setTitle('🛡️ **COMMANDS:** 🛡️')
+            .setImage('https://res.cloudinary.com/dnjaazvr7/image/upload/v1684522493/megura/dahlia-twitter_yae5go.png')
             .setDescription(
                 `> **_/info_** - Shows this message.
                 
@@ -33,9 +34,8 @@ module.exports = {
                 > **_/buy_** - Lets player to buy items in bulk.
                 
                 **Messinia Graciene: Project DAHLIA**
-                [Invite Me](https://discord.com/api/oauth2/authorize?client_id=1108464420465692795&permissions=139855260823&scope=bot)🔸[Docs](https://docs.megura.xyz)🔸[Support Server](https://discord.gg/X9eEW6yuhq)`
+                [Invite Me](https://discord.com/api/oauth2/authorize?client_id=1108464420465692795&permissions=139855260823&scope=bot)🔸[Docs](https://docs.megura.xyz)🔸[Support Server](https://discord.gg/X9eEW6yuhq)🔸[Vote for Us!](https://discordbotlist.com/bots/dahlia/upvote)`
                 );
-                // 🔸[Vote for Us!](https://top.gg/bot/1108464420465692795)
 
 		await interaction.reply({ embeds: [embed] });
 	}
