@@ -58,14 +58,9 @@ app.post('/top/upvote', async (req, res) => {
     }
 
     const { bot, user, type, isWeekend, query } = req.body;
+    const votes = isWeekend ? 2 : 1;
 
-    console.log(`Bot that received vote: ${bot}`);
-    console.log(`User who voted: ${user}`);
-    console.log(`Type of vote: ${type}`);
-    console.log(`Weekend multiplier in effect: ${isWeekend}`);
-    console.log(`Query string params: ${query}`);
-
-    await voteWebhook(user);
+    await voteWebhook(user, votes);
 
     return res.sendStatus(200);
 });
