@@ -1,6 +1,6 @@
 const express = require('express');
 const {Client, GatewayIntentBits, Collection} = require('discord.js');
-const {token, port, dblWebhookSecret} = require('./config.json');
+const {token, port, dblWebhookSecret, topWebhookSecret} = require('./config.json');
 const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -43,13 +43,29 @@ app.post('/dbl/upvote', async (req, res) => {
         return res.sendStatus(403);
     }
 
-    const {admin, avatar, username, id} = req.body;
-
-    console.log(`User ${username} (ID: ${id}) voted.`);
-    console.log(`User is admin: ${admin}`);
-    console.log(`User avatar hash: ${avatar}`);
+    const { admin, avatar, username, id } = req.body;
 
     await voteWebhook(id);
+
+    return res.sendStatus(200);
+});
+
+app.post('/top/upvote', async (req, res) => {
+    console.log("Referer: ", req.headers.referer);
+    if (req.headers.authorization !== topWebhookSecret || req.headers.referer !== 'top.gg') {
+        console.log('Unauthorized request');
+        return res.sendStatus(403);
+    }
+
+    const { bot, user, type, isWeekend, query } = req.body;
+
+    console.log(`Bot that received vote: ${bot}`);
+    console.log(`User who voted: ${user}`);
+    console.log(`Type of vote: ${type}`);
+    console.log(`Weekend multiplier in effect: ${isWeekend}`);
+    console.log(`Query string params: ${query}`);
+
+    await voteWebhook(user);
 
     return res.sendStatus(200);
 });

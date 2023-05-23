@@ -2,10 +2,10 @@ const { Player } = require('../src/db');
 
 const voteWebhook = async (id) => {
     try {
-        const player = await Player.findOne({ where: { discordID: id }, include: 'iura '});
+        const player = await Player.findOne({ where: { discordID: id }, include: 'iura' });
     
-        player.iura.walletAmount += 200;
-        return await player.save();
+        player.iura.walletAmount += 50;
+        await player.iura.save();
     } catch (error) {
         console.error(error);
     }
