@@ -1,7 +1,9 @@
 const { encrypt, decrypt } = require("../src/crypto-utils");
 
 module.exports = (sequelize, DataTypes) => {
-    const Twitter = sequelize.define('Twitter', {
+  const Twitter = sequelize.define(
+    "Twitter",
+    {
       discordID: {
         type: DataTypes.INTEGER,
         unique: true,
@@ -45,9 +47,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       freezeTableName: true,
-      timestamps: true
-    });
-  
-    return Twitter;
-  };
-  
+      timestamps: true,
+    }
+  );
+
+  return Twitter;
+};

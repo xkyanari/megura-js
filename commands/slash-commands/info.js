@@ -1,18 +1,20 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
-const readChapter = require('../../functions/displaytext');
+const readChapter = require("../../functions/displaytext");
 
 module.exports = {
-	data: new SlashCommandBuilder()
-		.setName('info')
-		.setDescription('List of Commands'),
-    cooldown: 3000,
-	async execute(interaction) {
-        const embed = new EmbedBuilder()
-            .setTitle('🛡️ **COMMANDS:** 🛡️')
-            .setImage('https://res.cloudinary.com/dnjaazvr7/image/upload/v1684522493/megura/dahlia-twitter_yae5go.png')
-            .setDescription(
-                `> **_/info_** - Shows this message.
+  data: new SlashCommandBuilder()
+    .setName("info")
+    .setDescription("List of Commands"),
+  cooldown: 3000,
+  async execute(interaction) {
+    const embed = new EmbedBuilder()
+      .setTitle("🛡️ **COMMANDS:** 🛡️")
+      .setImage(
+        "https://res.cloudinary.com/dnjaazvr7/image/upload/v1684522493/megura/dahlia-twitter_yae5go.png"
+      )
+      .setDescription(
+        `> **_/info_** - Shows this message.
                 
                 **Profile**
                 > **_/start_** - Initiate creating own character.
@@ -37,8 +39,8 @@ module.exports = {
                 
                 **Messinia Graciene: Project DAHLIA**
                 [Invite Me](https://discord.com/api/oauth2/authorize?client_id=1108464420465692795&permissions=139855260823&scope=bot)🔸[Docs](https://docs.megura.xyz)🔸[Support Server](https://discord.gg/X9eEW6yuhq)🔸[Vote for Us!](https://discordbotlist.com/bots/dahlia/upvote)`
-                );
+      );
 
-		await interaction.reply({ embeds: [embed] });
-	}
+    await interaction.reply({ embeds: [embed] });
+  },
 };

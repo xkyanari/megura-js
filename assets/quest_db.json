@@ -1,47 +1,47 @@
 [
-    {
-        "questName": "Caring for a Cat",
-        "questDescription": "You found a cat searching for food at an alley so you went to a store and gave the cat a can of cat food. The cat was delighted and purred a lot!",
-        "questReward": 50
-    },
-    {
-        "questName": "The Conflict in Merio",
-        "questDescription": "You received a task to go to the great city of Merio and defeat the Conflict terrorizing it. You asked around to find out what kind of Conflict you are up against and how to best go about defeating it. You fought hard to protect the people and survived.",
-        "questReward": 550
-    },
-    {
-        "questName": "Search for a Gem",
-        "questDescription": "A merchant asked you to retrieve a powerful gem from the depths of a mysterious temple in Eldelvain. You braved the Conflicts and traps to reach the gem until you encountered a hidden danger that lurked in the darkness. As you fell into a pit, there you found the gem. You teleported back and gave the gem.",
-        "questReward": 1010
-    },
-    {
-        "questName": "Lord Time's Lost Artifact",
-        "questDescription": "An Archduke asked you to search for the lost artifact of Lord Time. It has the power to manipulate the fabric of time and space. It turns out that he needed it so his wife will not find out he cheated with a marchioness.",
-        "questReward": 150
-    },
-    {
-        "questName": "The Magic in Southern Bluffs",
-        "questDescription": "You were tasked to locate the source of a strange magic stirring on the Southern Bluffs of Eldelvain. Apparently, there was a new book cafe that was built within. You reported back with your findings in dismay.",
-        "questReward": 10
-    },
-    {
-        "questName": "Fire, Water and Earth",
-        "questDescription": "There were three magical rings that will help you harness the power of elements but you must venture to a distant part of Eldelvain to obtain them. Dragons and Conflicts were found in sight but you defeated them all. Well done!",
-        "questReward": 700
-    },
-    {
-        "questName": "The Conflict in Merio: Part II",
-        "questDescription": "After defeating the Conflict in Merio, you received a message from one of its people that there is a disturbance again caused by a group of bandits. They have been all over the town causing chaos. Your mission was to track them down and bring them to justice.",
-        "questReward": 800
-    },
-    {
-        "questName": "Lord Time's Lost Artifact: Part II",
-        "questDescription": "After the successful recovery of the Lost Artifact, you were approached by the Archduke once again. This time he wanted to run away with the marchioness. You couldn't help but shake your head in disbelief, wondering if it was worth all the trouble just to avoid a little marital strife.",
-        "questReward": 300
-    },
-    {
-        "questName": "The Scapegoat",
-        "questDescription": "A lady accidentally left their favorite hat. You must navigate through time to retrieve it but every time you get close, a funny-looking goat steals it and runs off. Can you outsmart the goat and retrieve her lost treasure?",
-        "questReward": 200
-    }
+  {
+    "questName": "Caring for a Cat",
+    "questDescription": "You found a cat searching for food at an alley so you went to a store and gave the cat a can of cat food. The cat was delighted and purred a lot!",
+    "questReward": 50
+  },
+  {
+    "questName": "The Conflict in Merio",
+    "questDescription": "You received a task to go to the great city of Merio and defeat the Conflict terrorizing it. You asked around to find out what kind of Conflict you are up against and how to best go about defeating it. You fought hard to protect the people and survived.",
+    "questReward": 550
+  },
+  {
+    "questName": "Search for a Gem",
+    "questDescription": "A merchant asked you to retrieve a powerful gem from the depths of a mysterious temple in Eldelvain. You braved the Conflicts and traps to reach the gem until you encountered a hidden danger that lurked in the darkness. As you fell into a pit, there you found the gem. You teleported back and gave the gem.",
+    "questReward": 1010
+  },
+  {
+    "questName": "Lord Time's Lost Artifact",
+    "questDescription": "An Archduke asked you to search for the lost artifact of Lord Time. It has the power to manipulate the fabric of time and space. It turns out that he needed it so his wife will not find out he cheated with a marchioness.",
+    "questReward": 150
+  },
+  {
+    "questName": "The Magic in Southern Bluffs",
+    "questDescription": "You were tasked to locate the source of a strange magic stirring on the Southern Bluffs of Eldelvain. Apparently, there was a new book cafe that was built within. You reported back with your findings in dismay.",
+    "questReward": 10
+  },
+  {
+    "questName": "Fire, Water and Earth",
+    "questDescription": "There were three magical rings that will help you harness the power of elements but you must venture to a distant part of Eldelvain to obtain them. Dragons and Conflicts were found in sight but you defeated them all. Well done!",
+    "questReward": 700
+  },
+  {
+    "questName": "The Conflict in Merio: Part II",
+    "questDescription": "After defeating the Conflict in Merio, you received a message from one of its people that there is a disturbance again caused by a group of bandits. They have been all over the town causing chaos. Your mission was to track them down and bring them to justice.",
+    "questReward": 800
+  },
+  {
+    "questName": "Lord Time's Lost Artifact: Part II",
+    "questDescription": "After the successful recovery of the Lost Artifact, you were approached by the Archduke once again. This time he wanted to run away with the marchioness. You couldn't help but shake your head in disbelief, wondering if it was worth all the trouble just to avoid a little marital strife.",
+    "questReward": 300
+  },
+  {
+    "questName": "The Scapegoat",
+    "questDescription": "A lady accidentally left their favorite hat. You must navigate through time to retrieve it but every time you get close, a funny-looking goat steals it and runs off. Can you outsmart the goat and retrieve her lost treasure?",
+    "questReward": 200
+  }
 ]

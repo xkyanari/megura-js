@@ -1,7 +1,9 @@
-const { Events, ActivityType } = require('discord.js');
-const { sequelize, Player } = require('../src/db');
-const cron = require('node-cron');
-const refresh = require('../functions/refresh');
+const { Events, ActivityType } = require("discord.js");
+const { sequelize, Player } = require("../src/db");
+const cron = require("node-cron");
+const refresh = require("../functions/refresh");
+const { mongooseDB } = require("./config.json");
+const { connect } = require("mongoose");
 
 let Discord;
 try {
@@ -18,31 +20,47 @@ try {
  */
 
 module.exports = {
-	name: Events.ClientReady,
-	once: true,
-	async execute(client) {
-		client.user.setPresence({ activities: [{ name: `\/start | \/info`, type: ActivityType.Listening }], status: 'dnd' });
-		console.log( `You're now connected as ${client.user.tag}.\nNode version: ${process.version}\nDiscord.js version: ${Discord.version}` );
+  name: Events.ClientReady,
+  once: true,
+  async execute(client) {
+    client.user.setPresence({
+      activities: [
+        {
+          name: `\/start | \/info`,
+          type: ActivityType.Listening,
+        },
+      ],
+      status: "dnd",
+    });
+    console.log(
+      `You're now connected as ${client.user.tag}.\nNode version: ${process.version}\nDiscord.js version: ${Discord.version}`
+    );
 
-		const sync = {
-			default: {},
-			alter: { alter: true },
-			force: { force: true }
-		};
+    const sync = {
+      default: {},
+      alter: {
+        alter: true,
+      },
+      force: {
+        force: true,
+      },
+    };
 
-		const data = await sequelize.sync(sync.default);
-		console.log("Database connection successful.");
-		
-		// uncomment only when sync.force is running in dev
-		// if (data) {
-		// 	await refresh();
-		// }
-		
-		// for running scheduled tasks
-		// cron.schedule('* * * * *', function() {
-		// 	const date = new Date(); // date now
-		// 	console.log(`<${date.toLocaleString()}> Standing by...`);
-		// });
+    await sequelize.sync(sync.default);
+    console.log("Database connection successful.");
 
-	},
+    await connect(mongooseDB).catch(console.error);
+    console.log("MongoDB database connection successful.");
+
+    // uncomment only when sync.force is running in dev
+    // if (data) {
+    // await refresh();
+    // }
+
+    // for running scheduled tasks
+    // cron.schedule('* * * * *', function() {
+    // const date = new Date(); // date now
+    // console.log(`<${date.toLocaleString()}> Standing by...`);
+    // });
+  },
 };

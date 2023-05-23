@@ -1,44 +1,47 @@
 module.exports = (sequelize, DataTypes) => {
-    const Raid = sequelize.define('Raid', {
-        tweetID: {
-            type: DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true
+  const Raid = sequelize.define(
+    "Raid",
+    {
+      tweetID: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      tweetUrlID: {
+        type: DataTypes.TEXT,
+      },
+      postedBy: {
+        type: DataTypes.INTEGER,
+      },
+      postedIn: {
+        type: DataTypes.INTEGER,
+      },
+      retweeters: {
+        type: DataTypes.TEXT,
+        defaultValue: "[]",
+        get() {
+          return JSON.parse(this.getDataValue("retweeters"));
         },
-        tweetUrlID: {
-            type: DataTypes.TEXT,
+        set(value) {
+          this.setDataValue("retweeters", JSON.stringify(value));
         },
-        postedBy: {
-            type: DataTypes.INTEGER,
+      },
+      likers: {
+        type: DataTypes.TEXT,
+        defaultValue: "[]",
+        get() {
+          return JSON.parse(this.getDataValue("likers"));
         },
-        postedIn: {
-            type: DataTypes.INTEGER,
+        set(value) {
+          this.setDataValue("likers", JSON.stringify(value));
         },
-        retweeters: {
-            type: DataTypes.TEXT,
-            defaultValue: '[]',
-            get() {
-              return JSON.parse(this.getDataValue('retweeters'));
-            },
-            set(value) {
-              this.setDataValue('retweeters', JSON.stringify(value));
-            },
-        },
-        likers: {
-            type: DataTypes.TEXT,
-            defaultValue: '[]',
-            get() {
-                return JSON.parse(this.getDataValue('likers'));
-            },
-            set(value) {
-                this.setDataValue('likers', JSON.stringify(value));
-            },
-        },
+      },
     },
     {
-        freezeTableName: true,
-        timestamps: true
-    });
+      freezeTableName: true,
+      timestamps: true,
+    }
+  );
 
-    return Raid;
+  return Raid;
 };

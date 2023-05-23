@@ -1,62 +1,62 @@
 [
-    {
-        "itemName": "Basic Sword",
-        "level": 1,
-        "totalHealth": 0,
-        "totalAttack": 50,
-        "totalDefense": 0,
-        "price": 50,
-        "description": "A cheap sword for starters.",
-        "item_ID": "sword"
-    },
-    {
-        "itemName": "Cheap Bow",
-        "level": 1,
-        "totalHealth": 0,
-        "totalAttack": 75,
-        "totalDefense": 0,
-        "price": 50,
-        "description": "Nothing special. Just a cheap bow.",
-        "item_ID": "bow"
-    },
-    {
-        "itemName": "Rotten Bandage",
-        "level": 1,
-        "totalHealth": 50,
-        "totalAttack": 0,
-        "totalDefense": 0,
-        "price": 75,
-        "description": "These were rumored to be stolen from the tombs of kings in Aescaphone.",
-        "item_ID": "bandage"
-    },
-    {
-        "itemName": "Boiled Egg",
-        "level": 1,
-        "totalHealth": 100,
-        "totalAttack": 50,
-        "totalDefense": 25,
-        "price": 150,
-        "description": "Small adventurers' favorite.",
-        "item_ID": "eggs"
-    },
-    {
-        "itemName": "Simple Rock",
-        "level": 1,
-        "totalHealth": 0,
-        "totalAttack": 5,
-        "totalDefense": 0,
-        "price": 1,
-        "description": "A rock. Duh.",
-        "item_ID": "rock"
-    },
-    {
-        "itemName": "Yusha's Ben10 Brief",
-        "level": 1,
-        "totalHealth": 0,
-        "totalAttack": 0,
-        "totalDefense": 100,
-        "price": 150,
-        "description": "Your inner kid will feel like they have the strength and agility of an alien superhero. It's like a secret weapon hiding in their brief.",
-        "item_ID": "yusha"
-    }
+  {
+    "itemName": "Basic Sword",
+    "level": 1,
+    "totalHealth": 0,
+    "totalAttack": 50,
+    "totalDefense": 0,
+    "price": 50,
+    "description": "A cheap sword for starters.",
+    "item_ID": "sword"
+  },
+  {
+    "itemName": "Cheap Bow",
+    "level": 1,
+    "totalHealth": 0,
+    "totalAttack": 75,
+    "totalDefense": 0,
+    "price": 50,
+    "description": "Nothing special. Just a cheap bow.",
+    "item_ID": "bow"
+  },
+  {
+    "itemName": "Rotten Bandage",
+    "level": 1,
+    "totalHealth": 50,
+    "totalAttack": 0,
+    "totalDefense": 0,
+    "price": 75,
+    "description": "These were rumored to be stolen from the tombs of kings in Aescaphone.",
+    "item_ID": "bandage"
+  },
+  {
+    "itemName": "Boiled Egg",
+    "level": 1,
+    "totalHealth": 100,
+    "totalAttack": 50,
+    "totalDefense": 25,
+    "price": 150,
+    "description": "Small adventurers' favorite.",
+    "item_ID": "eggs"
+  },
+  {
+    "itemName": "Simple Rock",
+    "level": 1,
+    "totalHealth": 0,
+    "totalAttack": 5,
+    "totalDefense": 0,
+    "price": 1,
+    "description": "A rock. Duh.",
+    "item_ID": "rock"
+  },
+  {
+    "itemName": "Yusha's Ben10 Brief",
+    "level": 1,
+    "totalHealth": 0,
+    "totalAttack": 0,
+    "totalDefense": 100,
+    "price": 150,
+    "description": "Your inner kid will feel like they have the strength and agility of an alien superhero. It's like a secret weapon hiding in their brief.",
+    "item_ID": "yusha"
+  }
 ]

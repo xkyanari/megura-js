@@ -9,6 +9,7 @@ Dahlia is a state-of-the-art Discord bot that runs on chatGPT and supports both 
 🔸[Docs](https://docs.megura.xyz)🔸[Support Server](https://discord.gg/X9eEW6yuhq)🔸[Vote for Us!](https://discordbotlist.com/bots/dahlia/upvote)🔸
 
 ## Table of Contents
+
 - [Packages](#packages)
 - [Pre-requisites](#pre-requisites)
 - [List of Discord bot features (work in progress)](#list-of-discord-bot-features-work-in-progress)
@@ -18,6 +19,7 @@ Dahlia is a state-of-the-art Discord bot that runs on chatGPT and supports both 
 - [License](#license)
 
 ## Packages
+
 - Node.js
 - Alchemy SDK
 - Solscan API
@@ -28,6 +30,7 @@ Dahlia is a state-of-the-art Discord bot that runs on chatGPT and supports both 
 - Sequelize
 
 ## Pre-requisites
+
 Before running the bot, you will need the following:
 
 - **Node.js**: You will need Node.js installed on your machine to run the bot. You can download and install Node.js from the official website at https://nodejs.org.
@@ -38,6 +41,7 @@ Before running the bot, you will need the following:
 - **Database**: You will need a database to store data related to the bot. In this project, SQLite3 is used. You can download and install SQLite3 from the official website at https://www.sqlite.org/download.html. Alternatively, you can use other databases supported by Sequelize, such as PostgreSQL, MySQL, or MariaDB.
 
 ## List of Discord bot features (work in progress)
+
 - [x] Verification with Captcha
 - [x] NFT Verification
 - [ ] Create and manage Giveaways
@@ -72,6 +76,7 @@ To install and run the project, follow these steps:
 6. (Optional) Chapters can be uploaded in `chapters/`. Otherwise, the bot will simply load the placeholder stories found in `samples/`.
 
 ## Commands (work in progress)
+
 - `/attack`: Initiate attack against a random monster.
 - `/buy`: Lets player to buy items in bulk.
 - `/changenick`: Updates player name.

@@ -1,36 +1,36 @@
 [
-    {
-        "player1": {
-            "critical": [
-                "🔴 **CRITICAL HIT !!** `${p1_name}` received a ✨ __blessing__ ✨ and dealt **${atk_1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth1}** remaining.",
-                "🔴 **CRITICAL HIT !!** `${p1_name}` poured __hot oil__ and dealt **${atk_1}** damage to `${p2_name}`'s head. `${p2_name}` had **${remainingHealth1}** remaining.",
-                "🔴 **CRITICAL HIT !!** `${p1_name}` grabbed a __cat gun__ from nowhere and dealt **${atk_1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth1}** remaining.",
-                "🔴 **CRITICAL HIT !!** `${p1_name}` threw a __dynamite__ and dealt **${atk_1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth1}** remaining.",
-                "🔴 **CRITICAL HIT !!** `${p1_name}` pulled the __rug__ and dealt **${atk_1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth1}** remaining."
-            ],
-            "normal": [
-                "⚔️ `{$p1_name}` has dealt **${atk1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth2}** remaining.",
-                "⚔️ `{$p1_name}` struck their weapon to deal **${atk1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth2}** remaining.",
-                "⚔️ `{$p1_name}` threw a lot of stones dealing **${atk1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth2}** remaining.",
-                "⚔️ `{$p1_name}` climbed on top of a tree then dropped a bee hive dealing **${atk1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth2}** remaining."
-            ]
-        }
-    },
-    {
-        "player2": {
-            "critical": [
-                "🔴 **CRITICAL HIT !!** `${p2_name}` received a ✨ __blessing__ ✨ and dealt **${atk_2}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth3}** remaining.",
-                "🔴 **CRITICAL HIT !!** `${p2_name}` poured __hot oil__ and dealt **${atk_2}** damage to `${p2_name}`'s head. `${p2_name}` had **${remainingHealth3}** remaining.",
-                "🔴 **CRITICAL HIT !!** `${p2_name}` grabbed a __cat gun__ from nowhere and dealt **${atk_2}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth3}** remaining.",
-                "🔴 **CRITICAL HIT !!** `${p2_name}` threw a __dynamite__ and dealt **${atk_2}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth3}** remaining.",
-                "🔴 **CRITICAL HIT !!** `${p2_name}` pulled the __rug__ and dealt **${atk_2}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth3}** remaining."
-            ],
-            "normal": [
-                "⚔️ `${p2_name}` has dealt **${atk2}** damage to `${p1_name}`. `${p1_name}` had **${remainingHealth4}** remaining.",
-                "⚔️ `${p2_name}` struck their weapon to deal **${atk2}** damage to `${p1_name}`. `${p1_name}` had **${remainingHealth4}** remaining.",
-                "⚔️ `${p2_name}` threw a lot of stones dealing **${atk2}** damage to `${p1_name}`. `${p1_name}` had **${remainingHealth4}** remaining.",
-                "⚔️ `${p2_name}` climbed on top of a tree then dropped a bee hive dealing **${atk2}** damage to `${p1_name}`. `${p1_name}` had **${remainingHealth4}** remaining."
-            ]
-        }
+  {
+    "player1": {
+      "critical": [
+        "🔴 **CRITICAL HIT !!** `${p1_name}` received a ✨ __blessing__ ✨ and dealt **${atk_1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth1}** remaining.",
+        "🔴 **CRITICAL HIT !!** `${p1_name}` poured __hot oil__ and dealt **${atk_1}** damage to `${p2_name}`'s head. `${p2_name}` had **${remainingHealth1}** remaining.",
+        "🔴 **CRITICAL HIT !!** `${p1_name}` grabbed a __cat gun__ from nowhere and dealt **${atk_1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth1}** remaining.",
+        "🔴 **CRITICAL HIT !!** `${p1_name}` threw a __dynamite__ and dealt **${atk_1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth1}** remaining.",
+        "🔴 **CRITICAL HIT !!** `${p1_name}` pulled the __rug__ and dealt **${atk_1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth1}** remaining."
+      ],
+      "normal": [
+        "⚔️ `{$p1_name}` has dealt **${atk1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth2}** remaining.",
+        "⚔️ `{$p1_name}` struck their weapon to deal **${atk1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth2}** remaining.",
+        "⚔️ `{$p1_name}` threw a lot of stones dealing **${atk1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth2}** remaining.",
+        "⚔️ `{$p1_name}` climbed on top of a tree then dropped a bee hive dealing **${atk1}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth2}** remaining."
+      ]
     }
+  },
+  {
+    "player2": {
+      "critical": [
+        "🔴 **CRITICAL HIT !!** `${p2_name}` received a ✨ __blessing__ ✨ and dealt **${atk_2}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth3}** remaining.",
+        "🔴 **CRITICAL HIT !!** `${p2_name}` poured __hot oil__ and dealt **${atk_2}** damage to `${p2_name}`'s head. `${p2_name}` had **${remainingHealth3}** remaining.",
+        "🔴 **CRITICAL HIT !!** `${p2_name}` grabbed a __cat gun__ from nowhere and dealt **${atk_2}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth3}** remaining.",
+        "🔴 **CRITICAL HIT !!** `${p2_name}` threw a __dynamite__ and dealt **${atk_2}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth3}** remaining.",
+        "🔴 **CRITICAL HIT !!** `${p2_name}` pulled the __rug__ and dealt **${atk_2}** damage to `${p2_name}`. `${p2_name}` had **${remainingHealth3}** remaining."
+      ],
+      "normal": [
+        "⚔️ `${p2_name}` has dealt **${atk2}** damage to `${p1_name}`. `${p1_name}` had **${remainingHealth4}** remaining.",
+        "⚔️ `${p2_name}` struck their weapon to deal **${atk2}** damage to `${p1_name}`. `${p1_name}` had **${remainingHealth4}** remaining.",
+        "⚔️ `${p2_name}` threw a lot of stones dealing **${atk2}** damage to `${p1_name}`. `${p1_name}` had **${remainingHealth4}** remaining.",
+        "⚔️ `${p2_name}` climbed on top of a tree then dropped a bee hive dealing **${atk2}** damage to `${p1_name}`. `${p1_name}` had **${remainingHealth4}** remaining."
+      ]
+    }
+  }
 ]

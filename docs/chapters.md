@@ -7,7 +7,7 @@ This guide explains how writers can create their chapters to be uploaded in the 
 
 ## Chapter Format
 
-1. Write your chapter as a plain text file (*.txt) using any text editor of your choice.
+1. Write your chapter as a plain text file (\*.txt) using any text editor of your choice.
 2. Separate paragraphs by a blank line (two line breaks).
 3. To add a delay between paragraphs, insert a line with the desired number of seconds followed by the word "seconds" (e.g., `5 seconds`). This line should also be separated from the paragraphs by blank lines.
 4. Save your file with a `.txt` extension (e.g., `chapter1.txt`).

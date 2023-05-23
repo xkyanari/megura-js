@@ -1,160 +1,160 @@
 [
-    {
-        "blockchain": "ethereum",
-        "contractName": "PXN: Ghost Division",
-        "contractAddress": "0x160c404b2b49cbc3240055ceaee026df1e8497a0",
-        "traitWeapon": "Back",
-        "traitArmor": "Outfit",
-        "collectionURL": "https://opensea.io/collection/pxnghostdivision"
-    },
-    {
-        "blockchain": "ethereum",
-        "contractName": "The Girls of Armament: GENE_SIS",
-        "contractAddress": "0xd8a5d498ab43ed060cb6629b97a19e3e4276dd9f",
-        "traitWeapon": "hand",
-        "traitArmor": "clothes",
-        "collectionURL": "https://opensea.io/collection/tgoa-gene-sis"
-    },
-    {
-        "blockchain": "ethereum",
-        "contractName": "Moonbirds",
-        "contractAddress": "0x23581767a106ae21c074b2276D25e5C3e136a68b",
-        "traitArmor": "Outerwear",
-        "collectionURL": "https://opensea.io/collection/proof-moonbirds"
-    },
-    {
-        "blockchain": "ethereum",
-        "contractName": "Doodles",
-        "contractAddress": "0x8a90cab2b38dba80c64b7734e58ee1db38b8992e",
-        "traitArmor": "body",
-        "collectionURL": "https://opensea.io/collection/doodles-official"
-    },
-    {
-        "blockchain": "ethereum",
-        "contractName": "Sappy Seals",
-        "contractAddress": "0x364C828eE171616a39897688A831c2499aD972ec",
-        "traitArmor": "body",
-        "collectionURL": "https://opensea.io/collection/sappy-seals"
-    },
-    {
-        "blockchain": "ethereum",
-        "contractName": "JUUNI Zodia",
-        "contractAddress": "0x3E3589F7337551256daFE3Df3695f92e605047bC",
-        "traitWeapon": "Weapon",
-        "traitArmor": "Clothing",
-        "collectionURL": "https://opensea.io/collection/juuni-zodia"
-    },
-    {
-        "blockchain": "ethereum",
-        "contractName": "Oldeus",
-        "contractAddress": "0x427cfA4947CCCC6Db3040Ab32908A7EA6D31F370",
-        "traitWeapon": "Handgear",
-        "traitArmor": "Outfit",
-        "collectionURL": "https://opensea.io/collection/oldeus-collection"
-    },
-    {
-        "blockchain": "ethereum",
-        "contractName": "Azuki",
-        "contractAddress": "0xed5af388653567af2f388e6224dc7c4b3241c544",
-        "traitWeapon": "Offhand",
-        "traitArmor": "Clothing",
-        "collectionURL": "https://opensea.io/collection/azuki"
-    },
-    {
-        "blockchain": "ethereum",
-        "contractName": "BEANZ Official",
-        "contractAddress": "0x306b1ea3ecdf94ab739f1910bbda052ed4a9f949",
-        "traitWeapon": "Hand",
-        "traitArmor": "Clothing",
-        "collectionURL": "https://opensea.io/collection/beanzofficial"
-    },
-    {
-        "blockchain": "ethereum",
-        "contractName": "Valhalla",
-        "contractAddress": "0x231d3559aa848Bf10366fB9868590F01d34bF240",
-        "traitWeapon": "Primary",
-        "traitArmor": "Clothes",
-        "collectionURL": "https://opensea.io/collection/valhalla"
-    },
-    {
-        "blockchain": "ethereum",
-        "contractName": "KPR",
-        "contractAddress": "0x231d3559aa848Bf10366fB9868590F01d34bF240",
-        "traitWeapon": "Special",
-        "traitArmor": "Outerwear",
-        "collectionURL": "https://opensea.io/collection/kprverse"
-    },
-    {
-        "blockchain": "ethereum",
-        "contractName": "Children of Ukiyo",
-        "contractAddress": "0x3b3c2dacfdd7b620c8916a5f7aa6476bdfb1aa07",
-        "traitWeapon": "Weapon",
-        "traitArmor": "Shirt",
-        "collectionURL": "https://opensea.io/collection/childrenofukiyoofficial"
-    },
-    {
-        "blockchain": "ethereum",
-        "contractName": "Divine Anarchy",
-        "contractAddress": "0xc631164b6cb1340b5123c9162f8558c866de1926",
-        "traitWeapon": "Weapon",
-        "traitArmor": "Clothes",
-        "collectionURL": "https://opensea.io/collection/divineanarchy"
-    },
-    {
-        "blockchain": "ethereum",
-        "contractName": "Project Atama Genesis",
-        "contractAddress": "0xef5e3e60bd031498318ac97cf55db74357256282",
-        "traitWeapon": "HANDS",
-        "traitArmor": "SUIT",
-        "collectionURL": "https://opensea.io/collection/projectatamaofficial"
-    },
-    {
-        "blockchain": "ethereum",
-        "contractName": "NANO Agents",
-        "contractAddress": "0x6DCD514E73653Fdb8Dc46B6E77538Bb3069a7e0f",
-        "traitArmor": "Type",
-        "collectionURL": "https://opensea.io/collection/nano-agents"
-    },
-    {
-        "blockchain": "solana",
-        "collectionID": "simpl3r",
-        "contractName": "Simpl3r: Bounty Hunters",
-        "contractAddress": "ee701d4fab70618380b34007d38ba09af9f4b976a0709fcba31ffdc25aa779b1",
-        "traitArmor": "Clothes",
-        "collectionURL": "https://magiceden.io/marketplace/simpl3r"
-    },
-    {
-        "blockchain": "solana",
-        "collectionID": "cyberheroez",
-        "contractName": "Cyberheroez",
-        "contractAddress": "310fe0426095bfc7d98a41858dc7d65f848fffb82a7f75474f2057d7b2eb69a4",
-        "traitWeapon": "Weapon",
-        "traitArmor": "Armor",
-        "collectionURL": "https://magiceden.io/marketplace/cyberheroez"
-    },
-    {
-        "blockchain": "solana",
-        "collectionID": "cybervillainz_reborn",
-        "contractName": "Cybervillainz: Reborn",
-        "contractAddress": "d193d75eafd2f7535b2e2cf147738b695eeecda77b89882de38a2a38524f9758",
-        "traitWeapon": "Right Hand",
-        "traitArmor": "Clothing",
-        "collectionURL": "https://magiceden.io/marketplace/cybervillainz_reborn"
-    },
-    {
-        "blockchain": "solana",
-        "collectionID": "bvdcat",
-        "contractName": "BVDCAT",
-        "contractAddress": "0880b222d1950ec57eafb3d2d8c5eeb8cf6fa9c4213bbe8a71b33b5a8c088fbd",
-        "traitArmor": "Clothes",
-        "collectionURL": "https://magiceden.io/marketplace/bvdcat"
-    },
-    {
-        "blockchain": "solana",
-        "collectionID": "galactic_geckos",
-        "contractName": "Galactic Gecko Space Garage",
-        "contractAddress": "658a8a03214921923ef82ed2ddda27526b365e03b3f50370a1d3587fa89ccd8f",
-        "traitArmor": "Armor",
-        "collectionURL": "https://magiceden.io/marketplace/galactic_geckos"
-    }
+  {
+    "blockchain": "ethereum",
+    "contractName": "PXN: Ghost Division",
+    "contractAddress": "0x160c404b2b49cbc3240055ceaee026df1e8497a0",
+    "traitWeapon": "Back",
+    "traitArmor": "Outfit",
+    "collectionURL": "https://opensea.io/collection/pxnghostdivision"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "The Girls of Armament: GENE_SIS",
+    "contractAddress": "0xd8a5d498ab43ed060cb6629b97a19e3e4276dd9f",
+    "traitWeapon": "hand",
+    "traitArmor": "clothes",
+    "collectionURL": "https://opensea.io/collection/tgoa-gene-sis"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "Moonbirds",
+    "contractAddress": "0x23581767a106ae21c074b2276D25e5C3e136a68b",
+    "traitArmor": "Outerwear",
+    "collectionURL": "https://opensea.io/collection/proof-moonbirds"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "Doodles",
+    "contractAddress": "0x8a90cab2b38dba80c64b7734e58ee1db38b8992e",
+    "traitArmor": "body",
+    "collectionURL": "https://opensea.io/collection/doodles-official"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "Sappy Seals",
+    "contractAddress": "0x364C828eE171616a39897688A831c2499aD972ec",
+    "traitArmor": "body",
+    "collectionURL": "https://opensea.io/collection/sappy-seals"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "JUUNI Zodia",
+    "contractAddress": "0x3E3589F7337551256daFE3Df3695f92e605047bC",
+    "traitWeapon": "Weapon",
+    "traitArmor": "Clothing",
+    "collectionURL": "https://opensea.io/collection/juuni-zodia"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "Oldeus",
+    "contractAddress": "0x427cfA4947CCCC6Db3040Ab32908A7EA6D31F370",
+    "traitWeapon": "Handgear",
+    "traitArmor": "Outfit",
+    "collectionURL": "https://opensea.io/collection/oldeus-collection"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "Azuki",
+    "contractAddress": "0xed5af388653567af2f388e6224dc7c4b3241c544",
+    "traitWeapon": "Offhand",
+    "traitArmor": "Clothing",
+    "collectionURL": "https://opensea.io/collection/azuki"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "BEANZ Official",
+    "contractAddress": "0x306b1ea3ecdf94ab739f1910bbda052ed4a9f949",
+    "traitWeapon": "Hand",
+    "traitArmor": "Clothing",
+    "collectionURL": "https://opensea.io/collection/beanzofficial"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "Valhalla",
+    "contractAddress": "0x231d3559aa848Bf10366fB9868590F01d34bF240",
+    "traitWeapon": "Primary",
+    "traitArmor": "Clothes",
+    "collectionURL": "https://opensea.io/collection/valhalla"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "KPR",
+    "contractAddress": "0x231d3559aa848Bf10366fB9868590F01d34bF240",
+    "traitWeapon": "Special",
+    "traitArmor": "Outerwear",
+    "collectionURL": "https://opensea.io/collection/kprverse"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "Children of Ukiyo",
+    "contractAddress": "0x3b3c2dacfdd7b620c8916a5f7aa6476bdfb1aa07",
+    "traitWeapon": "Weapon",
+    "traitArmor": "Shirt",
+    "collectionURL": "https://opensea.io/collection/childrenofukiyoofficial"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "Divine Anarchy",
+    "contractAddress": "0xc631164b6cb1340b5123c9162f8558c866de1926",
+    "traitWeapon": "Weapon",
+    "traitArmor": "Clothes",
+    "collectionURL": "https://opensea.io/collection/divineanarchy"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "Project Atama Genesis",
+    "contractAddress": "0xef5e3e60bd031498318ac97cf55db74357256282",
+    "traitWeapon": "HANDS",
+    "traitArmor": "SUIT",
+    "collectionURL": "https://opensea.io/collection/projectatamaofficial"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "NANO Agents",
+    "contractAddress": "0x6DCD514E73653Fdb8Dc46B6E77538Bb3069a7e0f",
+    "traitArmor": "Type",
+    "collectionURL": "https://opensea.io/collection/nano-agents"
+  },
+  {
+    "blockchain": "solana",
+    "collectionID": "simpl3r",
+    "contractName": "Simpl3r: Bounty Hunters",
+    "contractAddress": "ee701d4fab70618380b34007d38ba09af9f4b976a0709fcba31ffdc25aa779b1",
+    "traitArmor": "Clothes",
+    "collectionURL": "https://magiceden.io/marketplace/simpl3r"
+  },
+  {
+    "blockchain": "solana",
+    "collectionID": "cyberheroez",
+    "contractName": "Cyberheroez",
+    "contractAddress": "310fe0426095bfc7d98a41858dc7d65f848fffb82a7f75474f2057d7b2eb69a4",
+    "traitWeapon": "Weapon",
+    "traitArmor": "Armor",
+    "collectionURL": "https://magiceden.io/marketplace/cyberheroez"
+  },
+  {
+    "blockchain": "solana",
+    "collectionID": "cybervillainz_reborn",
+    "contractName": "Cybervillainz: Reborn",
+    "contractAddress": "d193d75eafd2f7535b2e2cf147738b695eeecda77b89882de38a2a38524f9758",
+    "traitWeapon": "Right Hand",
+    "traitArmor": "Clothing",
+    "collectionURL": "https://magiceden.io/marketplace/cybervillainz_reborn"
+  },
+  {
+    "blockchain": "solana",
+    "collectionID": "bvdcat",
+    "contractName": "BVDCAT",
+    "contractAddress": "0880b222d1950ec57eafb3d2d8c5eeb8cf6fa9c4213bbe8a71b33b5a8c088fbd",
+    "traitArmor": "Clothes",
+    "collectionURL": "https://magiceden.io/marketplace/bvdcat"
+  },
+  {
+    "blockchain": "solana",
+    "collectionID": "galactic_geckos",
+    "contractName": "Galactic Gecko Space Garage",
+    "contractAddress": "658a8a03214921923ef82ed2ddda27526b365e03b3f50370a1d3587fa89ccd8f",
+    "traitArmor": "Armor",
+    "collectionURL": "https://magiceden.io/marketplace/galactic_geckos"
+  }
 ]
