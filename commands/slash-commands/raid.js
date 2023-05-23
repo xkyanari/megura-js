@@ -68,71 +68,95 @@ module.exports = {
 
         switch (subCommand) {
             case 'join':
-                if (twitter) {
-                    return interaction.reply({ content: `You're logged in as ${twitter.username}.`, ephemeral: true });
-                } else {
-                    await twitterAuth(interaction);
+                try {
+                    if (twitter) {
+                        return interaction.reply({ content: `You're logged in as ${twitter.username}.`, ephemeral: true });
+                    } else {
+                        await twitterAuth(interaction);
+                    }
+                    
+                    setTimeout(() => {
+                        Twitter.findOne({ where: { discordID: interaction.member.id }})
+                            .then((user) => {
+                                if (user.username !== null) {
+                                    return interaction.followUp({ content: `You're now logged in as \`${user.username}\`.`, ephemeral: true });
+                                } else {
+                                    Twitter.destroy({ where: { discordID: interaction.member.id }});
+                                    interaction.followUp({ content: `Your session expired. Please try logging in again.`, ephemeral: true });
+                                }
+                            })
+                            .catch((error) => {
+                                console.error(error);
+                            });
+                    }, 180000);
+                } catch (error) {
+                    console.error(error);
                 }
-                
-                setTimeout(() => {
-                    Twitter.findOne({ where: { discordID: interaction.member.id }})
-                        .then((user) => {
-                            if (user.username !== null) {
-                                return interaction.followUp({ content: `You're now logged in as \`${user.username}\`.`, ephemeral: true });
-                            } else {
-                                Twitter.destroy({ where: { discordID: interaction.member.id }});
-                                interaction.followUp({ content: `Your session expired. Please try logging in again.`, ephemeral: true });
-                            }
-                        })
-                        .catch((error) => {
-                            console.error(error);
-                        });
-                }, 180000);
             break;
 
             case 'remove':
-                if (twitter) {
-                    await Twitter.destroy({ where: { discordID: interaction.member.id } });
-                    return await interaction.reply({ content: `Your Twitter access has been revoked.`, ephemeral: true });
-                } else {
-                    await interaction.reply({ content: `You do not have a Twitter account linked.`, ephemeral: true });
+                try {
+                    if (twitter) {
+                        await Twitter.destroy({ where: { discordID: interaction.member.id } });
+                        return await interaction.reply({ content: `Your Twitter access has been revoked.`, ephemeral: true });
+                    } else {
+                        await interaction.reply({ content: `You do not have a Twitter account linked.`, ephemeral: true });
+                    }
+                } catch (error) {
+                    console.error(error);
                 }
             break;
 
             case 'post':
-                if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `You do not have sufficient permissions to post a tweet!`, ephemeral: true });
-
-                if (!guildCheck || !guildCheck.twitterChannelID || !guildCheck.raidRoleID) return await interaction.reply({ content: `Please register the guild first and assign a Twitter channel and role.`, ephemeral: true });
-                await post(interaction, guildCheck.twitterChannelID, guildCheck.raidRoleID);
+                try {
+                    if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `You do not have sufficient permissions to post a tweet!`, ephemeral: true });
+    
+                    if (!guildCheck || !guildCheck.twitterChannelID || !guildCheck.raidRoleID) return await interaction.reply({ content: `Please register the guild first and assign a Twitter channel and role.`, ephemeral: true });
+                    await post(interaction, guildCheck.twitterChannelID, guildCheck.raidRoleID);
+                } catch (error) {
+                    console.error(error);
+                }
             break;
 
             case 'role':
-                if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `You do not have sufficient permissions to post a tweet!`, ephemeral: true });
-
-                const raidRole = options.getRole('name');
-                
-                if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
-                await guildCheck.update({ raidRoleID: raidRole.id });
-                await interaction.reply({ content: `Role for raids have been assigned.`, ephemeral: true });
+                try {
+                    if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `You do not have sufficient permissions to post a tweet!`, ephemeral: true });
+    
+                    const raidRole = options.getRole('name');
+                    
+                    if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
+                    await guildCheck.update({ raidRoleID: raidRole.id });
+                    await interaction.reply({ content: `Role for raids have been assigned.`, ephemeral: true });
+                } catch (error) {
+                    console.error(error);
+                }
             break;
 
             case 'channel':
-                if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `You do not have sufficient permissions to select a channel!`, ephemeral: true });
-
-                const twitterChannel = options.getChannel('name');
-
-                if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
-                await guildCheck.update({ twitterChannelID: twitterChannel.id });
-                await interaction.reply({ content: `Twitter channel assigned.`, ephemeral: true });
+                try {
+                    if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `You do not have sufficient permissions to select a channel!`, ephemeral: true });
+    
+                    const twitterChannel = options.getChannel('name');
+    
+                    if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
+                    await guildCheck.update({ twitterChannelID: twitterChannel.id });
+                    await interaction.reply({ content: `Twitter channel assigned.`, ephemeral: true });
+                } catch (error) {
+                    console.error(error);
+                }
             break;
 
             case 'check':
-                if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `You do not have sufficient permissions to select a channel!`, ephemeral: true });
-
-                const tweetURL = interaction.options.getString('tweet');
-                const tweetId = tweetURL.match(/(\d+)/)[0];
-
-                await raidCheck(interaction, tweetId);
+                try {
+                    if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `You do not have sufficient permissions to select a channel!`, ephemeral: true });
+    
+                    const tweetURL = interaction.options.getString('tweet');
+                    const tweetId = tweetURL.match(/(\d+)/)[0];
+    
+                    await raidCheck(interaction, tweetId);
+                } catch (error) {
+                    console.error(error);
+                }
             break;
         }
 	}

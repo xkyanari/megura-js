@@ -9,11 +9,12 @@ module.exports = {
         const member = interaction.member;
         const guild = interaction.guild;
 
-        const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
-        const numFormat = (value) => new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
-
-        if (!player) return interaction.reply("This user does not have a player profile in this world yet.");
-
+        try {
+            const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
+            const numFormat = (value) => new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
+    
+            if (!player) return interaction.reply("This user does not have a player profile in this world yet.");
+    
             try {
                 const balanceWallet = numFormat(player.iura.walletAmount);
                 const embed = new EmbedBuilder()
@@ -25,6 +26,10 @@ module.exports = {
                     .catch(console.error);
             } catch (error) {
                 console.log(error);
-            }
+            }   
+        } catch (error) {
+            console.error(error);
+        }
+
     }
 };

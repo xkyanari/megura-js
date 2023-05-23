@@ -107,68 +107,84 @@ module.exports = {
 
         switch (subCommand) {
             case 'register':
-                if (guildCheck) return await interaction.reply({ content: `Guild already registered.`, ephemeral: true});
-
-                await Guild.create({ guildID: interaction.guild.id });
-                await interaction.reply({ content: `Guild registered.`, ephemeral: true });
+                try {
+                    if (guildCheck) return await interaction.reply({ content: `Guild already registered.`, ephemeral: true});
+    
+                    await Guild.create({ guildID: interaction.guild.id });
+                    await interaction.reply({ content: `Guild registered.`, ephemeral: true });
+                } catch (error) {
+                    console.error(error);
+                }
             break;
 
             case 'twitter':
-                if (interaction.member.id !== interaction.guild.ownerId) return await interaction.reply({ content: `You do not have permission to perform this action.`, ephemeral: true });
-
-                if (guildCheck.twitterID) {
-                    return interaction.reply({ content: `Server logged in as \`${guildCheck.username}\`.`, ephemeral: true });
-                } else {
-                    await twitterAuth(interaction);
-                }
-
-                setTimeout(() => {
-                    Twitter.findOne({ where: { discordID: interaction.member.id } })
-                      .then((user) => {
-                        if (user.username !== null) {
-                          // Transfers the tokens to the Guild table
-                          Guild.update({ twitterID: user.twitterID, username: user.username, accessToken: user.accessToken, refreshToken: user.refreshToken, expiresIn: user.expiresIn, expirationTime: user.expirationTime }, { where: { guildID: interaction.guild.id } })
-                            .then(() => {
-                              Twitter.destroy({ where: { discordID: interaction.member.id } })
+                try {
+                    if (interaction.member.id !== interaction.guild.ownerId) return await interaction.reply({ content: `You do not have permission to perform this action.`, ephemeral: true });
+    
+                    if (guildCheck.twitterID) {
+                        return interaction.reply({ content: `Server logged in as \`${guildCheck.username}\`.`, ephemeral: true });
+                    } else {
+                        await twitterAuth(interaction);
+                    }
+    
+                    setTimeout(() => {
+                        Twitter.findOne({ where: { discordID: interaction.member.id } })
+                          .then((user) => {
+                            if (user.username !== null) {
+                              // Transfers the tokens to the Guild table
+                              Guild.update({ twitterID: user.twitterID, username: user.username, accessToken: user.accessToken, refreshToken: user.refreshToken, expiresIn: user.expiresIn, expirationTime: user.expirationTime }, { where: { guildID: interaction.guild.id } })
                                 .then(() => {
-                                  return interaction.followUp({ content: `Tokens transferred to the Guild.\n\nServer now logged in as \`${user.username}\`.`, ephemeral: true });
+                                  Twitter.destroy({ where: { discordID: interaction.member.id } })
+                                    .then(() => {
+                                      return interaction.followUp({ content: `Tokens transferred to the Guild.\n\nServer now logged in as \`${user.username}\`.`, ephemeral: true });
+                                    })
+                                    .catch((error) => {
+                                      console.error("Error clearing tokens in Twitter table:", error);
+                                    });
                                 })
                                 .catch((error) => {
-                                  console.error("Error clearing tokens in Twitter table:", error);
+                                  console.error("Error transferring tokens to Guild table:", error);
                                 });
-                            })
-                            .catch((error) => {
-                              console.error("Error transferring tokens to Guild table:", error);
-                            });
-                  
-                        } else {
-                          Twitter.destroy({ where: { discordID: interaction.member.id } });
-                          Guild.update({ twitterID: '', username: '', accessToken: '', refreshToken: '', expiresIn: '', expirationTime: '' }, { where: { guildID: interaction.guild.id } });
-                  
-                          interaction.followUp({ content: `Session expired. Please try logging in again.`, ephemeral: true });
-                        }
-                      })
-                      .catch((error) => {
-                        console.error(error);
-                      });
-                  }, 180000);                  
+                      
+                            } else {
+                              Twitter.destroy({ where: { discordID: interaction.member.id } });
+                              Guild.update({ twitterID: '', username: '', accessToken: '', refreshToken: '', expiresIn: '', expirationTime: '' }, { where: { guildID: interaction.guild.id } });
+                      
+                              interaction.followUp({ content: `Session expired. Please try logging in again.`, ephemeral: true });
+                            }
+                          })
+                          .catch((error) => {
+                            console.error(error);
+                          });
+                      }, 180000);
+                } catch (error) {
+                    console.error(error);
+                }
             break;
 
             case 'disable':
-                // Add a warning to confirm deletion of the guild entry.
-                
-                if (!guildCheck) return await interaction.reply({ content: `Dahlia is not yet setup in this server.`, ephemeral: true });
-                await guildCheck.destroy({ where: { guildID: interaction.guild.id }});
-                await interaction.reply({ content: `Guild has been un-registered.`, ephemeral: true });
+                try {
+                    // Add a warning to confirm deletion of the guild entry.
+                    
+                    if (!guildCheck) return await interaction.reply({ content: `Dahlia is not yet setup in this server.`, ephemeral: true });
+                    await guildCheck.destroy({ where: { guildID: interaction.guild.id }});
+                    await interaction.reply({ content: `Guild has been un-registered.`, ephemeral: true });
+                } catch (error) {
+                    console.error(error);
+                }
             break;
 
             case 'logs':
-                if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
-
-                const logsChannel = options.getChannel('channel');
-                
-                await guildCheck.update({ logsChannelID: logsChannel.id });
-                await interaction.reply({ content: `Audit Logs channel assigned.`, ephemeral: true });
+                try {
+                    if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
+    
+                    const logsChannel = options.getChannel('channel');
+                    
+                    await guildCheck.update({ logsChannelID: logsChannel.id });
+                    await interaction.reply({ content: `Audit Logs channel assigned.`, ephemeral: true });
+                } catch (error) {
+                    console.error(error);
+                }
             break;
 
             case 'captcha':
@@ -186,27 +202,39 @@ module.exports = {
             break;
 
             case 'shop':
-                if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
-                
-                const whitelist = options.getChannel('channel');
-
-                await guildCheck.update({ whitelistChannelID: whitelist.id });
-                await interaction.reply({ content: `Verification disabled!`, ephemeral: true });
+                try {
+                    if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
+                    
+                    const whitelist = options.getChannel('channel');
+    
+                    await guildCheck.update({ whitelistChannelID: whitelist.id });
+                    await interaction.reply({ content: `Verification disabled!`, ephemeral: true });
+                } catch (error) {
+                    console.error(error);
+                }
             break;
 
             case 'deploy':
-                if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
-                await captcha(interaction, guildCheck.verifyChannelID);
+                try {
+                    if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
+                    await captcha(interaction, guildCheck.verifyChannelID);
+                } catch (error) {
+                    console.error(error);
+                }
             break;
 
             case 'factions':
-                if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
-
-                const margaretha = options.getRole('margaretha');
-                const cerberon = options.getRole('cerberon');
-
-                await guildCheck.update({ margarethaID: margaretha.id, margarethaName: margaretha.name, cerberonID: cerberon.id, cerberonName: cerberon.name });
-                await interaction.reply({ content: `Factions roles have been set successfully!`, ephemeral: true });
+                try {
+                    if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
+    
+                    const margaretha = options.getRole('margaretha');
+                    const cerberon = options.getRole('cerberon');
+    
+                    await guildCheck.update({ margarethaID: margaretha.id, margarethaName: margaretha.name, cerberonID: cerberon.id, cerberonName: cerberon.name });
+                    await interaction.reply({ content: `Factions roles have been set successfully!`, ephemeral: true });
+                } catch (error) {
+                    console.error(error);
+                }
             break;
 
             case 'rules':
@@ -220,32 +248,36 @@ module.exports = {
             break;
 
             case 'settings':
-                if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
-
-                const embed = new EmbedBuilder()
-                    .setTitle(`Current settings for ${interaction.guild.name}`);
-
-                const fieldMap = [
-                    { check: 'verifyChannelID', name: 'Verify Channel:', inline: true, valueFunc: channelMention },
-                    { check: 'verifyRoleID', name: 'Verify Role:', inline: true, valueFunc: roleMention },
-                    { check: 'twitterChannelID', name: 'Twitter Channel:', inline: true, valueFunc: channelMention },
-                    { check: 'raidRoleID', name: 'Raid Role:', inline: true, valueFunc: roleMention },
-                    { check: 'username', name: 'Server Twitter Account:', inline: false, valueFunc: (v) => `[@${v}](https://www.twitter.com/${v})` },
-                    { check: 'logsChannelID', name: 'Audit Logs Channel:', inline: false, valueFunc: channelMention },
-                    { check: 'whitelistChannelID', name: 'Whitelist Shop Channel:', inline: false, valueFunc: channelMention },
-                ];
-
-                const fields = fieldMap
-                    .filter(field => guildCheck[field.check])
-                    .map(field => ({ name: field.name, value: field.valueFunc(guildCheck[field.check]), inline: field.inline }));
-
-                if (fields.length === 0) {
-                    embed.addFields({name: `No settings found`, value: `Please configure your guild settings.`, inline: false })
-                } else {
-                    embed.addFields(...fields);
+                try {
+                    if (!guildCheck) return await interaction.reply({ content: `Please register the guild first.`, ephemeral: true });
+    
+                    const embed = new EmbedBuilder()
+                        .setTitle(`Current settings for ${interaction.guild.name}`);
+    
+                    const fieldMap = [
+                        { check: 'verifyChannelID', name: 'Verify Channel:', inline: true, valueFunc: channelMention },
+                        { check: 'verifyRoleID', name: 'Verify Role:', inline: true, valueFunc: roleMention },
+                        { check: 'twitterChannelID', name: 'Twitter Channel:', inline: true, valueFunc: channelMention },
+                        { check: 'raidRoleID', name: 'Raid Role:', inline: true, valueFunc: roleMention },
+                        { check: 'username', name: 'Server Twitter Account:', inline: false, valueFunc: (v) => `[@${v}](https://www.twitter.com/${v})` },
+                        { check: 'logsChannelID', name: 'Audit Logs Channel:', inline: false, valueFunc: channelMention },
+                        { check: 'whitelistChannelID', name: 'Whitelist Shop Channel:', inline: false, valueFunc: channelMention },
+                    ];
+    
+                    const fields = fieldMap
+                        .filter(field => guildCheck[field.check])
+                        .map(field => ({ name: field.name, value: field.valueFunc(guildCheck[field.check]), inline: field.inline }));
+    
+                    if (fields.length === 0) {
+                        embed.addFields({name: `No settings found`, value: `Please configure your guild settings.`, inline: false })
+                    } else {
+                        embed.addFields(...fields);
+                    }
+    
+                    await interaction.reply({ embeds: [embed], ephemeral: true });
+                } catch (error) {
+                    console.error(error);
                 }
-
-                await interaction.reply({ embeds: [embed], ephemeral: true });
             break;
         }
 	}

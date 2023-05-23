@@ -13,16 +13,20 @@ const getTopPlayers = async (attribute, guildID) => {
 };
 
 const generateTopPlayersEmbed = async (attribute, title, valueFormatter, guildID) => {
-    const topPlayers = await getTopPlayers(attribute, guildID);
-    const playerList = topPlayers.map((player, i) => `${i + 1}. **${player.playerName}** - ${valueFormatter(player)}\n`);
-
-    return new EmbedBuilder()
-        .setColor(0xCD7F32)
-        .setTitle(title)
-        .setDescription(`${playerList.join('')}
-        **Messinia Graciene: Project DAHLIA**
-        [Invite Me](https://discord.com/api/oauth2/authorize?client_id=1108464420465692795&permissions=139855260823&scope=bot)🔸[Docs](https://docs.megura.xyz)🔸[Support Server](https://discord.gg/X9eEW6yuhq)🔸[Vote for Us!](https://discordbotlist.com/bots/dahlia/upvote)
-        `);
+    try {
+        const topPlayers = await getTopPlayers(attribute, guildID);
+        const playerList = topPlayers.map((player, i) => `${i + 1}. **${player.playerName}** - ${valueFormatter(player)}\n`);
+    
+        return new EmbedBuilder()
+            .setColor(0xCD7F32)
+            .setTitle(title)
+            .setDescription(`${playerList.join('')}
+            **Messinia Graciene: Project DAHLIA**
+            [Invite Me](https://discord.com/api/oauth2/authorize?client_id=1108464420465692795&permissions=139855260823&scope=bot)🔸[Docs](https://docs.megura.xyz)🔸[Support Server](https://discord.gg/X9eEW6yuhq)🔸[Vote for Us!](https://discordbotlist.com/bots/dahlia/upvote)
+            `);
+    } catch (error) {
+        console.error(error);
+    }
 };
 
 module.exports = {

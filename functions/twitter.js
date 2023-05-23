@@ -19,41 +19,45 @@ const keyv = new Keyv();
 keyv.on('error', err => console.error('Keyv connection error:', err));
 
 const twitterAuth = async (interaction) => {
-    const twitter = await Twitter.findOne({ where: { discordID: interaction.member.id }});
-
-    const { url, codeVerifier, state } = client.generateOAuth2AuthLink(TWITTER_CALLBACK_URL, { scope: [
-        'tweet.read', // requirement for retweets
-        'tweet.write', // requirement for retweets
-        'users.read', // requirement for retweets and likes
-        'like.write', // requirement for liking tweets
-        'offline.access' // to refresh logins and not asked again
-    ] });
-
-    await keyv.set(`codeVerifier:${state}`, codeVerifier, 600000);
-
-    if (twitter) {
-        twitter.codeVerifier = codeVerifier;
-        await twitter.save();
-    } else {
-        await Twitter.create({ discordID: interaction.member.id, codeVerifier });
-    }
-
-    const button = new ActionRowBuilder()
-        .addComponents(
-            new ButtonBuilder()
-                .setLabel('Login')
-                .setEmoji('🐦')
-                .setStyle(ButtonStyle.Link)
-                .setURL(url)
-    );
-
-    const embed = new EmbedBuilder()
-        .setDescription(
-            `Please click the button below to authenticate with your Twitter account.
-            
-            Once authenticated, please allow up to 3 mins to check your status.`
+    try {
+        const twitter = await Twitter.findOne({ where: { discordID: interaction.member.id }});
+    
+        const { url, codeVerifier, state } = client.generateOAuth2AuthLink(TWITTER_CALLBACK_URL, { scope: [
+            'tweet.read', // requirement for retweets
+            'tweet.write', // requirement for retweets
+            'users.read', // requirement for retweets and likes
+            'like.write', // requirement for liking tweets
+            'offline.access' // to refresh logins and not asked again
+        ] });
+    
+        await keyv.set(`codeVerifier:${state}`, codeVerifier, 600000);
+    
+        if (twitter) {
+            twitter.codeVerifier = codeVerifier;
+            await twitter.save();
+        } else {
+            await Twitter.create({ discordID: interaction.member.id, codeVerifier });
+        }
+    
+        const button = new ActionRowBuilder()
+            .addComponents(
+                new ButtonBuilder()
+                    .setLabel('Login')
+                    .setEmoji('🐦')
+                    .setStyle(ButtonStyle.Link)
+                    .setURL(url)
         );
-    await interaction.reply({ embeds: [embed], components: [button], ephemeral: true });
+    
+        const embed = new EmbedBuilder()
+            .setDescription(
+                `Please click the button below to authenticate with your Twitter account.
+                
+                Once authenticated, please allow up to 3 mins to check your status.`
+            );
+        await interaction.reply({ embeds: [embed], components: [button], ephemeral: true });
+    } catch (error) {
+        console.error(error);
+    }
 };
 
 const twitterCallback = async (req, res) => {

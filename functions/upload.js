@@ -21,13 +21,17 @@ const uploadImage = async (imageBuffer, flag) => {
 };
 
 const deleteImage = async (flag) => {
+  try {
     cloudinary.uploader.destroy(flag, (error, result) => {
         if (error) {
           console.error('Error deleting image:', error);
         } else {
           console.log('Image deleted:', result);
         }
-      });
+      });           
+  } catch (error) {
+      console.error(error);
+  }
 };
 
 module.exports = { uploadImage, deleteImage };

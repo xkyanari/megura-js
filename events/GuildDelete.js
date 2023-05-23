@@ -10,20 +10,24 @@ const { serverID } = require('../src/vars');
 module.exports = {
 	name: Events.GuildDelete,
 	async execute(guild) {
-        const guildCheck = await Guild.findOne({ where: {guildID: guild.id }});
-        if (guildCheck) {
-			Guild.destroy({ where: {guildID: guild.id}});
+		try {
+			const guildCheck = await Guild.findOne({ where: {guildID: guild.id }});
+			if (guildCheck) {
+				Guild.destroy({ where: {guildID: guild.id}});
+			}
+	
+			const embed = new EmbedBuilder()
+				.setTitle('Guild Left.')
+				.setColor('Red')
+				.setDescription(`
+					> **Guild Name** : ${guild.name}
+					> **Guild ID** : ${guild.id}
+				`);
+			
+			const logEntry = `${guild.client.user.tag} left <${guild.name}> - <${guild.id}>.`;
+			return sendLogs(guild.client, serverID, embed, logEntry);
+		} catch (error) {
+			console.error(error);
 		}
-
-		const embed = new EmbedBuilder()
-			.setTitle('Guild Left.')
-			.setColor('Red')
-			.setDescription(`
-				> **Guild Name** : ${guild.name}
-				> **Guild ID** : ${guild.id}
-			`);
-		
-		const logEntry = `${guild.client.user.tag} left <${guild.name}> - <${guild.id}>.`;
-		return sendLogs(guild.client, serverID, embed, logEntry);
 	},
 };

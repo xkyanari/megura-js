@@ -16,13 +16,17 @@ module.exports = {
         const member = interaction.options.getUser('player');
         const { guild } = interaction;
 
-        const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
-        if (player) {
-            await Item.destroy({ where: { accountID: player.iura.accountID }});
-            await Iura.destroy({ where: { accountID: player.iura.accountID }});
-            await Player.destroy({ where: { discordID: member.id, guildID: guild.id }});
+        try {
+            const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id }, include: 'iura' });
+            if (player) {
+                await Item.destroy({ where: { accountID: player.iura.accountID }});
+                await Iura.destroy({ where: { accountID: player.iura.accountID }});
+                await Player.destroy({ where: { discordID: member.id, guildID: guild.id }});
+            }
+    
+            await interaction.reply({ content: `\`${member.tag}\` profile has been removed.`});
+        } catch (error) {
+            console.error(error);
         }
-
-		await interaction.reply({ content: `\`${member.tag}\` profile has been removed.`});
 	}
 };

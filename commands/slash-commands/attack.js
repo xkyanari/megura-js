@@ -32,12 +32,14 @@ module.exports = {
                     totalDefense: player.totalDefense
                 };
 
+                const scalingFactor = 1 + (player.level * 0.10);
+
                 const monsterObj = {
                     playerName: monster.monsterName,
                     level: monster.level,
-                    totalHealth: monster.totalHealth,
-                    totalAttack: monster.totalAttack,
-                    totalDefense: monster.totalDefense,
+                    totalHealth: Math.round(monster.totalHealth * scalingFactor),
+                    totalAttack: Math.round(monster.totalAttack * scalingFactor),
+                    totalDefense: Math.round(monster.totalDefense * scalingFactor),
                     expDropped: monster.expDropped,
                     iuraDropped: monster.iuraDropped
                 };

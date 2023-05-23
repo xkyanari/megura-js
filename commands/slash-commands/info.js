@@ -1,5 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
+const readChapter = require('../../functions/displaytext');
+
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('info')

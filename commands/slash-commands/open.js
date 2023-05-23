@@ -21,8 +21,9 @@ module.exports = {
 
     if (!player) return interaction.editReply("This user does not have a player profile in this world yet.");
 
+    try {
       if (!member.roles.cache.some(role => role.name === 'Margaretha' || role.name === 'Cerberon')) return interaction.editReply("You don't seem to have a proper faction yet. Please choose your faction then `/start` again.");
-
+  
         const guild_name = await guild.channels.create({
           name: channel_name,
           type: ChannelType.GuildText,
@@ -41,7 +42,7 @@ module.exports = {
             }
           ],
         });
-
+  
         const time = 10;
         const wait = require('node:timers/promises').setTimeout;
         const embed = new EmbedBuilder()
@@ -71,5 +72,8 @@ module.exports = {
                   );
               interaction.followUp({ content: `${member}`, embeds: [embed2], ephemeral: true });
             });
+    } catch (error) {
+      console.error(error);
+    }
   }
 };
