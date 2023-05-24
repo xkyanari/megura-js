@@ -5,7 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     "Twitter",
     {
       discordID: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.TEXT,
         unique: true,
       },
       twitterID: {

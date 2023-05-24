@@ -1,15 +1,15 @@
 // main server ID
-const serverID = '1073827215957032960'; // dev
-// const serverID = '1032034043686035508'; // prod
+// const serverID = '1073827215957032960'; // dev
+const serverID = "1032034043686035508"; // prod
 
 // text command prefix
-const prefix = '!';
+const prefix = "!";
 
 // audit log directory
-const logDir = '../logs';
+const logDir = "../logs";
 
 // wanderer faction - can be changed to anything
-const wanderer = 'Wanderer';
+const wanderer = "Wanderer";
 
 // for attacks and duels
 const criticalRate = 0.125;
@@ -27,31 +27,33 @@ const levelDefenseMultiplier = 10;
 const skillMultiplier = 0.05;
 
 // experience points
-const expPoints = (level) => (50 * (level ** 2)) - (50 * level) || 1;
+const expPoints = (level) => 50 * level ** 2 - 50 * level || 1;
 
 // battle formula
-const attackMultiplier = (level) => baseAttackMultiplier + (skillMultiplier * level);
+const attackMultiplier = (level) =>
+  baseAttackMultiplier + skillMultiplier * level;
 const getCriticalHitRate = (level) => Math.min(level * criticalRate, 0.5);
 
 // leveling bonuses
-const attackPerLevel = (level) => baseAttack * (1 + attackIncreasePerLevel) ^ (level - 1);
-const defensePerLevel = (level) => baseDefense + (levelDefenseMultiplier * level);
-const healthPerLevel = (level) => baseHealth + (levelHealthMultiplier * level);
+const attackPerLevel = (level) =>
+  (baseAttack * (1 + attackIncreasePerLevel)) ^ (level - 1);
+const defensePerLevel = (level) => baseDefense + levelDefenseMultiplier * level;
+const healthPerLevel = (level) => baseHealth + levelHealthMultiplier * level;
 
 module.exports = {
-    serverID,
-    prefix,
-    logDir,
-    wanderer,
-    expPoints,
-    duel_expGained,
-    duel_iuraGained,
-    baseHealth,
-    baseAttack,
-    baseDefense,
-    attackPerLevel,
-    defensePerLevel,
-    healthPerLevel,
-    attackMultiplier,
-    getCriticalHitRate
+  serverID,
+  prefix,
+  logDir,
+  wanderer,
+  expPoints,
+  duel_expGained,
+  duel_iuraGained,
+  baseHealth,
+  baseAttack,
+  baseDefense,
+  attackPerLevel,
+  defensePerLevel,
+  healthPerLevel,
+  attackMultiplier,
+  getCriticalHitRate,
 };

@@ -2,7 +2,7 @@ const { Events, ActivityType } = require("discord.js");
 const { sequelize, Player } = require("../src/db");
 const cron = require("node-cron");
 const refresh = require("../functions/refresh");
-const { mongooseDB } = require("./config.json");
+const { mongooseDB } = require("../config.json");
 const { connect } = require("mongoose");
 
 let Discord;

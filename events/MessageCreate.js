@@ -161,8 +161,6 @@ module.exports = {
         });
 
         const response = result.data.choices[0].message.content;
-        console.log("Total tokens: ", result.data.usage.total_tokens);
-        console.log("Chat log length: ", chatLog.length);
 
         if (result.data.usage.total_tokens > 1500 || chatLog.length > 10) {
           const summary = await generateSummary(chatLog.slice(0, 6));
@@ -184,8 +182,6 @@ module.exports = {
         } else {
           message.reply(`${response}`);
         }
-
-        console.log(chatLog);
       } catch (error) {
         if (error.APIerror) {
           console.log(`OpenAI returned an API Error: ${error.APIerror}`);

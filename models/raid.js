@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
       },
       postedIn: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.TEXT,
       },
       retweeters: {
         type: DataTypes.TEXT,
