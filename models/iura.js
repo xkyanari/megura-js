@@ -2,16 +2,13 @@ module.exports = (sequelize, DataTypes) => {
   const Iura = sequelize.define(
     "Iura",
     {
-      guildID: {
-        type: DataTypes.TEXT,
-      },
       accountID: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
       },
       walletName: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING,
         unique: true,
       },
       walletAmount: {
@@ -19,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 0,
       },
       bankName: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING,
         unique: true,
       },
       bankAmount: {

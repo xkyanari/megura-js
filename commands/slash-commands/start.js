@@ -3,6 +3,15 @@ const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 const { Player, Guild } = require("../../src/db");
 const { wanderer } = require("../../src/vars");
 
+const generateWalletName = (length) => {
+  const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let walletName = "";
+  for (let i = 0; i < length; i++) {
+    walletName += charset.charAt(Math.floor(Math.random() * charset.length));
+  }
+  return walletName;
+};
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("start")
@@ -74,8 +83,8 @@ module.exports = {
                 faction: wanderer,
               });
               await create_profile.createIura({
-                walletName: player_name.content,
-                bankName: player_name.content,
+                walletName: generateWalletName(10),
+                bankName: generateWalletName(10),
               });
               const wait = require("node:timers/promises").setTimeout;
               await wait(1000);

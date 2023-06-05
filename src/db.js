@@ -1,14 +1,21 @@
 const Sequelize = require("sequelize");
+const { mysql_dbname, mysql_dbuser, mysql_dbpass } = require('../config.json');
 
 // Connecting to the database using Sequelize -----------------
 
-const sequelize = new Sequelize("megura", "user", "password", {
-  host: "localhost",
-  dialect: "sqlite",
-  // logging: (...msg) => console.log(msg),
-  logging: false,
-  storage: "megura.db", // database filename
+const sequelize = new Sequelize(mysql_dbname, mysql_dbuser, mysql_dbpass, {
+  host: "172.20.0.1",
+  dialect: "mysql",
+  logging: false
 });
+
+// const sequelize = new Sequelize("megura", "user", "password", {
+//   host: "localhost",
+//   dialect: "sqlite",
+//   // logging: (...msg) => console.log(msg),
+//   logging: false,
+//   storage: "megura.db", // database filename
+// });
 
 const Player = require("../models/player")(sequelize, Sequelize.DataTypes);
 const Monster = require("../models/monster")(sequelize, Sequelize.DataTypes);

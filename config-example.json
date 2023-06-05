@@ -1,5 +1,8 @@
 {
     "port": "",
+    "mysql_dbname": "",
+    "mysql_dbuser": "",
+    "mysql_dbpass": "",
     "token": "",
     "clientId": "",
     "guildId": "",
@@ -16,5 +19,6 @@
     "cloudApiKey": "",
     "cloudApiSecret": "",
     "dblApiKey": "",
-    "dblWebhookSecret": ""
+    "dblWebhookSecret": "",
+    "topWebhookSecret": ""
 }

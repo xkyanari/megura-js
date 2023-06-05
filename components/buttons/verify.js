@@ -4,13 +4,17 @@ const {
   ButtonBuilder,
   ButtonStyle,
 } = require("discord.js");
+const { Guild } = require('../../src/db');
 
 module.exports = {
   data: {
     name: `verify`,
   },
   async execute(interaction) {
-    const verified = interaction.guild.roles.cache.get("1073827215957032966");
+    const guild = await Guild.findOne({
+      where: { guildID: interaction.guild.id },
+    });
+    const verified = interaction.guild.roles.cache.get(guild.verifyRoleID);
 
     if (
       interaction.member.roles.cache.some((role) => role.name === verified.name)

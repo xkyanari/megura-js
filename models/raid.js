@@ -11,7 +11,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.TEXT,
       },
       postedBy: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.TEXT,
       },
       postedIn: {
         type: DataTypes.TEXT,

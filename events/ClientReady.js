@@ -2,8 +2,6 @@ const { Events, ActivityType } = require("discord.js");
 const { sequelize, Player } = require("../src/db");
 const cron = require("node-cron");
 const refresh = require("../functions/refresh");
-const { mongooseDB } = require("../config.json");
-const { connect } = require("mongoose");
 
 let Discord;
 try {
@@ -48,9 +46,6 @@ module.exports = {
 
     await sequelize.sync(sync.default);
     console.log("Database connection successful.");
-
-    await connect(mongooseDB).catch(console.error);
-    console.log("MongoDB database connection successful.");
 
     // uncomment only when sync.force is running in dev
     // if (data) {

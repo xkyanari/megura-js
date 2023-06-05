@@ -5,11 +5,11 @@ module.exports = (sequelize, DataTypes) => {
     "Twitter",
     {
       discordID: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING,
         unique: true,
       },
       twitterID: {
-        type: DataTypes.TEXT,
+        type: DataTypes.STRING,
         unique: true,
       },
       username: {

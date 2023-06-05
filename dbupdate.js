@@ -12,35 +12,35 @@ const {
 } = require("./src/db");
 
 (async () => {
-  // await Shop.sync({ force: true})
-  //     .then(() => {
-  //         const items = require('./assets/item_db.json');
-  //         for (let item = 0; item < items.length; item++) {
-  //             Shop.create(items[item]);
-  //         }
-  //         console.log("Shop data import completed.");
-  //     })
-  //     .catch((error) => console.log(error));
+  await Shop.sync({ force: true })
+    .then(() => {
+      const items = require('./assets/item_db.json');
+      for (let item = 0; item < items.length; item++) {
+        Shop.create(items[item]);
+      }
+      console.log("Shop data import completed.");
+    })
+    .catch((error) => console.log(error));
 
-  // await Monster.sync({ force: true})
-  //     .then(() => {
-  //         const monsters = require('./assets/mob_db.json');
-  //         for (let monster = 0; monster < monsters.length; monster++) {
-  //             Monster.create(monsters[monster]);
-  //         }
-  //         console.log("Monster data import completed.");
-  //     })
-  //     .catch((error) => console.log(error));
+  await Monster.sync({ force: true })
+    .then(() => {
+      const monsters = require('./assets/mob_db.json');
+      for (let monster = 0; monster < monsters.length; monster++) {
+        Monster.create(monsters[monster]);
+      }
+      console.log("Monster data import completed.");
+    })
+    .catch((error) => console.log(error));
 
-  // await Quest.sync({ force: true})
-  //     .then(() => {
-  //         const quests = require('./assets/quest_db.json');
-  //         for (let quest = 0; quest < quests.length; quest++) {
-  //             Quest.create(quests[quest]);
-  //         }
-  //         console.log("Quest data import completed.");
-  //     })
-  //     .catch((error) => console.log(error));
+  await Quest.sync({ force: true })
+    .then(() => {
+      const quests = require('./assets/quest_db.json');
+      for (let quest = 0; quest < quests.length; quest++) {
+        Quest.create(quests[quest]);
+      }
+      console.log("Quest data import completed.");
+    })
+    .catch((error) => console.log(error));
 
   await Contract.sync({ force: true })
     .then(() => {
@@ -52,11 +52,11 @@ const {
     })
     .catch((error) => console.log(error));
 
-  // await Player.sync({ alter: true })
-  //     .then(() => {
-  //         console.log("Player table updated.");
-  //     })
-  //     .catch((error) => console.log(error));
+  await Player.sync({ alter: true })
+    .then(() => {
+      console.log("Player table updated.");
+    })
+    .catch((error) => console.log(error));
 
   await Iura.sync({ alter: true })
     .then(() => {
