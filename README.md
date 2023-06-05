@@ -26,7 +26,7 @@ Dahlia is a state-of-the-art Discord bot that runs on chatGPT and supports both 
 - Discord.js v14
 - Captcha-canvas
 - ChatGPT
-- SQLite3
+- SQLite3 or MySQL 8.0
 - Sequelize
 
 ## Pre-requisites
