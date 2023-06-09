@@ -1,18 +1,24 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const logger = require('../../src/logger');
 
 module.exports = {
-  data: new SlashCommandBuilder()
-    .setName("invite")
-    .setDescription("Add Dahlia to your server!"),
-  cooldown: 3000,
-  async execute(interaction) {
-    const embed = new EmbedBuilder()
-      .setTitle("Add to Server")
-      .setImage(
-        "https://res.cloudinary.com/dnjaazvr7/image/upload/v1684522493/megura/dahlia-twitter_yae5go.png"
-      )
-      .setDescription(
-        `**Messinia Graciene: Project DAHLIA**
+	data: new SlashCommandBuilder()
+		.setName('invite')
+		.setDescription('Add Dahlia to your server!'),
+	cooldown: 3000,
+	async execute(interaction) {
+		logger.log({
+			level: 'info',
+			message: `User: ${interaction.member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
+		});
+
+		const embed = new EmbedBuilder()
+			.setTitle('Add to Server')
+			.setImage(
+				'https://res.cloudinary.com/dnjaazvr7/image/upload/v1684522493/megura/dahlia-twitter_yae5go.png',
+			)
+			.setDescription(
+				`**Messinia Graciene: Project DAHLIA**
                 Dahlia is a Discord bot that can read NFT metadata from any collection, allowing it to be utilized for gameplay purposes. We're looking for awesome NFT projects to collaborate with and bring more value to our community!
 
                 [>> CLICK ME TO ADD <<](https://discord.com/api/oauth2/authorize?client_id=1108464420465692795&permissions=139855260823&scope=bot)
@@ -22,9 +28,9 @@ module.exports = {
                 🔸[Support Server](https://discord.gg/X9eEW6yuhq)
                 🔸[Vote for Us!](https://discordbotlist.com/bots/dahlia/upvote)
                 
-                Thank you! (◕‿◕)`
-      );
+                Thank you! (◕‿◕)`,
+			);
 
-    await interaction.reply({ embeds: [embed] });
-  },
+		await interaction.reply({ embeds: [embed] });
+	},
 };

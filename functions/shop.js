@@ -1,79 +1,110 @@
-const { EmbedBuilder } = require("discord.js");
-const { Shop } = require("../src/db");
+const { EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+// const { Shop } = require('../src/db');
+const { footer, shopImage } = require('../src/vars');
+// const buttonPages = require('./paginator');
+
+// function chunkArray(array, chunkSize) {
+// 	const results = [];
+// 	while (array.length) {
+// 		results.push(array.splice(0, chunkSize));
+// 	}
+
+// 	return results;
+// }
 
 module.exports = async (interaction) => {
-  try {
-    const numFormat = (value) =>
-      new Intl.NumberFormat("en-US").format(value === null ? 0 : value);
-    const embed = new EmbedBuilder()
-      .setColor(0xcd7f32)
-      .setTitle("🛒 **ITEM SHOP:** 🛒")
-      .setDescription(`Type \`/buy <item ID> <amount>\` to buy in bulk.`)
-      .setFooter({ text: "This bot was made by megura.xyz." });
+	try {
+		const embed = new EmbedBuilder()
+			.setColor(0xcd7f32)
+			.setTitle('🛒 **ITEM SHOP:** 🛒')
+			.setDescription('Type `/buy <item ID> <amount>` to buy.')
+			.setImage(shopImage)
+			.setFooter(footer);
 
-    const shop = await Shop.findAll();
+		const select = new StringSelectMenuBuilder()
+			.setCustomId('category')
+			.setPlaceholder('Choose an item category.')
+			.addOptions(
+				new StringSelectMenuOptionBuilder()
+					.setLabel('Weapons')
+					.setValue('weapons'),
+				new StringSelectMenuOptionBuilder()
+					.setLabel('Armor')
+					.setValue('armor'),
+				new StringSelectMenuOptionBuilder()
+					.setLabel('Consumables')
+					.setValue('consumables'),
+				new StringSelectMenuOptionBuilder()
+					.setLabel('Miscellaneous Items')
+					.setValue('miscellaneous'),
+			);
 
-    let itemOptions = [];
-    shop.forEach((item) => {
-      let itemStats = [];
+		const row = new ActionRowBuilder()
+			.addComponents(select);
 
-      if (item.totalHealth > 0) {
-        itemStats.push(`Total Health: ${item.totalHealth}\n`);
-      }
-      if (item.totalAttack > 0) {
-        itemStats.push(`Total Attack: ${item.totalAttack}\n`);
-      }
-      if (item.totalDefense > 0) {
-        itemStats.push(`Total Defense: ${item.totalDefense}\n`);
-      }
-      itemStats.push(`Price: $${numFormat(item.price)} IURA\n`);
-      itemStats.push(`Description: ${item.description}\n`);
-      itemStats.push(`Item ID: \`${item.item_ID}\``);
-      itemOptions.push({ label: item.itemName, value: item.itemName });
+		const button1 = new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
+				.setCustomId('profile')
+				.setEmoji('👤')
+				.setLabel('Profile')
+				.setStyle(ButtonStyle.Success),
+			new ButtonBuilder()
+				.setCustomId('inventory')
+				.setEmoji('🛄')
+				.setLabel('Inventory')
+				.setStyle(ButtonStyle.Primary),
+			new ButtonBuilder()
+				.setCustomId('shop')
+				.setEmoji('🛒')
+				.setLabel('Shop')
+				.setStyle(ButtonStyle.Danger),
+		);
 
-      embed.addFields({
-        name: `__**${item.itemName}**__`,
-        value: itemStats.join(""),
-        inline: false,
-      });
-    });
+		await interaction.reply({
+			embeds: [embed],
+			components: [row, button1],
+		});
 
-    await interaction.reply({
-      embeds: [embed],
-      components: [
-        {
-          type: 1,
-          components: [
-            {
-              type: 3,
-              custom_id: "shop",
-              placeholder: "Choose an item.",
-              options: itemOptions,
-            },
-          ],
-        },
-        {
-          type: 1,
-          components: [
-            {
-              type: 2,
-              custom_id: "inventory",
-              emoji: "🛄",
-              label: "Inventory",
-              style: 3,
-            },
-            {
-              type: 2,
-              custom_id: "wallet",
-              emoji: "💰",
-              label: "Wallet",
-              style: 1,
-            },
-          ],
-        },
-      ],
-    });
-  } catch (error) {
-    console.error(error);
-  }
+		// const shop = await Shop.findAll();
+
+		// const shopChunks = chunkArray(shop, 5);
+		// const itemOptions = [];
+		// const embeds = [];
+
+		// shopChunks.forEach((chunk, chunkIndex) => {
+		// 	const embed = new EmbedBuilder()
+		// 		.setColor(0xCD7F32)
+		// 		.setTitle(`🛒 **ITEM SHOP (Page ${chunkIndex + 1}):** 🛒`)
+		// 		.setDescription('Type `/buy <item ID> <amount>` to buy in bulk.')
+		// 		.setFooter(footer);
+
+		// 	chunk.forEach(item => {
+		// 		const itemStats = [];
+
+		// 		if (item.totalHealth > 0) {
+		// 			itemStats.push(`Total Health: ${item.totalHealth}\n`);
+		// 		}
+		// 		if (item.totalAttack > 0) {
+		// 			itemStats.push(`Total Attack: ${item.totalAttack}\n`);
+		// 		}
+		// 		if (item.totalDefense > 0) {
+		// 			itemStats.push(`Total Defense: ${item.totalDefense}\n`);
+		// 		}
+		// 		itemStats.push(`Price: $${numFormat(item.price)} IURA\n`);
+		// 		itemStats.push(`Description: ${item.description}\n`);
+		// 		itemStats.push(`Item ID: \`${item.item_ID}\``);
+		// 		itemOptions.push({ 'label': item.itemName, 'value': item.itemName });
+
+		// 		embed.addFields({ name: `__**${item.itemName}**__`, value: itemStats.join(''), inline: false });
+		// 	});
+
+		// 	embeds.push(embed);
+		// });
+
+		// buttonPages(interaction, embeds);
+
+	}
+	catch (error) {
+		console.error(error);
+	}
 };

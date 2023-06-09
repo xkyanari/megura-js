@@ -8,7 +8,8 @@
     "test": "node deploy && node .",
     "deploy": "node deploy.js",
     "start:prod": "node index.js",
-    "start:dev": "nodemon index.js"
+    "start:dev": "nodemon index.js",
+    "lint": "eslint ."
   },
   "author": "Kyanari",
   "license": "GPL-3.0-or-later",
@@ -19,11 +20,11 @@
   "dependencies": {
     "@napi-rs/canvas": "^0.1.41",
     "@solana/web3.js": "^1.77.3",
-    "alchemy-sdk": "^2.8.3",
+    "alchemy-sdk": "^2.9.0",
     "axios": "^1.4.0",
     "body-parser": "^1.20.2",
     "captcha-canvas": "^3.2.1",
-    "cloudinary": "^1.37.0",
+    "cloudinary": "^1.37.1",
     "config": "^3.3.9",
     "cors": "^2.8.5",
     "discord-logs": "^2.2.1",
@@ -39,11 +40,14 @@
     "sequelize": "^6.32.0",
     "sqlite3": "^5.1.6",
     "twitter-api-v2": "^1.15.0",
-    "undici": "^5.22.1"
+    "undici": "^5.22.1",
+    "winston": "^3.9.0",
+    "winston-daily-rotate-file": "^4.7.1"
   },
   "devDependencies": {
-    "eslint": "^8.41.0",
+    "eslint": "^8.42.0",
+    "eslint-config-google": "^0.14.0",
     "nodemon": "^2.0.22",
-    "sequelize-cli": "^6.6.0"
+    "sequelize-cli": "^6.6.1"
   }
 }

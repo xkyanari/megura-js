@@ -1,27 +1,96 @@
 [
   {
-    "itemName": "Basic Sword",
+    "itemName": "Talkative Blade",
     "level": 1,
+    "category": "weapons",
     "totalHealth": 0,
     "totalAttack": 50,
     "totalDefense": 0,
     "price": 50,
-    "description": "A cheap sword for starters.",
+    "description": "The pen might be mightier, but this sword does more immediate damage.",
     "item_ID": "sword"
   },
   {
-    "itemName": "Cheap Bow",
-    "level": 1,
+    "itemName": "Long-Distance Greetings",
+    "level": 2,
+    "category": "weapons",
     "totalHealth": 0,
-    "totalAttack": 75,
+    "totalAttack": 40,
     "totalDefense": 0,
-    "price": 50,
-    "description": "Nothing special. Just a cheap bow.",
+    "price": 60,
+    "description": "Why say hello up close when you can do it from afar? Requires arrows for proper salutations.",
     "item_ID": "bow"
+  },
+  {
+    "itemName": "Quiet Negotiator",
+    "level": 1,
+    "category": "weapons",
+    "totalHealth": 0,
+    "totalAttack": 25,
+    "totalDefense": 0,
+    "price": 30,
+    "description": "Doesn't say much, but gets to the point quickly.",
+    "item_ID": "dagger"
+  },
+  {
+    "itemName": "Peace Negotiator",
+    "level": 4,
+    "category": "weapons",
+    "totalHealth": 0,
+    "totalAttack": 80,
+    "totalDefense": 0,
+    "price": 100,
+    "description": "No need for diplomacy when you carry this hefty hammer. Often ends disputes... permanently.",
+    "item_ID": "hammer"
+  },
+  {
+    "itemName": "Gossip Shield",
+    "level": 3,
+    "category": "armor",
+    "totalHealth": 20,
+    "totalAttack": 0,
+    "totalDefense": 70,
+    "price": 80,
+    "description": "Protection isn't just about blocking swords. This shield also deflects rumors, half-truths, and the occasional nasty comment.",
+    "item_ID": "shield"
+  },
+  {
+    "itemName": "Thinker's Helm",
+    "level": 2,
+    "category": "armor",
+    "totalHealth": 10,
+    "totalAttack": 0,
+    "totalDefense": 30,
+    "price": 40,
+    "description": "Keeps your head in the game, and enemy blades out of it. Also great for pondering life's mysteries in safety.",
+    "item_ID": "helmet"
+  },
+  {
+    "itemName": "Handyman's Helpers",
+    "level": 3,
+    "category": "armor",
+    "totalHealth": 15,
+    "totalAttack": 0,
+    "totalDefense": 50,
+    "price": 60,
+    "description": "Provides the grip of a vise and the protection of a mini fortress. Perfect for high-fives and handling prickly situations.",
+    "item_ID": "gauntlets"
+  },
+  {
+    "itemName": "Strider's Steps",
+    "level": 4,
+    "category": "armor",
+    "totalHealth": 20,
+    "totalAttack": 0,
+    "totalDefense": 40,
+    "price": 70,
+    "description": "With these boots, every step feels like walking on a cloud. Also perfect for kicking foes and stepping on sharp objects.",
+    "item_ID": "boots"
   },
   {
     "itemName": "Rotten Bandage",
     "level": 1,
+    "category": "miscellaneous",
     "totalHealth": 50,
     "totalAttack": 0,
     "totalDefense": 0,
@@ -32,6 +101,7 @@
   {
     "itemName": "Boiled Egg",
     "level": 1,
+    "category": "consumables",
     "totalHealth": 100,
     "totalAttack": 50,
     "totalDefense": 25,
@@ -42,6 +112,7 @@
   {
     "itemName": "Simple Rock",
     "level": 1,
+    "category": "miscellaneous",
     "totalHealth": 0,
     "totalAttack": 5,
     "totalDefense": 0,
@@ -52,10 +123,11 @@
   {
     "itemName": "Yusha's Ben10 Brief",
     "level": 1,
+    "category": "miscellaneous",
     "totalHealth": 0,
     "totalAttack": 0,
     "totalDefense": 100,
-    "price": 150,
+    "price": 1500,
     "description": "Your inner kid will feel like they have the strength and agility of an alien superhero. It's like a secret weapon hiding in their brief.",
     "item_ID": "yusha"
   }

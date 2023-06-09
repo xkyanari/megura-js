@@ -1,18 +1,24 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const logger = require('../../src/logger');
 
 module.exports = {
-  data: new SlashCommandBuilder()
-    .setName("support")
-    .setDescription("Join our Support Server!"),
-  cooldown: 3000,
-  async execute(interaction) {
-    const embed = new EmbedBuilder()
-      .setTitle("Join our Support Server!")
-      .setImage(
-        "https://res.cloudinary.com/dnjaazvr7/image/upload/v1684522493/megura/dahlia-twitter_yae5go.png"
-      )
-      .setDescription(
-        `**Messinia Graciene: Project DAHLIA**
+	data: new SlashCommandBuilder()
+		.setName('support')
+		.setDescription('Join our Support Server!'),
+	cooldown: 3000,
+	async execute(interaction) {
+		logger.log({
+			level: 'info',
+			message: `User: ${interaction.member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
+		});
+
+		const embed = new EmbedBuilder()
+			.setTitle('Join our Support Server!')
+			.setImage(
+				'https://res.cloudinary.com/dnjaazvr7/image/upload/v1684522493/megura/dahlia-twitter_yae5go.png',
+			)
+			.setDescription(
+				`**Messinia Graciene: Project DAHLIA**
                 🔹Play with our exclusive version of Dahlia!
                 🔹Meet our awesome community
                 🔹Be the first to receive the latest updates
@@ -25,9 +31,9 @@ module.exports = {
                 🔸[Documentation](https://docs.megura.xyz)
                 🔸[Vote for Us!](https://discordbotlist.com/bots/dahlia/upvote)
                 
-                Thank you! (◕‿◕)`
-      );
+                Thank you! (◕‿◕)`,
+			);
 
-    await interaction.reply({ embeds: [embed] });
-  },
+		await interaction.reply({ embeds: [embed] });
+	},
 };

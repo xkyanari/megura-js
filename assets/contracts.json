@@ -156,5 +156,12 @@
     "contractAddress": "658a8a03214921923ef82ed2ddda27526b365e03b3f50370a1d3587fa89ccd8f",
     "traitArmor": "Armor",
     "collectionURL": "https://magiceden.io/marketplace/galactic_geckos"
+  },
+  {
+    "blockchain": "solana",
+    "collectionID": "drp",
+    "contractName": "Dropouts",
+    "contractAddress": "483cde04ed8420264e8e82eb4f47ec3a68bdb586572bddcd11409206b7ecb2ec",
+    "collectionURL": "https://magiceden.io/marketplace/drp"
   }
 ]

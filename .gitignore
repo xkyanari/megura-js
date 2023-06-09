@@ -4,4 +4,5 @@ logs/*
 config.json
 *.sqlite
 *.db
+*.sql
 .devcontainer

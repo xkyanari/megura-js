@@ -1,51 +1,49 @@
-const { Player } = require("../src/db");
+const { Player } = require('../src/db');
 const {
-  baseHealth,
-  baseAttack,
-  baseDefense,
-  attackPerLevel,
-  defensePerLevel,
-  healthPerLevel,
-} = require("../src/vars");
+	baseHealth,
+	baseAttack,
+	baseDefense,
+	attackPerLevel,
+	defensePerLevel,
+	healthPerLevel,
+	expPoints,
+} = require('../src/vars');
 
-/**
- *  Player runs commands
- * => gains EXP
- * => levels up
- * => gains level (and reset to 0)
- * => base attack increases
- * => base defense increases
- * => base health increases
- */
+module.exports = async (guildID, discordID) => {
+	try {
+		const player = await Player.findOne({ where: { discordID, guildID } });
 
-module.exports = async (discordID) => {
-  try {
-    const player = await Player.findOne({ where: { discordID } });
+		let levelsGained = 0;
 
-    // adding a level
-    player.expGained = 0;
-    player.level += 1;
+		while (player.expGained >= expPoints(player.level + levelsGained)) {
+			player.expGained -= expPoints(player.level + levelsGained);
+			levelsGained += 1;
+		}
 
-    // updating the totalAttack
-    const newBaseAttack = attackPerLevel(player.level);
-    const attackAddition = newBaseAttack - baseAttack;
-    player.totalAttack += attackAddition;
+		player.level += levelsGained;
 
-    // updating the totalDefense
-    const newBaseDefense = defensePerLevel(player.level);
-    const defenseAddition = newBaseDefense - baseDefense;
-    player.totalDefense += defenseAddition;
+		// Update the totalAttack
+		const newBaseAttack = attackPerLevel(player.level);
+		const attackAddition = newBaseAttack - baseAttack;
+		player.totalAttack += attackAddition * levelsGained;
 
-    // updating the totalHealth
-    const newBaseHealth = healthPerLevel(player.level);
-    const healthAddition = newBaseHealth - baseHealth;
-    player.totalHealth += healthAddition;
+		// Update the totalDefense
+		const newBaseDefense = defensePerLevel(player.level);
+		const defenseAddition = newBaseDefense - baseDefense;
+		player.totalDefense += defenseAddition * levelsGained;
 
-    await player.save();
-    return {
-      level: player.level,
-    };
-  } catch (error) {
-    console.error(error);
-  }
+		// Update the totalHealth
+		const newBaseHealth = healthPerLevel(player.level);
+		const healthAddition = newBaseHealth - baseHealth;
+		player.totalHealth += healthAddition * levelsGained;
+
+		await player.save();
+		return {
+			level: player.level,
+			levelsGained: levelsGained,
+		};
+	}
+	catch (error) {
+		console.error(error);
+	}
 };

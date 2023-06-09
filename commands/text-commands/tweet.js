@@ -1,97 +1,108 @@
 const {
-  TWITTER_CLIENT_ID,
-  TWITTER_CLIENT_SECRET,
-} = require("../../config.json");
-const { TwitterApi } = require("twitter-api-v2");
-const { Guild, Tweet } = require("../../src/db");
+	TWITTER_CLIENT_ID,
+	TWITTER_CLIENT_SECRET,
+} = require('../../config.json');
+const { TwitterApi } = require('twitter-api-v2');
+const { Guild, Tweet } = require('../../src/db');
+const logger = require('../../src/logger');
 
 /**
  * Text and emojis are accepted.
  */
 
 module.exports = {
-  name: "tweet",
-  description: "Post tweets to server Twitter account.",
-  usage: "<message>",
-  async execute(message, args) {
-    let messageContent = args.join(" ");
-    if (!messageContent)
-      return message.reply({ content: "Please provide a tweet." });
-    if (messageContent.length > 280)
-      return message.reply({ content: `Tweet cannot exceed 280 characters.` });
+	name: 'tweet',
+	description: 'Post tweets to server Twitter account.',
+	usage: '<message>',
+	async execute(message, args) {
+		logger.log({
+			level: 'info',
+			message: `User: ${message.author.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
+		});
 
-    try {
-      const guild = await Guild.findOne({
-        where: { guildID: message.guild.id },
-      });
+		const messageContent = args.join(' ');
+		if (!messageContent) {
+			return message.reply({ content: 'Please provide a tweet.' });
+		}
+		if (messageContent.length > 280) {
+			return message.reply({ content: 'Tweet cannot exceed 280 characters.' });
+		}
 
-      if (!guild || !guild.twitterID)
-        return await message.reply({
-          content: `Please register the guild first.`,
-        });
+		try {
+			const guild = await Guild.findOne({
+				where: { guildID: message.guild.id },
+			});
 
-      const now = new Date();
-      if (guild.expirationTime && guild.expirationTime < now) {
-        const twitterClient = new TwitterApi({
-          clientId: TWITTER_CLIENT_ID,
-          clientSecret: TWITTER_CLIENT_SECRET,
-        });
+			if (!guild || !guild.twitterID) {
+				return await message.reply({
+					content: 'Please register the guild first.',
+				});
+			}
 
-        const {
-          client: refreshedClient,
-          accessToken,
-          refreshToken: newRefreshToken,
-        } = await twitterClient.refreshOAuth2Token(guild.refreshToken);
+			const now = new Date();
+			if (guild.expirationTime && guild.expirationTime < now) {
+				const twitterClient = new TwitterApi({
+					clientId: TWITTER_CLIENT_ID,
+					clientSecret: TWITTER_CLIENT_SECRET,
+				});
 
-        guild.accessToken = accessToken;
-        guild.refreshToken = newRefreshToken;
-        await guild.save();
+				const {
+					client: refreshedClient,
+					accessToken,
+					refreshToken: newRefreshToken,
+				} = await twitterClient.refreshOAuth2Token(guild.refreshToken);
 
-        const rwClient = refreshedClient.readWrite;
+				guild.accessToken = accessToken;
+				guild.refreshToken = newRefreshToken;
+				await guild.save();
 
-        if (message.attachments.size > 0) {
-          return await message.reply({
-            content: `I'm unable to include images on tweets right now. Please try again. I accept only text and emojis at the moment.`,
-          });
-        }
+				const rwClient = refreshedClient.readWrite;
 
-        const { data: createdTweet } = await rwClient.v2.tweet(messageContent);
-        const tweetURL = `https://twitter.com/${guild.username}/status/${createdTweet.id}`;
+				if (message.attachments.size > 0) {
+					return await message.reply({
+						content: 'I\'m unable to include images on tweets right now. Please try again. I accept only text and emojis at the moment.',
+					});
+				}
 
-        await Tweet.create({
-          postedby: message.member.id,
-          tweetID: createdTweet.id,
-          tweetURL,
-        });
-        await message.reply({
-          content: `Tweet sent!\n\nTweet URL: ${tweetURL}`,
-        });
-      } else {
-        const twitterClient = new TwitterApi(guild.accessToken);
-        const rwClient = twitterClient.readWrite;
+				const { data: createdTweet } = await rwClient.v2.tweet(messageContent);
+				const tweetURL = `https://twitter.com/${guild.username}/status/${createdTweet.id}`;
 
-        if (message.attachments.size > 0) {
-          // const imageUrl = message.attachments.first().url;
-          // messageContent += `${imageUrl}`;
-          return await message.reply({
-            content: `I'm unable to include images on tweets right now. Please try again. I accept only text and emojis at the moment.`,
-          });
-        }
+				await Tweet.create({
+					postedby: message.member.id,
+					tweetID: createdTweet.id,
+					tweetURL,
+				});
+				await message.reply({
+					content: `Tweet sent!\n\nTweet URL: ${tweetURL}`,
+				});
+			}
+			else {
+				const twitterClient = new TwitterApi(guild.accessToken);
+				const rwClient = twitterClient.readWrite;
 
-        const { data: createdTweet } = await rwClient.v2.tweet(messageContent);
-        const tweetURL = `https://twitter.com/${guild.username}/status/${createdTweet.id}`;
+				if (message.attachments.size > 0) {
+					// const imageUrl = message.attachments.first().url;
+					// messageContent += `${imageUrl}`;
+					return await message.reply({
+						content: 'I\'m unable to include images on tweets right now. Please try again. I accept only text and emojis at the moment.',
+					});
+				}
 
-        await Tweet.create({
-          postedby: message.member.id,
-          tweetID: createdTweet.id,
-          tweetURL,
-        });
-        await message.reply({
-          content: `Tweet sent!\n\nTweet URL: ${tweetURL}`,
-        });
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  },
+				const { data: createdTweet } = await rwClient.v2.tweet(messageContent);
+				const tweetURL = `https://twitter.com/${guild.username}/status/${createdTweet.id}`;
+
+				await Tweet.create({
+					postedby: message.member.id,
+					tweetID: createdTweet.id,
+					tweetURL,
+				});
+				await message.reply({
+					content: `Tweet sent!\n\nTweet URL: ${tweetURL}`,
+				});
+			}
+		}
+		catch (error) {
+			console.error(error);
+		}
+	},
 };

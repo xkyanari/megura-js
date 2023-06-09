@@ -1,18 +1,20 @@
-const { Player } = require("../src/db");
+const { Player } = require('../src/db');
 
 const voteWebhook = async (id, votes = 1) => {
-  try {
-    const player = await Player.findOne({
-      where: { discordID: id },
-      include: "iura",
-    });
-    console.log(player);
+	try {
+		const player = await Player.findOne({
+			where: { discordID: id },
+			include: 'iura',
+		});
 
-    player.iura.walletAmount += 50 * votes;
-    await player.iura.save();
-  } catch (error) {
-    console.error(error);
-  }
+		if (!player) return;
+
+		player.iura.walletAmount += 50 * votes;
+		await player.iura.save();
+	}
+	catch (error) {
+		console.error(error);
+	}
 };
 
 module.exports = { voteWebhook };

@@ -1,19 +1,12 @@
-const {
-  EmbedBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  ActionRowBuilder,
-} = require("discord.js");
-const profile = require("../../functions/profile");
-const { Player } = require("../../src/db");
+const profile = require('../../functions/profile');
 
 module.exports = {
-  data: {
-    name: `profile`,
-  },
-  async execute(interaction) {
-    const member = interaction.user;
+	data: {
+		name: 'profile',
+	},
+	async execute(interaction) {
+		const member = interaction.user;
 
-    await profile(interaction, member);
-  },
+		await profile(interaction, member);
+	},
 };

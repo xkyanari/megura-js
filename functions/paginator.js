@@ -1,122 +1,117 @@
 const {
-  ButtonBuilder,
-  ButtonStyle,
-  ActionRowBuilder,
-  ComponentType,
-} = require("discord.js");
+	ButtonBuilder,
+	ButtonStyle,
+	ActionRowBuilder,
+	ComponentType,
+} = require('discord.js');
 
 async function buttonPages(
-  interaction,
-  pages,
-  selectMenu = null,
-  optionPages = null,
-  time = 60000
+	interaction,
+	pages,
+	selectMenu = null,
+	optionPages = null,
+	time = 60000,
 ) {
-  /**
-     * if (!interaction) throw new Error("Please provide an interaction argument");
-     * if (!pages) throw new Error("Please provide a page argument");
-     * if (!Array.isArray(pages)) throw new Error("Pages must be an array");
+	try {
+		if (pages.length === 1) {
+			const page = await interaction.editReply({
+				embeds: pages,
+				components: [],
+				fetchReply: true,
+			});
 
-     * if (typeof time !== "number") throw new Error("Time must be a number");
-     * if (parseInt(time) < 30000) throw new Error("Time must be greater than 30 seconds");
-     */
+			return page;
+		}
 
-  try {
-    if (pages.length === 1) {
-      const page = await interaction.editReply({
-        embeds: pages,
-        components: [],
-        fetchReply: true,
-      });
+		const prev = new ButtonBuilder()
+			.setCustomId('prev')
+			.setEmoji('◀️')
+			.setStyle(ButtonStyle.Primary);
 
-      return page;
-    }
+		const home = new ButtonBuilder()
+			.setCustomId('home')
+			.setEmoji('🏠')
+			.setStyle(ButtonStyle.Primary);
 
-    const prev = new ButtonBuilder()
-      .setCustomId("prev")
-      .setEmoji("◀️")
-      .setStyle(ButtonStyle.Primary);
+		const next = new ButtonBuilder()
+			.setCustomId('next')
+			.setEmoji('▶️')
+			.setStyle(ButtonStyle.Primary);
 
-    const home = new ButtonBuilder()
-      .setCustomId("home")
-      .setEmoji("🏠")
-      .setStyle(ButtonStyle.Primary);
+		const buttonRow = new ActionRowBuilder().addComponents(prev, home, next);
 
-    const next = new ButtonBuilder()
-      .setCustomId("next")
-      .setEmoji("▶️")
-      .setStyle(ButtonStyle.Primary);
+		let selectMenuRow;
+		if (selectMenu) {
+			selectMenuRow = new ActionRowBuilder().addComponents(selectMenu);
+		}
 
-    const buttonRow = new ActionRowBuilder().addComponents(prev, home, next);
+		let index = 0;
 
-    let selectMenuRow;
-    if (selectMenu) {
-      selectMenuRow = new ActionRowBuilder().addComponents(selectMenu);
-    }
+		const currentPage = await interaction.editReply({
+			embeds: [pages[index]],
+			components: selectMenu ? [selectMenuRow, buttonRow] : [buttonRow],
+			fetchReply: true,
+		});
 
-    let index = 0;
+		const collector = await currentPage.createMessageComponentCollector({
+			componentType: ComponentType.Button,
+			time,
+		});
 
-    const currentPage = await interaction.editReply({
-      embeds: [pages[index]],
-      components: selectMenu ? [selectMenuRow, buttonRow] : [buttonRow],
-      fetchReply: true,
-    });
+		collector.on('collect', async (button) => {
+			if (button.user.id !== interaction.user.id) {
+				return button.reply({
+					content: 'You cannot use these buttons',
+					ephemeral: true,
+				});
+			}
 
-    const collector = await currentPage.createMessageComponentCollector({
-      componentType: ComponentType.Button,
-      time,
-    });
+			await button.deferUpdate();
 
-    collector.on("collect", async (button) => {
-      if (button.user.id !== interaction.user.id)
-        return button.reply({
-          content: "You cannot use these buttons",
-          ephemeral: true,
-        });
+			if (button.customId === 'prev') {
+				if (index > 0) index--;
+			}
+			else if (button.customId === 'home') {
+				index = 0;
+			}
+			else if (button.customId === 'next') {
+				if (index < pages.length - 1) index++;
+			}
 
-      await button.deferUpdate();
+			if (index === 0) prev.setDisabled(true);
+			else prev.setDisabled(false);
 
-      if (button.customId === "prev") {
-        if (index > 0) index--;
-      } else if (button.customId === "home") {
-        index = 0;
-      } else if (button.customId === "next") {
-        if (index < pages.length - 1) index++;
-      }
+			if (index === 0) home.setDisabled(true);
+			else home.setDisabled(false);
 
-      if (index === 0) prev.setDisabled(true);
-      else prev.setDisabled(false);
+			if (index === pages.length - 1) next.setDisabled(true);
+			else next.setDisabled(false);
 
-      if (index === 0) home.setDisabled(true);
-      else home.setDisabled(false);
+			if (selectMenu && optionPages) {
+				selectMenu = selectMenu.setOptions(optionPages[index]);
+				selectMenuRow = new ActionRowBuilder().addComponents(selectMenu);
+			}
 
-      if (index === pages.length - 1) next.setDisabled(true);
-      else next.setDisabled(false);
+			await currentPage.edit({
+				embeds: [pages[index]],
+				components: selectMenu ? [selectMenuRow, buttonRow] : [buttonRow],
+			});
 
-      if (selectMenu && optionPages) {
-        selectMenu = selectMenu.setOptions(optionPages[index]);
-        selectMenuRow = new ActionRowBuilder().addComponents(selectMenu);
-      }
+			collector.resetTimer();
+		});
 
-      await currentPage.edit({
-        embeds: [pages[index]],
-        components: selectMenu ? [selectMenuRow, buttonRow] : [buttonRow],
-      });
+		collector.on('end', async () => {
+			await currentPage.edit({
+				embeds: [pages[index]],
+				components: [],
+			});
+		});
 
-      collector.resetTimer();
-    });
-
-    collector.on("end", async (button) => {
-      await currentPage.edit({
-        embeds: [pages[index]],
-        components: [],
-      });
-    });
-
-    return currentPage;
-  } catch (error) {
-    console.error(error);
-  }
+		return currentPage;
+	}
+	catch (error) {
+		console.error(error);
+	}
 }
 
 module.exports = buttonPages;
