@@ -1,7 +1,5 @@
 const { Events, ActivityType } = require('discord.js');
-const { sequelize, Player } = require('../src/db');
-const cron = require('node-cron');
-const refresh = require('../functions/refresh');
+const { sequelize } = require('../src/db');
 
 let Discord;
 try {
@@ -48,15 +46,5 @@ module.exports = {
 		await sequelize.sync(sync.default);
 		console.log('Database connection successful.');
 
-		// uncomment only when sync.force is running in dev
-		// if (data) {
-		// await refresh();
-		// }
-
-		// for running scheduled tasks
-		// cron.schedule('* * * * *', function() {
-		// const date = new Date(); // date now
-		// console.log(`<${date.toLocaleString()}> Standing by...`);
-		// });
 	},
 };

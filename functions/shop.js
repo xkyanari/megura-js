@@ -1,16 +1,5 @@
 const { EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-// const { Shop } = require('../src/db');
 const { footer, shopImage } = require('../src/vars');
-// const buttonPages = require('./paginator');
-
-// function chunkArray(array, chunkSize) {
-// 	const results = [];
-// 	while (array.length) {
-// 		results.push(array.splice(0, chunkSize));
-// 	}
-
-// 	return results;
-// }
 
 module.exports = async (interaction) => {
 	try {
@@ -64,44 +53,6 @@ module.exports = async (interaction) => {
 			embeds: [embed],
 			components: [row, button1],
 		});
-
-		// const shop = await Shop.findAll();
-
-		// const shopChunks = chunkArray(shop, 5);
-		// const itemOptions = [];
-		// const embeds = [];
-
-		// shopChunks.forEach((chunk, chunkIndex) => {
-		// 	const embed = new EmbedBuilder()
-		// 		.setColor(0xCD7F32)
-		// 		.setTitle(`🛒 **ITEM SHOP (Page ${chunkIndex + 1}):** 🛒`)
-		// 		.setDescription('Type `/buy <item ID> <amount>` to buy in bulk.')
-		// 		.setFooter(footer);
-
-		// 	chunk.forEach(item => {
-		// 		const itemStats = [];
-
-		// 		if (item.totalHealth > 0) {
-		// 			itemStats.push(`Total Health: ${item.totalHealth}\n`);
-		// 		}
-		// 		if (item.totalAttack > 0) {
-		// 			itemStats.push(`Total Attack: ${item.totalAttack}\n`);
-		// 		}
-		// 		if (item.totalDefense > 0) {
-		// 			itemStats.push(`Total Defense: ${item.totalDefense}\n`);
-		// 		}
-		// 		itemStats.push(`Price: $${numFormat(item.price)} IURA\n`);
-		// 		itemStats.push(`Description: ${item.description}\n`);
-		// 		itemStats.push(`Item ID: \`${item.item_ID}\``);
-		// 		itemOptions.push({ 'label': item.itemName, 'value': item.itemName });
-
-		// 		embed.addFields({ name: `__**${item.itemName}**__`, value: itemStats.join(''), inline: false });
-		// 	});
-
-		// 	embeds.push(embed);
-		// });
-
-		// buttonPages(interaction, embeds);
 
 	}
 	catch (error) {

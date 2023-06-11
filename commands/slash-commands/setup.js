@@ -11,6 +11,7 @@ const captcha = require('../../functions/verify');
 const { twitterAuth } = require('../../functions/twitter');
 const rules = require('../../functions/rules');
 const logger = require('../../src/logger');
+const { validateFeature } = require('../../src/feature');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -103,11 +104,16 @@ module.exports = {
 			subcommand
 				.setName('chat')
 				.setDescription('Adjust chat settings for Dahlia.')
+				.addBooleanOption((option) =>
+					option
+						.setName('disable')
+						.setDescription('Disable chat option or use default parameters.'),
+				)
 				.addStringOption((option) =>
 					option
 						.setName('prompt')
-						.setDescription('Enter your prompt in 2000 characters.')
-						.setMaxLength(2000)
+						.setDescription('Enter your prompt in 1000 characters.')
+						.setMaxLength(1000)
 						.setRequired(false),
 				)
 				.addStringOption((option) =>
@@ -177,7 +183,12 @@ module.exports = {
 				break;
 
 			case 'twitter':
+				if (!await validateFeature(interaction, guildCheck.version, 'ownTwitter')) {
+					return;
+				}
+
 				try {
+
 					if (interaction.member.id !== interaction.guild.ownerId) {
 						return await interaction.reply({
 							content: 'You do not have permission to perform this action.',
@@ -186,7 +197,7 @@ module.exports = {
 					}
 
 					if (guildCheck.twitterID) {
-						return interaction.reply({
+						return await interaction.reply({
 							content: `Server logged in as \`${guildCheck.username}\`.`,
 							ephemeral: true,
 						});
@@ -380,6 +391,10 @@ module.exports = {
 				break;
 
 			case 'factions':
+				if (!await validateFeature(interaction, guildCheck.version, 'hasRoles')) {
+					return;
+				}
+
 				try {
 					if (!guildCheck) {
 						return await interaction.reply({
@@ -538,6 +553,10 @@ module.exports = {
 				break;
 
 			case 'chat':
+				if (!await validateFeature(interaction, guildCheck.version, 'ownDahlia')) {
+					return;
+				}
+				
 				try {
 					if (!guildCheck) {
 						return await interaction.reply({
@@ -550,20 +569,29 @@ module.exports = {
 					const prefix = options.getString('prefix');
 					const channel = options.getChannel('channel');
 					const prompt = options.getString('prompt');
+					const disable = options.getBoolean('disable');
 
-					if (prefix) {
-						updateFields.chatPrefix = prefix;
-						responseMsg += `Chat Prefix has been set to \`${prefix}\`.\n`;
+					if (disable) {
+						updateFields.chatPrefix = null;
+						updateFields.chatChannelID = null;
+						updateFields.chatPrompt = null;
+						responseMsg += 'Chat has been disabled.\n';
 					}
+					else {
+						if (prefix) {
+							updateFields.chatPrefix = prefix;
+							responseMsg += `Chat Prefix has been set to \`${prefix}\`.\n`;
+						}
 
-					if (channel) {
-						updateFields.chatChannelID = channel.id;
-						responseMsg += `Chat Channel has been set to ${channelMention(channel.id)}.\n`;
-					}
+						if (channel) {
+							updateFields.chatChannelID = channel.id;
+							responseMsg += `Chat Channel has been set to ${channelMention(channel.id)}.\n`;
+						}
 
-					if (prompt) {
-						updateFields.chatPrompt = prompt;
-						responseMsg += `Chat Prompt has been set to \`${prompt}\`.\n`;
+						if (prompt) {
+							updateFields.chatPrompt = prompt;
+							responseMsg += `Chat Prompt has been set to \`${prompt}\`.\n`;
+						}
 					}
 
 					if (Object.keys(updateFields).length > 0) {
@@ -583,9 +611,7 @@ module.exports = {
 				catch (error) {
 					console.error(error);
 				}
-
 				break;
-
 		}
 	},
 };

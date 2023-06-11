@@ -1,6 +1,7 @@
 node_modules
 memoria
 logs/*
+src/feature.js
 config.json
 *.sqlite
 *.db

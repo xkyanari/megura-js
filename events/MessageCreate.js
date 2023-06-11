@@ -1,7 +1,7 @@
 const { Events, AttachmentBuilder } = require('discord.js');
 const { openAIkey, openAIorg } = require('../config.json');
 const { prefix, dahliaPrompt, dahliaPrefix } = require('../src/vars');
-const { Player, Guild } = require('../src/db');
+const { Guild } = require('../src/db');
 
 /**
  * This event is fired when a user sends a message.
@@ -15,7 +15,7 @@ const configuration = new Configuration({
 });
 const openai = new OpenAIApi(configuration);
 
-const chatUsers = new Set();
+const chatUsers = new Map();
 const userTimeouts = {};
 
 const inactivityTimeout = 15 * 60 * 1000; // 15mins of inactivity
@@ -59,6 +59,17 @@ module.exports = {
 				where: { guildID: message.guild.id },
 			});
 
+			let chatPrefix = dahliaPrefix;
+			let chatPrompt = dahliaPrompt;
+
+			if (guildCheck && guildCheck.chatPrefix) {
+				chatPrefix = guildCheck.chatPrefix;
+			}
+
+			if (guildCheck && guildCheck.chatPrompt) {
+				chatPrompt = guildCheck.chatPrompt;
+			}
+
 			const isOnVerifyChannel =
 				message.channel.id === guildCheck.verifyChannelID;
 
@@ -66,35 +77,19 @@ module.exports = {
 				await message.delete();
 			}
 
-			const chatPrefix = guildCheck.chatPrefix ? guildCheck.chatPrefix.toLowerCase() : dahliaPrefix;
-			const chatPrompt = guildCheck.chatPrompt ? guildCheck.chatPrompt : dahliaPrompt;
-
-			// const player = await Player.findOne({
-			// 	where: { discordID: message.author.id, guildID: message.guild.id },
-			// });
-
-			// let playerName = '';
-
-			// if (player) {
-			// 	const fullName = player.playerName;
-			// 	const firstName = fullName.split(' ')[0];
-			// 	playerName = `You know the user very well, as they are a voyager who has traveled through time with you on various adventures. You have a close relationship with them, and you usually address them by their name. Their name is ${firstName}`;
-			// }
-
 			if (
-				message.content.toLowerCase().startsWith(`${chatPrefix} stop`) &&
-				(!guildCheck.chatChannelID || message.channel.id === guildCheck.chatChannelID)
+				message.content.toLowerCase().startsWith(`${chatPrefix} stop`)
 			) {
 				if (chatUsers.has(message.author.id)) {
 					chatUsers.delete(message.author.id);
 				}
 				return;
 			}
+
 			if (
-				message.content.toLowerCase().startsWith(`${chatPrefix}`) &&
-				(!guildCheck.chatChannelID || message.channel.id === guildCheck.chatChannelID)
+				message.content.toLowerCase().startsWith(chatPrefix.toLowerCase())
 			) {
-				chatUsers.add(message.author.id);
+				chatUsers.set(message.author.id, message.channel.id);
 				resetUserTimeout(message.author.id);
 			}
 
@@ -102,6 +97,9 @@ module.exports = {
 				resetUserTimeout(message.author.id);
 
 				try {
+					if (guildCheck.chatChannelID && message.channel.id !== guildCheck.chatChannelID) return;
+					if (message.channel.id !== chatUsers.get(message.author.id)) return;
+
 					let chatLog = [
 						{
 							role: 'system',
@@ -124,7 +122,7 @@ module.exports = {
 					for (const msg of allMessages.values()) {
 						if (
 							msg.author.id === message.author.id &&
-							(msg.content.toLowerCase().startsWith(`${chatPrefix}`))
+							(msg.content.toLowerCase().startsWith(chatPrefix))
 						) {
 							foundLastCall = true;
 							messagesAfterLastCall = [msg];
@@ -172,7 +170,7 @@ module.exports = {
 					if (response.length >= 2000) {
 						const attachment = new AttachmentBuilder(
 							Buffer.from(response, 'utf-8'),
-							{ name: 'frommetoyou.txt' },
+							{ name: 'fromdahliatoyou.txt' },
 						);
 						await message.reply({
 							content: 'I couldn\'t give my whole answer here so I\'m attaching the file for you.',
@@ -184,40 +182,8 @@ module.exports = {
 					}
 				}
 				catch (error) {
-					if (error.APIerror) {
-						console.log(`OpenAI returned an API Error: ${error.APIerror}`);
-					}
-					else if (error.APIConnectionError) {
-						console.log(
-							`Failed to connect to OpenAI API: ${error.APIConnectionError}`,
-						);
-					}
-					else if (error.RateLimitError) {
-						console.log(
-							`${error.response.status}: ${error.response.statusText}`,
-						);
-						message.reply(
-							'Sorry, I\'m getting a lot of requests right now. Please try again later.',
-						);
-					}
-					else if (
-						error.response &&
-						error.response.status === 400 &&
-						error.response.data.error.message.includes('Token limit exceeded')
-					) {
-						console.log(
-							`${error.response.status}: ${error.response.statusText}`,
-						);
-						message.reply(
-							'Sorry, our conversation has become too long, and I can\'t process it. Please try a shorter message or remove some context.',
-						);
-					}
-					else {
-						message.reply('Yes?');
-						console.log(
-							`${error.response.status}: ${error.response.statusText}`,
-						);
-					}
+					message.reply('Yes?');
+					console.log(error);
 				}
 			}
 		}
@@ -231,8 +197,7 @@ module.exports = {
 
 		const command =
 			message.client.commands.get(commandName) ||
-			message.client.commands.find((cmd) => cmd.aliases && cmd.aliases.includes(commandName),
-			);
+			message.client.commands.find((cmd) => cmd.aliases && cmd.aliases.includes(commandName));
 
 		if (!command) return;
 

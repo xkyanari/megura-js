@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require('discord.js');
-const { Player } = require('../src/db');
+const { Player, Shop } = require('../src/db');
 const { footer, checkProfile } = require('../src/vars');
 const buttonPages = require('./paginator');
 
@@ -15,13 +15,13 @@ module.exports = async (interaction) => {
 	const items = await player.getItems();
 
 	if (!player) {
-		return interaction.editReply(checkProfile);
+		return interaction.reply(checkProfile);
 	}
 
 	items.sort((a, b) => b.equipped - a.equipped);
 
 	try {
-		await interaction.deferReply();
+		await interaction.deferReply({ ephemeral: true });
 
 		const embeds = [];
 		let currentEmbed = new EmbedBuilder()
@@ -29,6 +29,7 @@ module.exports = async (interaction) => {
 			.setAuthor({ name: `${interaction.user.tag}` })
 			.setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
 			.setTitle('**🛄 INVENTORY LIST**')
+			.setDescription('Type `/equip` or `/unequip` to apply them to your stats.')
 			.setFooter(footer);
 
 		if (items.length === 0) {
@@ -47,13 +48,15 @@ module.exports = async (interaction) => {
 					.setAuthor({ name: `${interaction.user.tag}` })
 					.setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
 					.setTitle('**🛄 INVENTORY LIST**')
+					.setDescription('Type `/equip` or `/unequip` to apply them to your stats.')
 					.setFooter(footer);
 			}
 
 			const item = items[i];
+			const { item_ID } = await Shop.findOne({ where: { itemName: item.itemName } });
 			currentEmbed.addFields({
 				name: item.itemName,
-				value: `Quantity: ${item.quantity}\nEquipped: ${item.equipped ? 'Yes' : 'No'}`,
+				value: `Unequipped: ${item.quantity}\nEquipped: ${item.equippedAmount}\n__Total Amount:__ **${item.quantity + item.equippedAmount}**\nItem ID: \`${item_ID}\``,
 				inline: false,
 			});
 		}

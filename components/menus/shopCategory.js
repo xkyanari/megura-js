@@ -75,7 +75,12 @@ module.exports = {
 					.setStyle(ButtonStyle.Danger),
 			);
 
-			const select = new StringSelectMenuBuilder()
+			const select1 = new StringSelectMenuBuilder()
+				.setCustomId('getItem')
+				.setPlaceholder('Choose an item.')
+				.addOptions(itemOptions);
+
+			const select2 = new StringSelectMenuBuilder()
 				.setCustomId('category')
 				.setPlaceholder('Choose an item category.')
 				.addOptions(
@@ -93,12 +98,15 @@ module.exports = {
 						.setValue('miscellaneous'),
 				);
 
-			const row = new ActionRowBuilder()
-				.addComponents(select);
+			const row1 = new ActionRowBuilder()
+				.addComponents(select1);
+
+			const row2 = new ActionRowBuilder()
+				.addComponents(select2);
 
 			await interaction.editReply({
 				embeds: [embed],
-				components: [row, button],
+				components: [row1, row2, button],
 			});
 		}
 		catch (error) {

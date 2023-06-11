@@ -9,11 +9,15 @@ module.exports = {
 		.setDescription('Equip an item.')
 		.addStringOption((option) =>
 			option.setName('id').setDescription('Enter item ID.').setRequired(true),
+		)
+		.addIntegerOption((option) =>
+			option.setName('amount').setDescription('Enter amount.').setRequired(true),
 		),
 	cooldown: 3000,
 	async execute(interaction) {
-		const { member, guild } = interaction;
-		const id = interaction.options.getString('id');
+		const { member, guild, options } = interaction;
+		const id = options.getString('id');
+		const amount = options.getInteger('amount');
 
 		logger.log({
 			level: 'info',
@@ -42,7 +46,7 @@ module.exports = {
 
 			if (equipped.length >= 5) {
 				return interaction.reply({
-					content: 'You can equip up to 5 items only.',
+					content: 'You can equip up to 5 different items only.',
 					ephemeral: true,
 				});
 			}
@@ -54,17 +58,24 @@ module.exports = {
 				});
 			}
 
-			if (item.equipped) {
+			if (item.equippedAmount === amount) {
 				return interaction.reply({
-					content: `You already have \`${item.itemName}\` equipped.`,
+					content: `You already have all \`${item.itemName}\` equipped.`,
 					ephemeral: true,
 				});
 			}
 
-			await player.updateStats(item.itemName);
+			if (item.quantity < amount) {
+				return interaction.reply({
+					content: `You do not have enough \`${item.itemName}\` to equip.`,
+					ephemeral: true,
+				});
+			}
+
+			await player.updateStats(item.itemName, true, amount);
 			await player.updateItem(id, true);
 
-			await interaction.reply(`You equipped \`${item.itemName}\`.`);
+			await interaction.reply({ content: `You equipped \`${item.itemName}\`.`, ephemeral: true });
 		}
 		catch (error) {
 			console.error(error);

@@ -7,6 +7,9 @@ module.exports = (sequelize, DataTypes) => {
 			guildID: {
 				type: DataTypes.TEXT,
 			},
+			version: {
+				type: DataTypes.TEXT,
+			},
 			type: {
 				type: DataTypes.TEXT,
 			},

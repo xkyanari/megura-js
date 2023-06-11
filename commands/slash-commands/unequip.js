@@ -9,11 +9,15 @@ module.exports = {
 		.setDescription('Unequip an item.')
 		.addStringOption((option) =>
 			option.setName('id').setDescription('Enter item ID.').setRequired(true),
+		)
+		.addIntegerOption((option) =>
+			option.setName('amount').setDescription('Enter amount.').setRequired(true),
 		),
 	cooldown: 3000,
 	async execute(interaction) {
-		const { member, guild } = interaction;
-		const id = interaction.options.getString('id');
+		const { member, guild, options } = interaction;
+		const id = options.getString('id');
+		const amount = options.getInteger('amount');
 
 		logger.log({
 			level: 'info',
@@ -39,14 +43,14 @@ module.exports = {
 				});
 			}
 
-			if (!item.equipped) {
+			if (!item.equippedAmount === 0) {
 				return interaction.reply({
 					content: `You already have \`${item.itemName}\` unequipped.`,
 					ephemeral: true,
 				});
 			}
 
-			await player.updateStats(item.itemName, false);
+			await player.updateStats(item.itemName, false, amount);
 			await player.updateItem(id, false);
 
 			await interaction.reply(`You unequipped \`${item.itemName}\`.`);

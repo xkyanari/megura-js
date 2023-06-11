@@ -9,12 +9,10 @@ const sequelize = new Sequelize(mysql_dbname, mysql_dbuser, mysql_dbpass, {
 	logging: false,
 });
 
-// const sequelize = new Sequelize("megura", "user", "password", {
-//   host: "localhost",
-//   dialect: "sqlite",
-//   // logging: (...msg) => console.log(msg),
-//   logging: false,
-//   storage: "megura.db", // database filename
+// const sequelize = new Sequelize(mysql_dbname, mysql_dbuser, mysql_dbpass, {
+// 	host: 'localhost',
+// 	dialect: 'mysql',
+// 	logging: false,
 // });
 
 const Player = require('../models/player')(sequelize, Sequelize.DataTypes);
@@ -66,6 +64,7 @@ Reflect.defineProperty(Player.prototype, 'getItem', {
 	value: async function getItem(itemID) {
 		const { itemName, level } = await Shop.findOne({ where: { item_ID: itemID } });
 		const item = await Item.findOne({ where: { accountID: this.accountID, itemName } });
+
 		return {
 			...item.toJSON(),
 			level,
@@ -200,6 +199,17 @@ Reflect.defineProperty(Player.prototype, 'updateStats', {
 				if (category === 'armor') {
 					this.armor = itemName;
 				}
+
+				// quantity --> equippedAmount
+				await Item.increment(
+					{ equippedAmount: amount },
+					{ where: { accountID: this.accountID, itemName } },
+				);
+
+				await Item.decrement(
+					{ quantity: amount },
+					{ where: { accountID: this.accountID, itemName } },
+				);
 			}
 			else {
 				if (category === 'weapons') {
@@ -208,6 +218,17 @@ Reflect.defineProperty(Player.prototype, 'updateStats', {
 				if (category === 'armor') {
 					this.armor = 'Basic Clothes';
 				}
+
+				// equippedAmount --> quantity
+				await Item.decrement(
+					{ equippedAmount: amount },
+					{ where: { accountID: this.accountID, itemName } },
+				);
+
+				await Item.increment(
+					{ quantity: amount },
+					{ where: { accountID: this.accountID, itemName } },
+				);
 			}
 
 			return this.save();

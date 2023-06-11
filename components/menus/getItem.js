@@ -2,7 +2,7 @@ const { Player, Shop } = require('../../src/db');
 
 module.exports = {
 	data: {
-		name: 'shop',
+		name: 'getItem',
 	},
 	async execute(interaction) {
 		const member = interaction.member;

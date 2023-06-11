@@ -19,6 +19,11 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.BOOLEAN,
 				defaultValue: 0,
 			},
+			equippedAmount: {
+				type: DataTypes.INTEGER,
+				defaultValue: 0,
+				allowNull: false,
+			},
 			createdAt: {
 				type: DataTypes.DATE,
 				allowNull: true,
