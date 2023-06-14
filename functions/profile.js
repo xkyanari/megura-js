@@ -37,10 +37,7 @@ module.exports = async (interaction, member) => {
 		});
 
 		if (!player && member.id === interaction.user.id) {
-			return interaction.reply({
-				content: checkProfile,
-				ephemeral: true,
-			});
+			throw new Error('profile not found');
 		}
 
 		if (!player && member.id !== interaction.user.id) {

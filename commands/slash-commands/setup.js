@@ -10,7 +10,6 @@ const { Guild, Twitter } = require('../../src/db');
 const captcha = require('../../functions/verify');
 const { twitterAuth } = require('../../functions/twitter');
 const rules = require('../../functions/rules');
-const logger = require('../../src/logger');
 const { validateFeature } = require('../../src/feature');
 
 module.exports = {
@@ -138,10 +137,6 @@ module.exports = {
 		),
 	cooldown: 3000,
 	async execute(interaction) {
-		logger.log({
-			level: 'info',
-			message: `User: ${interaction.member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
-		});
 
 		if (
 			!interaction.member.permissions.has(

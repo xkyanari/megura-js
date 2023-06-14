@@ -5,8 +5,6 @@ const {
 	ChannelType,
 } = require('discord.js');
 const { Player, Guild } = require('../../src/db');
-const logger = require('../../src/logger');
-const { checkProfile } = require('../../src/vars');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -23,11 +21,6 @@ module.exports = {
 		const channel_name = interaction.options.getString('channel');
 		const { member, guild } = interaction;
 
-		logger.log({
-			level: 'info',
-			message: `User: ${member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
-		});
-
 		const player = await Player.findOne({
 			where: { discordID: member.id, guildID: guild.id },
 		});
@@ -35,10 +28,7 @@ module.exports = {
 		// const guildCheck = await Guild.findOne({ where: { guildID: guild.id } });
 
 		if (!player) {
-			return interaction.reply({
-				content: checkProfile,
-				ephemeral: true,
-			});
+			throw new Error('profile not found');
 		}
 
 		// if (!guildCheck) {

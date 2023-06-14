@@ -37,7 +37,7 @@ const generateSummary = async (chatLog) => {
 		.join(' ')}"`;
 
 	const result = await openai.createChatCompletion({
-		model: 'gpt-3.5-turbo',
+		model: 'gpt-3.5-turbo-0613',
 		max_tokens: 1000,
 		temperature: 0.4,
 		messages: [{ role: 'system', content: prompt }],
@@ -78,7 +78,7 @@ module.exports = {
 			}
 
 			if (
-				message.content.toLowerCase().startsWith(`${chatPrefix} stop`)
+				message.content.toLowerCase().startsWith(`${chatPrefix.toLowerCase()} stop`)
 			) {
 				if (chatUsers.has(message.author.id)) {
 					chatUsers.delete(message.author.id);
@@ -122,7 +122,7 @@ module.exports = {
 					for (const msg of allMessages.values()) {
 						if (
 							msg.author.id === message.author.id &&
-							(msg.content.toLowerCase().startsWith(chatPrefix))
+							(msg.content.toLowerCase().startsWith(chatPrefix.toLowerCase()))
 						) {
 							foundLastCall = true;
 							messagesAfterLastCall = [msg];
@@ -149,7 +149,7 @@ module.exports = {
 					});
 
 					const result = await openai.createChatCompletion({
-						model: 'gpt-3.5-turbo',
+						model: 'gpt-3.5-turbo-0613',
 						max_tokens: 1000,
 						temperature: 0.4,
 						messages: chatLog,

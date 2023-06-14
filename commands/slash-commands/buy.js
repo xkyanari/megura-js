@@ -1,14 +1,23 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { Player, Shop } = require('../../src/db');
-const logger = require('../../src/logger');
-const { checkProfile } = require('../../src/vars');
+const fs = require('fs');
+
+const itemsData = fs.readFileSync('./assets/item_db.json');
+const itemsJson = JSON.parse(itemsData);
 
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('buy')
 		.setDescription('Buy items in bulk')
 		.addStringOption((option) =>
-			option.setName('id').setDescription('Enter item ID.').setRequired(true),
+			option
+				.setName('id')
+				.setDescription('Enter item ID.')
+				.setRequired(true)
+				.addChoices(...itemsJson.map(item => ({
+					name: `${item.item_ID}: ${item.itemName}`,
+					value: item.item_ID,
+				}))),
 		)
 		.addIntegerOption((option) =>
 			option.setName('amount').setDescription('Enter amount.').setRequired(true),
@@ -18,11 +27,6 @@ module.exports = {
 		const { member, guild } = interaction;
 		const id = interaction.options.getString('id');
 		const amount = interaction.options.getInteger('amount');
-
-		logger.log({
-			level: 'info',
-			message: `User: ${member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
-		});
 
 		try {
 			const player = await Player.findOne({
@@ -34,11 +38,9 @@ module.exports = {
 			});
 
 			if (!player) {
-				return interaction.reply({
-					content: checkProfile,
-					ephemeral: true,
-				});
+				throw new Error('profile not found');
 			}
+
 			if (price * amount > player.iura.walletAmount) {
 				return interaction.reply({
 					content: 'You do not have sufficient balance!',

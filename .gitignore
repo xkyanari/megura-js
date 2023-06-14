@@ -3,6 +3,7 @@ memoria
 logs/*
 src/feature.js
 config.json
+pm2.config.js
 *.sqlite
 *.db
 *.sql

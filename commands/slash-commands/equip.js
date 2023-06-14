@@ -1,7 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { Player } = require('../../src/db');
-const logger = require('../../src/logger');
-const { checkProfile } = require('../../src/vars');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -19,11 +17,6 @@ module.exports = {
 		const id = options.getString('id');
 		const amount = options.getInteger('amount');
 
-		logger.log({
-			level: 'info',
-			message: `User: ${member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
-		});
-
 		try {
 			const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id } });
 
@@ -31,10 +24,7 @@ module.exports = {
 			const equipped = await player.getItems(true);
 
 			if (!player) {
-				return interaction.reply({
-					content: checkProfile,
-					ephemeral: true,
-				});
+				throw new Error('profile not found');
 			}
 
 			if (!item) {

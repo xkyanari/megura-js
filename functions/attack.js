@@ -6,7 +6,7 @@ const {
 } = require('discord.js');
 const { Player, Monster, Iura, sequelize } = require('../src/db');
 const { simulateBattle } = require('./battle');
-const { expPoints, checkProfile } = require('../src/vars');
+const { expPoints } = require('../src/vars');
 const leveling = require('./level');
 const levelcheck = require('./levelup');
 
@@ -21,16 +21,13 @@ const executeAttack = async (interaction) => {
 	});
 
 	if (!player) {
-		return interaction.editReply(checkProfile);
+		throw new Error('profile not found');
 	}
 
 	try {
-		const levelCheck = player.totalAttack < 2500 ? 1 : 2;
-
 		const [monster] = await Monster.findAll({
 			order: sequelize.random(),
 			limit: 1,
-			where: { level: levelCheck },
 		});
 
 		const playerObj = {

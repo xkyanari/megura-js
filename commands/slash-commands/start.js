@@ -2,7 +2,6 @@ const Discord = require('discord.js');
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { Player, Guild } = require('../../src/db');
 const { wanderer } = require('../../src/vars');
-const logger = require('../../src/logger');
 
 const generateWalletName = (length) => {
 	const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -21,11 +20,6 @@ module.exports = {
 	async execute(interaction) {
 		const { channel, member, guild } = interaction;
 
-		logger.log({
-			level: 'info',
-			message: `User: ${member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
-		});
-
 		try {
 			const player = await Player.findOne({
 				where: { discordID: member.id, guildID: guild.id },
@@ -36,7 +30,7 @@ module.exports = {
 
 			// const factionCheck = guild.roles.cache.find(role => role.name === guildCheck.margarethaName || role.name === guildCheck.cerberonName);
 			// const faction = factionCheck === undefined ? wanderer : factionCheck.name;
-			if (player) return interaction.reply('You\'re all set!');
+			if (player && player.playerName) return interaction.reply('You\'re all set!');
 
 			const embed = new EmbedBuilder()
 				.setColor(0xcd7f32)

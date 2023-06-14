@@ -1,7 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { Player, Iura, Quest, sequelize } = require('../../src/db');
-const logger = require('../../src/logger');
-const { checkProfile } = require('../../src/vars');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -11,21 +9,13 @@ module.exports = {
 	async execute(interaction) {
 		const { member, guild } = interaction;
 
-		logger.log({
-			level: 'info',
-			message: `User: ${member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
-		});
-
 		const player = await Player.findOne({
 			where: { discordID: member.id, guildID: guild.id },
 			include: 'iura',
 		});
 
 		if (!player) {
-			return interaction.reply({
-				content: checkProfile,
-				ephemeral: true,
-			});
+			throw new Error('profile not found');
 		}
 
 		try {

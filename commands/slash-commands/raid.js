@@ -3,7 +3,6 @@ const { twitterAuth } = require('../../functions/twitter');
 const { Twitter, Guild } = require('../../src/db');
 const post = require('../../functions/post');
 const raidCheck = require('../../functions/raidcheck');
-const logger = require('../../src/logger');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -65,11 +64,6 @@ module.exports = {
 	async execute(interaction) {
 		const { options } = interaction;
 		const subCommand = options.getSubcommand();
-
-		logger.log({
-			level: 'info',
-			message: `User: ${interaction.member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
-		});
 
 		const twitter = await Twitter.findOne({
 			where: { discordID: interaction.member.id },

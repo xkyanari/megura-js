@@ -1,5 +1,7 @@
 const { Events, EmbedBuilder } = require('discord.js');
 const ms = require('ms');
+const { checkProfile } = require('../src/vars');
+const logger = require('../src/logger');
 
 /**
  * This event is fired when a user initiates slash commands.
@@ -30,14 +32,26 @@ module.exports = {
 			}
 
 			try {
+				logger.log({
+					level: 'info',
+					message: `User: ${interaction.user.id}, Command: ${command.data.name}, Time: ${new Date().toISOString()}`,
+				});
+
+				await command.execute(interaction);
 				client.cooldown.set(cooldownData, Date.now() + command.cooldown);
 				setTimeout(
 					() => client.cooldown.delete(cooldownData),
 					command.cooldown,
 				);
-				await command.execute(interaction);
 			}
 			catch (error) {
+				if (error.message === 'profile not found') {
+					return interaction.reply({
+						content: checkProfile,
+						ephemeral: true,
+					});
+				}
+
 				const embed = new EmbedBuilder().setColor('Red').setDescription(`
                             Error executing \`${interaction.commandName}\`
                             Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
@@ -126,6 +140,27 @@ module.exports = {
 
 			try {
 				await contextCommand.execute(interaction);
+			}
+			catch (error) {
+				console.error(error);
+				const embed = new EmbedBuilder().setColor('Red').setDescription(`
+                            Error executing \`${interaction.commandName}\`
+                            Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
+				await interaction.reply({ embeds: [embed], ephemeral: true });
+			}
+		}
+		if (interaction.isAutocomplete()) {
+			const autoCommand = client.commands.get(interaction.commandName);
+
+			if (!autoCommand) {
+				console.error(
+					`No command matching \`${interaction.commandName}\` was found.`,
+				);
+				return;
+			}
+
+			try {
+				await autoCommand.autocomplete(interaction);
 			}
 			catch (error) {
 				console.error(error);

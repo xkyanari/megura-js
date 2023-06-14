@@ -9,9 +9,7 @@ const { Player, Iura } = require('../../src/db');
 const { expPoints, duel_expGained } = require('../../src/vars');
 const { simulateBattle } = require('../../functions/battle');
 const leveling = require('../../functions/level');
-const logger = require('../../src/logger');
 const levelcheck = require('../../functions/levelup');
-const { checkProfile } = require('../../src/vars');
 
 module.exports = {
 	data: new ContextMenuCommandBuilder()
@@ -22,11 +20,6 @@ module.exports = {
 		const wait = require('node:timers/promises').setTimeout;
 		const { member: player1 } = interaction;
 		const player2 = interaction.targetUser;
-
-		logger.log({
-			level: 'info',
-			message: `User: ${interaction.member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
-		});
 
 		try {
 			if (player1.id === player2.id) {
@@ -60,7 +53,7 @@ module.exports = {
 			const updatedPlayer2 = players[1];
 
 			if (!updatedPlayer1) {
-				return await interaction.editReply(checkProfile);
+				throw new Error('profile not found');
 			}
 			if (!updatedPlayer2) {
 				return await interaction.editReply(`${player2.user.tag} does not have a voyager profile yet.`);

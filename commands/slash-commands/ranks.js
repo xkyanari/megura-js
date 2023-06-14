@@ -1,7 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { Player } = require('../../src/db');
 const buttonPages = require('../../functions/paginator');
-const logger = require('../../src/logger');
 
 const getTopPlayers = async (attribute, guildID) => {
 	return await Player.findAll({
@@ -43,10 +42,6 @@ module.exports = {
 		.setDescription('Check the leaderboard (server-wide).'),
 	cooldown: 3000,
 	async execute(interaction) {
-		logger.log({
-			level: 'info',
-			message: `User: ${interaction.member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
-		});
 
 		await interaction.deferReply();
 

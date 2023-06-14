@@ -18,11 +18,6 @@ module.exports = {
 		const member = interaction.options.getUser('player');
 		const { guild } = interaction;
 
-		logger.log({
-			level: 'info',
-			message: `User: ${interaction.member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
-		});
-
 		try {
 			const player = await Player.findOne({
 				where: { discordID: member.id, guildID: guild.id },

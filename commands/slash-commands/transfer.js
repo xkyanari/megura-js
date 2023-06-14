@@ -1,7 +1,5 @@
 const { SlashCommandBuilder, userMention } = require('discord.js');
 const { Player } = require('../../src/db');
-const { checkProfile } = require('../../src/vars');
-const logger = require('../../src/logger');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -20,11 +18,6 @@ module.exports = {
 	cooldown: 3000,
 	async execute(interaction) {
 		const { member, guild } = interaction;
-
-		logger.log({
-			level: 'info',
-			message: `User: ${member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
-		});
 
 		const numFormat = (value) =>
 			new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
@@ -60,7 +53,7 @@ module.exports = {
 			const updatedPlayer2 = players[1];
 
 			if (!updatedPlayer1) {
-				return await interaction.editReply(checkProfile);
+				throw new Error('profile not found');
 			}
 			if (!updatedPlayer2) {
 				return await interaction.editReply(`${recipient.user.tag} does not have a voyager profile yet.`);

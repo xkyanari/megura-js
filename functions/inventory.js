@@ -1,12 +1,12 @@
 const { EmbedBuilder } = require('discord.js');
 const { Player, Shop } = require('../src/db');
-const { footer, checkProfile } = require('../src/vars');
+const { footer } = require('../src/vars');
 const buttonPages = require('./paginator');
 
 module.exports = async (interaction) => {
 	const member = interaction.member;
 	const guild = interaction.guild;
-	const itemsPerPage = 10; // Number of items to display per page
+	const itemsPerPage = 3; // Number of items to display per page
 
 	const player = await Player.findOne({
 		where: { discordID: member.id, guildID: guild.id },
@@ -15,13 +15,13 @@ module.exports = async (interaction) => {
 	const items = await player.getItems();
 
 	if (!player) {
-		return interaction.reply(checkProfile);
+		throw new Error('profile not found');
 	}
 
 	items.sort((a, b) => b.equipped - a.equipped);
 
 	try {
-		await interaction.deferReply({ ephemeral: true });
+		await interaction.deferReply();
 
 		const embeds = [];
 		let currentEmbed = new EmbedBuilder()

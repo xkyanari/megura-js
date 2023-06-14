@@ -5,10 +5,9 @@ const {
 	ButtonStyle,
 } = require('discord.js');
 const { Player, Iura } = require('../../src/db');
-const { expPoints, duel_expGained, checkProfile } = require('../../src/vars');
+const { expPoints, duel_expGained } = require('../../src/vars');
 const { simulateBattle } = require('../../functions/battle');
 const leveling = require('../../functions/level');
-const logger = require('../../src/logger');
 const levelcheck = require('../../functions/levelup');
 
 module.exports = {
@@ -26,11 +25,6 @@ module.exports = {
 		const wait = require('node:timers/promises').setTimeout;
 		const { member: player1, options } = interaction;
 		const player2 = options.getMember('target');
-
-		logger.log({
-			level: 'info',
-			message: `User: ${interaction.member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
-		});
 
 		try {
 			if (player1.id === player2.id) {
@@ -64,7 +58,7 @@ module.exports = {
 			const updatedPlayer2 = players[1];
 
 			if (!updatedPlayer1) {
-				return await interaction.editReply(checkProfile);
+				throw new Error('profile not found');
 			}
 			if (!updatedPlayer2) {
 				return await interaction.editReply(`${player2.user.tag} does not have a voyager profile yet.`);

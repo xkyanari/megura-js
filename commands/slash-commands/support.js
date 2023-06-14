@@ -1,5 +1,4 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const logger = require('../../src/logger');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -7,10 +6,6 @@ module.exports = {
 		.setDescription('Join our Support Server!'),
 	cooldown: 3000,
 	async execute(interaction) {
-		logger.log({
-			level: 'info',
-			message: `User: ${interaction.member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
-		});
 
 		const embed = new EmbedBuilder()
 			.setTitle('Join our Support Server!')
