@@ -2,6 +2,7 @@ const {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
+	EmbedBuilder,
 	userMention,
 } = require('discord.js');
 const { Player, Monster, Iura, sequelize } = require('../src/db');
@@ -53,9 +54,23 @@ const executeAttack = async (interaction) => {
 			iuraDropped: monster.iuraDropped,
 		};
 
-		await interaction.editReply('Searching for a monster...');
+		const embed1 = new EmbedBuilder()
+			.setColor(0xcd7f32)
+			.setDescription('Searching for a monster...');
+		await interaction.editReply({ embeds: [embed1] });
+		
 		await wait(1000);
-		await interaction.channel.send(`Target locked. A **${monster.monsterName}** has appeared! Engaging in 5 seconds...`);
+
+		const embed2 = new EmbedBuilder()
+			.setColor(0xcd7f32)
+			.setDescription(`Target locked. A **${monster.monsterName}** has appeared! Engaging in 5 seconds...`);
+		await interaction.channel.send({ embeds: [embed2] });
+
+		const imageEmbed = new EmbedBuilder()
+			.setColor(0xcd7f32)
+			.setImage(monster.imageURL);
+		await interaction.channel.send({ embeds: [imageEmbed] });
+
 		await wait(5000);
 		const winner = await simulateBattle(interaction, playerObj, monsterObj);
 

@@ -50,9 +50,7 @@ module.exports = async (interaction, member) => {
 			.setColor(0xcd7f32)
 			.setTitle('**VOYAGER ID CARD**')
 			.setAuthor({ name: `${member.tag}` })
-			.setThumbnail(
-				`${member.displayAvatarURL({ extension: 'png', size: 512 })}`,
-			)
+			.setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
 			.addFields(
 				{
 					name: '👤 Player Name',

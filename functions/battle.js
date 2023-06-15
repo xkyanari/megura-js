@@ -130,4 +130,5 @@ const simulateBattle = async (interaction, player1, player2) => {
 
 module.exports = {
 	simulateBattle,
+	getDamage,
 };

@@ -52,18 +52,19 @@ const monsterBattle = async (interaction, winner) => {
         limit: 1,
     });
 
-    const scalingFactor = 2 + winner.level * 0.25;
-
     const bossObj = {
         playerName: monster.monsterName,
-        level: monster.level,
-        totalHealth: Math.round(monster.totalHealth * scalingFactor + 1000),
-        totalAttack: Math.round(monster.totalAttack * scalingFactor + 200),
-        totalDefense: Math.round(monster.totalDefense * scalingFactor + 200),
-        user: {displayAvatarURL: function() {
-            return monster.imageURL;
-        }}
+        level: winner.level + monster.level * 2,
+        totalHealth: Math.round(monster.totalHealth + winner.totalHealth + 30000),
+        totalAttack: Math.round(monster.totalAttack + winner.totalAttack + 5000),
+        totalDefense: Math.round(monster.totalDefense + winner.totalDefense + 5000),
+        user: {
+            displayAvatarURL: function() {
+                return monster.imageURL;
+            }
+        }
     };
+    console.log(bossObj);
 
     const wait = require('node:timers/promises').setTimeout;
     const embed1 = new EmbedBuilder()
@@ -147,5 +148,5 @@ const arenaBattle = async (interaction, players) => {
 };
 
 module.exports = {
-    arenaBattle
+    arenaBattle,
 };
