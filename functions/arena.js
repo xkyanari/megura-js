@@ -35,7 +35,7 @@ const duelPlayer = async (interaction, player1, player2) => {
     }
 
     await battleUp(interaction, winner, loser);
-    
+
     const message = duelMessages[Math.floor(Math.random() * duelMessages.length)];
     const filledMessage = message.replace('${winner.playerName}', winner.playerName).replace('${loser.playerName}', loser.playerName);
     const embed = new EmbedBuilder()
@@ -50,8 +50,8 @@ const duelMonster = async (interaction, player1, monster) => {
     const playerCriticalHitChance = Math.random() < 0.35; // 35% chance for player to get a critical hit
     const criticalHitMultiplier = playerCriticalHitChance ? 2 : 1; // Critical hit doubles the damage
 
-    const playerDamage = Math.round(getDamage(player1, bossObj, criticalHitMultiplier).finalDamage);
-    const bossDamage = Math.round(getDamage(bossObj, player1, 1).finalDamage);
+    const playerDamage = Math.round(getDamage(player1, monster, criticalHitMultiplier).finalDamage);
+    const bossDamage = Math.round(getDamage(monster, player1, 1).finalDamage);
 
     let winner, loser;
 
@@ -67,7 +67,7 @@ const duelMonster = async (interaction, player1, monster) => {
     }
 
     await battleUp(interaction, winner, loser);
-    
+
     const message = duelMessages[Math.floor(Math.random() * duelMessages.length)];
     const filledMessage = message.replace('${winner.playerName}', winner.playerName).replace('${loser.playerName}', loser.playerName);
     const embed = new EmbedBuilder()
@@ -91,7 +91,7 @@ const monsterBattle = async (interaction, winner) => {
         totalAttack: Math.round(monster.totalAttack + winner.totalAttack),
         totalDefense: Math.round(monster.totalDefense + winner.totalDefense),
         user: {
-            displayAvatarURL: function() {
+            displayAvatarURL: function () {
                 return monster.imageURL;
             }
         }
