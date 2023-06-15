@@ -53,7 +53,12 @@ module.exports = async (interaction) => {
 			}
 
 			const item = items[i];
-			const { item_ID } = await Shop.findOne({ where: { itemName: item.itemName } });
+			const shopItem = await Shop.findOne({ where: { itemName: item.itemName } });
+			if (!shopItem) {
+				console.log(`Item not found in Shop for itemName: ${item.itemName}`);
+				continue;  // Skip this iteration of the loop
+			}
+			const { item_ID } = shopItem;
 			currentEmbed.addFields({
 				name: item.itemName,
 				value: `Unequipped: ${item.quantity}\nEquipped: ${item.equippedAmount}\n__Total Amount:__ **${item.quantity + item.equippedAmount}**\nItem ID: \`${item_ID}\``,

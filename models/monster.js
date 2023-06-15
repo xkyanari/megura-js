@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
 			totalDefense: DataTypes.INTEGER,
 			expDropped: DataTypes.INTEGER,
 			iuraDropped: DataTypes.INTEGER,
+			imageURL: DataTypes.TEXT,
 		},
 		{
 			freezeTableName: true,

@@ -9,7 +9,7 @@ async function updateName(interaction, player, type, name) {
 		)
 			.then(() => Iura.findOne({ where: { accountID: player.iura.accountID } }))
 			.then((create_wallet) =>
-				interaction.reply(
+			 interaction.editReply(
 					`Wallet: \`${create_wallet.walletName}\` has been updated successfully.`,
 				),
 			);
@@ -21,7 +21,7 @@ async function updateName(interaction, player, type, name) {
 		)
 			.then(() => Iura.findOne({ where: { accountID: player.iura.accountID } }))
 			.then((create_bank) =>
-				interaction.reply(
+			 interaction.editReply(
 					`Bank: \`${create_bank.bankName}\` has been updated successfully.`,
 				),
 			);
@@ -100,6 +100,8 @@ module.exports = {
 		const { member, guild } = interaction;
 
 		try {
+			await interaction.deferReply({ ephemeral: true });
+
 			const player = await Player.findOne({
 				where: { discordID: member.id, guildID: guild.id },
 				include: 'iura',
@@ -136,7 +138,7 @@ module.exports = {
 					if (wallet_deposit) {
 						// wallet ----> bank
 						if (wallet_deposit > balance.walletAmount) {
-							return interaction.reply({
+							return interaction.editReply({
 								content: 'You do not have sufficient balance!',
 								ephemeral: true,
 							});
@@ -153,14 +155,12 @@ module.exports = {
 								`**$${numFormat(wallet_deposit)} IURA** has been deposited to \`${balance.bankName
 								}\` account.`,
 							);
-						await interaction
-							.reply({ embeds: [embed], ephemeral: true })
-							.catch(console.error);
+						await interaction.editReply({ embeds: [embed], ephemeral: true });
 					}
 					if (wallet_withdraw) {
 						// bank ----> wallet
 						if (wallet_withdraw > balance.bankAmount) {
-							return interaction.reply({
+							return interaction.editReply({
 								content: 'You do not have sufficient balance!',
 								ephemeral: true,
 							});
@@ -178,16 +178,14 @@ module.exports = {
 									wallet_withdraw,
 								)} IURA** has been removed from \`${balance.bankName}\` account.`,
 							);
-						await interaction
-							.reply({ embeds: [embed], ephemeral: true })
-							.catch(console.error);
+						await interaction.editReply({ embeds: [embed], ephemeral: true });
 					}
 					const embed = new EmbedBuilder()
 						.setTitle('Error!')
 						.setDescription(
 							'Please deposit and withdraw from your wallet balance only. Thanks!',
 						);
-					await interaction.reply({ embeds: [embed], ephemeral: true });
+					await interaction.editReply({ embeds: [embed], ephemeral: true });
 					break;
 
 				case 'bank':
@@ -202,7 +200,7 @@ module.exports = {
 					if (bank_deposit) {
 						// bank ----> stake
 						if (bank_deposit > balance.bankAmount) {
-							return interaction.reply({
+							return interaction.editReply({
 								content: 'You do not have sufficient balance!',
 								ephemeral: true,
 							});
@@ -220,14 +218,12 @@ module.exports = {
 									bank_deposit,
 								)} IURA** has been added to your Stake account.`,
 							);
-						await interaction
-							.reply({ embeds: [embed1], ephemeral: true })
-							.catch(console.error);
+						await interaction.editReply({ embeds: [embed1], ephemeral: true });
 					}
 					if (bank_withdraw) {
 						// stake ----> bank
 						if (bank_withdraw > balance.stakedAmount) {
-							return interaction.reply({
+							return interaction.editReply({
 								content: 'You do not have sufficient balance!',
 								ephemeral: true,
 							});
@@ -245,16 +241,14 @@ module.exports = {
 									bank_withdraw,
 								)} IURA** has been removed from your Stake account.`,
 							);
-						await interaction
-							.reply({ embeds: [embed1], ephemeral: true })
-							.catch(console.error);
+						await interaction.editReply({ embeds: [embed1], ephemeral: true });
 					}
 					const embed1 = new EmbedBuilder()
 						.setTitle('Error!')
 						.setDescription(
 							'Please stake and unstake from your bank balance only. Thanks!',
 						);
-					await interaction.reply({ embeds: [embed1], ephemeral: true });
+					await interaction.editReply({ embeds: [embed1], ephemeral: true });
 					break;
 
 				case 'balance':
@@ -264,9 +258,7 @@ module.exports = {
 							.setDescription(
 								`💰 **Wallet:** $${numFormat(balance.walletAmount)} IURA`,
 							);
-						await interaction
-							.reply({ embeds: [embed2], ephemeral: true })
-							.catch(console.error);
+						await interaction.editReply({ embeds: [embed2], ephemeral: true });
 					}
 					if (check_balance === 'bank') {
 						const embed2 = new EmbedBuilder()
@@ -276,9 +268,7 @@ module.exports = {
 									balance.bankAmount,
 								)} IURA\n💵 **Staked:** $${numFormat(balance.stakedAmount)} IURA`,
 							);
-						await interaction
-							.reply({ embeds: [embed2], ephemeral: true })
-							.catch(console.error);
+						await interaction.editReply({ embeds: [embed2], ephemeral: true });
 					}
 					break;
 			}
