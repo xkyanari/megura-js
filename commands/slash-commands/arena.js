@@ -1,6 +1,7 @@
 const {
     SlashCommandBuilder,
     EmbedBuilder,
+    PermissionFlagsBits,
 } = require('discord.js');
 const { Player } = require('../../src/db');
 const { arenaBattle } = require('../../functions/arena');
@@ -10,6 +11,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('arena')
         .setDescription('Start an arena event!')
+        .setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands)
         .addSubcommand((subcommand) =>
             subcommand.setName('start').setDescription('Join the event.'),
         )
@@ -47,7 +49,7 @@ module.exports = {
                 const embed1 = new EmbedBuilder()
                     .setColor(0xcd7f32)
                     .setTitle('THE ARENA GATES ARE OPEN!')
-                    .setDescription('The crowd is roaring! React with ⚖️ to join the fray and prove your might!\n\nStarting in 60 seconds!');
+                    .setDescription('The crowd is roaring! React with ⚖️ to join the fray and prove your might!\n\nStarting in 2 minutes!');
 
                 const message = await interaction.reply({ embeds: [embed1], fetchReply: true });
                 await message.react('⚖️');

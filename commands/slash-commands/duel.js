@@ -3,6 +3,7 @@ const {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
+	EmbedBuilder,
 } = require('discord.js');
 const { Player, Iura } = require('../../src/db');
 const { expPoints, duel_expGained } = require('../../src/vars');
@@ -77,9 +78,16 @@ module.exports = {
 				return interaction.editReply('This player does not have enough balance to be attacked.');
 			}
 
-			await interaction.editReply('The battle commences!');
+			const embed1 = new EmbedBuilder()
+				.setColor(0xcd7f32)
+				.setDescription('The battle commences!');
+			await interaction.editReply({ embeds: [embed1] });
 			await wait(1000);
-			await interaction.channel.send('Starting in 10 seconds...');
+
+			const embed2 = new EmbedBuilder()
+				.setColor(0xcd7f32)
+				.setDescription('Starting in 10 seconds...');
+			await interaction.channel.send({ embeds: [embed2] });
 			await wait(10000);
 			const winner = await simulateBattle(
 				interaction,

@@ -32,17 +32,13 @@ const skillMultiplier = 0.05;
 const expPoints = (level) => 50 * level ** 2 - 50 * level || 1;
 
 // battle formula
-const attackMultiplier = (level) =>
-	baseAttackMultiplier + skillMultiplier * level;
+const attackMultiplier = (level) =>	baseAttackMultiplier + skillMultiplier * level;
 const getCriticalHitRate = (level) => Math.min(level * criticalRate, 0.5);
 
 // leveling bonuses
-const attackPerLevel = (level) =>
-	Math.round(baseAttack * (1 + attackIncreasePerLevel) ** (level - 1));
-const defensePerLevel = (level) =>
-	baseDefense + levelDefenseMultiplier * (level - 1);
-const healthPerLevel = (level) =>
-	baseHealth + levelHealthMultiplier * (level - 1);
+const attackPerLevel = (level) => Math.round(baseAttack * (1 + attackIncreasePerLevel) ** (level - 1));
+const defensePerLevel = (level) => baseDefense + levelDefenseMultiplier * (level - 1);
+const healthPerLevel = (level) => baseHealth + levelHealthMultiplier * (level - 1);
 
 // Dahlia chat settings
 const dahliaPrefix = 'Dahlia';

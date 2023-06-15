@@ -17,7 +17,7 @@ const duelMessages = [
     "A titanic struggle ends as ${winner.playerName} vanquishes ${loser.playerName}, demonstrating their superior skill!"
 ];
 
-const duel = async (interaction, player1, player2) => {
+const duelPlayer = async (interaction, player1, player2) => {
     const damage1 = Math.round(getDamage(player1, player2, attackMultiplier(player1.level)).finalDamage);
     const damage2 = Math.round(getDamage(player2, player1, attackMultiplier(player2.level)).finalDamage);
 
@@ -46,6 +46,38 @@ const duel = async (interaction, player1, player2) => {
     return winner;
 };
 
+const duelMonster = async (interaction, player1, monster) => {
+    const playerCriticalHitChance = Math.random() < 0.35; // 35% chance for player to get a critical hit
+    const criticalHitMultiplier = playerCriticalHitChance ? 2 : 1; // Critical hit doubles the damage
+
+    const playerDamage = Math.round(getDamage(player1, bossObj, criticalHitMultiplier).finalDamage);
+    const bossDamage = Math.round(getDamage(bossObj, player1, 1).finalDamage);
+
+    let winner, loser;
+
+    if (playerDamage > bossDamage) {
+        winner = player1;
+        loser = monster;
+    } else if (bossDamage > playerDamage) {
+        winner = monster;
+        loser = player1;
+    } else {
+        winner = Math.random() < 0.5 ? player1 : monster;
+        loser = winner === player1 ? monster : player1;
+    }
+
+    await battleUp(interaction, winner, loser);
+    
+    const message = duelMessages[Math.floor(Math.random() * duelMessages.length)];
+    const filledMessage = message.replace('${winner.playerName}', winner.playerName).replace('${loser.playerName}', loser.playerName);
+    const embed = new EmbedBuilder()
+        .setColor(0xcd7f32)
+        .setDescription(filledMessage);
+    await interaction.channel.send({ embeds: [embed] });
+
+    return winner;
+};
+
 const monsterBattle = async (interaction, winner) => {
     const [monster] = await Monster.findAll({
         order: sequelize.random(),
@@ -54,10 +86,10 @@ const monsterBattle = async (interaction, winner) => {
 
     const bossObj = {
         playerName: monster.monsterName,
-        level: winner.level + monster.level * 2,
-        totalHealth: Math.round(monster.totalHealth + winner.totalHealth + 30000),
-        totalAttack: Math.round(monster.totalAttack + winner.totalAttack + 5000),
-        totalDefense: Math.round(monster.totalDefense + winner.totalDefense + 5000),
+        level: Math.round(winner.level + monster.level),
+        totalHealth: Math.round(monster.totalHealth + winner.totalHealth),
+        totalAttack: Math.round(monster.totalAttack + winner.totalAttack),
+        totalDefense: Math.round(monster.totalDefense + winner.totalDefense),
         user: {
             displayAvatarURL: function() {
                 return monster.imageURL;
@@ -95,7 +127,7 @@ const monsterBattle = async (interaction, winner) => {
 
     await wait(1000);
 
-    const winnerBattle = await duel(interaction, winner, bossObj);
+    const winnerBattle = await duelMonster(interaction, winner, bossObj);
 
     if (winnerBattle === bossObj) {
         const embed4 = new EmbedBuilder()
@@ -130,7 +162,7 @@ const arenaBattle = async (interaction, players) => {
             player2 = players[Math.floor(Math.random() * players.length)];
         } while (player1 === player2);
 
-        let winner = await duel(interaction, player1, player2);
+        let winner = await duelPlayer(interaction, player1, player2);
         players = players.filter(player => player !== (winner === player1 ? player2 : player1));
 
         await wait(2000);
