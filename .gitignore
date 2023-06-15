@@ -2,6 +2,7 @@ node_modules
 memoria
 logs/*
 src/feature.js
+src/db.js
 config.json
 pm2.config.js
 *.sqlite

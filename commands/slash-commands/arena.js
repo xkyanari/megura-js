@@ -4,40 +4,46 @@ const {
 } = require('discord.js');
 const { Player } = require('../../src/db');
 const { arenaBattle } = require('../../functions/arena');
-const { footer } = require('../../src/vars');
+const { footer, allowedRoleIDs } = require('../../src/vars');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('arena')
         .setDescription('Start an arena event!')
-        .setDefaultMemberPermissions('0')
         .addSubcommand((subcommand) =>
             subcommand.setName('start').setDescription('Join the event.'),
         )
         .addSubcommand((subcommand) =>
             subcommand.setName('rules').setDescription('Show the rules.'),
         ),
-        // .addSubcommand((subcommand) =>
-        //     subcommand
-        //         .setName('difficulty')
-        //         .setDescription('Select difficulty level.')
-        //         .addStringOption(option =>
-        //             option.setName('type')
-        //                 .setDescription('Choose one.')
-        //                 .setRequired(true)
-        //                 .addChoices(
-        //                     { name: 'Easy', value: 'easy' },
-        //                     { name: 'Medium', value: 'medium' },
-        //                     { name: 'Hard', value: 'hard' },
-        //                     { name: 'Deathmatch', value: 'deathmatch' },
-        //                 ),
-        //         ),
-        // ),
+    // .addSubcommand((subcommand) =>
+    //     subcommand
+    //         .setName('difficulty')
+    //         .setDescription('Select difficulty level.')
+    //         .addStringOption(option =>
+    //             option.setName('type')
+    //                 .setDescription('Choose one.')
+    //                 .setRequired(true)
+    //                 .addChoices(
+    //                     { name: 'Easy', value: 'easy' },
+    //                     { name: 'Medium', value: 'medium' },
+    //                     { name: 'Hard', value: 'hard' },
+    //                     { name: 'Deathmatch', value: 'deathmatch' },
+    //                 ),
+    //         ),
+    // ),
     cooldown: 0,
     async execute(interaction) {
         const subCommand = interaction.options.getSubcommand();
         switch (subCommand) {
             case 'start':
+                const memberRoles = interaction.member.roles.cache;
+                const hasAllowedRole = allowedRoleIDs.some(roleID => memberRoles.has(roleID));
+
+                if (!hasAllowedRole) {
+                    return await interaction.reply('You do not have the required role to use this command.');
+                }
+
                 const embed1 = new EmbedBuilder()
                     .setColor(0xcd7f32)
                     .setTitle('THE ARENA GATES ARE OPEN!')
@@ -46,7 +52,7 @@ module.exports = {
                 const message = await interaction.reply({ embeds: [embed1], fetchReply: true });
                 await message.react('⚖️');
 
-                const players = await Player.findAll({ where: { guildID: interaction.guild.id }});
+                const players = await Player.findAll({ where: { guildID: interaction.guild.id } });
                 const playerObjects = players.map(player => ({
                     discordID: player.discordID,
                     playerName: player.playerName,

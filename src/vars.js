@@ -1,6 +1,9 @@
 // main server ID
 const serverID = '1110421362255863918';
 
+// mod roles
+const allowedRoleIDs = ['1032061332150816878', '1032422989834235924'];
+
 // text command prefix
 const prefix = '!';
 
@@ -82,4 +85,5 @@ module.exports = {
 	checkProfile,
 	footer,
 	shopImage,
+	allowedRoleIDs,
 };
