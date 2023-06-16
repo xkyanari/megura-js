@@ -64,6 +64,9 @@ module.exports = (sequelize, DataTypes) => {
 			closing: {
 				type: DataTypes.TEXT,
 			},
+			arenaBoss: {
+				type: DataTypes.BOOLEAN,
+			},
 			twitterID: {
 				type: DataTypes.STRING,
 				unique: true,

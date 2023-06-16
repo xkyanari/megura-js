@@ -2,7 +2,7 @@ const { EmbedBuilder } = require("@discordjs/builders");
 const { attackMultiplier } = require("../src/vars");
 const { getDamage } = require("./battle");
 const battleUp = require('../functions/battleup');
-const { Monster, sequelize } = require('../src/db');
+const { Monster, sequelize, Guild } = require('../src/db');
 
 const duelMessages = [
     "${winner.playerName} strikes a mighty blow, defeating ${loser.playerName} in a flurry of steel and grit!",
@@ -147,6 +147,7 @@ const monsterBattle = async (interaction, winner) => {
 };
 
 const arenaBattle = async (interaction, players) => {
+    const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
     const wait = require('node:timers/promises').setTimeout;
     await wait(10000);
 
@@ -175,8 +176,11 @@ const arenaBattle = async (interaction, players) => {
 
     // announce the winner
     await interaction.channel.send({ embeds: [embed2] });
-    await wait(5000);
-    await monsterBattle(interaction, players[0]);
+
+    if (guildCheck && guildCheck.arenaBoss) {
+        await wait(5000);
+        await monsterBattle(interaction, players[0]);
+    }
 };
 
 module.exports = {
