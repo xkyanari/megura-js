@@ -4,76 +4,35 @@ module.exports = (sequelize, DataTypes) => {
 	const Guild = sequelize.define(
 		'Guild',
 		{
-			guildID: {
-				type: DataTypes.TEXT,
-			},
-			version: {
-				type: DataTypes.TEXT,
-			},
-			type: {
-				type: DataTypes.TEXT,
-			},
-			verifyChannelID: {
-				type: DataTypes.TEXT,
-			},
-			verifyMessageID: {
-				type: DataTypes.TEXT,
-			},
-			logsChannelID: {
-				type: DataTypes.TEXT,
-			},
-			whitelistChannelID: {
-				type: DataTypes.TEXT,
-			},
-			twitterChannelID: {
-				type: DataTypes.TEXT,
-			},
-			verifyRoleID: {
-				type: DataTypes.TEXT,
-			},
-			raidRoleID: {
-				type: DataTypes.TEXT,
-			},
-			margarethaID: {
-				type: DataTypes.TEXT,
-			},
-			margarethaName: {
-				type: DataTypes.TEXT,
-			},
-			cerberonID: {
-				type: DataTypes.TEXT,
-			},
-			cerberonName: {
-				type: DataTypes.TEXT,
-			},
-			chatPrefix: {
-				type: DataTypes.TEXT,
-			},
-			chatPrompt: {
-				type: DataTypes.TEXT,
-			},
-			chatChannelID: {
-				type: DataTypes.TEXT,
-			},
-			intro: {
-				type: DataTypes.TEXT,
-			},
-			rules: {
-				type: DataTypes.TEXT,
-			},
-			closing: {
-				type: DataTypes.TEXT,
-			},
-			arenaBoss: {
-				type: DataTypes.BOOLEAN,
-			},
+			guildID: DataTypes.TEXT,
+			version: DataTypes.TEXT,
+			type: DataTypes.TEXT,
+			verifyChannelID: DataTypes.TEXT,
+			verifyMessageID: DataTypes.TEXT,
+			verifyRoleID: DataTypes.TEXT,
+			logsChannelID: DataTypes.TEXT,
+			specialShopChannelID: DataTypes.TEXT,
+			specialShopWebhookID: DataTypes.TEXT,
+			specialShopWebhookToken: DataTypes.TEXT,
+			twitterChannelID: DataTypes.TEXT,
+			raidRoleID: DataTypes.TEXT,
+			margarethaID: DataTypes.TEXT,
+			margarethaName: DataTypes.TEXT,
+			cerberonID: DataTypes.TEXT,
+			cerberonName: DataTypes.TEXT,
+			chatPrefix: DataTypes.TEXT,
+			chatChannelID: DataTypes.TEXT,
+			chatPrompt: DataTypes.TEXT,
+			intro: DataTypes.TEXT,
+			rules: DataTypes.TEXT,
+			closing: DataTypes.TEXT,
+			arenaBoss: DataTypes.BOOLEAN,
+			customToken: DataTypes.TEXT,
 			twitterID: {
 				type: DataTypes.STRING,
 				unique: true,
 			},
-			username: {
-				type: DataTypes.TEXT,
-			},
+			username: DataTypes.TEXT,
 			accessToken: {
 				type: DataTypes.TEXT,
 				get() {
@@ -94,16 +53,15 @@ module.exports = (sequelize, DataTypes) => {
 					this.setDataValue('refreshToken', encrypt(value));
 				},
 			},
-			expiresIn: {
-				type: DataTypes.TEXT,
-			},
-			expirationTime: {
-				type: DataTypes.DATE,
-			},
+			expiresIn: DataTypes.TEXT,
+			expirationTime: DataTypes.DATE,
 			walletAmount: {
 				type: DataTypes.INTEGER,
-				defaultValue: 0,
+				defaultValue: 500000,
 			},
+			webhookId: DataTypes.STRING,
+			webhookToken: DataTypes.STRING,
+			webhookChannelID: DataTypes.STRING,
 		},
 		{
 			freezeTableName: true,

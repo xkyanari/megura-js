@@ -46,9 +46,9 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			description: {
 				type: DataTypes.TEXT,
-				allowNull: false,
 			},
 			item_ID: DataTypes.TEXT,
+			guildID: DataTypes.TEXT,
 		},
 		{
 			freezeTableName: true,

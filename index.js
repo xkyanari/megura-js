@@ -91,6 +91,7 @@ const client = new Client({
 		GatewayIntentBits.GuildPresences,
 		GatewayIntentBits.GuildVoiceStates,
 		GatewayIntentBits.GuildMessageReactions,
+		GatewayIntentBits.GuildWebhooks,
 	],
 	// sweepers: Options.DefaultSweeperSettings,
 });

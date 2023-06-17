@@ -1,13 +1,13 @@
 const { EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { footer, shopImage } = require('../src/vars');
+const { footer, specialShopImage } = require('../src/vars');
 
 module.exports = async (interaction) => {
 	try {
 		const embed = new EmbedBuilder()
 			.setColor(0xcd7f32)
-			.setTitle('🛒 **ITEM SHOP:** 🛒')
-			.setDescription('Type `/buy <item ID> <amount>` to buy in bulk.')
-			.setImage(shopImage)
+			.setTitle('💎 **SPECIAL SHOP:** 💎')
+			.setDescription('Special items sold here!')
+			.setImage(specialShopImage)
 			.setFooter(footer);
 
 		const select = new StringSelectMenuBuilder()
@@ -15,17 +15,20 @@ module.exports = async (interaction) => {
 			.setPlaceholder('Choose an item category.')
 			.addOptions(
 				new StringSelectMenuOptionBuilder()
-					.setLabel('Weapons')
-					.setValue('weapons'),
+					.setLabel('Whitelist')
+					.setValue('whitelist'),
 				new StringSelectMenuOptionBuilder()
-					.setLabel('Armor')
-					.setValue('armor'),
+					.setLabel('Event Items')
+					.setValue('events'),
 				new StringSelectMenuOptionBuilder()
-					.setLabel('Consumables')
-					.setValue('consumables'),
+					.setLabel('Digital Items')
+					.setValue('digital'),
 				new StringSelectMenuOptionBuilder()
-					.setLabel('Miscellaneous Items')
-					.setValue('miscellaneous'),
+					.setLabel('NFTs')
+					.setValue('nfts'),
+					new StringSelectMenuOptionBuilder()
+					.setLabel('Cryptocurrencies')
+					.setValue('crypto'),
 			);
 
 		const row = new ActionRowBuilder()

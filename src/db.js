@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const { mysql_dbname, mysql_dbuser, mysql_dbpass } = require('../config.json');
+const player = require('../models/player');
 
 // Connecting to the database using Sequelize -----------------
 
@@ -26,6 +27,7 @@ const Guild = require('../models/guild')(sequelize, Sequelize.DataTypes);
 const Twitter = require('../models/twitter')(sequelize, Sequelize.DataTypes);
 const Raid = require('../models/raid')(sequelize, Sequelize.DataTypes);
 const Tweet = require('../models/tweet')(sequelize, Sequelize.DataTypes);
+const Order = require('../models/order')(sequelize, Sequelize.DataTypes);
 
 Player.hasOne(Iura, {
 	as: 'iura',
@@ -81,7 +83,7 @@ Reflect.defineProperty(Player.prototype, 'updateItem', {
 	},
 });
 
-// adds only the item (no deduction of payment yet)
+// adds only the item (no deduction of payment yet) to the user's inventory
 Reflect.defineProperty(Player.prototype, 'addItem', {
 	value: async function addItem(item, amount = 1) {
 		const { itemID } = await Shop.findOne({ where: { itemName: item } });
@@ -98,6 +100,90 @@ Reflect.defineProperty(Player.prototype, 'addItem', {
 		}
 
 		await this.createItem({ itemName: item, quantity: amount });
+	},
+});
+
+// adds an item to the Shop
+Reflect.defineProperty(Shop, 'addItem', {
+	value: async function addItem(itemName, price, quantity, item_ID, category, guildID) {
+		return await this.upsert({ itemName, price, quantity, item_ID, category, guildID });
+	},
+});
+
+// removes an item from the Shop
+Reflect.defineProperty(Shop, 'removeItem', {
+	value: async function removeItem(item_ID) {
+		const shopItem = await this.findOne({ where: { item_ID }});
+		if (shopItem) return await this.destroy({ where: { item_ID }});
+		return;
+	},
+});
+
+// updates an item from the Shop
+Reflect.defineProperty(Shop, 'updateItem', {
+	value: async function updateItem({ item_ID, price, stock }) {
+		const updatedValues = {};
+		if (price !== undefined) {
+			updatedValues.price = price;
+		}
+		if (stock !== undefined) {
+			updatedValues.quantity = stock;
+		}
+		return await this.update(updatedValues, { where: { item_ID } });
+	},
+});
+
+// buy an item from the Shop
+Reflect.defineProperty(Shop, 'buyItem', {
+	value: async function buyItem(item, quantity, discordID, guildID) {
+		const shopItem = await this.findOne({ where: { itemName: item }});
+		const user = await Player.findOne({ where: { discordID, guildID }});
+		const guild = await Guild.findOne({ where: { guildID }});
+
+		// Update user balance
+		await Player.update({ oresEarned: user.oresEarned - shopItem.price * quantity }, { where: { discordID } });
+		
+		// Update guild wallet
+		await Guild.update({ walletAmount: guild.walletAmount + shopItem.price * quantity }, { where: { guildID } });
+
+		// Update shop stock
+		await this.update({ quantity: shopItem.stock - quantity }, { where: { itemName: item } });
+
+		return;
+	},
+});
+
+// refund the ores to the player
+Reflect.defineProperty(Shop, 'returnOres', {
+	value: async function returnOres(item, quantity, discordID, guildID) {
+		const shopItem = await this.findOne({ where: { itemName: item }});
+		const user = await Player.findOne({ where: { discordID, guildID }});
+		const guild = await Guild.findOne({ where: { guildID }});
+
+		const oreReturned = shopItem.price * quantity;
+
+		// Refund ores to user
+		await Player.update({ oresEarned: user.oresEarned + oreReturned }, { where: { discordID } });
+		
+		// Deduct from guild wallet
+		await Guild.update({ walletAmount: guild.walletAmount - oreReturned }, { where: { guildID } });
+
+		// Increase shop stock
+		await this.update({ quantity: shopItem.stock + quantity }, { where: { itemName: item } });
+
+		return oreReturned;
+	},
+});
+
+
+// gets an item from the Shop
+Reflect.defineProperty(Shop, 'getItem', {
+	value: async function getItem(item_ID) {
+		const shopItem = await this.findOne({ where: { item_ID }});
+		if (!shopItem) return;
+		return {
+			...shopItem.toJSON(),
+		};
 	},
 });
 
@@ -252,4 +338,5 @@ module.exports = {
 	Twitter,
 	Raid,
 	Tweet,
+	Order,
 };

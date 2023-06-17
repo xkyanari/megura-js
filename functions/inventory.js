@@ -55,13 +55,21 @@ module.exports = async (interaction) => {
 			const item = items[i];
 			const shopItem = await Shop.findOne({ where: { itemName: item.itemName } });
 			if (!shopItem) {
-				console.log(`Item not found in Shop for itemName: ${item.itemName}`);
 				continue;  // Skip this iteration of the loop
 			}
-			const { item_ID } = shopItem;
+			const { item_ID, guildID } = shopItem;
+
+			let fieldValue;
+			if (guildID) {
+				fieldValue = `__Total Amount:__ **${item.quantity + item.equippedAmount}**`;
+			}
+			else {
+				fieldValue = `Unequipped: ${item.quantity}\nEquipped: ${item.equippedAmount}\n__Total Amount:__ **${item.quantity + item.equippedAmount}**\nItem ID: \`${item_ID}\``;
+			}
+
 			currentEmbed.addFields({
 				name: item.itemName,
-				value: `Unequipped: ${item.quantity}\nEquipped: ${item.equippedAmount}\n__Total Amount:__ **${item.quantity + item.equippedAmount}**\nItem ID: \`${item_ID}\``,
+				value: fieldValue,
 				inline: false,
 			});
 		}

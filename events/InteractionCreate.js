@@ -52,6 +52,13 @@ module.exports = {
 					});
 				}
 
+				if (error.message === 'guild not found') {
+					return interaction.reply({
+						content: 'Please register the guild first.',
+						ephemeral: true,
+					});
+				}
+
 				const embed = new EmbedBuilder().setColor('Red').setDescription(`
                             Error executing \`${interaction.commandName}\`
                             Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);

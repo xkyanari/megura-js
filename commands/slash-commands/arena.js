@@ -5,13 +5,13 @@ const {
 } = require('discord.js');
 const { Player, Guild } = require('../../src/db');
 const { arenaBattle } = require('../../functions/arena');
-const { footer, allowedRoleIDs } = require('../../src/vars');
+const { footer } = require('../../src/vars');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('arena')
         .setDescription('Start an arena event!')
-        .setDefaultMemberPermissions(PermissionFlagsBits.UseApplicationCommands)
+        .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
         .addSubcommand((subcommand) =>
             subcommand.setName('start').setDescription('Join the event.'),
         )
@@ -50,13 +50,6 @@ module.exports = {
         switch (subCommand) {
             case 'start':
                 try {
-                    const memberRoles = interaction.member.roles.cache;
-                    const hasAllowedRole = allowedRoleIDs.some(roleID => memberRoles.has(roleID));
-
-                    if (!hasAllowedRole) {
-                        return await interaction.reply({ content: 'You do not have the required role to use this command.', ephemeral: true });
-                    }
-
                     const embed1 = new EmbedBuilder()
                         .setColor(0xcd7f32)
                         .setTitle('THE ARENA GATES ARE OPEN!')

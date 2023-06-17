@@ -29,6 +29,7 @@ module.exports = async (interaction, member) => {
 	const numFormat = (value) =>
 		new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
 	const guild = interaction.guild;
+	const oreEmoji = interaction.client.emojis.cache.get('1119212796136144956') || '💎';
 
 	try {
 		const player = await Player.findOne({
@@ -71,10 +72,18 @@ module.exports = async (interaction, member) => {
 				{
 					name: '💰 Iura',
 					value: `$${numFormat(player.iura.walletAmount)}`,
-					inline: false,
+					inline: true,
 				},
 			)
 			.setFooter(footer);
+
+		if (player.oresEarned) {
+			embed.addFields({
+				name: `${oreEmoji} Ores`,
+				value: `${numFormat(player.oresEarned)}`,
+				inline: true,
+			});
+		}
 
 		if (player.imageURL) {
 			const contract = await Contract.findOne({

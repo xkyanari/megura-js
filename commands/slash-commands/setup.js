@@ -40,6 +40,18 @@ module.exports = {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
+				.setName('mods')
+				.setDescription('Assign channel for moderator logs.')
+				.addChannelOption((option) =>
+					option
+						.setName('channel')
+						.setDescription('Choose the channel for moderator logs and purchases.')
+						.addChannelTypes(ChannelType.GuildText)
+						.setRequired(true),
+				),
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
 				.setName('captcha')
 				.setDescription('Setup CAPTCHA.')
 				.addStringOption(option =>
@@ -70,17 +82,17 @@ module.exports = {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName('shop')
-				.setDescription('Whitelist Shop.')
+				.setDescription('Special Shop.')
 				.addChannelOption((option) =>
 					option
 						.setName('channel')
-						.setDescription('Choose the channel for the Whitelist Shop.')
+						.setDescription('Choose the channel for the Special Shop announcements.')
 						.addChannelTypes(ChannelType.GuildText)
 						.setRequired(true),
 				),
 		)
 		.addSubcommand((subcommand) =>
-			subcommand.setName('deploy').setDescription('Deploy messages for respective channels.'),
+			subcommand.setName('deploy').setDescription('Deploy CAPTCHA to its assigned Verification channel.'),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -137,18 +149,6 @@ module.exports = {
 		),
 	cooldown: 3000,
 	async execute(interaction) {
-
-		if (
-			!interaction.member.permissions.has(
-				PermissionsBitField.Flags.Administrator,
-			)
-		) {
-			return await interaction.reply({
-				content: 'You do not have permissions to setup the server.',
-				ephemeral: true,
-			});
-		}
-
 		const guildCheck = await Guild.findOne({
 			where: { guildID: interaction.guild.id },
 		});
@@ -278,10 +278,7 @@ module.exports = {
 					// Add a warning to confirm deletion of the guild entry.
 
 					if (!guildCheck) {
-						return await interaction.reply({
-							content: 'Dahlia is not yet setup in this server.',
-							ephemeral: true,
-						});
+						throw new Error('guild not found');
 					}
 					await guildCheck.destroy({
 						where: { guildID: interaction.guild.id },
@@ -299,10 +296,7 @@ module.exports = {
 			case 'logs':
 				try {
 					if (!guildCheck) {
-						return await interaction.reply({
-							content: 'Please register the guild first.',
-							ephemeral: true,
-						});
+						throw new Error('guild not found');
 					}
 
 					const logsChannel = options.getChannel('channel');
@@ -318,13 +312,29 @@ module.exports = {
 				}
 				break;
 
+			case 'mods':
+				try {
+					if (!guildCheck) {
+						throw new Error('guild not found');
+					}
+
+					const modsChannel = options.getChannel('channel');
+
+					await guildCheck.update({ webhookChannelID: modsChannel.id });
+					await interaction.reply({
+						content: 'Moderation Logs channel assigned.',
+						ephemeral: true,
+					});
+				}
+				catch (error) {
+					console.error(error);
+				}
+				break;
+
 			case 'captcha':
 				try {
 					if (!guildCheck) {
-						return await interaction.reply({
-							content: 'Please register the guild first.',
-							ephemeral: true,
-						});
+						throw new Error('guild not found');
 					}
 
 					const type = options.getString('type');
@@ -351,17 +361,14 @@ module.exports = {
 			case 'shop':
 				try {
 					if (!guildCheck) {
-						return await interaction.reply({
-							content: 'Please register the guild first.',
-							ephemeral: true,
-						});
+						throw new Error('guild not found');
 					}
 
-					const whitelist = options.getChannel('channel');
+					const specialShop = options.getChannel('channel');
 
-					await guildCheck.update({ whitelistChannelID: whitelist.id });
+					await guildCheck.update({ specialShopChannelID: specialShop.id });
 					await interaction.reply({
-						content: 'Verification disabled!',
+						content: 'Special Shop announcement channel saved!',
 						ephemeral: true,
 					});
 				}
@@ -373,10 +380,7 @@ module.exports = {
 			case 'deploy':
 				try {
 					if (!guildCheck) {
-						return await interaction.reply({
-							content: 'Please register the guild first.',
-							ephemeral: true,
-						});
+						throw new Error('guild not found');
 					}
 					await captcha(interaction, guildCheck.verifyChannelID);
 				}
@@ -392,10 +396,7 @@ module.exports = {
 
 				try {
 					if (!guildCheck) {
-						return await interaction.reply({
-							content: 'Please register the guild first.',
-							ephemeral: true,
-						});
+						throw new Error('guild not found');
 					}
 
 					const margaretha = options.getRole('margaretha');
@@ -420,10 +421,7 @@ module.exports = {
 			case 'rules':
 				try {
 					if (!guildCheck) {
-						return await interaction.reply({
-							content: 'Please register the guild first.',
-							ephemeral: true,
-						});
+						throw new Error('guild not found');
 					}
 
 					await rules(interaction);
@@ -436,10 +434,7 @@ module.exports = {
 			case 'settings':
 				try {
 					if (!guildCheck) {
-						return await interaction.reply({
-							content: 'Please register the guild first.',
-							ephemeral: true,
-						});
+						throw new Error('guild not found');
 					}
 
 					const embed = new EmbedBuilder().setTitle(
@@ -460,6 +455,18 @@ module.exports = {
 							valueFunc: roleMention,
 						},
 						{
+							check: 'logsChannelID',
+							name: 'Audit Logs Channel:',
+							inline: false,
+							valueFunc: channelMention,
+						},
+						{
+							check: 'specialShopChannelID',
+							name: 'Special Shop Channel:',
+							inline: false,
+							valueFunc: channelMention,
+						},
+						{
 							check: 'twitterChannelID',
 							name: 'Twitter Channel:',
 							inline: true,
@@ -476,18 +483,6 @@ module.exports = {
 							name: 'Server Twitter Account:',
 							inline: false,
 							valueFunc: (v) => `[@${v}](https://www.twitter.com/${v})`,
-						},
-						{
-							check: 'logsChannelID',
-							name: 'Audit Logs Channel:',
-							inline: false,
-							valueFunc: channelMention,
-						},
-						{
-							check: 'whitelistChannelID',
-							name: 'Whitelist Shop Channel:',
-							inline: false,
-							valueFunc: channelMention,
 						},
 						{
 							check: 'margarethaID',
@@ -518,6 +513,18 @@ module.exports = {
 							name: 'Chat Prompt:',
 							inline: false,
 							valueFunc: (v) => `\`${v}\``,
+						},
+						{
+							check: 'walletAmount',
+							name: 'Wallet Balance:',
+							inline: false,
+							valueFunc: (v) => `\`${v}\` ORES`,
+						},
+						{
+							check: 'webhookChannelID',
+							name: 'Moderator Channel:',
+							inline: true,
+							valueFunc: channelMention,
 						},
 					];
 
@@ -551,13 +558,10 @@ module.exports = {
 				if (!await validateFeature(interaction, guildCheck.version, 'ownDahlia')) {
 					return;
 				}
-				
+
 				try {
 					if (!guildCheck) {
-						return await interaction.reply({
-							content: 'Please register the guild first.',
-							ephemeral: true,
-						});
+						throw new Error('guild not found');
 					}
 					const updateFields = {};
 					let responseMsg = '';

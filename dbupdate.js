@@ -10,6 +10,7 @@ const {
 	Twitter,
 	Raid,
 	Tweet,
+	Order
 } = require('./src/db');
 
 (async () => {
@@ -59,17 +60,29 @@ const {
 		})
 		.catch((error) => console.log(error));
 
+	await Order.sync({ alter: true })
+		.then(() => {
+			console.log('Order table updated.');
+		})
+		.catch((error) => console.log(error));
+
 	await Item.sync({ alter: true })
 		.then(() => {
 			console.log('Item table updated.');
 		})
 		.catch((error) => console.log(error));
 
-	await Iura.sync({ alter: true })
-		.then(() => {
-			console.log('Iura table refreshed.');
-		})
-		.catch((error) => console.log(error));
+	// await Item.sync({ alter: true })
+	// 	.then(() => {
+	// 		console.log('Item table updated.');
+	// 	})
+	// 	.catch((error) => console.log(error));
+
+	// await Iura.sync({ alter: true })
+	// 	.then(() => {
+	// 		console.log('Iura table refreshed.');
+	// 	})
+	// 	.catch((error) => console.log(error));
 
 	await Guild.sync({ alter: true })
 		.then(() => {
@@ -77,21 +90,21 @@ const {
 		})
 		.catch((error) => console.log(error));
 
-	await Twitter.sync({ alter: true })
-		.then(() => {
-			console.log('Twitter table refreshed.');
-		})
-		.catch((error) => console.log(error));
+	// await Twitter.sync({ alter: true })
+	// 	.then(() => {
+	// 		console.log('Twitter table refreshed.');
+	// 	})
+	// 	.catch((error) => console.log(error));
 
-	await Raid.sync({ alter: true })
-		.then(() => {
-			console.log('Raid table refreshed.');
-		})
-		.catch((error) => console.log(error));
+	// await Raid.sync({ alter: true })
+	// 	.then(() => {
+	// 		console.log('Raid table refreshed.');
+	// 	})
+	// 	.catch((error) => console.log(error));
 
-	await Tweet.sync({ alter: true })
-		.then(() => {
-			console.log('Tweet table refreshed.');
-		})
-		.catch((error) => console.log(error));
+	// await Tweet.sync({ alter: true })
+	// 	.then(() => {
+	// 		console.log('Tweet table refreshed.');
+	// 	})
+	// 	.catch((error) => console.log(error));
 })();

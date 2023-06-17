@@ -75,6 +75,10 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.INTEGER,
 				defaultValue: 0,
 			},
+			oresEarned: {
+				type: DataTypes.INTEGER,
+				defaultValue: 0,
+			},
 			iuraEarned: {
 				type: DataTypes.INTEGER,
 				defaultValue: 0,
