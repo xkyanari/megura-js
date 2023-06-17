@@ -49,7 +49,6 @@ module.exports = {
 			nfts.forEach((thisNFT) => {
 				if (thisNFT.collection === collectionID) {
 					if (!nftList.includes(`${thisNFT.name}\n`)) {
-						console.log(thisNFT);
 						nftList.push(`${thisNFT.name}\n`);
 						nftOptions.push({
 							label: `${thisNFT.name}`,

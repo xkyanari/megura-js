@@ -163,5 +163,39 @@
     "contractName": "Dropouts",
     "contractAddress": "483cde04ed8420264e8e82eb4f47ec3a68bdb586572bddcd11409206b7ecb2ec",
     "collectionURL": "https://magiceden.io/marketplace/drp"
+  },
+  {
+    "blockchain": "solana",
+    "collectionID": "mad_lads",
+    "contractName": "Mad Lads",
+    "contractAddress": "8588cfc580248be304c2852c9505d69dd873a1ea57ff65d96cd2807dd3da288c",
+    "traitWeapon": "Hand",
+    "traitArmor": "Clothing",
+    "collectionURL": "https://magiceden.io/marketplace/mad_lads"
+  },
+  {
+    "blockchain": "solana",
+    "collectionID": "aurory",
+    "contractName": "Aurory",
+    "contractAddress": "45841b3efa6e5714aca4617a340cbfcf69fc1398589e6ccc0311815145126fac",
+    "traitArmor": "Cloth",
+    "collectionURL": "https://magiceden.io/marketplace/aurory"
+  },
+  {
+    "blockchain": "solana",
+    "collectionID": "wolf_capital",
+    "contractName": "Wolf Capital",
+    "contractAddress": "b1275a46929c3bb4385e02e2cf111fac5e73b5e83a49b7722f8832b112de8959",
+    "traitArmor": "Clothing",
+    "collectionURL": "https://magiceden.io/marketplace/wolf_capital"
+  },
+  {
+    "blockchain": "solana",
+    "collectionID": "Nekozuma",
+    "contractName": "Nekozuma",
+    "contractAddress": "e4924435bcbbfc8e2e491408dfeb1da31c2c958ee36dc9fe8356acb55b1b7bc6",
+    "traitWeapon": "Hand",
+    "traitArmor": "Cloth",
+    "collectionURL": "https://magiceden.io/marketplace/Nekozuma"
   }
 ]

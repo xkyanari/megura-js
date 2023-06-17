@@ -57,35 +57,12 @@ module.exports = {
                 .setPlaceholder('Choose an item.')
                 .addOptions(itemOptions);
 
-            const select3 = new StringSelectMenuBuilder()
-                .setCustomId('category')
-                .setPlaceholder('Choose an item category.')
-                .addOptions(
-                    new StringSelectMenuOptionBuilder()
-                        .setLabel('Whitelist')
-                        .setValue('whitelist'),
-                    new StringSelectMenuOptionBuilder()
-                        .setLabel('Event Items')
-                        .setValue('events'),
-                    new StringSelectMenuOptionBuilder()
-                        .setLabel('Digital Items')
-                        .setValue('digital'),
-                    new StringSelectMenuOptionBuilder()
-                        .setLabel('NFTs')
-                        .setValue('nfts'),
-                    new StringSelectMenuOptionBuilder()
-                        .setLabel('Cryptocurrencies')
-                        .setValue('crypto'),
-                );
-
             const row1 = new ActionRowBuilder()
                 .addComponents(select1);
-            const row3 = new ActionRowBuilder()
-                .addComponents(select3);
-
+                
             return await interaction.followUp({
                 embeds: [embed],
-                components: [row1, row3],
+                components: [row1],
                 ephemeral: true,
             });
         }

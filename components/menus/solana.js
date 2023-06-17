@@ -3,6 +3,7 @@ const {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
+	CommandInteractionOptionResolver,
 } = require('discord.js');
 const { Player, Contract } = require('../../src/db');
 const weapons = require('../../assets/weapons.json');
