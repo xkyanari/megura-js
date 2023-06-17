@@ -26,19 +26,6 @@ module.exports = {
                 .setTitle(`${oreEmoji} **SPECIAL SHOP:** ${oreEmoji}`)
                 .setFooter(footer);
 
-            const button = new ActionRowBuilder().addComponents(
-                new ButtonBuilder()
-                    .setCustomId('profile')
-                    .setEmoji('👤')
-                    .setLabel('Profile')
-                    .setStyle(ButtonStyle.Success),
-                new ButtonBuilder()
-                    .setCustomId('inventory')
-                    .setEmoji('🛄')
-                    .setLabel('Inventory')
-                    .setStyle(ButtonStyle.Primary),
-            );
-
             const itemOptions = [];
             itemList.forEach((item) => {
                 const itemStats = [];
@@ -98,7 +85,7 @@ module.exports = {
 
             return await interaction.followUp({
                 embeds: [embed],
-                components: [row1, row3, button],
+                components: [row1, row3],
                 ephemeral: true,
             });
         }
