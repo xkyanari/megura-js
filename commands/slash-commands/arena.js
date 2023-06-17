@@ -96,21 +96,26 @@ module.exports = {
                 }
                 break;
             case 'rules':
-                const embed2 = new EmbedBuilder()
+                const guild = await Guild.findOne({
+                    where: { guildID: interaction.guild.id },
+                });
+
+                const basicRules = `**Game Rules:**\n1. React with ⚖️ to join the event and become a contender in the arena.\n2. After gathering participants, a 10-second preparation phase will occur before the duels begin.\n3. Participants will engage in duels until only one player remains.\n4. The player with higher attack damage (without critical hits) wins the duel.\n5. The player who loses a duel is eliminated from the event.`;
+
+                const bossRules = `\n6. After determining the final winner, a boss monster appears for an epic battle.\n7. Achievements may be awarded based on performance during the event.\n8. Participants are expected to adhere to fair play and good sportsmanship.\n9. The ultimate champion is the player who emerges as the last one standing after defeating both the contenders and the boss.`;
+
+                const embedDescription = guild.arenaBoss ? basicRules + bossRules : basicRules;
+
+                const embedMessage = new EmbedBuilder()
                     .setColor(0xcd7f32)
-                    .setDescription(`**Game Rules:**\n1. React with ⚖️ to join the event and become a contender in the arena.\n2. After gathering participants, a 10-second preparation phase will occur before the duels begin.\n3. Participants will engage in duels until only one player remains.\n4. The player with higher attack damage (without critical hits) wins the duel.\n5. The player who loses a duel is eliminated from the event.`)
+                    .setDescription(embedDescription)
                     .setFooter(footer);
-                await interaction.reply({ embeds: [embed2] });
+
+                await interaction.reply({ embeds: [embedMessage] });
                 break;
+
             case 'boss':
                 try {
-                    const memberRoles = interaction.member.roles.cache;
-                    const hasAllowedRole = allowedRoleIDs.some(roleID => memberRoles.has(roleID));
-
-                    if (!hasAllowedRole) {
-                        return await interaction.reply({ content: 'You do not have the required role to use this command.', ephemeral: true });
-                    }
-
                     const guildCheck = await Guild.findOne({
                         where: { guildID: interaction.guild.id },
                     });
