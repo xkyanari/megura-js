@@ -3,15 +3,17 @@ const { footer, specialShopImage } = require('../src/vars');
 
 module.exports = async (interaction) => {
 	try {
+		const oreEmoji = interaction.client.emojis.cache.get('1119212796136144956') || '💎';
+
 		const embed = new EmbedBuilder()
 			.setColor(0xcd7f32)
-			.setTitle('💎 **SPECIAL SHOP:** 💎')
+			.setTitle(`${oreEmoji} **SPECIAL SHOP:** ${oreEmoji}`)
 			.setDescription('Special items sold here!')
 			.setImage(specialShopImage)
 			.setFooter(footer);
 
 		const select = new StringSelectMenuBuilder()
-			.setCustomId('category')
+			.setCustomId('specialshopCategory')
 			.setPlaceholder('Choose an item category.')
 			.addOptions(
 				new StringSelectMenuOptionBuilder()
@@ -34,22 +36,9 @@ module.exports = async (interaction) => {
 		const row = new ActionRowBuilder()
 			.addComponents(select);
 
-		const button1 = new ActionRowBuilder().addComponents(
-			new ButtonBuilder()
-				.setCustomId('profile')
-				.setEmoji('👤')
-				.setLabel('Profile')
-				.setStyle(ButtonStyle.Success),
-			new ButtonBuilder()
-				.setCustomId('inventory')
-				.setEmoji('🛄')
-				.setLabel('Inventory')
-				.setStyle(ButtonStyle.Primary),
-		);
-
 		await interaction.reply({
 			embeds: [embed],
-			components: [row, button1],
+			components: [row],
 		});
 
 	}

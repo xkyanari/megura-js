@@ -8,7 +8,6 @@ module.exports = {
 	},
 	async execute(interaction) {
 		const selected = await interaction.values[0];
-		const oreEmoji = interaction.client.emojis.cache.get('1119212796136144956') || '💎';
 		await interaction.deferUpdate();
 
 		const numFormat = (value) =>
@@ -19,13 +18,11 @@ module.exports = {
 				where: { category: selected },
 			});
 
-			const hasGuildItem = itemList.some(item => item.guildID !== null);
-
 			if (itemList.length === 0) return;
 
 			const embed = new EmbedBuilder()
 				.setColor(0xcd7f32)
-				.setTitle(`${hasGuildItem ? '💎 **SPECIAL SHOP:** 💎' : '🛒 **ITEM SHOP:** 🛒'}`)
+				.setTitle('🛒 **ITEM SHOP:** 🛒')
 				.setFooter(footer);
 
 			const button = new ActionRowBuilder().addComponents(
@@ -56,15 +53,9 @@ module.exports = {
 				if (item.description) {
 					itemStats.push(`Description: ${item.description}\n`);
 				}
-				if (!item.guildID) {
-					itemStats.push(`Level: ${item.level}\n`);
-					itemStats.push(`Price: $${numFormat(item.price)} IURA\n`);
-					itemStats.push(`Item ID: \`${item.item_ID}\``);
-				}
-				if (item.guildID) {
-					itemStats.push(`Price: ${numFormat(item.price)} ${oreEmoji}\n`);
-					itemStats.push(`Quantity: ${item.quantity > 0 ? item.quantity : '**SOLD OUT**'}\n`);
-				}
+				itemStats.push(`Level: ${item.level}\n`);
+				itemStats.push(`Price: $${numFormat(item.price)} IURA\n`);
+				itemStats.push(`Item ID: \`${item.item_ID}\``);
 				itemOptions.push({ label: item.itemName, value: item.itemName });
 
 				embed.addFields({
@@ -97,35 +88,12 @@ module.exports = {
 						.setValue('miscellaneous'),
 				);
 
-			const select3 = new StringSelectMenuBuilder()
-				.setCustomId('category')
-				.setPlaceholder('Choose an item category.')
-				.addOptions(
-					new StringSelectMenuOptionBuilder()
-						.setLabel('Whitelist')
-						.setValue('whitelist'),
-					new StringSelectMenuOptionBuilder()
-						.setLabel('Event Items')
-						.setValue('events'),
-					new StringSelectMenuOptionBuilder()
-						.setLabel('Digital Items')
-						.setValue('digital'),
-					new StringSelectMenuOptionBuilder()
-						.setLabel('NFTs')
-						.setValue('nfts'),
-					new StringSelectMenuOptionBuilder()
-						.setLabel('Cryptocurrencies')
-						.setValue('crypto'),
-				);
-
 			const row1 = new ActionRowBuilder()
 				.addComponents(select1);
 			const row2 = new ActionRowBuilder()
 				.addComponents(select2);
-			const row3 = new ActionRowBuilder()
-				.addComponents(select3);
 
-			const actionRow = hasGuildItem ? [row1, row3, button] : [row1, row2, button];
+			const actionRow = [row1, row2, button];
 
 			return await interaction.editReply({
 				embeds: [embed],
