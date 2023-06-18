@@ -14,7 +14,7 @@ const {
 } = require('./src/db');
 
 (async () => {
-	await Shop.sync({ force: true })
+	await Shop.sync({ alter: true })
 		.then(() => {
 			const items = require('./assets/item_db.json');
 			for (let item = 0; item < items.length; item++) {

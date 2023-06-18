@@ -73,13 +73,42 @@ module.exports = {
                         return playerObjects.some(player => player.discordID === user.id);
                     };
 
-                    const collector = message.createReactionCollector({ filter, time: 60000 });
+                    const collector = message.createReactionCollector({ filter, time: 120000 });
+
                     collector.on('collect', (reaction, user) => {
+                        if (collectedPlayers.some(collectedPlayer => collectedPlayer.user.id === user.id)) {
+                            console.log(`User ${user.id} has already joined the game.`);
+                            return;
+                        }
+
                         const player = playerObjects.find(player => player.discordID === user.id);
+                        if (!player) {
+                            console.log(`User ${user.id} is not in the playerObjects.`);
+                            return;
+                        }
+
                         collectedPlayers.push({ user, playerName: player.playerName, level: player.level, totalHealth: player.totalHealth, totalAttack: player.totalAttack, totalDefense: player.totalDefense });
+                        console.log(`User ${user.id} (${player.playerName}) has joined the game.`);
                     });
 
+                    const reminder1 = setTimeout(() => {
+                        const embed = new EmbedBuilder()
+                            .setColor(0xcd7f32)
+                            .setDescription('Hurry up, warriors! Only 80 seconds left to join the battle!');
+                        interaction.channel.send({ embeds: [embed] });
+                    }, 40000);
+
+                    const reminder2 = setTimeout(() => {
+                        const embed = new EmbedBuilder()
+                            .setColor(0xcd7f32)
+                            .setDescription('Last chance, fighters! You have 40 seconds to step into the arena!');
+                        interaction.channel.send({ embeds: [embed] });
+                    }, 80000);
+
                     collector.on('end', collected => {
+                        clearTimeout(reminder1);
+                        clearTimeout(reminder2);
+
                         const embed1 = new EmbedBuilder()
                             .setColor(0xcd7f32)
                             .setDescription(`Looks like no one wanted to accept ${collectedPlayers[0].playerName}'s challenge.`);
@@ -95,6 +124,7 @@ module.exports = {
                     console.log(error);
                 }
                 break;
+
             case 'rules':
                 const guild = await Guild.findOne({
                     where: { guildID: interaction.guild.id },

@@ -14,7 +14,29 @@ const duelMessages = [
     "Despite a hard-fought battle, ${loser.playerName} falls to the superior skill of ${winner.playerName}.",
     "The tension breaks as ${winner.playerName} lands the final blow, defeating ${loser.playerName}!",
     "The arena echoes with the clash of steel, but it's ${winner.playerName} who stands victorious over ${loser.playerName}.",
-    "A titanic struggle ends as ${winner.playerName} vanquishes ${loser.playerName}, demonstrating their superior skill!"
+    "A titanic struggle ends as ${winner.playerName} vanquishes ${loser.playerName}, demonstrating their superior skill!",
+    "${winner.playerName} slips on a banana peel and still manages to defeat ${loser.playerName}!",
+    "${winner.playerName} calls their mom for advice and it pays off! They defeat ${loser.playerName}!",
+    "The crowd is stunned as ${winner.playerName} defeats ${loser.playerName} while juggling three apples!",
+    "${winner.playerName} puts on a puppet show so captivating that ${loser.playerName} forgets to fight back!",
+    "${loser.playerName} trips on their shoelaces, giving ${winner.playerName} an easy victory!",
+    "${winner.playerName} uses their secret weapon – a squirrel – and startles ${loser.playerName} into defeat!",
+    "${winner.playerName} convinces ${loser.playerName} to sit down and enjoy a picnic. When the fight is forgotten, ${winner.playerName} claims victory!",
+    "After a fierce thumb war, ${winner.playerName} takes the win over ${loser.playerName}!",
+    "In a surprising twist, ${winner.playerName} pulls out a chessboard. Several moves later, ${loser.playerName} admits defeat.",
+    "${winner.playerName} pulls out a yo-yo and impresses ${loser.playerName} so much that they forget to fight back!",
+    "Sources reveal that ${winner.playerName} defeated ${loser.playerName} in a thumb war championship. The thumb-wrestling world will never be the same!",
+    "In a stunning display of skill and finesse, ${winner.playerName} gracefully danced their way to victory over ${loser.playerName}. Looks like they've got the moves like Jagger!",
+    "In a clash of sportsmanship and hilarity, ${winner.playerName} defeated ${loser.playerName} in a game of competitive pillow fighting. Who knew fluffy weapons could be so effective?",
+    "Witnesses report that ${winner.playerName} pulled off a victory over ${loser.playerName} that was so impressive, even their opponents couldn't help but applaud. Talk about a standing ovation!",
+    "Hold onto your seats! ${winner.playerName} just served ${loser.playerName} a defeat so fierce, it sent their racket flying into the stands. I hope nobody got a concussion!",
+    "News just in: ${winner.playerName} won the world championship in a fierce game of rock-paper-scissors-lizard-Spock against ${loser.playerName}. Sheldon Cooper would be proud!",
+    "Looks like ${winner.playerName} just took out the trash, defeating ${loser.playerName} so convincingly that even the garbage collector couldn't handle the stench of their defeat!",
+    "${loser.playerName} forgot to pay their electrical bills because ${winner.playerName} just stole their money!",
+    "Another One Bites the Dust as ${winner.playerName} sent ${loser.playerName} packing with a defeat that would make Freddie Mercury proud!",
+    "It's a game of gaming chairs and thrones, and ${winner.playerName} emerged as the rightful ruler, dethroning ${loser.playerName} and turning their defeat into a 'Game of Throws'.",
+    "In a gaming universe far, far away, ${winner.playerName} embraced their inner Jedi and defeated ${loser.playerName} with a lightsaber-swinging skill that would make Darth Vader surrender!",
+    "In a record-breaking feat, ${winner.playerName} crushed the karaoke competition, leaving ${loser.playerName} singing, 'I Will Survive!' in defeat.",
 ];
 
 const duelPlayer = async (interaction, player1, player2) => {
@@ -107,7 +129,7 @@ const monsterBattle = async (interaction, winner) => {
     // announce the winner
     await interaction.channel.send({ embeds: [embed1] });
 
-    await wait(1000);
+    await wait(10000);
 
     const embed2 = new EmbedBuilder()
         .setColor(0xcd7f32)
@@ -116,7 +138,7 @@ const monsterBattle = async (interaction, winner) => {
 
     await interaction.channel.send({ embeds: [embed2] });
 
-    await wait(1000);
+    await wait(10000);
 
     const embed3 = new EmbedBuilder()
         .setColor(0xcd7f32)
@@ -125,9 +147,11 @@ const monsterBattle = async (interaction, winner) => {
 
     await interaction.channel.send({ embeds: [embed3] });
 
-    await wait(1000);
+    await wait(10000);
 
     const winnerBattle = await duelMonster(interaction, winner, bossObj);
+
+    await wait(10000);
 
     if (winnerBattle === bossObj) {
         const embed4 = new EmbedBuilder()
@@ -166,7 +190,7 @@ const arenaBattle = async (interaction, players) => {
         let winner = await duelPlayer(interaction, player1, player2);
         players = players.filter(player => player !== (winner === player1 ? player2 : player1));
 
-        await wait(2000);
+        await wait(10000);
     }
 
     const embed2 = new EmbedBuilder()
@@ -178,7 +202,7 @@ const arenaBattle = async (interaction, players) => {
     await interaction.channel.send({ embeds: [embed2] });
 
     if (guildCheck && guildCheck.arenaBoss) {
-        await wait(5000);
+        await wait(15000);
         await monsterBattle(interaction, players[0]);
     }
 };
