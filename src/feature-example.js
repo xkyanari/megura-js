@@ -37,6 +37,7 @@ const features = {
 		transferIura: '',
 		sellGlobal: '',
 		iuraOnly: '',
+		hasArena: '',
 	},
 	megura: {
 		stakingRate: '',
@@ -55,6 +56,7 @@ const features = {
 		transferIura: '',
 		sellGlobal: '',
 		iuraOnly: '',
+		hasArena: '',
 	},
 };
 

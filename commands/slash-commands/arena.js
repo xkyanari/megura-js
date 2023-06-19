@@ -54,7 +54,7 @@ module.exports = {
         .addSubcommand((subcommand) =>
             subcommand.setName('rules').setDescription('Show the rules.'),
         ),
-    cooldown: 3000,
+    cooldown: 120000,
     async execute(interaction) {
         const subCommand = interaction.options.getSubcommand();
         const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
@@ -171,7 +171,7 @@ module.exports = {
                         const embed0 = new EmbedBuilder()
                             .setColor(0xcd7f32)
                             .setDescription(`Looks like no one wanted to join. Closing...`);
-                        if (collectedPlayers.length < 0) return interaction.channel.send({ embeds: [embed0] });
+                        if (collectedPlayers.length === 0) return interaction.channel.send({ embeds: [embed0] });
 
                         const embed1 = new EmbedBuilder()
                             .setColor(0xcd7f32)
