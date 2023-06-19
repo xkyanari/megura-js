@@ -40,7 +40,7 @@ module.exports = {
 				throw new Error('guild not found');
 			}
 
-			await interaction.deferReply();
+			await interaction.deferReply({ ephemeral: true });
 			// if (
 			// 	!member.roles.cache.some(
 			// 		(role) => role.name === guildCheck.margarethaName || role.name === guildCheck.cerberonName,
@@ -76,14 +76,14 @@ module.exports = {
 				],
 			});
 
-			const time = 15;
+			const time = 5;
 
 			const jobs = await interaction.client.deleteChannelQueue.getJobs(['waiting', 'delayed']);
 
 			const hasExistingJob = jobs.some(job => job.data.userId === member.id);
 
 			if (hasExistingJob) {
-				return await interaction.reply({ content: 'You already have a channel waiting to be deleted. Please wait for it to be deleted before creating a new one.', ephemeral: true });
+				return await interaction.reply({ content: 'You already have a portal waiting to be deleted. Please wait for it to be deleted before creating a new one or use \`/close\` to close the existing one manually.', ephemeral: true });
 			}
 
 			await interaction.client.deleteChannelQueue.add({
@@ -104,7 +104,6 @@ module.exports = {
 				embeds: [embed],
 				ephemeral: true,
 			});
-
 		}
 		catch (error) {
 			console.error(error);

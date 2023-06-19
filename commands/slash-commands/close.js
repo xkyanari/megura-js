@@ -3,7 +3,6 @@ const {
 	EmbedBuilder,
 	PermissionFlagsBits,
 } = require('discord.js');
-const logger = require('../../src/logger');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -11,31 +10,35 @@ module.exports = {
 		.setDescription('Closes a portal'),
 	cooldown: 13000,
 	async execute(interaction) {
-		const { channel, member } = interaction;
-
-		logger.log({
-			level: 'info',
-			message: `User: ${member.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
-		});
+		const { guild, client, member } = interaction;
 
 		try {
-			if (member.permissions.has(PermissionFlagsBits.ManageChannels)) {
-				const time = 10;
-				const embed = new EmbedBuilder()
-					.setColor(0x6e8b3d)
-					.setTitle('Consider it done.')
-					.setDescription(
-						`This channel will be deleted in \`${time}\` seconds.`,
-					);
+			await interaction.deferReply({ ephemeral: true });
+			const jobs = await client.deleteChannelQueue.getJobs(['waiting', 'delayed']);
+			const job = jobs.find(job => job.data.userId === member.id);
 
-				await interaction.reply({ embeds: [embed] });
-			}
-			else {
-				await interaction.reply('You do not have sufficient privileges.');
-			}
-			setTimeout(() => {
+			if (!job) return await interaction.reply({ content: 'You do not have an active portal.', ephemeral: true });
+
+			const channelId = job.data.channelId;
+			const channel = guild.channels.cache.get(channelId);
+
+			if (!channel) return await interaction.reply({ content: 'Looks like your portal vanished into thin air. Oh well...', ephemeral: true });
+
+			const time = 10;
+			const embed = new EmbedBuilder()
+				.setColor(0x6e8b3d)
+				.setTitle('Consider it done.')
+				.setDescription(
+					`The channel will be deleted in \`${time}\` seconds.`,
+				);
+
+			const message = await interaction.reply({ embeds: [embed], ephemeral: true });
+
+			setTimeout(async () => {
 				channel.delete().catch(console.error);
-			}, 10000);
+				await job.remove();
+				await message.delete();
+			}, time * 1000);
 		}
 		catch (error) {
 			console.error(error);

@@ -72,14 +72,18 @@ module.exports = {
 				const replyChannel = guild.channels.cache.get(replyChannelId);
 
 				const embed = new EmbedBuilder()
-						.setColor(0x6e8b3d)
-						.setTitle('Times Up!')
-						.setDescription(
-							'Your portal has been closed. Thanks for using our services!',
-						);
+					.setColor(0x6e8b3d)
+					.setTitle('Times Up!')
+					.setDescription(
+						'Your portal has been closed. Thanks for using our services!\n\nThis message will be deleted in \`10\` seconds.',
+					);
 
 				if (replyChannel) {
-					await replyChannel.send({ content: `${userMention(userId)}`, embeds: [embed], ephemeral: true });
+					const message = await replyChannel.send({ content: `${userMention(userId)}`, embeds: [embed] });
+
+					setTimeout(async () => {
+						await message.delete();
+					}, 10000);
 				}
 				done();
 			} catch (error) {
