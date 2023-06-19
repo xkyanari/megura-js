@@ -65,6 +65,12 @@ module.exports = {
         switch (subCommand) {
             case 'start':
                 try {
+                    const modeNames = {
+                        classic: 'Battle Royale: Classic',
+                        evolving: 'Battle Royale: Evolving Classic',
+                        'evolving-deathmatch': 'Battle Royale: Evolving Deathmatch',
+                        deathmatch: 'Battle Royale: Deathmatch',
+                    };
                     const mode = interaction.options.getString('mode') || 'classic';
                     const timer = interaction.options.getString('timer') || '2';
                     const timerMilliseconds = parseInt(timer) * 60 * 1000;
@@ -79,7 +85,7 @@ module.exports = {
                     const embed1 = new EmbedBuilder()
                         .setColor(0xcd7f32)
                         .setTitle('THE ARENA GATES ARE OPEN!')
-                        .setDescription(`The crowd is roaring! React with ⚖️ to join the fray and prove your might!\n\nStarting in ${timer} minutes!`);
+                        .setDescription(`**${modeNames[mode]}**\n\nThe crowd is roaring! React with ⚖️ to join the fray and prove your might!\n\nStarting in ${timer} minutes!`);
 
                     const message = await interaction.reply({ embeds: [embed1], fetchReply: true });
                     await message.react('⚖️');
