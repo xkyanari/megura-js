@@ -1,11 +1,28 @@
-node_modules
-memoria
-logs/*
-src/feature.js
-src/db.js
-config.json
-pm2.config.js
+# Node modules
+/node_modules
+
+# Logs
+/logs/*
+
+# Environment files
+.env
+
+# Redacted System
+/memoria
+
+# Database files
 *.sqlite
 *.db
 *.sql
-.devcontainer
+*.rdb
+
+# Config files
+db.js
+config.json
+pm2.config.js
+
+# Specific features
+feature.js
+
+# Development containers
+/.devcontainer

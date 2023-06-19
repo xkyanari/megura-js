@@ -1,5 +1,6 @@
-const { Events, ActivityType } = require('discord.js');
+const { Events, ActivityType, EmbedBuilder, userMention } = require('discord.js');
 const { sequelize } = require('../src/db');
+const Queue = require('bull');
 
 let Discord;
 try {
@@ -46,5 +47,45 @@ module.exports = {
 		await sequelize.sync(sync.default);
 		console.log('Database connection successful.');
 
+		const deleteChannelQueue = new Queue('deleteChannel', 'redis://127.0.0.1:6379');
+		client.deleteChannelQueue = deleteChannelQueue;
+
+		deleteChannelQueue.process(async (job, done) => {
+			const { channelId, guildId, userId, replyChannelId } = job.data;
+
+			const guild = client.guilds.cache.get(guildId);
+			const channel = guild.channels.cache.get(channelId);
+
+			if (!guild) {
+				console.error('Guild not found');
+				return done(new Error('guild not found'));
+			}
+
+			if (!channel) {
+				console.error('Channel not found');
+				return done(new Error('Channel not found'));
+			}
+
+			try {
+				await channel.delete();
+				console.log(`Deleted channel ${channelId}`);
+				const replyChannel = guild.channels.cache.get(replyChannelId);
+
+				const embed = new EmbedBuilder()
+						.setColor(0x6e8b3d)
+						.setTitle('Times Up!')
+						.setDescription(
+							'Your portal has been closed. Thanks for using our services!',
+						);
+
+				if (replyChannel) {
+					await replyChannel.send({ content: `${userMention(userId)}`, embeds: [embed], ephemeral: true });
+				}
+				done();
+			} catch (error) {
+				console.error(`Failed to delete channel ${channelId}`);
+				done(error);
+			}
+		});
 	},
 };

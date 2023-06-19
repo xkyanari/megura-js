@@ -197,5 +197,13 @@
     "traitWeapon": "Hand",
     "traitArmor": "Cloth",
     "collectionURL": "https://magiceden.io/marketplace/Nekozuma"
+  },
+  {
+    "blockchain": "ethereum",
+    "contractName": "Dreamzuki",
+    "contractAddress": "0xbc4c9777c22fe519fd890bc6961ff1554c3f13ac",
+    "traitWeapon": "Offhand",
+    "traitArmor": "Outfit",
+    "collectionURL": "https://opensea.io/collection/dreamzukinft"
   }
 ]

@@ -18,11 +18,14 @@
     "url": "https://github.com/xkyanari/megura-js.git"
   },
   "dependencies": {
+    "@bull-board/api": "^5.5.0",
+    "@bull-board/express": "^5.5.0",
     "@napi-rs/canvas": "^0.1.41",
     "@solana/web3.js": "^1.77.3",
     "alchemy-sdk": "^2.9.0",
     "axios": "^1.4.0",
     "body-parser": "^1.20.2",
+    "bull": "^4.10.4",
     "captcha-canvas": "^3.2.1",
     "cloudinary": "^1.37.1",
     "config": "^3.3.9",
@@ -37,6 +40,7 @@
     "mysql2": "^3.3.5",
     "node-cron": "^3.0.2",
     "openai": "^3.2.1",
+    "redis": "^4.6.7",
     "sequelize": "^6.32.0",
     "sqlite3": "^5.1.6",
     "twitter-api-v2": "^1.15.0",
