@@ -76,7 +76,7 @@ module.exports = {
 				],
 			});
 
-			const time = 5;
+			const time = 15;
 
 			const jobs = await interaction.client.deleteChannelQueue.getJobs(['waiting', 'delayed']);
 

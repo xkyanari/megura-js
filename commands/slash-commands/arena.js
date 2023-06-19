@@ -6,6 +6,7 @@ const {
 const { Player, Guild } = require('../../src/db');
 const { arenaBattle } = require('../../functions/arena');
 const { footer } = require('../../src/vars');
+const { validateFeature } = require('../../src/feature');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,7 +14,32 @@ module.exports = {
         .setDescription('Start an arena event!')
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
         .addSubcommand((subcommand) =>
-            subcommand.setName('start').setDescription('Join the event.'),
+            subcommand
+                .setName('start')
+                .setDescription('Join the event.')
+                .addStringOption((option) =>
+                    option
+                        .setName('timer')
+                        .setDescription('Choose a number in minutes.')
+                        .addChoices(
+                            { name: '3 minutes', value: '3' },
+                            { name: '5 minutes', value: '5' },
+                            { name: '7 minutes', value: '7' },
+                        )
+                        .setRequired(false),
+                )
+                .addStringOption((option) =>
+                    option
+                        .setName('mode')
+                        .setDescription('Set PVP mode.')
+                        .addChoices(
+                            { name: 'Battle Royale: Classic', value: 'classic' },
+                            { name: 'Battle Royale: Evolving Classic', value: 'evolving' },
+                            { name: 'Battle Royale: Evolving Deathmatch', value: 'evolving-deathmatch' },
+                            { name: 'Battle Royale: Deathmatch', value: 'deathmatch' },
+                        )
+                        .setRequired(false)
+                ),
         )
         .addSubcommand((subcommand) =>
             subcommand
@@ -28,55 +54,88 @@ module.exports = {
         .addSubcommand((subcommand) =>
             subcommand.setName('rules').setDescription('Show the rules.'),
         ),
-    // .addSubcommand((subcommand) =>
-    //     subcommand
-    //         .setName('difficulty')
-    //         .setDescription('Select difficulty level.')
-    //         .addStringOption(option =>
-    //             option.setName('type')
-    //                 .setDescription('Choose one.')
-    //                 .setRequired(true)
-    //                 .addChoices(
-    //                     { name: 'Easy', value: 'easy' },
-    //                     { name: 'Medium', value: 'medium' },
-    //                     { name: 'Hard', value: 'hard' },
-    //                     { name: 'Deathmatch', value: 'deathmatch' },
-    //                 ),
-    //         ),
-    // ),
     cooldown: 3000,
     async execute(interaction) {
         const subCommand = interaction.options.getSubcommand();
+        const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
+        if (!await validateFeature(interaction, guildCheck.version, 'hasArena')) {
+            return;
+        }
+
         switch (subCommand) {
             case 'start':
                 try {
+                    const mode = interaction.options.getString('mode') || 'classic';
+                    const timer = interaction.options.getString('timer') || '2';
+                    const timerMilliseconds = parseInt(timer) * 60 * 1000;
+
+                    const baseStats = {
+                        level: 1,
+                        totalHealth: 2000,
+                        totalAttack: 500,
+                        totalDefense: 500
+                    };
+
                     const embed1 = new EmbedBuilder()
                         .setColor(0xcd7f32)
                         .setTitle('THE ARENA GATES ARE OPEN!')
-                        .setDescription('The crowd is roaring! React with ⚖️ to join the fray and prove your might!\n\nStarting in 2 minutes!');
+                        .setDescription(`The crowd is roaring! React with ⚖️ to join the fray and prove your might!\n\nStarting in ${timer} minutes!`);
 
                     const message = await interaction.reply({ embeds: [embed1], fetchReply: true });
                     await message.react('⚖️');
 
                     const players = await Player.findAll({ where: { guildID: interaction.guild.id } });
-                    const playerObjects = players.map(player => ({
+                    let playerObjects = players.map(player => ({
                         discordID: player.discordID,
                         playerName: player.playerName,
                         level: player.level,
                         totalHealth: player.totalHealth,
                         totalAttack: player.totalAttack,
                         totalDefense: player.totalDefense,
+                        respawns: 0
                     }));
+
+                    switch (mode) {
+                        case 'classic':
+                            playerObjects = playerObjects.map(player => ({
+                                discordID: player.discordID,
+                                playerName: player.playerName,
+                                level: baseStats.level,
+                                totalHealth: baseStats.totalHealth,
+                                totalAttack: baseStats.totalAttack,
+                                totalDefense: baseStats.totalDefense
+                            }));
+                            break;
+                        case 'evolving':
+                            playerObjects = playerObjects.map(player => ({
+                                discordID: player.discordID,
+                                playerName: player.playerName,
+                                level: baseStats.level,
+                                totalHealth: baseStats.totalHealth,
+                                totalAttack: baseStats.totalAttack,
+                                totalDefense: baseStats.totalDefense,
+                                respawns: 1
+                            }));
+                            break;
+                        case 'deathmatch':
+                            break;
+                        case 'evolving-deathmatch':
+                            playerObjects = playerObjects.map(player => ({
+                                ...player,
+                                respawns: 1
+                            }));
+                            break;
+                    }
 
                     let collectedPlayers = [];
                     const filter = (reaction, user) => {
                         return playerObjects.some(player => player.discordID === user.id);
                     };
 
-                    const collector = message.createReactionCollector({ filter, time: 120000 });
+                    const collector = message.createReactionCollector({ filter, time: timerMilliseconds });
 
                     collector.on('collect', (reaction, user) => {
-                        if (collectedPlayers.some(collectedPlayer => collectedPlayer.user.id === user.id)) {
+                        if (collectedPlayers.some(collectedPlayer => collectedPlayer.id === user.id)) {
                             console.log(`User ${user.id} has already joined the game.`);
                             return;
                         }
@@ -87,27 +146,32 @@ module.exports = {
                             return;
                         }
 
-                        collectedPlayers.push({ user, playerName: player.playerName, level: player.level, totalHealth: player.totalHealth, totalAttack: player.totalAttack, totalDefense: player.totalDefense });
+                        collectedPlayers.push({ user, ...player });
                         console.log(`User ${user.id} (${player.playerName}) has joined the game.`);
                     });
 
                     const reminder1 = setTimeout(() => {
                         const embed = new EmbedBuilder()
                             .setColor(0xcd7f32)
-                            .setDescription('Hurry up, warriors! Only 80 seconds left to join the battle!');
+                            .setDescription(`Hurry up, voyagers! Only ${(timerMilliseconds / 1000) / 2} seconds left to join the battle!`);
                         interaction.channel.send({ embeds: [embed] });
-                    }, 40000);
+                    }, timerMilliseconds / 2);
 
                     const reminder2 = setTimeout(() => {
                         const embed = new EmbedBuilder()
                             .setColor(0xcd7f32)
-                            .setDescription('Last chance, fighters! You have 40 seconds to step into the arena!');
+                            .setDescription(`Last chance, voyagers! You have ${(timerMilliseconds / 1000) / 4} seconds to step into the arena!`);
                         interaction.channel.send({ embeds: [embed] });
-                    }, 80000);
+                    }, (timerMilliseconds / 4) * 3);
 
                     collector.on('end', collected => {
                         clearTimeout(reminder1);
                         clearTimeout(reminder2);
+
+                        const embed0 = new EmbedBuilder()
+                            .setColor(0xcd7f32)
+                            .setDescription(`Looks like no one wanted to join. Closing...`);
+                        if (collectedPlayers.length < 0) return interaction.channel.send({ embeds: [embed0] });
 
                         const embed1 = new EmbedBuilder()
                             .setColor(0xcd7f32)
@@ -116,7 +180,7 @@ module.exports = {
 
                         const embed2 = new EmbedBuilder()
                             .setColor(0xcd7f32)
-                            .setDescription('Participants have gathered. Get ready to clash in the arena!\n\nYou have 10 seconds to prepare! Who will be the last one standing?')
+                            .setDescription('Participants have gathered. Get ready to clash in the arena!\n\nYou have 10 seconds to prepare! Who will be the last one standing?');
                         interaction.channel.send({ embeds: [embed2] });
                         arenaBattle(interaction, collectedPlayers);
                     });
@@ -126,15 +190,11 @@ module.exports = {
                 break;
 
             case 'rules':
-                const guild = await Guild.findOne({
-                    where: { guildID: interaction.guild.id },
-                });
-
                 const basicRules = `**Game Rules:**\n1. React with ⚖️ to join the event and become a contender in the arena.\n2. After gathering participants, a 10-second preparation phase will occur before the duels begin.\n3. Participants will engage in duels until only one player remains.\n4. The player with higher attack damage (without critical hits) wins the duel.\n5. The player who loses a duel is eliminated from the event.`;
 
                 const bossRules = `\n6. After determining the final winner, a boss monster appears for an epic battle.\n7. Achievements may be awarded based on performance during the event.\n8. Participants are expected to adhere to fair play and good sportsmanship.\n9. The ultimate champion is the player who emerges as the last one standing after defeating both the contenders and the boss.`;
 
-                const embedDescription = guild.arenaBoss ? basicRules + bossRules : basicRules;
+                const embedDescription = guildCheck.arenaBoss ? basicRules + bossRules : basicRules;
 
                 const embedMessage = new EmbedBuilder()
                     .setColor(0xcd7f32)
@@ -146,9 +206,6 @@ module.exports = {
 
             case 'boss':
                 try {
-                    const guildCheck = await Guild.findOne({
-                        where: { guildID: interaction.guild.id },
-                    });
                     const show = interaction.options.getBoolean('show');
                     if (show) {
                         guildCheck.arenaBoss = true;
@@ -163,9 +220,6 @@ module.exports = {
                     console.error(error);
                 }
                 break;
-            // case 'difficulty':
-
-            //     break;
         }
     },
 };
