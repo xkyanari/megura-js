@@ -2,10 +2,15 @@ const { Events, EmbedBuilder } = require('discord.js');
 const ms = require('ms');
 const { checkProfile } = require('../src/vars');
 const logger = require('../src/logger');
+const Redis = require('ioredis');
+const redis = new Redis();
 
 /**
  * This event is fired when a user initiates slash commands.
  */
+
+const MAX_CONSECUTIVE_COMMANDS = 10; // number of commands to trigger a cooldown
+const TOLERANCE = 1000; // Tolerance in milliseconds, to account for network delay
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -21,12 +26,59 @@ module.exports = {
 				return;
 			}
 
-			const cooldownData = `${interaction.commandName}:${interaction.user.id}`;
+			const counterKey = `counter:${interaction.user.id}`;
 
-			if (client.cooldown.has(cooldownData)) {
-				const timer = ms(client.cooldown.get(cooldownData) - Date.now());
+			// Get the existing counter from Redis
+			let counter = await redis.lrange(counterKey, 0, -1);
+			counter = counter ? counter.map(Number) : [];
+
+			// Check the intervals between the commands
+			let checker = false;
+			let averageInterval = 0;
+
+			// Check the intervals between the commands
+			for (let i = 1; i < counter.length; i++) {
+				let interval = counter[i] - counter[i - 1];
+				averageInterval += interval;
+			}
+			averageInterval /= (counter.length - 1); // average of the intervals
+
+			for (let i = 1; i < counter.length; i++) {
+				let interval = counter[i] - counter[i - 1];
+				if (Math.abs(interval - averageInterval) <= TOLERANCE) {
+					checker = true;
+				}
+				else {
+					checker = false;
+					break;
+				}
+			}
+
+			if (checker && counter.length >= MAX_CONSECUTIVE_COMMANDS) {
+				logger.log({
+					level: 'info',
+					message: `User: ${interaction.user.id}, Command: ${command.data.name}, with consistent intervals.`,
+				});
+
 				return interaction.reply({
-					content: `You are on cooldown for another ${timer}.`,
+					content: `You're doing that too frequently. Please wait a moment before trying again.`,
+					ephemeral: true,
+				});
+			}
+
+			// Add a new timestamp to the list and set a 30-second TTL
+			await redis.rpush(counterKey, Date.now());
+			await redis.ltrim(counterKey, -MAX_CONSECUTIVE_COMMANDS, -1);  // Keep only the last MAX_CONSECUTIVE_COMMANDS items
+			await redis.expire(counterKey, 30);
+
+			// Use Redis to check for existing cooldown
+			const cooldownData = `${interaction.commandName}:${interaction.user.id}`;
+			const existingCooldown = await redis.get(cooldownData);
+			if (existingCooldown) {
+				const remainingTime = existingCooldown - Date.now();
+				const timer = ms(remainingTime > 0 ? remainingTime : 0);
+				return interaction.reply({
+					content: `You are on cooldown for another ${timer}`,
 					ephemeral: true,
 				});
 			}
@@ -37,6 +89,8 @@ module.exports = {
 					message: `User: ${interaction.user.id}, Command: ${command.data.name}, Time: ${new Date().toISOString()}`,
 				});
 
+				// Ensure `command.cooldown` exists and is a number
+				await redis.set(cooldownData, Date.now() + command.cooldown, 'PX', command.cooldown);
 				await command.execute(interaction);
 				client.cooldown.set(cooldownData, Date.now() + command.cooldown);
 				setTimeout(
@@ -85,6 +139,11 @@ module.exports = {
 			}
 
 			try {
+				logger.log({
+					level: 'info',
+					message: `User: ${interaction.user.id}, Button: ${customId}, Time: ${new Date().toISOString()}`,
+				});
+
 				if (button.data.cooldown) {
 					client.cooldown.set(cooldownData, Date.now() + button.data.cooldown);
 					setTimeout(() => client.cooldown.delete(cooldownData), button.data.cooldown);
@@ -108,6 +167,10 @@ module.exports = {
 			if (!menu) return new Error('There is no code for this menu.');
 
 			try {
+				logger.log({
+					level: 'info',
+					message: `User: ${interaction.user.id}, Menu: ${customId}, Time: ${new Date().toISOString()}`,
+				});
 				await menu.execute(interaction);
 			}
 			catch (error) {
@@ -125,6 +188,10 @@ module.exports = {
 			if (!modal) return new Error('There is no code for this modal.');
 
 			try {
+				logger.log({
+					level: 'info',
+					message: `User: ${interaction.user.id}, Modal: ${customId}, Time: ${new Date().toISOString()}`,
+				});
 				await modal.execute(interaction);
 			}
 			catch (error) {
@@ -146,6 +213,10 @@ module.exports = {
 			}
 
 			try {
+				logger.log({
+					level: 'info',
+					message: `User: ${interaction.user.id}, Command: ${interaction.commandName}, Time: ${new Date().toISOString()}`,
+				});
 				await contextCommand.execute(interaction);
 			}
 			catch (error) {
@@ -167,6 +238,10 @@ module.exports = {
 			}
 
 			try {
+				logger.log({
+					level: 'info',
+					message: `User: ${interaction.user.id}, AutoCommand: ${interaction.commandName}, Time: ${new Date().toISOString()}`,
+				});
 				await autoCommand.autocomplete(interaction);
 			}
 			catch (error) {

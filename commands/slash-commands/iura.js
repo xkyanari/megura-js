@@ -9,7 +9,7 @@ async function updateName(interaction, player, type, name) {
 		)
 			.then(() => Iura.findOne({ where: { accountID: player.iura.accountID } }))
 			.then((create_wallet) =>
-			 interaction.editReply(
+				interaction.editReply(
 					`Wallet: \`${create_wallet.walletName}\` has been updated successfully.`,
 				),
 			);
@@ -21,7 +21,7 @@ async function updateName(interaction, player, type, name) {
 		)
 			.then(() => Iura.findOne({ where: { accountID: player.iura.accountID } }))
 			.then((create_bank) =>
-			 interaction.editReply(
+				interaction.editReply(
 					`Bank: \`${create_bank.bankName}\` has been updated successfully.`,
 				),
 			);
@@ -135,7 +135,7 @@ module.exports = {
 							wallet_name,
 						);
 					}
-					if (wallet_deposit) {
+					else if (wallet_deposit) {
 						// wallet ----> bank
 						if (wallet_deposit > balance.walletAmount) {
 							return interaction.editReply({
@@ -157,7 +157,7 @@ module.exports = {
 							);
 						await interaction.editReply({ embeds: [embed], ephemeral: true });
 					}
-					if (wallet_withdraw) {
+					else if (wallet_withdraw) {
 						// bank ----> wallet
 						if (wallet_withdraw > balance.bankAmount) {
 							return interaction.editReply({
@@ -180,12 +180,14 @@ module.exports = {
 							);
 						await interaction.editReply({ embeds: [embed], ephemeral: true });
 					}
-					const embed = new EmbedBuilder()
-						.setTitle('Error!')
-						.setDescription(
-							'Please deposit and withdraw from your wallet balance only. Thanks!',
-						);
-					await interaction.editReply({ embeds: [embed], ephemeral: true });
+					else {
+						const embed = new EmbedBuilder()
+							.setTitle('Error!')
+							.setDescription(
+								'Please deposit and withdraw from your wallet balance only. Thanks!',
+							);
+						await interaction.editReply({ embeds: [embed], ephemeral: true });
+					}
 					break;
 
 				case 'bank':
@@ -197,7 +199,7 @@ module.exports = {
 							bank_name,
 						);
 					}
-					if (bank_deposit) {
+					else if (bank_deposit) {
 						// bank ----> stake
 						if (bank_deposit > balance.bankAmount) {
 							return interaction.editReply({
@@ -220,7 +222,7 @@ module.exports = {
 							);
 						await interaction.editReply({ embeds: [embed1], ephemeral: true });
 					}
-					if (bank_withdraw) {
+					else if (bank_withdraw) {
 						// stake ----> bank
 						if (bank_withdraw > balance.stakedAmount) {
 							return interaction.editReply({
@@ -243,12 +245,14 @@ module.exports = {
 							);
 						await interaction.editReply({ embeds: [embed1], ephemeral: true });
 					}
-					const embed1 = new EmbedBuilder()
-						.setTitle('Error!')
-						.setDescription(
-							'Please stake and unstake from your bank balance only. Thanks!',
-						);
-					await interaction.editReply({ embeds: [embed1], ephemeral: true });
+					else {
+						const embed1 = new EmbedBuilder()
+							.setTitle('Error!')
+							.setDescription(
+								'Please stake and unstake from your bank balance only. Thanks!',
+							);
+						await interaction.editReply({ embeds: [embed1], ephemeral: true });
+					}
 					break;
 
 				case 'balance':
@@ -260,7 +264,7 @@ module.exports = {
 							);
 						await interaction.editReply({ embeds: [embed2], ephemeral: true });
 					}
-					if (check_balance === 'bank') {
+					else if (check_balance === 'bank') {
 						const embed2 = new EmbedBuilder()
 							.setTitle('Balance')
 							.setDescription(

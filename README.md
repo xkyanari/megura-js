@@ -38,7 +38,7 @@ Before running the bot, you will need the following:
 - **Alchemy API Key**: You will need an Alchemy API key to access the Alchemy Web3 API. You can obtain a key by creating an account on the Alchemy website at https://alchemyapi.io.
 - **OpenAI API Key**: You will need an OpenAI API key to use the OpenAI package. You can obtain a key by creating an account on the OpenAI website at https://openai.com.
 - **Twitter API Keys and Tokens**: You will need Twitter API keys and tokens to authenticate and integrate the bot with Twitter. You can obtain these by creating a new project and developer account on the Twitter Developer Portal at https://developer.twitter.com.
-- **Database**: You will need a database to store data related to the bot. In this project, SQLite3 is used. You can download and install SQLite3 from the official website at https://www.sqlite.org/download.html. Alternatively, you can use other databases supported by Sequelize, such as PostgreSQL, MySQL, or MariaDB.
+- **Database**: You will need a database to store data related to the bot. In this project, SQLite3 is used then later migrated to MySQL 8.0. You can download and install SQLite3 from the official website at https://www.sqlite.org/download.html. Alternatively, you can use other databases supported by Sequelize, such as PostgreSQL, MySQL, or MariaDB.
 
 ## List of Discord bot features (work in progress)
 

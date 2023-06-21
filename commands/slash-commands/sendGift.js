@@ -4,7 +4,6 @@ const { Player } = require('../../src/db');
 module.exports = {
 	data: new ContextMenuCommandBuilder()
 		.setName('Transfer IURA')
-		.setDefaultMemberPermissions('0')
 		.setType(ApplicationCommandType.User),
 	cooldown: 3000,
 	async execute(interaction) {

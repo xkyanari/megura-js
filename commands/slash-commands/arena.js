@@ -120,7 +120,7 @@ module.exports = {
                                 totalHealth: baseStats.totalHealth,
                                 totalAttack: baseStats.totalAttack,
                                 totalDefense: baseStats.totalDefense,
-                                respawns: 1
+                                respawns: 3
                             }));
                             break;
                         case 'deathmatch':

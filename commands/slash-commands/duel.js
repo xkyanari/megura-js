@@ -66,7 +66,7 @@ module.exports = {
 			}
 
 			// checking rank
-			if (updatedPlayer2.totalHealth - updatedPlayer1.totalHealth >= 5000 || updatedPlayer2.totalHealth - updatedPlayer1.totalHealth <= -5000) {
+			if (updatedPlayer2.totalHealth - updatedPlayer1.totalHealth >= 15000 || updatedPlayer2.totalHealth - updatedPlayer1.totalHealth <= -15000) {
 				return interaction.editReply('Your rank is inappropriate to fight this player.');
 			}
 

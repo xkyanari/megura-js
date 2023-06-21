@@ -69,6 +69,8 @@ const duelMonster = async (interaction, player1, monster) => {
 
     await battleUp(interaction, winner, loser);
 
+    await wait(2000);
+
     const message = duelMessages[Math.floor(Math.random() * duelMessages.length)];
     const filledMessage = message.replace(new RegExp('\\${winner.playerName}', 'g'), winner.playerName)
         .replace(new RegExp('\\${loser.playerName}', 'g'), loser.playerName);
