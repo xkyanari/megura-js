@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 unique: true,
             },
+            guildID: {
+                type: DataTypes.STRING,
+                unique: true,
+            },
             type: DataTypes.STRING,
             walletAddress: {
                 type: DataTypes.STRING,

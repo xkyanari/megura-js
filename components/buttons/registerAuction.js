@@ -18,7 +18,7 @@ module.exports = {
 	},
 	async execute(interaction) {
 		try {
-			const user = await User.findOne({ where: { discordID: interaction.member.id } });
+			const user = await User.findOne({ where: { discordID: interaction.member.id, guildID: interaction.guild.id } });
 
 			const embed0 = new EmbedBuilder()
 				.setColor(0xcd7f32)
@@ -35,6 +35,7 @@ module.exports = {
 			await User.create({
 				registrationID,
 				discordID: interaction.member.id,
+				guildID: interaction.guild.id,
 			});
 
 			const button = new ActionRowBuilder().addComponents(

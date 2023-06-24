@@ -1,7 +1,6 @@
 const {
 	SlashCommandBuilder,
 	ChannelType,
-	PermissionsBitField,
 	EmbedBuilder,
 	channelMention,
 	roleMention,
@@ -11,6 +10,7 @@ const captcha = require('../../functions/verify');
 const { twitterAuth } = require('../../functions/twitter');
 const rules = require('../../functions/rules');
 const { validateFeature } = require('../../src/feature');
+const { changeChannel } = require('../../functions/webhook');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -320,8 +320,18 @@ module.exports = {
 
 					const modsChannel = options.getChannel('channel');
 
-					await guildCheck.update({ webhookChannelID: modsChannel.id });
-					await interaction.reply({
+					const fieldsToUpdate = {
+						channelField: 'webhookChannelID',
+						webhookIDField: 'webhookId',
+						webhookTokenField: 'webhookToken',
+						webhookName: 'modChannel',
+						webhookReason: 'For posting purchases',
+					  };
+					const moderationChannel = await changeChannel(interaction, interaction.guild.id, modsChannel.id, fieldsToUpdate);
+					console.log(moderationChannel.id);
+					console.log(moderationChannel.token);
+
+					if (moderationChannel) return await interaction.reply({
 						content: 'Moderation Logs channel assigned.',
 						ephemeral: true,
 					});
@@ -366,8 +376,18 @@ module.exports = {
 
 					const specialShop = options.getChannel('channel');
 
-					await guildCheck.update({ specialShopChannelID: specialShop.id });
-					await interaction.reply({
+					const fieldsToUpdate = {
+						channelField: 'specialShopChannelID',
+						webhookIDField: 'specialShopWebhookID',
+						webhookTokenField: 'specialShopWebhookToken',
+						webhookName: 'announcementChannel',
+						webhookReason: 'For announcement purchases',
+					};
+					const specialChannel = await changeChannel(interaction, interaction.guild.id, specialShop.id, fieldsToUpdate);
+					console.log(specialChannel.id);
+					console.log(specialChannel.token);
+
+					if (specialChannel) return await interaction.reply({
 						content: 'Special Shop announcement channel saved!',
 						ephemeral: true,
 					});

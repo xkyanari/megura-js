@@ -12,7 +12,7 @@ module.exports = {
             
             await shop.update({ status: 'processing' });
             await interaction.reply('Processing!');
-            await purchaseStatus(interaction, interaction.guild.id, shop.discordID, shop.itemName, 'Processing');
+            await purchaseStatus(interaction.guild.id, shop.discordID, shop.itemName, 'Processing');
         } catch (error) {
             console.error(error);
         }

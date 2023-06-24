@@ -31,7 +31,7 @@ module.exports = {
 
 			if (guildID) {
 				await Shop.buyItem(selected, 1, interaction.member.id, interaction.guild.id);
-				await notifyPurchase(interaction, interaction.guild.id, interaction.member.id, selected);
+				await notifyPurchase(interaction.guild.id, interaction.member.id, selected);
 				return await interaction.editReply(`\`${selected}\` has been purchased.\nThe team has been notified for your purchase and will update you once it's complete.`);
 			}
 

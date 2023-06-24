@@ -2,6 +2,7 @@ const { SlashCommandBuilder, EmbedBuilder, ChannelType, channelMention, userMent
 const { validateFeature } = require('../../src/feature');
 const { startAuction } = require('../../functions/startAuction');
 const { endAuction } = require('../../functions/endAuction');
+const { changeChannel } = require('../../functions/webhook');
 const { Guild, Auction } = require('../../src/db');
 const { dahliaAvatar, dahliaName } = require('../../src/vars');
 
@@ -173,8 +174,16 @@ module.exports = {
 					}
 					const channel = options.getChannel('channelid');
 
-					await guildCheck.update({ auctionChannelID: channel.id });
-					await interaction.reply({
+					const fieldsToUpdate = {
+						channelField: 'auctionChannelID',
+						webhookIDField: 'auctionwebhookId',
+						webhookTokenField: 'auctionwebhookToken',
+						webhookName: 'auctionChannel',
+						webhookReason: 'For announcements related to auctions',
+					};
+					const updateChannel = await changeChannel(interaction, interaction.guild.id, channel.id, fieldsToUpdate);
+
+					if (updateChannel) return await interaction.reply({
 						content: `Auction Channel has been set to ${channelMention(channel.id)}.\n`,
 						ephemeral: true,
 					});

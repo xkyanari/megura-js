@@ -72,10 +72,14 @@ module.exports = {
 
         } catch (error) {
             if (error.message === 'Not enough funds in this address to cover the target amount.' || error.message === 'No unspent transaction outputs found for this address.') {
-                await interaction.reply({ content: 'You do not have enough funds to place this bid.', ephemeral: true });
-            } else {
+                return await interaction.reply({ content: 'You do not have enough funds to place this bid.', ephemeral: true });
+            }
+            if (error.message === 'The auction has already ended.') {
+                return await interaction.reply({ content: 'The auction has already ended.', ephemeral: true });
+            }
+            else {
                 console.error(error);
-                await interaction.reply({ content: 'Failed to place a bid due to an error.', ephemeral: true });
+                return await interaction.reply({ content: 'Failed to place a bid due to an error.', ephemeral: true });
             }
         }
     },

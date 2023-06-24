@@ -4,10 +4,16 @@ const { mysql_dbname, mysql_dbuser, mysql_dbpass } = require('../config.json');
 // Connecting to the database using Sequelize -----------------
 
 const sequelize = new Sequelize(mysql_dbname, mysql_dbuser, mysql_dbpass, {
-	host: 'localhost',
+	host: '172.20.0.1',
 	dialect: 'mysql',
 	logging: false,
 });
+
+// const sequelize = new Sequelize(mysql_dbname, mysql_dbuser, mysql_dbpass, {
+// 	host: 'localhost',
+// 	dialect: 'mysql',
+// 	logging: false,
+// });
 
 const Player = require('../models/player')(sequelize, Sequelize.DataTypes);
 const Monster = require('../models/monster')(sequelize, Sequelize.DataTypes);
@@ -120,8 +126,8 @@ Reflect.defineProperty(Shop, 'addItem', {
 // removes an item from the Shop
 Reflect.defineProperty(Shop, 'removeItem', {
 	value: async function removeItem(item_ID) {
-		const shopItem = await this.findOne({ where: { item_ID }});
-		if (shopItem) return await this.destroy({ where: { item_ID }});
+		const shopItem = await this.findOne({ where: { item_ID } });
+		if (shopItem) return await this.destroy({ where: { item_ID } });
 		return;
 	},
 });
@@ -143,18 +149,20 @@ Reflect.defineProperty(Shop, 'updateItem', {
 // buy an item from the Shop
 Reflect.defineProperty(Shop, 'buyItem', {
 	value: async function buyItem(item, quantity, discordID, guildID) {
-		const shopItem = await this.findOne({ where: { itemName: item }});
-		const user = await Player.findOne({ where: { discordID, guildID }});
-		const guild = await Guild.findOne({ where: { guildID }});
+
+		const shopItem = await this.findOne({ where: { itemName: item } });
+
+		const user = await Player.findOne({ where: { discordID, guildID } });
+		const guild = await Guild.findOne({ where: { guildID } });
 
 		// Update user balance
 		await Player.update({ oresEarned: user.oresEarned - shopItem.price * quantity }, { where: { discordID } });
-		
+
 		// Update guild wallet
 		await Guild.update({ walletAmount: guild.walletAmount + shopItem.price * quantity }, { where: { guildID } });
 
 		// Update shop stock
-		await this.update({ quantity: shopItem.stock - quantity }, { where: { itemName: item } });
+		await this.update({ quantity: shopItem.quantity - quantity }, { where: { itemName: item } });
 
 		return;
 	},
@@ -163,20 +171,20 @@ Reflect.defineProperty(Shop, 'buyItem', {
 // refund the ores to the player
 Reflect.defineProperty(Shop, 'returnOres', {
 	value: async function returnOres(item, quantity, discordID, guildID) {
-		const shopItem = await this.findOne({ where: { itemName: item }});
-		const user = await Player.findOne({ where: { discordID, guildID }});
-		const guild = await Guild.findOne({ where: { guildID }});
+		const shopItem = await this.findOne({ where: { itemName: item } });
+		const user = await Player.findOne({ where: { discordID, guildID } });
+		const guild = await Guild.findOne({ where: { guildID } });
 
 		const oreReturned = shopItem.price * quantity;
 
 		// Refund ores to user
 		await Player.update({ oresEarned: user.oresEarned + oreReturned }, { where: { discordID } });
-		
+
 		// Deduct from guild wallet
 		await Guild.update({ walletAmount: guild.walletAmount - oreReturned }, { where: { guildID } });
 
 		// Increase shop stock
-		await this.update({ quantity: shopItem.stock + quantity }, { where: { itemName: item } });
+		await this.update({ quantity: shopItem.quantity + quantity }, { where: { itemName: item } });
 
 		return oreReturned;
 	},
@@ -186,7 +194,7 @@ Reflect.defineProperty(Shop, 'returnOres', {
 // gets an item from the Shop
 Reflect.defineProperty(Shop, 'getItem', {
 	value: async function getItem(item_ID) {
-		const shopItem = await this.findOne({ where: { item_ID }});
+		const shopItem = await this.findOne({ where: { item_ID } });
 		if (!shopItem) return;
 		return {
 			...shopItem.toJSON(),
@@ -264,7 +272,7 @@ Reflect.defineProperty(Player.prototype, 'updateStats', {
 	value: async function updateStats(itemName, add = true, amount = 1) {
 		try {
 			const { itemID, totalHealth, totalAttack, totalDefense, category } =
-                await Shop.findOne({ where: { itemName } });
+				await Shop.findOne({ where: { itemName } });
 
 			if (!itemID) {
 				throw new Error(`Item ${itemName} not found in Shop`);

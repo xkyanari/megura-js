@@ -14,7 +14,7 @@ module.exports = {
             await player.addItem(shop.itemName);
             await shop.update({ status: 'completed' });
             await interaction.reply('Completed!');
-            await purchaseStatus(interaction, interaction.guild.id, shop.discordID, shop.itemName, 'Completed');
+            await purchaseStatus(interaction.guild.id, shop.discordID, shop.itemName, 'Completed');
         } catch (error) {
             console.error(error);
         }

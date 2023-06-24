@@ -34,7 +34,7 @@ const startAuction = async (interaction, itemName, description = null, quantity 
         transaction = null;
 
         // post a webhook on the channel
-        await auctionStatus(interaction, interaction.guild.id, interaction.member.id, item, auction);
+        await auctionStatus(interaction.guild.id, interaction.member.id, item, auction);
 
         // start a timer to end the auction after the specified duration
         await interaction.client.auctionQueue.add({
