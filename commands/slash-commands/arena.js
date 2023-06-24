@@ -1,5 +1,5 @@
 const { EmbedBuilder } = require("@discordjs/builders");
-const { attackMultiplier } = require("../src/vars");
+const { attackMultiplier } = require("../../src/vars");
 const { getDamage } = require("./battle");
 const battleUp = require('../functions/battleup');
 const { Monster, sequelize, Guild } = require('../src/db');
