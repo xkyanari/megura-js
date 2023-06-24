@@ -1,5 +1,23 @@
+const { default: axios } = require('axios');
 const { Auction, Bid, sequelize } = require('../src/db');
-const { getUtxos } = require('./getUtxos');
+// const { getUtxos } = require('./getUtxos');
+
+const checkBalance = async (address, amount) => {
+    const apiURL = `https://api.blockcypher.com/v1/btc/main/addrs/${address}?unSpentOnly=true&limit=5&confirmations=6&includeScript=true`;
+
+    try {
+        const response = await axios.get(apiURL);
+        const balance = response.data.balance;
+        if (amount < balance) {
+            return true;
+        } else {
+            return false;
+        }
+    } catch (error) {
+        console.error(error);
+    }
+    return false;  // Return false as default in case of errors
+};
 
 const placeBid = async (interaction, user, amount) => {
     let transaction;
@@ -29,9 +47,11 @@ const placeBid = async (interaction, user, amount) => {
                 : auction.startPrice + (auction.startPrice + amount);
 
             // add utxo check from here
-            const utxos = await getUtxos(user.walletAddress, user.publicKey, bidAmount.toFixed(2));
+            // const utxos = await getUtxos(user.walletAddress, user.publicKey, bidAmount.toFixed(2));
 
-            if (utxos) {
+            const balance = await checkBalance(user.walletAddress, bidAmount.toFixed(2));                 
+
+            if (balance) {
                 // place the new bid
                 const newBid = await Bid.create({
                     auctionId: auction.id,
@@ -45,7 +65,7 @@ const placeBid = async (interaction, user, amount) => {
 
                 // increment the version
                 auction.version += 1;
-                
+
                 await auction.save({ transaction });
 
                 // commit the transaction
