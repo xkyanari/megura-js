@@ -6,7 +6,6 @@ const getUtxos = async (paymentAddress, paymentPublicKey, targetAmount) => {
     let utxos = [];
 
     try {
-        const btcToSatoshis = targetAmount * 100000000;
         const api_URL = isTestnet === 'true' ? `https://api.blockcypher.com/v1/btc/test3/addrs/${paymentAddress}?unSpentOnly=true&limit=5&confirmations=6&includeScript=true` : `https://api.blockcypher.com/v1/btc/main/addrs/${paymentAddress}?unSpentOnly=true&limit=5&confirmations=6&includeScript=true`;
         const response = await axios.get(api_URL);
         const data = response.data;
@@ -46,13 +45,13 @@ const getUtxos = async (paymentAddress, paymentPublicKey, targetAmount) => {
                 utxos.push(utxoObj);
                 totalValue += utxo.value;
 
-                if (totalValue >= btcToSatoshis) {
+                if (totalValue >= targetAmount) {
                     break;
                 }
             }
         }
 
-        if (totalValue < btcToSatoshis) {
+        if (totalValue < targetAmount) {
             throw new Error('Not enough funds in this address to cover the target amount.');
         }
     } catch (error) {

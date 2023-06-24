@@ -159,13 +159,17 @@ const auctionStatus = async (guildID, discordID, item, auction) => {
                 .setLabel('Register')
                 .setStyle(ButtonStyle.Success),
             new ButtonBuilder()
-                .setCustomId('placeBid')
-                .setLabel('Bid [5%]')
+                .setCustomId('placeBid1')
+                .setLabel('Bid [+$50]')
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
-                .setCustomId('withdrawBid')
-                .setLabel('Withdraw')
-                .setStyle(ButtonStyle.Danger),
+                .setCustomId('placeBid2')
+                .setLabel('Bid [+$75]')
+                .setStyle(ButtonStyle.Primary),
+            new ButtonBuilder()
+                .setCustomId('placeBid3')
+                .setLabel('Bid [+$100]')
+                .setStyle(ButtonStyle.Primary),
         );
 
         const message = await webhookClient.send({

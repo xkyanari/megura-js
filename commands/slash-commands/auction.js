@@ -70,6 +70,7 @@ module.exports = {
 
 		switch (subCommand) {
 			case 'start':
+				await interaction.deferReply();
 				const item = options.getString('item');
 				const description = options.getString('description');
 				const quantity = options.getInteger('quantity');
@@ -94,18 +95,19 @@ module.exports = {
 						.setColor(0xcd7f32)
 						.setDescription(`**Item Name:** ${item}\n**Starting Price:** ${startPrice} 🪙\n**Start Time:** <t:${startDateTimeUnix}:f>\n**Ending Time:** <t:${endDateTimeUnix}:f>\n**Auctioneer:** ${userMention(interaction.user.id)}\nAuction ID: ${start.id}`);
 
-					await interaction.reply({
+					await interaction.editReply({
 						embeds: [embed0],
 					});
 
 				} else {
-					await interaction.reply({ content: 'Sorry, there was a problem starting the auction.', ephemeral: true });
+					await interaction.editReply({ content: 'Sorry, there was a problem starting the auction.', ephemeral: true });
 				}
 				break;
 
 			case 'end':
 				// this command only updates the auction end time and gets the highest bidder
 				try {
+					await interaction.deferReply();
 					const id = options.getInteger('auctionid');
 					const end = await endAuction(id);
 
@@ -154,10 +156,10 @@ module.exports = {
 							components: [],
 						});
 
-						if (message) return await interaction.reply({ content: 'Auction ended successfully.', ephemeral: true });
+						if (message) return await interaction.editReply({ content: 'Auction ended successfully.', ephemeral: true });
 					}
 					else {
-						await interaction.reply({ content: 'Failed to end auction due to an error.' });
+						await interaction.editReply({ content: 'Failed to end auction due to an error.' });
 					}
 				} catch (error) {
 					console.error(error);
@@ -165,6 +167,7 @@ module.exports = {
 				break;
 			case 'settings':
 				try {
+					await interaction.deferReply();
 					const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
 					if (!guildCheck) {
 						throw new Error('guild not found');
@@ -183,7 +186,7 @@ module.exports = {
 					};
 					const updateChannel = await changeChannel(interaction, interaction.guild.id, channel.id, fieldsToUpdate);
 
-					if (updateChannel) return await interaction.reply({
+					if (updateChannel) return await interaction.editReply({
 						content: `Auction Channel has been set to ${channelMention(channel.id)}.\n`,
 						ephemeral: true,
 					});

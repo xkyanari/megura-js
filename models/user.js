@@ -14,7 +14,6 @@ module.exports = (sequelize, DataTypes) => {
             },
             guildID: {
                 type: DataTypes.STRING,
-                unique: true,
             },
             type: DataTypes.STRING,
             walletAddress: {

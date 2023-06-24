@@ -18,25 +18,31 @@ module.exports = {
 	},
 	async execute(interaction) {
 		try {
+			await interaction.deferReply();
 			const user = await User.findOne({ where: { discordID: interaction.member.id, guildID: interaction.guild.id } });
 
-			const embed0 = new EmbedBuilder()
-				.setColor(0xcd7f32)
-				.setDescription(`You're all set!`);
+			// const embed0 = new EmbedBuilder()
+			// 	.setColor(0xcd7f32)
+			// 	.setDescription(`You're all set!`);
 
-			if (user) return await interaction.reply({
-				embeds: [embed0],
-				ephemeral: true,
-			});
+			// if (user && user.walletAddress) return await interaction.reply({
+			// 	embeds: [embed0],
+			// 	ephemeral: true,
+			// });
 
 			const registrationID = await generateWalletName(10);
 			const url = `${auctionURL}?id=${registrationID}`;
 
-			await User.create({
-				registrationID,
-				discordID: interaction.member.id,
-				guildID: interaction.guild.id,
-			});
+			if (user) {
+				await user.update({ registrationID });
+			}
+			else {
+				await User.create({
+					registrationID,
+					discordID: interaction.member.id,
+					guildID: interaction.guild.id,
+				});
+			}
 
 			const button = new ActionRowBuilder().addComponents(
 				new ButtonBuilder()
@@ -49,7 +55,7 @@ module.exports = {
 				`Please click the button below to connect your wallet.
 				Once connected, please allow up to 3 mins to check your status.`,
 			);
-			await interaction.reply({
+			await interaction.editReply({
 				embeds: [embed1],
 				components: [button],
 				ephemeral: true,

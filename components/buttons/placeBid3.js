@@ -1,18 +1,20 @@
 const { WebhookClient, ActionRowBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, userMention } = require('discord.js');
+const { OptimisticLockError } = require('sequelize');
 const { placeBid } = require("../../functions/placeBid");
 const { User, Auction, Guild } = require("../../src/db");
 const { dahliaAvatar, dahliaName } = require('../../src/vars');
 
 module.exports = {
     data: {
-        name: 'placeBid',
+        name: 'placeBid3',
     },
     async execute(interaction) {
         try {
+            await interaction.deferReply();
             const user = await User.findOne({ where: { discordID: interaction.member.id } });
             if (!user || !user.walletAddress) return await interaction.reply({ content: 'Please register your wallet first.', ephemeral: true });
 
-            const bid = await placeBid(interaction, user);
+            const bid = await placeBid(interaction, user, 330000);
 
             const auction = await Auction.findByPk(bid.auctionId);
             const item = await auction.getAuctionItem();
@@ -48,8 +50,16 @@ module.exports = {
                     .setLabel('Register')
                     .setStyle(ButtonStyle.Success),
                 new ButtonBuilder()
-                    .setCustomId('placeBid')
-                    .setLabel('Bid [5%]')
+                    .setCustomId('placeBid1')
+                    .setLabel('Bid [+$50]')
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId('placeBid2')
+                    .setLabel('Bid [+$75]')
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId('placeBid3')
+                    .setLabel('Bid [+$100]')
                     .setStyle(ButtonStyle.Primary),
                 new ButtonBuilder()
                     .setCustomId('withdrawBid')
@@ -65,21 +75,28 @@ module.exports = {
                 components: [button],
             });
 
-            if (message) return await interaction.reply({
+            if (message) return await interaction.editReply({
                 content: `Placed bid for ${bid.bidAmount}.`,
                 ephemeral: true,
             });
 
         } catch (error) {
+            if (error instanceof OptimisticLockError) {
+                return await interaction.editReply({
+                    content: 'Your bid was unsuccessful because you were outbid. Please try again.',
+                    ephemeral: true,
+                });
+            }
+
             if (error.message === 'Not enough funds in this address to cover the target amount.' || error.message === 'No unspent transaction outputs found for this address.') {
-                return await interaction.reply({ content: 'You do not have enough funds to place this bid.', ephemeral: true });
+                return await interaction.editReply({ content: 'You do not have enough funds to place this bid.', ephemeral: true });
             }
             if (error.message === 'The auction has already ended.') {
-                return await interaction.reply({ content: 'The auction has already ended.', ephemeral: true });
+                return await interaction.editReply({ content: 'The auction has already ended.', ephemeral: true });
             }
             else {
                 console.error(error);
-                return await interaction.reply({ content: 'Failed to place a bid due to an error.', ephemeral: true });
+                return await interaction.editReply({ content: 'Failed to place a bid due to an error.', ephemeral: true });
             }
         }
     },

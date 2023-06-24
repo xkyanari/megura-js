@@ -1,7 +1,7 @@
 const { Auction, Bid, sequelize } = require('../src/db');
 const { getUtxos } = require('./getUtxos');
 
-const placeBid = async (interaction, user) => {
+const placeBid = async (interaction, user, amount) => {
     let transaction;
 
     try {
@@ -25,8 +25,8 @@ const placeBid = async (interaction, user) => {
 
             // calculate the bid amount
             const bidAmount = highestBid
-                ? highestBid.bidAmount + (highestBid.bidAmount * 0.05)
-                : auction.startPrice + (auction.startPrice * 0.05);
+                ? highestBid.bidAmount + (highestBid.bidAmount + amount)
+                : auction.startPrice + (auction.startPrice + amount);
 
             // add utxo check from here
             const utxos = await getUtxos(user.walletAddress, user.publicKey, bidAmount.toFixed(2));
@@ -42,6 +42,10 @@ const placeBid = async (interaction, user) => {
 
                 // update the current price in the auction
                 auction.currentPrice = bidAmount.toFixed(2);
+
+                // increment the version
+                auction.version += 1;
+                
                 await auction.save({ transaction });
 
                 // commit the transaction

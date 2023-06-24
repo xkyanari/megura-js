@@ -19,8 +19,8 @@ const startAuction = async (interaction, itemName, description = null, quantity 
             itemId: item.id,
             startDateTime: new Date(),
             endDateTime: new Date(Date.now() + endTime * 60 * 60 * 1000), // endTime is assumed to be in hours
-            startPrice,
-            currentPrice: startPrice,
+            startPrice: startPrice * 100000000, // converted to satoshis
+            currentPrice: startPrice * 100000000, // converted to satoshis
             winnerId: null,
         };
 

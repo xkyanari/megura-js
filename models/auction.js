@@ -1,15 +1,15 @@
 module.exports = (sequelize, DataTypes) => {
-	const Auction = sequelize.define(
-		'Auction',
-		{
-			id: {
-				type: DataTypes.INTEGER,
-				autoIncrement: true,
-				primaryKey: true,
-			},
+    const Auction = sequelize.define(
+        'Auction',
+        {
+            id: {
+                type: DataTypes.INTEGER,
+                autoIncrement: true,
+                primaryKey: true,
+            },
             userID: DataTypes.STRING,
             guildID: DataTypes.STRING,
-			itemId: {
+            itemId: {
                 type: DataTypes.INTEGER,
                 references: {
                     model: 'AuctionItem',
@@ -30,12 +30,16 @@ module.exports = (sequelize, DataTypes) => {
             },
             messageID: DataTypes.STRING,
             attachmentURL: DataTypes.STRING,
-		},
-		{
-			freezeTableName: true,
-			timestamps: true,
-		},
-	);
+            version: {
+                type: DataTypes.INTEGER,
+                defaultValue: 0
+            }
+        },
+        {
+            freezeTableName: true,
+            timestamps: true,
+        },
+    );
 
-	return Auction;
+    return Auction;
 };
