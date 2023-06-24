@@ -328,8 +328,6 @@ module.exports = {
 						webhookReason: 'For posting purchases',
 					  };
 					const moderationChannel = await changeChannel(interaction, interaction.guild.id, modsChannel.id, fieldsToUpdate);
-					console.log(moderationChannel.id);
-					console.log(moderationChannel.token);
 
 					if (moderationChannel) return await interaction.reply({
 						content: 'Moderation Logs channel assigned.',
@@ -384,8 +382,6 @@ module.exports = {
 						webhookReason: 'For announcement purchases',
 					};
 					const specialChannel = await changeChannel(interaction, interaction.guild.id, specialShop.id, fieldsToUpdate);
-					console.log(specialChannel.id);
-					console.log(specialChannel.token);
 
 					if (specialChannel) return await interaction.reply({
 						content: 'Special Shop announcement channel saved!',
