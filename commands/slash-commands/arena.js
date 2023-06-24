@@ -1,195 +1,231 @@
-const { EmbedBuilder } = require("@discordjs/builders");
-const { attackMultiplier } = require("../../src/vars");
-const { getDamage } = require("./battle");
-const battleUp = require('../functions/battleup');
-const { Monster, sequelize, Guild } = require('../src/db');
-const { duelMessages } = require("../assets/responses");
-
-const duelPlayer = async (interaction, player1, player2) => {
-    const damage1 = Math.round(getDamage(player1, player2, attackMultiplier(player1.level)).finalDamage);
-    const damage2 = Math.round(getDamage(player2, player1, attackMultiplier(player2.level)).finalDamage);
-
-    let winner, loser;
-
-    if (damage1 > damage2) {
-        winner = player1;
-        loser = player2;
-    } else if (damage2 > damage1) {
-        winner = player2;
-        loser = player1;
-    } else {
-        winner = Math.random() < 0.5 ? player1 : player2;
-        loser = winner === player1 ? player2 : player1;
-    }
-
-    await battleUp(interaction, winner, loser);
-
-    const message = duelMessages[Math.floor(Math.random() * duelMessages.length)];
-    const filledMessage = message.replace(new RegExp('\\${winner.playerName}', 'g'), winner.playerName)
-        .replace(new RegExp('\\${loser.playerName}', 'g'), loser.playerName);
-    const embed = new EmbedBuilder()
-        .setColor(0xcd7f32)
-        .setDescription(filledMessage);
-    await interaction.channel.send({ embeds: [embed] });
-
-    let respawned = false;
-
-    // Check if the loser has respawns left and if they win a 40% respawn chance
-    if (loser.respawns > 0 && Math.random() < 0.4) {
-        loser.respawns--;
-        const embedRespawn = new EmbedBuilder()
-            .setColor(0xcd7f32)
-            .setDescription(`${loser.playerName} has resurrected! A rare turning point of the event!`);
-        await interaction.channel.send({ embeds: [embedRespawn] });
-        respawned = true;
-    }
-
-    return { winner, loser, respawn: respawned };
-};
-
-const duelMonster = async (interaction, player1, monster) => {
-    const wait = require('node:timers/promises').setTimeout;
-    const playerCriticalHitChance = Math.random() < 0.35; // 35% chance for player to get a critical hit
-    const criticalHitMultiplier = playerCriticalHitChance ? 4 : 1; // Critical hit doubles the damage
-
-    const playerDamage = Math.round(getDamage(player1, monster, criticalHitMultiplier).finalDamage);
-    const bossDamage = Math.round(getDamage(monster, player1, 1).finalDamage);
-
-    let winner, loser;
-
-    if (playerDamage > bossDamage) {
-        winner = player1;
-        loser = monster;
-    } else if (bossDamage > playerDamage) {
-        winner = monster;
-        loser = player1;
-    } else {
-        winner = Math.random() < 0.5 ? player1 : monster;
-        loser = winner === player1 ? monster : player1;
-    }
-
-    await battleUp(interaction, winner, loser);
-
-    await wait(2000);
-
-    const message = duelMessages[Math.floor(Math.random() * duelMessages.length)];
-    const filledMessage = message.replace(new RegExp('\\${winner.playerName}', 'g'), winner.playerName)
-        .replace(new RegExp('\\${loser.playerName}', 'g'), loser.playerName);
-    const embed = new EmbedBuilder()
-        .setColor(0xcd7f32)
-        .setDescription(filledMessage);
-    await interaction.channel.send({ embeds: [embed] });
-
-    return winner;
-};
-
-const monsterBattle = async (interaction, winner) => {
-    const [monster] = await Monster.findAll({
-        order: sequelize.random(),
-        limit: 1,
-    });
-
-    const bossObj = {
-        playerName: monster.monsterName,
-        level: Math.round(winner.level + monster.level),
-        totalHealth: Math.round(monster.totalHealth + winner.totalHealth),
-        totalAttack: Math.round(monster.totalAttack + winner.totalAttack),
-        totalDefense: Math.round(monster.totalDefense + winner.totalDefense),
-        user: {
-            displayAvatarURL: function () {
-                return monster.imageURL;
-            }
-        }
-    };
-
-    const wait = require('node:timers/promises').setTimeout;
-    const embed1 = new EmbedBuilder()
-        .setColor(0xcd7f32)
-        .setTitle('Uh-oh!')
-        .setDescription('Suddenly, the ground trembles as a fearsome creature crashes into the arena!\nA mighty boss monster has arrived to challenge the champion!');
-
-    // announce the winner
-    await interaction.channel.send({ embeds: [embed1] });
-
-    await wait(10000);
-
-    const embed2 = new EmbedBuilder()
-        .setColor(0xcd7f32)
-        .setTitle('The atmosphere crackles with tension...')
-        .setDescription(`Will ${winner.playerName} save the day?`);
-
-    await interaction.channel.send({ embeds: [embed2] });
-
-    await wait(10000);
-
-    const embed3 = new EmbedBuilder()
-        .setColor(0xcd7f32)
-        .setTitle('The monster rose up intimidating the hero!')
-        .setDescription(`**ROOOAAAARRRRRRRR!!**`);
-
-    await interaction.channel.send({ embeds: [embed3] });
-
-    await wait(10000);
-
-    const winnerBattle = await duelMonster(interaction, winner, bossObj);
-
-    await wait(10000);
-
-    if (winnerBattle === bossObj) {
-        const embed4 = new EmbedBuilder()
-            .setColor(0xcd7f32)
-            .setTitle('Victory Lost!')
-            .setDescription(`In a shocking turn of events, even the mighty champion, ${winner.playerName}, falls before the overwhelming power of the boss. The arena is left in awe, witnessing the limits of mortal strength.`);
-
-        return await interaction.channel.send({ embeds: [embed4] });
-    }
-
-    const embed5 = new EmbedBuilder()
-        .setColor(0xcd7f32)
-        .setTitle('Another Legendary Victory!')
-        .setDescription(`With a final, decisive strike, ${winner.playerName} defeats the boss monster and emerges as the true champion of the arena!`);
-
-    return await interaction.channel.send({ embeds: [embed5] });
-};
-
-const arenaBattle = async (interaction, players) => {
-    const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
-    const wait = require('node:timers/promises').setTimeout;
-    await wait(10000);
-
-    const embed1 = new EmbedBuilder()
-        .setColor(0xcd7f32)
-        .setDescription('Let the duels commence!');
-    await interaction.channel.send({ embeds: [embed1] });
-
-    while (players.length > 1) {
-        let player1 = players.shift();
-        let player2Index = Math.floor(Math.random() * players.length);
-        let player2 = players.splice(player2Index, 1)[0];
-
-        let duelResult = await duelPlayer(interaction, player1, player2);
-        if (duelResult.respawn) {
-            players.unshift(duelResult.loser);
-        }
-        players.push(duelResult.winner);
-
-        await wait(10000);
-    }
-
-    const embed2 = new EmbedBuilder()
-        .setColor(0xcd7f32)
-        .setTitle('Victory!')
-        .setDescription(`${players[0].playerName} is the last one standing!`);
-
-    // announce the winner
-    await interaction.channel.send({ embeds: [embed2] });
-
-    if (guildCheck && guildCheck.arenaBoss) {
-        await wait(15000);
-        await monsterBattle(interaction, players[0]);
-    }
-};
+const {
+    SlashCommandBuilder,
+    EmbedBuilder,
+    PermissionFlagsBits,
+} = require('discord.js');
+const { Player, Guild } = require('../../src/db');
+const { arenaBattle } = require('../../functions/arena');
+const { footer } = require('../../src/vars');
+const { validateFeature } = require('../../src/feature');
 
 module.exports = {
-    arenaBattle,
+    data: new SlashCommandBuilder()
+        .setName('arena')
+        .setDescription('Start an arena event!')
+        .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
+        .addSubcommand((subcommand) =>
+            subcommand
+                .setName('start')
+                .setDescription('Join the event.')
+                .addStringOption((option) =>
+                    option
+                        .setName('timer')
+                        .setDescription('Choose a number in minutes.')
+                        .addChoices(
+                            { name: '3 minutes', value: '3' },
+                            { name: '5 minutes', value: '5' },
+                            { name: '7 minutes', value: '7' },
+                        )
+                        .setRequired(false),
+                )
+                .addStringOption((option) =>
+                    option
+                        .setName('mode')
+                        .setDescription('Set PVP mode.')
+                        .addChoices(
+                            { name: 'Battle Royale: Classic', value: 'classic' },
+                            { name: 'Battle Royale: Evolving Classic', value: 'evolving' },
+                            { name: 'Battle Royale: Evolving Deathmatch', value: 'evolving-deathmatch' },
+                            { name: 'Battle Royale: Deathmatch', value: 'deathmatch' },
+                        )
+                        .setRequired(false)
+                ),
+        )
+        .addSubcommand((subcommand) =>
+            subcommand
+                .setName('boss')
+                .setDescription('Add the boss to challenge the winner?')
+                .addBooleanOption((option) =>
+                    option
+                        .setName('show')
+                        .setDescription('Choose one.'),
+                ),
+        )
+        .addSubcommand((subcommand) =>
+            subcommand.setName('rules').setDescription('Show the rules.'),
+        ),
+    cooldown: 120000,
+    async execute(interaction) {
+        const subCommand = interaction.options.getSubcommand();
+        const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
+        if (!await validateFeature(interaction, guildCheck.version, 'hasArena')) {
+            return;
+        }
+
+        switch (subCommand) {
+            case 'start':
+                try {
+                    const modeNames = {
+                        classic: 'Battle Royale: Classic',
+                        evolving: 'Battle Royale: Evolving Classic',
+                        'evolving-deathmatch': 'Battle Royale: Evolving Deathmatch',
+                        deathmatch: 'Battle Royale: Deathmatch',
+                    };
+                    const mode = interaction.options.getString('mode') || 'classic';
+                    const timer = interaction.options.getString('timer') || '2';
+                    const timerMilliseconds = parseInt(timer) * 60 * 1000;
+
+                    const baseStats = {
+                        level: 1,
+                        totalHealth: 2000,
+                        totalAttack: 500,
+                        totalDefense: 500
+                    };
+
+                    const embed1 = new EmbedBuilder()
+                        .setColor(0xcd7f32)
+                        .setTitle('THE ARENA GATES ARE OPEN!')
+                        .setDescription(`**${modeNames[mode]}**\n\nThe crowd is roaring! React with ⚖️ to join the fray and prove your might!\n\nStarting in ${timer} minutes!`);
+
+                    const message = await interaction.reply({ embeds: [embed1], fetchReply: true });
+                    await message.react('⚖️');
+
+                    const players = await Player.findAll({ where: { guildID: interaction.guild.id } });
+                    let playerObjects = players.map(player => ({
+                        discordID: player.discordID,
+                        playerName: player.playerName,
+                        level: player.level,
+                        totalHealth: player.totalHealth,
+                        totalAttack: player.totalAttack,
+                        totalDefense: player.totalDefense,
+                        respawns: 0
+                    }));
+
+                    switch (mode) {
+                        case 'classic':
+                            playerObjects = playerObjects.map(player => ({
+                                discordID: player.discordID,
+                                playerName: player.playerName,
+                                level: baseStats.level,
+                                totalHealth: baseStats.totalHealth,
+                                totalAttack: baseStats.totalAttack,
+                                totalDefense: baseStats.totalDefense
+                            }));
+                            break;
+                        case 'evolving':
+                            playerObjects = playerObjects.map(player => ({
+                                discordID: player.discordID,
+                                playerName: player.playerName,
+                                level: baseStats.level,
+                                totalHealth: baseStats.totalHealth,
+                                totalAttack: baseStats.totalAttack,
+                                totalDefense: baseStats.totalDefense,
+                                respawns: 3
+                            }));
+                            break;
+                        case 'deathmatch':
+                            break;
+                        case 'evolving-deathmatch':
+                            playerObjects = playerObjects.map(player => ({
+                                ...player,
+                                respawns: 1
+                            }));
+                            break;
+                    }
+
+                    let collectedPlayers = [];
+                    const filter = (reaction, user) => {
+                        return playerObjects.some(player => player.discordID === user.id);
+                    };
+
+                    const collector = message.createReactionCollector({ filter, time: timerMilliseconds });
+
+                    collector.on('collect', (reaction, user) => {
+                        if (collectedPlayers.some(collectedPlayer => collectedPlayer.id === user.id)) {
+                            console.log(`User ${user.id} has already joined the game.`);
+                            return;
+                        }
+
+                        const player = playerObjects.find(player => player.discordID === user.id);
+                        if (!player) {
+                            console.log(`User ${user.id} is not in the playerObjects.`);
+                            return;
+                        }
+
+                        collectedPlayers.push({ user, ...player });
+                        console.log(`User ${user.id} (${player.playerName}) has joined the game.`);
+                    });
+
+                    const reminder1 = setTimeout(() => {
+                        const embed = new EmbedBuilder()
+                            .setColor(0xcd7f32)
+                            .setDescription(`Hurry up, voyagers! Only ${(timerMilliseconds / 1000) / 2} seconds left to join the battle!`);
+                        interaction.channel.send({ embeds: [embed] });
+                    }, timerMilliseconds / 2);
+
+                    const reminder2 = setTimeout(() => {
+                        const embed = new EmbedBuilder()
+                            .setColor(0xcd7f32)
+                            .setDescription(`Last chance, voyagers! You have ${(timerMilliseconds / 1000) / 4} seconds to step into the arena!`);
+                        interaction.channel.send({ embeds: [embed] });
+                    }, (timerMilliseconds / 4) * 3);
+
+                    collector.on('end', collected => {
+                        clearTimeout(reminder1);
+                        clearTimeout(reminder2);
+
+                        const embed0 = new EmbedBuilder()
+                            .setColor(0xcd7f32)
+                            .setDescription(`Looks like no one wanted to join. Closing...`);
+                        if (collectedPlayers.length === 0) return interaction.channel.send({ embeds: [embed0] });
+
+                        const embed1 = new EmbedBuilder()
+                            .setColor(0xcd7f32)
+                            .setDescription(`Looks like no one wanted to accept ${collectedPlayers[0].playerName}'s challenge.`);
+                        if (collectedPlayers.length < 2) return interaction.channel.send({ embeds: [embed1] });
+
+                        const embed2 = new EmbedBuilder()
+                            .setColor(0xcd7f32)
+                            .setDescription('Participants have gathered. Get ready to clash in the arena!\n\nYou have 10 seconds to prepare! Who will be the last one standing?');
+                        interaction.channel.send({ embeds: [embed2] });
+                        arenaBattle(interaction, collectedPlayers);
+                    });
+                } catch (error) {
+                    console.log(error);
+                }
+                break;
+
+            case 'rules':
+                const basicRules = `**Game Rules:**\n1. React with ⚖️ to join the event and become a contender in the arena.\n2. After gathering participants, a 10-second preparation phase will occur before the duels begin.\n3. Participants will engage in duels until only one player remains.\n4. The player with higher attack damage (without critical hits) wins the duel.\n5. The player who loses a duel is eliminated from the event.`;
+
+                const bossRules = `\n6. After determining the final winner, a boss monster appears for an epic battle.\n7. Achievements may be awarded based on performance during the event.\n8. Participants are expected to adhere to fair play and good sportsmanship.\n9. The ultimate champion is the player who emerges as the last one standing after defeating both the contenders and the boss.`;
+
+                const embedDescription = guildCheck.arenaBoss ? basicRules + bossRules : basicRules;
+
+                const embedMessage = new EmbedBuilder()
+                    .setColor(0xcd7f32)
+                    .setDescription(embedDescription)
+                    .setFooter(footer);
+
+                await interaction.reply({ embeds: [embedMessage] });
+                break;
+
+            case 'boss':
+                try {
+                    const show = interaction.options.getBoolean('show');
+                    if (show) {
+                        guildCheck.arenaBoss = true;
+                        await interaction.reply({ content: `Arena Boss is turned ON`, ephemeral: true });
+                    }
+                    else {
+                        guildCheck.arenaBoss = false;
+                        await interaction.reply({ content: `Arena Boss is turned OFF`, ephemeral: true });
+                    }
+                    return guildCheck.save();
+                } catch (error) {
+                    console.error(error);
+                }
+                break;
+        }
+    },
 };

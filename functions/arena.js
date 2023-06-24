@@ -48,6 +48,7 @@ const duelPlayer = async (interaction, player1, player2) => {
 };
 
 const duelMonster = async (interaction, player1, monster) => {
+    const wait = require('node:timers/promises').setTimeout;
     const playerCriticalHitChance = Math.random() < 0.35; // 35% chance for player to get a critical hit
     const criticalHitMultiplier = playerCriticalHitChance ? 4 : 1; // Critical hit doubles the damage
 
@@ -163,8 +164,15 @@ const arenaBattle = async (interaction, players) => {
 
     while (players.length > 1) {
         let player1 = players.shift();
-        let player2Index = Math.floor(Math.random() * players.length);
-        let player2 = players.splice(player2Index, 1)[0];
+        let player2Index;
+        let player2;
+
+        do {
+            player2Index = Math.floor(Math.random() * players.length);
+            player2 = players[player2Index];
+        } while (player1 === player2);
+
+        players.splice(player2Index, 1);
 
         let duelResult = await duelPlayer(interaction, player1, player2);
         if (duelResult.respawn) {
@@ -174,6 +182,7 @@ const arenaBattle = async (interaction, players) => {
 
         await wait(10000);
     }
+
 
     const embed2 = new EmbedBuilder()
         .setColor(0xcd7f32)
