@@ -91,7 +91,7 @@ module.exports = {
 					const embed0 = new EmbedBuilder()
 						.setTitle('Auction Started!')
 						.setColor(0xcd7f32)
-						.setDescription(`**Item Name:** ${item}\n**Starting Price:** ${startPrice} 🪙\n**Start Time:** <t:${startDateTimeUnix}:f>\n**Ending Time:** <t:${endDateTimeUnix}:f>\n**Auctioneer:** ${userMention(interaction.user.id)}`);
+						.setDescription(`**Item Name:** ${item}\n**Starting Price:** ${startPrice} 🪙\n**Start Time:** <t:${startDateTimeUnix}:f>\n**Ending Time:** <t:${endDateTimeUnix}:f>\n**Auctioneer:** ${userMention(interaction.user.id)}\nAuction ID: ${start.id}`);
 
 					await interaction.reply({
 						embeds: [embed0],
