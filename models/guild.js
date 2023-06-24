@@ -5,7 +5,6 @@ module.exports = (sequelize, DataTypes) => {
 		'Guild',
 		{
 			guildID: DataTypes.TEXT,
-			version: DataTypes.TEXT,
 			type: DataTypes.TEXT,
 			verifyChannelID: DataTypes.TEXT,
 			verifyMessageID: DataTypes.TEXT,
@@ -59,9 +58,16 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.INTEGER,
 				defaultValue: 500000,
 			},
+			version: {
+				type: DataTypes.TEXT,
+				defaultValue: 'free',
+			},
 			webhookId: DataTypes.STRING,
 			webhookToken: DataTypes.STRING,
 			webhookChannelID: DataTypes.STRING,
+			auctionChannelID: DataTypes.STRING,
+			auctionwebhookId: DataTypes.STRING,
+			auctionwebhookToken: DataTypes.STRING,
 		},
 		{
 			freezeTableName: true,

@@ -26,7 +26,7 @@ module.exports = {
 				return;
 			}
 
-			const counterKey = `counter:${interaction.user.id}`;
+			const counterKey = `counter:${interaction.user.id}:${interaction.guild.id}`;
 
 			// Get the existing counter from Redis
 			let counter = await redis.lrange(counterKey, 0, -1);
@@ -72,7 +72,7 @@ module.exports = {
 			await redis.expire(counterKey, 30);
 
 			// Use Redis to check for existing cooldown
-			const cooldownData = `${interaction.commandName}:${interaction.user.id}`;
+			const cooldownData = `${interaction.user.id}:${interaction.guild.id}:${interaction.commandName}`;
 			const existingCooldown = await redis.get(cooldownData);
 			if (existingCooldown) {
 				const remainingTime = existingCooldown - Date.now();
@@ -128,7 +128,7 @@ module.exports = {
 			const button = buttons.get(customId);
 			if (!button) return new Error('There is no code for this button.');
 
-			const cooldownData = `${customId}:${interaction.user.id}`;
+			const cooldownData = `${customId}:${interaction.user.id}:${interaction.guild.id}`;
 
 			if (client.cooldown.has(cooldownData)) {
 				const timer = ms(client.cooldown.get(cooldownData) - Date.now());

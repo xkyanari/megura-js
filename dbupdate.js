@@ -6,11 +6,15 @@ const {
 	Player,
 	Item,
 	Iura,
-	Guild,
 	Twitter,
 	Raid,
 	Tweet,
-	Order
+	Order,
+	Guild,
+	User,
+	Auction,
+	AuctionItem,
+	Bid,
 } = require('./src/db');
 
 (async () => {
@@ -44,15 +48,15 @@ const {
 	// 	})
 	// 	.catch((error) => console.log(error));
 
-	await Contract.sync({ force: true })
-		.then(() => {
-			const contracts = require('./assets/contracts.json');
-			for (let contract = 0; contract < contracts.length; contract++) {
-				Contract.create(contracts[contract]);
-			}
-			console.log('Contract data import completed.');
-		})
-		.catch((error) => console.log(error));
+	// await Contract.sync({ force: true })
+	// 	.then(() => {
+	// 		const contracts = require('./assets/contracts.json');
+	// 		for (let contract = 0; contract < contracts.length; contract++) {
+	// 			Contract.create(contracts[contract]);
+	// 		}
+	// 		console.log('Contract data import completed.');
+	// 	})
+	// 	.catch((error) => console.log(error));
 
 	// await Player.sync({ alter: true })
 	// 	.then(() => {
@@ -84,12 +88,6 @@ const {
 	// 	})
 	// 	.catch((error) => console.log(error));
 
-	// await Guild.sync({ alter: true })
-	// 	.then(() => {
-	// 		console.log('Guild table refreshed.');
-	// 	})
-	// 	.catch((error) => console.log(error));
-
 	// await Twitter.sync({ alter: true })
 	// 	.then(() => {
 	// 		console.log('Twitter table refreshed.');
@@ -107,4 +105,41 @@ const {
 	// 		console.log('Tweet table refreshed.');
 	// 	})
 	// 	.catch((error) => console.log(error));
+
+	await Guild.sync({ alter: true })
+		.then(() => {
+			console.log('Guild table refreshed.');
+		})
+		.catch((error) => console.log(error));
+
+	// await Order.sync({ alter: true })
+	// 	.then(() => {
+	// 		console.log('Order table refreshed.');
+	// 	})
+	// 	.catch((error) => console.log(error));
+
+	await Bid.sync({ alter: true })
+		.then(() => {
+			console.log('Bid table refreshed.');
+		})
+		.catch((error) => console.log(error));
+
+	await User.sync({ alter: true })
+		.then(() => {
+			console.log('User table refreshed.');
+		})
+		.catch((error) => console.log(error));
+
+	await AuctionItem.sync({ alter: true })
+		.then(() => {
+			console.log('AuctionItem table refreshed.');
+		})
+		.catch((error) => console.log(error));
+
+	await Auction.sync({ alter: true })
+		.then(() => {
+			console.log('Auction table refreshed.');
+		})
+		.catch((error) => console.log(error));
+
 })();

@@ -1,6 +1,9 @@
 const { Events, ActivityType, EmbedBuilder, userMention } = require('discord.js');
-const { sequelize } = require('../src/db');
+const { sequelize, Auction } = require('../src/db');
+const { port } = require('../config.json');
 const Queue = require('bull');
+const app = require('../server');
+const { endAuction } = require('../functions/endAuction');
 
 let Discord;
 try {
@@ -47,6 +50,10 @@ module.exports = {
 		await sequelize.sync(sync.default);
 		console.log('Database connection successful.');
 
+		// app.listen(port, () => {
+		// 	console.log(`Express server is running on http://localhost:${port}`);
+		// });
+
 		const deleteChannelQueue = new Queue('deleteChannel', 'redis://127.0.0.1:6379');
 		client.deleteChannelQueue = deleteChannelQueue;
 
@@ -88,6 +95,28 @@ module.exports = {
 				done();
 			} catch (error) {
 				console.error(`Failed to delete channel ${channelId}`);
+				done(error);
+			}
+		});
+
+		const auctionQueue = new Queue('auctionQueue', 'redis://127.0.0.1:6379');
+		client.auctionQueue = auctionQueue;
+
+		auctionQueue.process(async (job, done) => {
+			const { auctionId } = job.data;
+
+			const auction = await Auction.findByPk(auctionId);
+
+			if (!auction) {
+				console.error('Auction not found');
+				return done(new Error('Auction not found'));
+			}
+
+			try {
+				await endAuction(auctionId);
+				done();
+			} catch (error) {
+				console.error(`Failed to end auction ${auctionId}`);
 				done(error);
 			}
 		});
