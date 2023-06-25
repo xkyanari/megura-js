@@ -10,7 +10,7 @@ const executeBid = async (interaction, bidAmount) => {
         const userGuildId = `${interaction.member.id}-${interaction.guild.id}`;
         const user = await User.findOne({ where: { userGuildId } });
 
-        if (!user || !user.walletAddress) return await interaction.reply({ content: 'Please register your wallet first.', ephemeral: true });
+        if (!user || !user.walletAddress) return await interaction.editReply({ content: 'Please register your wallet first.', ephemeral: true });
 
         const bid = await placeBid(interaction, user, bidAmount);
 
@@ -74,7 +74,7 @@ const executeBid = async (interaction, bidAmount) => {
         });
 
         if (message) return await interaction.editReply({
-            content: `Placed bid for ${bid.bidAmount}.`,
+            content: `Placed bid for ${bid.bidAmount / 100000000} 🪙.`,
             ephemeral: true,
         });
 
@@ -86,7 +86,7 @@ const executeBid = async (interaction, bidAmount) => {
             });
         }
 
-        if (error.message === 'Not enough funds in this address to cover the target amount.' || error.message === 'No unspent transaction outputs found for this address.') {
+        if (error.message === 'Insufficient funds') {
             return await interaction.editReply({ content: 'You do not have enough funds to place this bid.', ephemeral: true });
         }
         if (error.message === 'The auction has already ended.') {

@@ -9,7 +9,11 @@ module.exports = {
     },
     async execute(interaction) {
         try {
-            const user = await User.findOne({ where: { discordID: interaction.member.id } });
+            await interaction.deferReply({ ephemeral: true });
+
+            const userGuildId = `${interaction.member.id}-${interaction.guild.id}`;
+            const user = await User.findOne({ where: { userGuildId } });
+            
             if (!user || !user.walletAddress) return await interaction.reply({ content: 'Please register your wallet first.', ephemeral: true });
 
             const withdraw = await withdrawBid(interaction);
@@ -26,8 +30,8 @@ module.exports = {
                 .setColor(0xcd7f32)
                 .addFields(
                     { name: 'Quantity:', value: `${item.quantity}`, inline: true },
-                    { name: 'Starting Price:', value: `${auction.startPrice} 🪙`, inline: true },
-                    { name: 'Highest Bid:', value: `${auction.currentPrice} 🪙`, inline: true },
+                    { name: 'Starting Price:', value: `${auction.startPrice / 100000000} 🪙`, inline: true },
+                    { name: 'Highest Bid:', value: `${auction.currentPrice / 100000000} 🪙`, inline: true },
                     { name: 'Start:', value: `<t:${startDateTimeUnix}:f>`, inline: true },
                     { name: 'End:', value: `<t:${endDateTimeUnix}:f>`, inline: true },
                     { name: 'Auctioneer:', value: `${userMention(auction.userID)}`, inline: false },
@@ -48,8 +52,16 @@ module.exports = {
                     .setLabel('Register')
                     .setStyle(ButtonStyle.Success),
                 new ButtonBuilder()
-                    .setCustomId('placeBid')
-                    .setLabel('Bid [5%]')
+                    .setCustomId('placeBid1')
+                    .setLabel('Bid [+$50]')
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId('placeBid2')
+                    .setLabel('Bid [+$75]')
+                    .setStyle(ButtonStyle.Primary),
+                new ButtonBuilder()
+                    .setCustomId('placeBid3')
+                    .setLabel('Bid [+$100]')
                     .setStyle(ButtonStyle.Primary),
             );
 
@@ -61,7 +73,7 @@ module.exports = {
                 components: [button],
             });
 
-            if (message) return await interaction.reply({
+            if (message) return await interaction.editReply({
                 content: `Your bid was withdrawn.`,
                 ephemeral: true,
             });

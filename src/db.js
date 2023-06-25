@@ -4,16 +4,10 @@ const { mysql_dbname, mysql_dbuser, mysql_dbpass } = require('../config.json');
 // Connecting to the database using Sequelize -----------------
 
 const sequelize = new Sequelize(mysql_dbname, mysql_dbuser, mysql_dbpass, {
-	host: '172.20.0.1',
+	host: 'localhost',
 	dialect: 'mysql',
 	logging: false,
 });
-
-// const sequelize = new Sequelize(mysql_dbname, mysql_dbuser, mysql_dbpass, {
-// 	host: 'localhost',
-// 	dialect: 'mysql',
-// 	logging: false,
-// });
 
 const Player = require('../models/player')(sequelize, Sequelize.DataTypes);
 const Monster = require('../models/monster')(sequelize, Sequelize.DataTypes);

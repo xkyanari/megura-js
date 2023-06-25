@@ -5,18 +5,27 @@ const { Auction, Bid, sequelize } = require('../src/db');
 const checkBalance = async (address, amount) => {
     const apiURL = `https://api.blockcypher.com/v1/btc/main/addrs/${address}/balance`;
 
+    let response;
     try {
-        const response = await axios.get(apiURL);
+        response = await axios.get(apiURL);
+    } catch (error) {
+        console.error('Error fetching balance from BlockCypher API:', error);
+        return false;
+    }
+
+    if (response.data && response.data.balance) {
         const balance = response.data.balance;
+
         if (amount < balance) {
             return true;
         } else {
+            console.log(`Insufficient funds: Required ${amount}, but balance is ${balance}`);
             return false;
         }
-    } catch (error) {
-        console.error(error);
+    } else {
+        console.error('Unexpected response data from BlockCypher API:', response.data);
+        return false;
     }
-    return false;  // Return false as default in case of errors
 };
 
 const placeBid = async (interaction, user, amount) => {
@@ -43,25 +52,28 @@ const placeBid = async (interaction, user, amount) => {
 
             // calculate the bid amount
             const bidAmount = highestBid
-                ? highestBid.bidAmount + (highestBid.bidAmount + amount)
-                : auction.startPrice + (auction.startPrice + amount);
+                ? highestBid.bidAmount + amount
+                : auction.startPrice + amount;
 
             // add utxo check from here
             // const utxos = await getUtxos(user.walletAddress, user.publicKey, bidAmount.toFixed(2));
 
-            const balance = await checkBalance(user.walletAddress, bidAmount.toFixed(2));                 
+            const balance = await checkBalance(user.walletAddress, bidAmount);
+            // const balance = true;
 
             if (balance) {
+                console.log(`Auction ID: ${auction.id}, User ID: ${interaction.user.id}, Bid Amount: ${bidAmount}`);
+
                 // place the new bid
                 const newBid = await Bid.create({
                     auctionId: auction.id,
-                    userId: interaction.user.id,
-                    bidAmount: bidAmount.toFixed(2),
+                    userId: `${interaction.member.id}-${interaction.guild.id}`,
+                    bidAmount: bidAmount,
                     bidDateTime: new Date(),
                 }, { transaction });
 
                 // update the current price in the auction
-                auction.currentPrice = bidAmount.toFixed(2);
+                auction.currentPrice = bidAmount;
 
                 // increment the version
                 auction.version += 1;
@@ -72,6 +84,9 @@ const placeBid = async (interaction, user, amount) => {
                 await transaction.commit();
 
                 return newBid;
+            }
+            else {
+                throw new Error('Insufficient funds');
             }
         } else {
             throw new Error('The auction has already ended.');
