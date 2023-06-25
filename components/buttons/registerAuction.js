@@ -19,7 +19,7 @@ module.exports = {
 	async execute(interaction) {
 		try {
 			await interaction.deferReply({ ephemeral: true });
-			const user = await User.findOne({ where: { discordID: interaction.member.id, guildID: interaction.guild.id } });
+			const user = await User.findOne({ where: { userGuildId: `${interaction.member.id}-${interaction.guild.id}` } });
 
 			// const embed0 = new EmbedBuilder()
 			// 	.setColor(0xcd7f32)

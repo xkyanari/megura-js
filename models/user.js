@@ -21,11 +21,9 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             walletAddress: {
                 type: DataTypes.STRING,
-                unique: true,
             },
             publicKey: {
                 type: DataTypes.STRING,
-                unique: true,
             },
         },
         {
