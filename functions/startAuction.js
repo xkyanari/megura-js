@@ -39,6 +39,7 @@ const startAuction = async (interaction, itemName, description = null, quantity 
         // start a timer to end the auction after the specified duration
         await interaction.client.auctionQueue.add({
             auctionId: auction.id,
+            guildId: interaction.guild.id,
         }, {
             delay: endTime * 60 * 60 * 1000,  // delay job for endTime hours
             attempts: 3,  // retry up to 3 times
