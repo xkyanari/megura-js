@@ -123,9 +123,6 @@ module.exports = {
 						const { auctionwebhookId, auctionwebhookToken } = await Guild.findOne({ where: { guildId: interaction.guild.id } });
 						const webhookClient = new WebhookClient({ id: auctionwebhookId, token: auctionwebhookToken });
 
-						const discordID = auction.userID.split('-');
-						const winningID = discordID[0];
-
 						const newEmbed = new EmbedBuilder()
 							.setTitle(`Auction: ${item.itemName}`)
 							.setColor(0xcd7f32)
@@ -133,7 +130,7 @@ module.exports = {
 								{ name: 'Quantity:', value: `${item.quantity}`, inline: true },
 								{ name: 'Starting Price:', value: `${auction.startPrice / 100000000} 🪙`, inline: true },
 								{ name: 'Highest Bid:', value: `${auction.currentPrice / 100000000} 🪙`, inline: true },
-								{ name: 'Auctioneer:', value: `${userMention(winningID)}`, inline: true },
+								{ name: 'Auctioneer:', value: `${userMention(auction.userID)}`, inline: true },
 							)
 							.setFooter({ text: `Auction ID: ${auction.id}` });
 
@@ -146,8 +143,10 @@ module.exports = {
 						}
 
 						if (auction.winnerId) {
+							const discordID = auction.winnerId.split('-');
+							const winningID = discordID[0];
 							newEmbed.addFields(
-								{ name: 'Winner:', value: `${userMention(auction.winnerId)}`, inline: true },
+								{ name: 'Winner:', value: `${userMention(winningID)}`, inline: true },
 							);
 						}
 
