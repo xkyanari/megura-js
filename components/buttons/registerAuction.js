@@ -18,7 +18,7 @@ module.exports = {
 	},
 	async execute(interaction) {
 		try {
-			await interaction.deferReply();
+			await interaction.deferReply({ ephemeral: true });
 			const user = await User.findOne({ where: { discordID: interaction.member.id, guildID: interaction.guild.id } });
 
 			// const embed0 = new EmbedBuilder()

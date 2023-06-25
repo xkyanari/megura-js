@@ -6,7 +6,7 @@ const { dahliaAvatar, dahliaName } = require('../src/vars');
 
 const executeBid = async (interaction, bidAmount) => {
     try {
-        await interaction.deferReply();
+        await interaction.deferReply({ ephemeral: true });
         const user = await User.findOne({ where: { discordID: interaction.member.id } });
         if (!user || !user.walletAddress) return await interaction.reply({ content: 'Please register your wallet first.', ephemeral: true });
 
