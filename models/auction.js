@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 references: {
                     model: 'User',
-                    key: 'discordID'
+                    key: 'userGuildId'
                 }
             },
             messageID: DataTypes.STRING,

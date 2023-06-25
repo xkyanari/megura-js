@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 references: {
                     model: 'User',
-                    key: 'discordID'
+                    key: 'userGuildId'
                 }
             },
             bidAmount: DataTypes.FLOAT,

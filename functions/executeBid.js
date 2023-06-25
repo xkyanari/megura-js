@@ -7,7 +7,9 @@ const { dahliaAvatar, dahliaName } = require('../src/vars');
 const executeBid = async (interaction, bidAmount) => {
     try {
         await interaction.deferReply({ ephemeral: true });
-        const user = await User.findOne({ where: { discordID: interaction.member.id } });
+        const userGuildId = `${interaction.member.id}-${interaction.guild.id}`;
+        const user = await User.findOne({ where: { userGuildId } });
+
         if (!user || !user.walletAddress) return await interaction.reply({ content: 'Please register your wallet first.', ephemeral: true });
 
         const bid = await placeBid(interaction, user, bidAmount);

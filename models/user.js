@@ -10,10 +10,13 @@ module.exports = (sequelize, DataTypes) => {
             registrationID: DataTypes.STRING,
             discordID: {
                 type: DataTypes.STRING,
-                unique: true,
             },
             guildID: {
                 type: DataTypes.STRING,
+            },
+            userGuildId: {
+                type: DataTypes.STRING,
+                unique: true,
             },
             type: DataTypes.STRING,
             walletAddress: {

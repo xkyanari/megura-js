@@ -3,7 +3,7 @@ const { Auction, Bid, sequelize } = require('../src/db');
 // const { getUtxos } = require('./getUtxos');
 
 const checkBalance = async (address, amount) => {
-    const apiURL = `https://api.blockcypher.com/v1/btc/main/addrs/${address}?unSpentOnly=true&limit=5&confirmations=6&includeScript=true`;
+    const apiURL = `https://api.blockcypher.com/v1/btc/main/addrs/${address}/balance`;
 
     try {
         const response = await axios.get(apiURL);

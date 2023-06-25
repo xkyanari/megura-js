@@ -37,10 +37,12 @@ module.exports = {
 				await user.update({ registrationID });
 			}
 			else {
+				const userGuildId = `${interaction.member.id}-${interaction.guild.id}`;
 				await User.create({
 					registrationID,
 					discordID: interaction.member.id,
 					guildID: interaction.guild.id,
+					userGuildId,
 				});
 			}
 
