@@ -5,6 +5,6 @@ module.exports = {
         name: 'placeBid2',
     },
     async execute(interaction) {
-        await executeBid(interaction, 250000);
+        await executeBid(interaction, 822358);
     },
 };

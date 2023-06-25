@@ -118,11 +118,11 @@ const {
 	// 	})
 	// 	.catch((error) => console.log(error));
 
-	// await User.sync({ alter: true })
-	// 	.then(() => {
-	// 		console.log('User table refreshed.');
-	// 	})
-	// 	.catch((error) => console.log(error));
+	await User.sync({ alter: true })
+		.then(() => {
+			console.log('User table refreshed.');
+		})
+		.catch((error) => console.log(error));
 
 	// await AuctionItem.sync({ alter: true })
 	// 	.then(() => {
@@ -137,10 +137,10 @@ const {
 	// 	})
 	// 	.catch((error) => console.log(error));
 
-	await Bid.sync({ alter: true })
-		.then(() => {
-			console.log('Bid table refreshed.');
-		})
-		.catch((error) => console.log(error));
+	// await Bid.sync({ alter: true })
+	// 	.then(() => {
+	// 		console.log('Bid table refreshed.');
+	// 	})
+	// 	.catch((error) => console.log(error));
 
 })();

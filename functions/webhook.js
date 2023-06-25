@@ -137,8 +137,8 @@ const auctionStatus = async (guildID, discordID, item, auction) => {
             .setColor(0xcd7f32)
             .addFields(
                 { name: 'Quantity:', value: `${item.quantity}`, inline: true },
-                { name: 'Starting Price:', value: `${auction.startPrice / 100000000} 🪙`, inline: true },
-                { name: 'Highest Bid:', value: `${auction.currentPrice / 100000000} 🪙`, inline: true },
+                { name: 'Starting Price:', value: `${auction.startPrice / 100000000}🪙`, inline: true },
+                { name: 'Highest Bid:', value: `${auction.currentPrice / 100000000}🪙`, inline: true },
                 { name: 'Start:', value: `<t:${startDateTimeUnix}:f>`, inline: true },
                 { name: 'End:', value: `<t:${endDateTimeUnix}:f>`, inline: true },
                 { name: 'Auctioneer:', value: `${userMention(discordID)}`, inline: false },
@@ -160,15 +160,15 @@ const auctionStatus = async (guildID, discordID, item, auction) => {
                 .setStyle(ButtonStyle.Success),
             new ButtonBuilder()
                 .setCustomId('placeBid1')
-                .setLabel('Bid [+$50]')
+                .setLabel('Bid [+0.0033🪙]')
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
                 .setCustomId('placeBid2')
-                .setLabel('Bid [+$75]')
+                .setLabel('Bid [+0.01🪙]')
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
                 .setCustomId('placeBid3')
-                .setLabel('Bid [+$100]')
+                .setLabel('Bid [+0.02🪙]')
                 .setStyle(ButtonStyle.Primary),
         );
 
