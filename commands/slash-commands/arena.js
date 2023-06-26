@@ -54,7 +54,7 @@ module.exports = {
         .addSubcommand((subcommand) =>
             subcommand.setName('rules').setDescription('Show the rules.'),
         ),
-    cooldown: 120000,
+    cooldown: 3000,
     async execute(interaction) {
         const subCommand = interaction.options.getSubcommand();
         const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });

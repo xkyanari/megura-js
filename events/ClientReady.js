@@ -131,8 +131,8 @@ module.exports = {
 					.setColor(0xcd7f32)
 					.addFields(
 						{ name: 'Quantity:', value: `${item.quantity}`, inline: true },
-						{ name: 'Starting Price:', value: `${auction.startPrice / 100000000} 🪙`, inline: true },
-						{ name: 'Highest Bid:', value: `${auction.currentPrice / 100000000} 🪙`, inline: true },
+						{ name: 'Starting Price:', value: `${auction.startPrice / 100000000}🪙`, inline: true },
+						{ name: 'Highest Bid:', value: `${auction.currentPrice / 100000000}🪙`, inline: true },
 						{ name: 'Auctioneer:', value: `${userMention(auction.userID)}`, inline: true },
 					)
 					.setFooter({ text: `Auction ID: ${auction.id}` });

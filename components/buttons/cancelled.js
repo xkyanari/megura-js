@@ -12,7 +12,7 @@ module.exports = {
             
             await Shop.returnOres(shop.itemName, 1, shop.discordID, interaction.guild.id);
             await shop.update({ status: 'cancelled' });
-            await interaction.reply('Cancelled!');
+            await interaction.reply(`Cancelled by ${interaction.user.id}!`);
             await purchaseStatus(interaction.guild.id, shop.discordID, shop.itemName, 'Cancelled');
         } catch (error) {
             console.error(error);
