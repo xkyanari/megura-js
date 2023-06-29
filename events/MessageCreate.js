@@ -192,6 +192,7 @@ module.exports = {
 		}
 
 		// For text commands
+		if (!message.content.startsWith(prefix)) return;
 		const args = message.content.slice(prefix.length).trim().split(/ +/);
 		const commandName = args.shift().toLowerCase();
 
@@ -203,8 +204,7 @@ module.exports = {
 
 		try {
 			await command.execute(message, args);
-		}
-		catch (error) {
+		} catch (error) {
 			console.error(error);
 			message.reply({
 				content: 'There was an error trying to execute that command!',
