@@ -1,5 +1,5 @@
 const { purchaseStatus } = require('../../functions/webhook');
-const { Order, Shop, Player } = require('../../src/db');
+const { Order, Player } = require('../../src/db');
 
 module.exports = {
 	data: {
@@ -13,7 +13,7 @@ module.exports = {
             const player = await Player.findOne({ where: { discordID: shop.discordID, guildID: interaction.guild.id }});
             await player.addItem(shop.itemName);
             await shop.update({ status: 'completed' });
-            await interaction.reply(`Completed by ${interaction.user.id}!`);
+            await interaction.reply(`Completed by ${userMention(interaction.user.id)}!`);
             await purchaseStatus(interaction.guild.id, shop.discordID, shop.itemName, 'Completed');
         } catch (error) {
             console.error(error);
