@@ -1,4 +1,4 @@
-const { Events, EmbedBuilder } = require('discord.js');
+const { Events, EmbedBuilder, DiscordAPIError } = require('discord.js');
 const ms = require('ms');
 const { checkProfile } = require('../src/vars');
 const logger = require('../src/logger');
@@ -111,6 +111,18 @@ module.exports = {
 						content: 'Please register the guild first.',
 						ephemeral: true,
 					});
+				}
+
+				if (error instanceof DiscordAPIError && error.code === 50013) {
+					const embed = new EmbedBuilder()
+						.setColor('Red')
+						.setDescription(`
+							I do not have the required permissions to execute this command.
+							Please check the permissions and try again.
+						`);
+					
+					await interaction.reply({ embeds: [embed], ephemeral: true });
+					client.cooldown.delete(cooldownData);
 				}
 
 				const embed = new EmbedBuilder().setColor('Red').setDescription(`
