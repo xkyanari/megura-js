@@ -4,6 +4,7 @@ const { getDamage } = require("./battle");
 const battleUp = require('../functions/battleup');
 const { Monster, sequelize, Guild } = require('../src/db');
 const { duelMessages } = require("../assets/responses");
+const wait = require('node:timers/promises').setTimeout;
 
 const duelPlayer = async (interaction, player1, player2) => {
     const damage1 = Math.round(getDamage(player1, player2, attackMultiplier(player1.level)).finalDamage);
@@ -48,7 +49,6 @@ const duelPlayer = async (interaction, player1, player2) => {
 };
 
 const duelMonster = async (interaction, player1, monster) => {
-    const wait = require('node:timers/promises').setTimeout;
     const playerCriticalHitChance = Math.random() < 0.35; // 35% chance for player to get a critical hit
     const criticalHitMultiplier = playerCriticalHitChance ? 4 : 1; // Critical hit doubles the damage
 
@@ -102,7 +102,6 @@ const monsterBattle = async (interaction, winner) => {
         }
     };
 
-    const wait = require('node:timers/promises').setTimeout;
     const embed1 = new EmbedBuilder()
         .setColor(0xcd7f32)
         .setTitle('Uh-oh!')
@@ -153,48 +152,60 @@ const monsterBattle = async (interaction, winner) => {
 };
 
 const arenaBattle = async (interaction, players) => {
-    const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
-    const wait = require('node:timers/promises').setTimeout;
-    await wait(10000);
-
-    const embed1 = new EmbedBuilder()
-        .setColor(0xcd7f32)
-        .setDescription('Let the duels commence!');
-    await interaction.channel.send({ embeds: [embed1] });
-
-    while (players.length > 1) {
-        let player1 = players.shift();
-        let player2Index;
-        let player2;
-
-        do {
-            player2Index = Math.floor(Math.random() * players.length);
-            player2 = players[player2Index];
-        } while (player1 === player2);
-
-        players.splice(player2Index, 1);
-
-        let duelResult = await duelPlayer(interaction, player1, player2);
-        if (duelResult.respawn) {
-            players.unshift(duelResult.loser);
-        }
-        players.push(duelResult.winner);
-
+    try {
+        const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
         await wait(10000);
-    }
 
+        const embed1 = new EmbedBuilder()
+            .setColor(0xcd7f32)
+            .setDescription('Let the duels commence!');
+        await interaction.channel.send({ embeds: [embed1] });
 
-    const embed2 = new EmbedBuilder()
-        .setColor(0xcd7f32)
-        .setTitle('Victory!')
-        .setDescription(`${players[0].playerName} is the last one standing!`);
+        while (players.length > 1) {
+            try {
+                console.log(`Starting new round. Current players: ${players.length}`);
+                let player1 = players.shift();
+                let player2Index;
+                let player2;
+        
+                do {
+                    player2Index = Math.floor(Math.random() * players.length);
+                    player2 = players[player2Index];
+                    if (player1 === player2) {
+                        console.log("Selected the same player for both player1 and player2. Selecting a new player2.");
+                        player2Index = (player2Index + 1) % players.length;
+                        player2 = players[player2Index];
+                    }
+                } while (player1 === player2);
+        
+                players.splice(player2Index, 1);
+        
+                let duelResult = await duelPlayer(interaction, player1, player2);
+                if (duelResult.respawn) {
+                    players.unshift(duelResult.loser);
+                }
+                players.push(duelResult.winner);
+        
+                await wait(10000);
+            } catch (error) {
+                console.error("An error occurred during the arena battle:", error);
+            }
+        }        
 
-    // announce the winner
-    await interaction.channel.send({ embeds: [embed2] });
+        const embed2 = new EmbedBuilder()
+            .setColor(0xcd7f32)
+            .setTitle('Victory!')
+            .setDescription(`${players[0].playerName} is the last one standing!`);
 
-    if (guildCheck && guildCheck.arenaBoss) {
-        await wait(15000);
-        await monsterBattle(interaction, players[0]);
+        // announce the winner
+        await interaction.channel.send({ embeds: [embed2] });
+
+        if (guildCheck && guildCheck.arenaBoss) {
+            await wait(15000);
+            await monsterBattle(interaction, players[0]);
+        }
+    } catch (error) {
+        console.error(error);
     }
 };
 

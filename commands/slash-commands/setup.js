@@ -178,7 +178,7 @@ module.exports = {
 				break;
 
 			case 'twitter':
-				if (!await validateFeature(interaction, guildCheck.version, 'ownTwitter')) {
+				if (!await validateFeature(interaction, guildCheck.subscription, 'ownTwitter')) {
 					return;
 				}
 
@@ -406,7 +406,7 @@ module.exports = {
 				break;
 
 			case 'factions':
-				if (!await validateFeature(interaction, guildCheck.version, 'hasRoles')) {
+				if (!await validateFeature(interaction, guildCheck.subscription, 'hasRoles')) {
 					return;
 				}
 
@@ -571,7 +571,7 @@ module.exports = {
 				break;
 
 			case 'chat':
-				if (!await validateFeature(interaction, guildCheck.version, 'ownDahlia')) {
+				if (!await validateFeature(interaction, guildCheck.subscription, 'ownDahlia')) {
 					return;
 				}
 

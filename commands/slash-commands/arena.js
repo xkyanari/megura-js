@@ -58,7 +58,7 @@ module.exports = {
     async execute(interaction) {
         const subCommand = interaction.options.getSubcommand();
         const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
-        if (!await validateFeature(interaction, guildCheck.version, 'hasArena')) {
+        if (!await validateFeature(interaction, guildCheck.subscription, 'hasArena')) {
             return;
         }
 
@@ -103,15 +103,6 @@ module.exports = {
 
                     switch (mode) {
                         case 'classic':
-                            playerObjects = playerObjects.map(player => ({
-                                discordID: player.discordID,
-                                playerName: player.playerName,
-                                level: baseStats.level,
-                                totalHealth: baseStats.totalHealth,
-                                totalAttack: baseStats.totalAttack,
-                                totalDefense: baseStats.totalDefense
-                            }));
-                            break;
                         case 'evolving':
                             playerObjects = playerObjects.map(player => ({
                                 discordID: player.discordID,
@@ -120,15 +111,14 @@ module.exports = {
                                 totalHealth: baseStats.totalHealth,
                                 totalAttack: baseStats.totalAttack,
                                 totalDefense: baseStats.totalDefense,
-                                respawns: 3
+                                respawns: mode === 'evolving' ? 1 : 0
                             }));
                             break;
                         case 'deathmatch':
-                            break;
                         case 'evolving-deathmatch':
                             playerObjects = playerObjects.map(player => ({
                                 ...player,
-                                respawns: 1
+                                respawns: mode === 'evolving-deathmatch' ? 1 : 0
                             }));
                             break;
                     }

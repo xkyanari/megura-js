@@ -28,7 +28,7 @@ module.exports = {
 			});
 
 			const guildCheck = await Guild.findOne({ where: { guildID: guild.id } });
-			if (!await validateFeature(interaction, guildCheck.version, 'hasRoles')) {
+			if (!await validateFeature(interaction, guildCheck.subscription, 'hasRoles')) {
 				return;
 			}
 

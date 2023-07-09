@@ -11,6 +11,42 @@ const { expPoints } = require('../src/vars');
 const leveling = require('./level');
 const levelcheck = require('./levelup');
 
+const getRandomVictoryQuote = () => {
+	const victoryQuotes = [
+		"I don't have a 'Plan B' because 'Plan A' never fails.",
+		"I'm like a ninja; when I win, I win quietly. And when I lose, you'll never know I was there.",
+		"The secret to success is to offend the greatest number of people.",
+		"Success is like a fart. It only bothers people when it’s not their own.",
+		"I plan on living forever. So far, so good.",
+		"I'm on a whiskey diet. I've lost three days already.",
+		"When life gives you lemons, squirt someone in the eye.",
+		"I'm not clumsy. It's just the floor hates me, the tables and chairs are bullies, and the walls get in my way!",
+		"If at first you don't succeed, skydiving is not for you.",
+		"I don't need a hair stylist, my pillow gives me a new hairstyle every morning."
+	];
+
+	const randomIndex = Math.floor(Math.random() * victoryQuotes.length);
+	return victoryQuotes[randomIndex];
+};
+
+const getRandomDefeatQuote = () => {
+	const defeatQuotes = [
+		"Failure is not the opposite of success; it's part of success.",
+		"I've failed over and over and over again in my life. And that is why I succeed.",
+		"Failure is simply the opportunity to begin again, this time more intelligently.",
+		"Remember that failure is an event, not a person.",
+		"There is no failure except in no longer trying.",
+		"When you take risks you learn that there will be times when you succeed and there will be times when you fail, and both are equally important.",
+		"It's not about how hard you hit. It's about how hard you can get hit and keep moving forward.",
+		"The only real mistake is the one from which we learn nothing.",
+		"Success is not in never failing, but rising every time you fall!",
+		"In the middle of difficulty lies opportunity."
+	];
+
+	const randomIndex = Math.floor(Math.random() * defeatQuotes.length);
+	return defeatQuotes[randomIndex];
+};
+
 const executeAttack = async (interaction) => {
 	const wait = require('node:timers/promises').setTimeout;
 	const { member, guild } = interaction;
@@ -58,7 +94,7 @@ const executeAttack = async (interaction) => {
 			.setColor(0xcd7f32)
 			.setDescription('Searching for a monster...');
 		await interaction.editReply({ embeds: [embed1] });
-		
+
 		await wait(1000);
 
 		const embed2 = new EmbedBuilder()
@@ -98,9 +134,10 @@ const executeAttack = async (interaction) => {
 		);
 
 		if (winner === playerObj) {
+			const victoryQuote = getRandomVictoryQuote();
 			await interaction.channel.send('The battle has concluded.');
 			await interaction.followUp({
-				content: `${userMention(interaction.member.id)}\n\n🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${monsterObj.iuraDropped} IURA\`\n- \`${monsterObj.expDropped} EXP\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`,
+				content: `${userMention(interaction.member.id)}\n\n🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${monsterObj.iuraDropped} IURA\`\n- \`${monsterObj.expDropped} EXP\`\n\n> “${victoryQuote}”`,
 				components: [button],
 			});
 
@@ -116,9 +153,10 @@ const executeAttack = async (interaction) => {
 		}
 
 		if (winner === monsterObj) {
+			const defeatQuote = getRandomDefeatQuote();
 			await interaction.channel.send('The battle has concluded.');
 			await interaction.followUp({
-				content: `${userMention(interaction.member.id)}\n\n👎 **YOU LOST!**\n\n> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`,
+				content: `${userMention(interaction.member.id)}\n\n😔 **Better luck next time!**\n\n> “${defeatQuote}”`,
 				components: [button],
 			});
 		}

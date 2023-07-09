@@ -71,6 +71,14 @@ module.exports = {
 		switch (subCommand) {
 			case 'start':
 				await interaction.deferReply();
+				const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
+				if (!guildCheck) {
+					throw new Error('guild not found');
+				}
+				if (!await validateFeature(interaction, guildCheck.subscription, 'hasAuction')) {
+					return;
+				}
+
 				const item = options.getString('item');
 				const description = options.getString('description');
 				const quantity = options.getInteger('quantity');
@@ -108,6 +116,14 @@ module.exports = {
 				// this command only updates the auction end time and gets the highest bidder
 				try {
 					await interaction.deferReply();
+					const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
+					if (!guildCheck) {
+						throw new Error('guild not found');
+					}
+					if (!await validateFeature(interaction, guildCheck.subscription, 'hasAuction')) {
+						return;
+					}
+					
 					const id = options.getInteger('auctionid');
 					const end = await endAuction(id);
 
@@ -174,7 +190,7 @@ module.exports = {
 					if (!guildCheck) {
 						throw new Error('guild not found');
 					}
-					if (!await validateFeature(interaction, guildCheck.version, 'hasAuction')) {
+					if (!await validateFeature(interaction, guildCheck.subscription, 'hasAuction')) {
 						return;
 					}
 					const channel = options.getChannel('channelid');

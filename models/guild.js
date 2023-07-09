@@ -58,9 +58,12 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.INTEGER,
 				defaultValue: 500000,
 			},
-			version: {
+			subscription: {
 				type: DataTypes.TEXT,
 				defaultValue: 'free',
+				validate: {
+					isIn: [['free', 'premium', 'enterprise', 'megura']]
+				}
 			},
 			webhookId: DataTypes.STRING,
 			webhookToken: DataTypes.STRING,
