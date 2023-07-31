@@ -2,15 +2,14 @@ const { Events, EmbedBuilder, DiscordAPIError } = require('discord.js');
 const ms = require('ms');
 const { checkProfile } = require('../src/vars');
 const logger = require('../src/logger');
-const Redis = require('ioredis');
-const redis = new Redis();
+const redis = require('../redis');
 
 /**
  * This event is fired when a user initiates slash commands.
  */
 
-const MAX_CONSECUTIVE_COMMANDS = 10; // number of commands to trigger a cooldown
-const TOLERANCE = 1000; // Tolerance in milliseconds, to account for network delay
+const MAX_CONSECUTIVE_COMMANDS = 10;
+const TOLERANCE = 1000;
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -28,20 +27,17 @@ module.exports = {
 
 			const counterKey = `counter:${interaction.user.id}:${interaction.guild.id}`;
 
-			// Get the existing counter from Redis
 			let counter = await redis.lrange(counterKey, 0, -1);
 			counter = counter ? counter.map(Number) : [];
 
-			// Check the intervals between the commands
 			let checker = false;
 			let averageInterval = 0;
 
-			// Check the intervals between the commands
 			for (let i = 1; i < counter.length; i++) {
 				let interval = counter[i] - counter[i - 1];
 				averageInterval += interval;
 			}
-			averageInterval /= (counter.length - 1); // average of the intervals
+			averageInterval /= (counter.length - 1);
 
 			for (let i = 1; i < counter.length; i++) {
 				let interval = counter[i] - counter[i - 1];
@@ -66,12 +62,10 @@ module.exports = {
 				});
 			}
 
-			// Add a new timestamp to the list and set a 30-second TTL
 			await redis.rpush(counterKey, Date.now());
-			await redis.ltrim(counterKey, -MAX_CONSECUTIVE_COMMANDS, -1);  // Keep only the last MAX_CONSECUTIVE_COMMANDS items
+			await redis.ltrim(counterKey, -MAX_CONSECUTIVE_COMMANDS, -1);
 			await redis.expire(counterKey, 30);
 
-			// Use Redis to check for existing cooldown
 			const cooldownData = `${interaction.user.id}:${interaction.guild.id}:${interaction.commandName}`;
 			const existingCooldown = await redis.get(cooldownData);
 			if (existingCooldown) {
@@ -89,7 +83,6 @@ module.exports = {
 					message: `User: ${interaction.user.id}, Command: ${command.data.name}, Time: ${new Date().toISOString()}`,
 				});
 
-				// Ensure `command.cooldown` exists and is a number
 				await redis.set(cooldownData, Date.now() + command.cooldown, 'PX', command.cooldown);
 				await command.execute(interaction);
 				client.cooldown.set(cooldownData, Date.now() + command.cooldown);

@@ -4,7 +4,7 @@ const { mysql_dbname, mysql_dbuser, mysql_dbpass } = require('../config.json');
 // Connecting to the database using Sequelize -----------------
 
 const sequelize = new Sequelize(mysql_dbname, mysql_dbuser, mysql_dbpass, {
-	host: 'localhost',
+	host: '172.20.0.1', // localhost
 	dialect: 'mysql',
 	logging: false,
 });

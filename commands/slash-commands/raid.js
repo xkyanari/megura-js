@@ -75,14 +75,14 @@ module.exports = {
 		switch (subCommand) {
 			case 'join':
 				try {
-					if (twitter) {
+					if (twitter && twitter.username !== null) {
 						return interaction.reply({
 							content: `You're logged in as ${twitter.username}.`,
 							ephemeral: true,
 						});
 					}
 					else {
-						await twitterAuth(interaction);
+						await twitterAuth(interaction); // switch to generating a link with random ID
 					}
 
 					setTimeout(() => {

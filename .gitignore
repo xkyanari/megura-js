@@ -22,7 +22,7 @@ config.json
 pm2.config.js
 
 # Specific features
-feature.js
+/assets/features.json
 
 # Development containers
 /.devcontainer

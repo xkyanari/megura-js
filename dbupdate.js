@@ -88,11 +88,11 @@ const {
 	// 	})
 	// 	.catch((error) => console.log(error));
 
-	// await Twitter.sync({ alter: true })
-	// 	.then(() => {
-	// 		console.log('Twitter table refreshed.');
-	// 	})
-	// 	.catch((error) => console.log(error));
+	await Twitter.sync({ alter: true })
+		.then(() => {
+			console.log('Twitter table refreshed.');
+		})
+		.catch((error) => console.log(error));
 
 	// await Raid.sync({ alter: true })
 	// 	.then(() => {
@@ -118,11 +118,11 @@ const {
 	// 	})
 	// 	.catch((error) => console.log(error));
 
-	await User.sync({ alter: true })
-		.then(() => {
-			console.log('User table refreshed.');
-		})
-		.catch((error) => console.log(error));
+	// await User.sync({ alter: true })
+	// 	.then(() => {
+	// 		console.log('User table refreshed.');
+	// 	})
+	// 	.catch((error) => console.log(error));
 
 	// await AuctionItem.sync({ alter: true })
 	// 	.then(() => {

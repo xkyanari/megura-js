@@ -1,7 +1,9 @@
-const { Events, AttachmentBuilder } = require('discord.js');
+const { Events, AttachmentBuilder, PermissionsBitField, EmbedBuilder } = require('discord.js');
 const { openAIkey, openAIorg } = require('../config.json');
 const { prefix, dahliaPrompt, dahliaPrefix } = require('../src/vars');
 const { Guild } = require('../src/db');
+const sendLogs = require('../functions/logs');
+const { serverID } = require('../src/vars');
 
 /**
  * This event is fired when a user sends a message.
@@ -53,6 +55,25 @@ module.exports = {
 	name: Events.MessageCreate,
 	async execute(message) {
 		if (message.author.bot) return;
+
+		const botMember = message.channel.guild.members.cache.get(message.client.user.id);
+		const permissions = message.channel.permissionsFor(botMember);
+
+		if (!permissions.has([PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ReadMessageHistory])) {
+			const embed = new EmbedBuilder()
+				.setTitle('Unable to send a message.')
+				.setColor('Red')
+				.setDescription(
+					`
+					> **Guild Name** : ${message.guild.name}
+					> **Guild ID** : ${message.guild.id}
+					> **Channel** : ${message.channel}
+				`,
+				);
+	
+			const logEntry = `Unable to send a message in ${message.guild.name} - ${message.channel.name}`;
+			return sendLogs(message.client, serverID, embed, logEntry);
+		}
 
 		try {
 			const guildCheck = await Guild.findOne({
@@ -186,9 +207,8 @@ module.exports = {
 					if (error.response) {
 						console.log(error.response.status);
 						console.log(error.response.data);
-					} else {
-						console.log(error.message);
 					}
+					console.log(error.message);
 				}
 			}
 		}

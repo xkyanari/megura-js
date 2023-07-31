@@ -1,5 +1,3 @@
-const Keyv = require('keyv');
-const { TwitterApi } = require('twitter-api-v2');
 const {
 	ActionRowBuilder,
 	ButtonBuilder,
@@ -10,8 +8,13 @@ const {
 	TWITTER_CLIENT_ID,
 	TWITTER_CLIENT_SECRET,
 	TWITTER_CALLBACK_URL,
+	TWITTER_CALLBACK_URL_TESTNET,
+	isTestnet,
+	website,
+	website_testnet
 } = require('../config.json');
 const { Twitter } = require('../src/db');
+const { generateId } = require('./generateId');
 
 /**
  *
@@ -21,13 +24,10 @@ const { Twitter } = require('../src/db');
  *
  */
 
-const client = new TwitterApi({
-	clientId: TWITTER_CLIENT_ID,
-	clientSecret: TWITTER_CLIENT_SECRET,
-});
-
-const keyv = new Keyv();
-keyv.on('error', (err) => console.error('Keyv connection error:', err));
+// const client = new TwitterApi({
+// 	clientId: TWITTER_CLIENT_ID,
+// 	clientSecret: TWITTER_CLIENT_SECRET,
+// });
 
 const twitterAuth = async (interaction) => {
 	try {
@@ -35,27 +35,11 @@ const twitterAuth = async (interaction) => {
 			where: { discordID: interaction.member.id },
 		});
 
-		const { url, codeVerifier, state } = client.generateOAuth2AuthLink(
-			TWITTER_CALLBACK_URL,
-			{
-				scope: [
-					'tweet.read', // requirement for retweets
-					'tweet.write', // requirement for retweets
-					'users.read', // requirement for retweets and likes
-					'like.write', // requirement for liking tweets
-					'offline.access', // to refresh logins and not asked again
-				],
-			},
-		);
+		const registrationID = await generateId(10);
+		const registrationURL = isTestnet ? `${website_testnet}/connect/service/twitter?id=${registrationID}` : `${website}/connect/service/twitter?id=${registrationID}`;
 
-		await keyv.set(`codeVerifier:${state}`, codeVerifier, 600000);
-
-		if (twitter) {
-			twitter.codeVerifier = codeVerifier;
-			await twitter.save();
-		}
-		else {
-			await Twitter.create({ discordID: interaction.member.id, codeVerifier });
+		if (!twitter) {
+			await Twitter.create({ discordID: interaction.member.id, registrationID });
 		}
 
 		const button = new ActionRowBuilder().addComponents(
@@ -63,7 +47,7 @@ const twitterAuth = async (interaction) => {
 				.setLabel('Login')
 				.setEmoji('🐦')
 				.setStyle(ButtonStyle.Link)
-				.setURL(url),
+				.setURL(registrationURL),
 		);
 
 		const embed = new EmbedBuilder().setDescription(
@@ -100,6 +84,8 @@ const twitterCallback = async (req, res) => {
 			return res.status(400).send('Stored tokens didn\'t match!');
 		}
 
+		const twitter_callback = isTestnet ? TWITTER_CALLBACK_URL_TESTNET : TWITTER_CALLBACK_URL;
+
 		const {
 			client: loggedClient,
 			accessToken,
@@ -108,7 +94,7 @@ const twitterCallback = async (req, res) => {
 		} = await client.loginWithOAuth2({
 			code,
 			codeVerifier,
-			redirectUri: TWITTER_CALLBACK_URL,
+			redirectUri: twitter_callback,
 		});
 
 		const { data: userObject } = await loggedClient.v2.me();

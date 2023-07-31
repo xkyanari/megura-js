@@ -24,7 +24,7 @@ module.exports = {
 			subcommand.setName('twitter').setDescription('Login to Twitter.'),
 		)
 		.addSubcommand((subcommand) =>
-			subcommand.setName('disable').setDescription('Disable the setup.'),
+			subcommand.setName('disable').setDescription('WARNING!! THIS OPTION RESETS ALL CONFIGURATION IN THE SERVER'),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -275,8 +275,6 @@ module.exports = {
 
 			case 'disable':
 				try {
-					// Add a warning to confirm deletion of the guild entry.
-
 					if (!guildCheck) {
 						throw new Error('guild not found');
 					}

@@ -185,7 +185,6 @@ module.exports = {
 				break;
 			case 'settings':
 				try {
-					await interaction.deferReply();
 					const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
 					if (!guildCheck) {
 						throw new Error('guild not found');
@@ -193,6 +192,7 @@ module.exports = {
 					if (!await validateFeature(interaction, guildCheck.subscription, 'hasAuction')) {
 						return;
 					}
+					await interaction.deferReply();
 					const channel = options.getChannel('channelid');
 
 					const fieldsToUpdate = {

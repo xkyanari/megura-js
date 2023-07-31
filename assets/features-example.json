@@ -1,0 +1,56 @@
+{
+  "free": {
+    "stakingRate": "",
+    "buyGlobal": "",
+    "hasRoles": "",
+    "transferIura": "",
+    "sellGlobal": ""
+  },
+  "premium": {
+    "stakingRate": "",
+    "buyGlobal": "",
+    "hasRoles": "",
+    "ownEvents": "",
+    "transferIura": "",
+    "sellGlobal": "",
+    "iuraOnly": ""
+  },
+  "enterprise": {
+    "stakingRate": "",
+    "buyGlobal": "",
+    "hasRoles": "",
+    "ownDahlia": "",
+    "ownServer": "",
+    "ownBranding": "",
+    "ownEvents": "",
+    "ownTokens": "",
+    "ownStory": "",
+    "ownTwitter": "",
+    "ownRaid": "",
+    "nftStaking": "",
+    "crossServer": "",
+    "transferIura": "",
+    "sellGlobal": "",
+    "iuraOnly": "",
+    "hasArena": ""
+  },
+  "megura": {
+    "stakingRate": "",
+    "buyGlobal": "",
+    "hasRoles": "",
+    "ownDahlia": "",
+    "ownServer": "",
+    "ownBranding": "",
+    "ownEvents": "",
+    "ownTokens": "",
+    "ownStory": "",
+    "ownTwitter": "",
+    "ownRaid": "",
+    "nftStaking": "",
+    "crossServer": "",
+    "transferIura": "",
+    "sellGlobal": "",
+    "iuraOnly": "",
+    "hasArena": ""
+  }
+}

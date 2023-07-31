@@ -1,15 +1,7 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 const { User } = require("../../src/db");
-const { auctionURL } = require('../../config.json');
-
-const generateWalletName = async (length) => {
-	const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-	let walletName = '';
-	for (let i = 0; i < length; i++) {
-		walletName += charset.charAt(Math.floor(Math.random() * charset.length));
-	}
-	return walletName;
-};
+const { isTestnet, website, website_testnet } = require('../../config.json');
+const { generateId } = require('../../functions/generateId');
 
 module.exports = {
 	data: {
@@ -21,16 +13,8 @@ module.exports = {
 			await interaction.deferReply({ ephemeral: true });
 			const user = await User.findOne({ where: { userGuildId: `${interaction.member.id}-${interaction.guild.id}` } });
 
-			// const embed0 = new EmbedBuilder()
-			// 	.setColor(0xcd7f32)
-			// 	.setDescription(`You're all set!`);
-
-			// if (user && user.walletAddress) return await interaction.reply({
-			// 	embeds: [embed0],
-			// 	ephemeral: true,
-			// });
-
-			const registrationID = await generateWalletName(10);
+			const registrationID = await generateId(10);
+			const auctionURL = isTestnet ? `${website_testnet}/connect` : `${website}/connect`;
 			const url = `${auctionURL}?id=${registrationID}`;
 
 			if (user) {

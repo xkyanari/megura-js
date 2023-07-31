@@ -15,6 +15,9 @@ module.exports = (sequelize, DataTypes) => {
 			username: {
 				type: DataTypes.TEXT,
 			},
+			state: {
+				type: DataTypes.TEXT,
+			},
 			codeVerifier: {
 				type: DataTypes.TEXT,
 			},
@@ -44,6 +47,9 @@ module.exports = (sequelize, DataTypes) => {
 			expirationTime: {
 				type: DataTypes.DATE,
 			},
+			registrationID: {
+				type: DataTypes.TEXT,
+			}
 		},
 		{
 			freezeTableName: true,
