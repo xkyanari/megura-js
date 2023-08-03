@@ -152,8 +152,8 @@ module.exports = {
 
 					if (
 						!guildCheck ||
-            !guildCheck.twitterChannelID ||
-            !guildCheck.raidRoleID
+						!guildCheck.twitterChannelID ||
+						!guildCheck.raidRoleID
 					) {
 						return await interaction.reply({
 							content: 'Please register the guild first and assign a Twitter channel and role.',

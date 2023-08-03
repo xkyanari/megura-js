@@ -1,5 +1,5 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
-const { User } = require("../../src/db");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { User } = require('../../src/db');
 const { isTestnet, website, website_testnet } = require('../../config.json');
 const { generateId } = require('../../functions/generateId');
 
@@ -49,10 +49,10 @@ module.exports = {
 
 			setTimeout(() => {
 				User.findOne({ where: { discordID: interaction.member.id } })
-					.then((user) => {
-						if (user.walletAddress !== null) {
+					.then((user1) => {
+						if (user1.walletAddress !== null) {
 							return interaction.followUp({
-								content: `You're now connected!`,
+								content: 'You\'re now connected!',
 								ephemeral: true,
 							});
 						}
@@ -68,7 +68,8 @@ module.exports = {
 					});
 			}, 180000);
 
-		} catch (error) {
+		}
+		catch (error) {
 			console.error(error);
 		}
 	},

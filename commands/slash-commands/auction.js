@@ -67,11 +67,11 @@ module.exports = {
 	async execute(interaction) {
 		const { options } = interaction;
 		const subCommand = options.getSubcommand();
+		const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
 
 		switch (subCommand) {
 			case 'start':
 				await interaction.deferReply();
-				const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
 				if (!guildCheck) {
 					throw new Error('guild not found');
 				}
@@ -79,7 +79,7 @@ module.exports = {
 					return;
 				}
 
-				const item = options.getString('item');
+				const item1 = options.getString('item');
 				const description = options.getString('description');
 				const quantity = options.getInteger('quantity');
 				const startPrice = options.getNumber('startprice');
@@ -91,7 +91,7 @@ module.exports = {
 					attachmentUrl = attachment.proxyURL;
 				}
 
-				const start = await startAuction(interaction, item, description, quantity, startPrice, endTime, interaction.user.id, attachmentUrl);
+				const start = await startAuction(interaction, item1, description, quantity, startPrice, endTime, interaction.user.id, attachmentUrl);
 
 				// respond to the interaction
 				if (start) {
@@ -101,13 +101,14 @@ module.exports = {
 					const embed0 = new EmbedBuilder()
 						.setTitle('Auction Started!')
 						.setColor(0xcd7f32)
-						.setDescription(`**Item Name:** ${item}\n**Starting Price:** ${startPrice} 🪙\n**Start Time:** <t:${startDateTimeUnix}:f>\n**Ending Time:** <t:${endDateTimeUnix}:f>\n**Auctioneer:** ${userMention(interaction.user.id)}\nAuction ID: ${start.id}`);
+						.setDescription(`**Item Name:** ${item1}\n**Starting Price:** ${startPrice} 🪙\n**Start Time:** <t:${startDateTimeUnix}:f>\n**Ending Time:** <t:${endDateTimeUnix}:f>\n**Auctioneer:** ${userMention(interaction.user.id)}\nAuction ID: ${start.id}`);
 
 					await interaction.editReply({
 						embeds: [embed0],
 					});
 
-				} else {
+				}
+				else {
 					await interaction.editReply({ content: 'Sorry, there was a problem starting the auction.', ephemeral: true });
 				}
 				break;
@@ -116,21 +117,20 @@ module.exports = {
 				// this command only updates the auction end time and gets the highest bidder
 				try {
 					await interaction.deferReply();
-					const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
 					if (!guildCheck) {
 						throw new Error('guild not found');
 					}
 					if (!await validateFeature(interaction, guildCheck.subscription, 'hasAuction')) {
 						return;
 					}
-					
+
 					const id = options.getInteger('auctionid');
 					const end = await endAuction(id);
 
 					if (end) {
 						// remove the job from the queue
 						const jobs = await interaction.client.auctionQueue.getJobs(['waiting', 'delayed']);
-						const job = jobs.find(job => job.data.auctionId === id);
+						const job = jobs.find(job1 => job1.data.auctionId === id);
 
 						if (job) await job.remove();
 
@@ -167,7 +167,7 @@ module.exports = {
 						}
 
 						const message = await webhookClient.editMessage(auction.messageID, {
-							content: `**The Auction is now CLOSED!**`,
+							content: '**The Auction is now CLOSED!**',
 							username: dahliaName,
 							avatarURL: dahliaAvatar,
 							embeds: [newEmbed],
@@ -179,13 +179,13 @@ module.exports = {
 					else {
 						await interaction.editReply({ content: 'Failed to end auction due to an error.' });
 					}
-				} catch (error) {
+				}
+				catch (error) {
 					console.error(error);
 				}
 				break;
 			case 'settings':
 				try {
-					const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
 					if (!guildCheck) {
 						throw new Error('guild not found');
 					}
@@ -204,11 +204,14 @@ module.exports = {
 					};
 					const updateChannel = await changeChannel(interaction, interaction.guild.id, channel.id, fieldsToUpdate);
 
-					if (updateChannel) return await interaction.editReply({
-						content: `Auction Channel has been set to ${channelMention(channel.id)}.\n`,
-						ephemeral: true,
-					});
-				} catch (error) {
+					if (updateChannel) {
+						return await interaction.editReply({
+							content: `Auction Channel has been set to ${channelMention(channel.id)}.\n`,
+							ephemeral: true,
+						});
+					}
+				}
+				catch (error) {
 					console.error(error);
 				}
 				break;

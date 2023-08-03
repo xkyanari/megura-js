@@ -54,11 +54,11 @@ module.exports = {
 				.setImage(`${imageURL}`);
 
 			const weaponValue =
-        nfts.rawMetadata.attributes.find((item) => item.trait_type === traitWeapon,
-        )?.value ?? weapon;
+				nfts.rawMetadata.attributes.find((item) => item.trait_type === traitWeapon,
+				)?.value ?? weapon;
 			const armorValue =
-        nfts.rawMetadata.attributes.find((item) => item.trait_type === traitArmor,
-        )?.value ?? armor;
+				nfts.rawMetadata.attributes.find((item) => item.trait_type === traitArmor,
+				)?.value ?? armor;
 
 			embed.addFields(
 				{ name: 'Token ID:', value: `${selected}`, inline: false },

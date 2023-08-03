@@ -23,8 +23,7 @@ module.exports = {
 	)}\`
                 `);
 
-			const logEntry = `Message Deleted: ${message.author.tag} - ${
-				message.author.id
+			const logEntry = `Message Deleted: ${message.author.tag} - ${message.author.id
 			} deleted "${message.content.replace(/`/g, '\'')}"`;
 			return sendLogs(message.client, message.guild.id, embed, logEntry);
 		}

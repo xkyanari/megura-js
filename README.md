@@ -46,13 +46,13 @@ Before running the bot, you will need the following:
 - [x] NFT Verification
 - [ ] Create and manage Giveaways
 - [ ] Create and manage Raffles
-- [x] Post announcements
-- [ ] Mini games
+- [x] Post announcements for orders, etc.
+- [x] Mini games (arena, etc.)
 - [x] Auto purge messages
 - [ ] View Action/Moderation Log
 - [ ] Create and manage Reaction roles
 - [ ] Create and manage Forms
-- [ ] Send Auto Messages
+- [ ] Send Auto Messages/webhooks
 - [x] Post tweets
 - [x] Raid tracking for Discord users
 - [x] Storytelling
@@ -61,6 +61,9 @@ Before running the bot, you will need the following:
 - [ ] Ticketing system
 - [ ] Whitelisting
 - [ ] Sales tracking
+- [x] Audit logs
+- [ ] Exploration mode
+- [ ] World bosses
 
 All of these may not require having administrator role on the bot for security, but they are subject to change without prior notice.
 
@@ -71,7 +74,7 @@ To install and run the project, follow these steps:
 1. Clone this repository to your local machine using `git clone https://github.com/xkyanari/megura-js.git`
 2. Navigate to the project directory in your terminal
 3. Install dependencies using `npm install`
-4. Rename `config-example.json` to `config.json` `src/feature-example.json` to `src/feature.js` and update the values
+4. Rename `config-example.json` to `config.json` `assets/feature-example.json` to `src/feature.js` and update the values
 5. (Optional) Database name can be changed including the settings in `src/db.js`.
 6. (Optional) Chapters can be uploaded in `chapters/`. Otherwise, the bot will simply load the placeholder stories found in `samples/`.
 

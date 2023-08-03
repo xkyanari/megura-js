@@ -34,13 +34,13 @@ module.exports = {
 			let averageInterval = 0;
 
 			for (let i = 1; i < counter.length; i++) {
-				let interval = counter[i] - counter[i - 1];
+				const interval = counter[i] - counter[i - 1];
 				averageInterval += interval;
 			}
 			averageInterval /= (counter.length - 1);
 
 			for (let i = 1; i < counter.length; i++) {
-				let interval = counter[i] - counter[i - 1];
+				const interval = counter[i] - counter[i - 1];
 				if (Math.abs(interval - averageInterval) <= TOLERANCE) {
 					checker = true;
 				}
@@ -57,7 +57,7 @@ module.exports = {
 				});
 
 				return interaction.reply({
-					content: `You're doing that too frequently. Please wait a moment before trying again.`,
+					content: 'You\'re doing that too frequently. Please wait a moment before trying again.',
 					ephemeral: true,
 				});
 			}
@@ -113,7 +113,7 @@ module.exports = {
 							I do not have the required permissions to execute this command.
 							Please check the permissions and try again.
 						`);
-					
+
 					await interaction.reply({ embeds: [embed], ephemeral: true });
 					client.cooldown.delete(cooldownData);
 				}

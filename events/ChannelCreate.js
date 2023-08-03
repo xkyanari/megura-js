@@ -1,5 +1,8 @@
-const { Events, EmbedBuilder } = require('discord.js');
-const CHANNEL_ID = '1073827217949331525';
+const {
+	Events,
+	// EmbedBuilder
+} = require('discord.js');
+// const CHANNEL_ID = '1073827217949331525';
 
 /**
  * This event is fired when a user opens a portal or private channel.
@@ -8,6 +11,7 @@ const CHANNEL_ID = '1073827217949331525';
 module.exports = {
 	name: Events.ChannelCreate,
 	async execute(channel) {
+		console.log(channel);
 		// try {
 		// 	const inactivityPeriod = 10 * 60 * 1000; // 10 minutes in milliseconds
 		// 	let timer;

@@ -1,5 +1,7 @@
 {
     "port": "",
+    "website_testnet": "",
+    "website": "",
     "mysql_dbname": "",
     "mysql_dbuser": "",
     "mysql_dbpass": "",
@@ -12,6 +14,7 @@
     "solscanApiToken": "",
     "TWITTER_CLIENT_ID": "",
     "TWITTER_CLIENT_SECRET": "",
+    "TWITTER_CALLBACK_URL_TESTNET": "",
     "TWITTER_CALLBACK_URL": "",
     "TWITTER_BEARER_TOKEN": "",
     "ENCRYPTION_KEY": "",
@@ -20,5 +23,6 @@
     "cloudApiSecret": "",
     "dblApiKey": "",
     "dblWebhookSecret": "",
-    "topWebhookSecret": ""
+    "topWebhookSecret": "",
+    "isTestnet": "true"
 }

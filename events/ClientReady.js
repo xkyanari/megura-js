@@ -1,8 +1,8 @@
 const { Events, ActivityType, EmbedBuilder, userMention, WebhookClient } = require('discord.js');
 const { sequelize, Auction, Guild } = require('../src/db');
-const { port } = require('../config.json');
+// const { port } = require('../config.json');
 const Queue = require('bull');
-const app = require('../server');
+// const app = require('../server');
 const { endAuction } = require('../functions/endAuction');
 const { dahliaName, dahliaAvatar } = require('../config.json');
 
@@ -83,7 +83,7 @@ module.exports = {
 					.setColor(0x6e8b3d)
 					.setTitle('Times Up!')
 					.setDescription(
-						'Your portal has been closed. Thanks for using our services!\n\nThis message will be deleted in \`10\` seconds.',
+						'Your portal has been closed. Thanks for using our services!\n\nThis message will be deleted in `10` seconds.',
 					);
 
 				if (replyChannel) {
@@ -94,7 +94,8 @@ module.exports = {
 					}, 10000);
 				}
 				done();
-			} catch (error) {
+			}
+			catch (error) {
 				console.error(`Failed to delete channel ${channelId}`);
 				done(error);
 			}
@@ -158,7 +159,7 @@ module.exports = {
 
 				// Update the message
 				await webhookClient.editMessage(auction.messageID, {
-					content: `**The Auction is now CLOSED!**`,
+					content: '**The Auction is now CLOSED!**',
 					username: dahliaName,
 					avatarURL: dahliaAvatar,
 					embeds: [newEmbed],
@@ -166,7 +167,8 @@ module.exports = {
 				});
 
 				done();
-			} catch (error) {
+			}
+			catch (error) {
 				console.error(`Failed to end auction ${auctionId}`);
 				done(error);
 			}

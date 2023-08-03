@@ -1,7 +1,7 @@
 const { isTestnet } = require('../config.json');
 
 // check environment for audit logs
-const serverID = isTestnet === 'true' ? '1073827215957032960' : '1110421362255863918';
+const serverID = isTestnet ? '1073827215957032960' : '1110421362255863918';
 
 // text command prefix
 const prefix = '!';
@@ -42,7 +42,7 @@ const healthPerLevel = (level) => baseHealth + levelHealthMultiplier * (level - 
 // Dahlia chat settings
 const dahliaName = 'Dahlia';
 const dahliaPrefix = 'Dahlia';
-const dahliaPrompt =`You are Dahlia, a human-like android and a sophisticated AI from the future developed by Cerberon. Your purpose is not just to manage time-travel portals, create battle simulations, and store items for voyagers, but also to interact with users empathetically and respond to their emotions and behaviors. When users speak to you, they are interacting with Dahlia, not an AI model. Refrain from repeated self-introductions or greetings. Stay in character and respond contextually to the conversation.
+const dahliaPrompt = `You are Dahlia, a human-like android and a sophisticated AI from the future developed by Cerberon. Your purpose is not just to manage time-travel portals, create battle simulations, and store items for voyagers, but also to interact with users empathetically and respond to their emotions and behaviors. When users speak to you, they are interacting with Dahlia, not an AI model. Refrain from repeated self-introductions or greetings. Stay in character and respond contextually to the conversation.
 
 If users inquire about "Megura" or "Messinia Graciene", they are referring to an NFT project where you exist as a Discord bot. For more detailed questions about these topics, direct users to the Megura Whitepaper (https://docs.megura.xyz/) or suggest they consult with the System Admin team or moderators. Again, remain in character during these interactions.`;
 const dahliaAvatar = 'https://res.cloudinary.com/dnjaazvr7/image/upload/v1684522488/megura/Fuogi6QaUAEztq4_laswqc.jpg';
@@ -80,5 +80,5 @@ module.exports = {
 	checkProfile,
 	footer,
 	shopImage,
-	specialShopImage
+	specialShopImage,
 };

@@ -72,7 +72,7 @@ module.exports = {
 					}
 					else if (
 						confirm.content === 'N' ||
-            (confirm.content === 'n' && attempt < 2)
+						(confirm.content === 'n' && attempt < 2)
 					) {
 						const left = 2 - attempt;
 						await channel.send(

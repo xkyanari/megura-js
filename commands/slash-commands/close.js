@@ -1,7 +1,6 @@
 const {
 	SlashCommandBuilder,
 	EmbedBuilder,
-	PermissionFlagsBits,
 } = require('discord.js');
 
 module.exports = {
@@ -15,7 +14,7 @@ module.exports = {
 		try {
 			await interaction.deferReply({ ephemeral: true });
 			const jobs = await client.deleteChannelQueue.getJobs(['waiting', 'delayed']);
-			const job = jobs.find(job => job.data.userId === member.id);
+			const job = jobs.find(job1 => job1.data.userId === member.id);
 
 			if (!job) return await interaction.editReply({ content: 'You do not have an active portal.', ephemeral: true });
 

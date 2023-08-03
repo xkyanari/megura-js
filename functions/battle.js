@@ -3,7 +3,7 @@ const { attackMultiplier, getCriticalHitRate } = require('../src/vars');
 
 const getDamage = (player1, player2, criticalHitMultiplier) => {
 	const damage =
-    player1.totalAttack * criticalHitMultiplier - player2.totalDefense;
+		player1.totalAttack * criticalHitMultiplier - player2.totalDefense;
 	const finalDamage = Math.max(damage, 0);
 
 	const remainingHealth = player2.totalHealth - finalDamage;

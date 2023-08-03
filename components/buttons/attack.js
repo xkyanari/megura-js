@@ -1,4 +1,3 @@
-
 const { executeAttack } = require('../../functions/attack');
 
 module.exports = {

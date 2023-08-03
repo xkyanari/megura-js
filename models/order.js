@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			discordID: DataTypes.STRING,
 			guildID: DataTypes.TEXT,
-            item_ID: DataTypes.STRING,
+			item_ID: DataTypes.STRING,
 			itemName: DataTypes.STRING,
 			status: {
 				type: DataTypes.STRING,

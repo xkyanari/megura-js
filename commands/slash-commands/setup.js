@@ -324,13 +324,15 @@ module.exports = {
 						webhookTokenField: 'webhookToken',
 						webhookName: 'modChannel',
 						webhookReason: 'For posting purchases',
-					  };
+					};
 					const moderationChannel = await changeChannel(interaction, interaction.guild.id, modsChannel.id, fieldsToUpdate);
 
-					if (moderationChannel) return await interaction.reply({
-						content: 'Moderation Logs channel assigned.',
-						ephemeral: true,
-					});
+					if (moderationChannel) {
+						return await interaction.reply({
+							content: 'Moderation Logs channel assigned.',
+							ephemeral: true,
+						});
+					}
 				}
 				catch (error) {
 					console.error(error);
@@ -381,10 +383,12 @@ module.exports = {
 					};
 					const specialChannel = await changeChannel(interaction, interaction.guild.id, specialShop.id, fieldsToUpdate);
 
-					if (specialChannel) return await interaction.reply({
-						content: 'Special Shop announcement channel saved!',
-						ephemeral: true,
-					});
+					if (specialChannel) {
+						return await interaction.reply({
+							content: 'Special Shop announcement channel saved!',
+							ephemeral: true,
+						});
+					}
 				}
 				catch (error) {
 					console.error(error);

@@ -1,6 +1,9 @@
 const Discord = require('discord.js');
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { Player, Guild } = require('../../src/db');
+const {
+	Player,
+	// Guild
+} = require('../../src/db');
 const { wanderer } = require('../../src/vars');
 const { generateId } = require('../../functions/generateId');
 
@@ -27,9 +30,9 @@ module.exports = {
 			const embed = new EmbedBuilder()
 				.setColor(0xcd7f32)
 				.setTitle('Start your Adventure!')
-			// .setDescription(
-			//     `***Welcome to Eldelvain's Voyagers Guild.***\n\nI see that you belong to the \`${faction}\` faction. Before you can start your journey, I need to get information from you first.\n\nPlease enter your \`Character Name\`.\n\nYou can have a name with up to 20 characters including spaces and numbers. You cannot use any special symbols as I will address you by this name moving forward.`
-			//     );
+				// .setDescription(
+				//     `***Welcome to Eldelvain's Voyagers Guild.***\n\nI see that you belong to the \`${faction}\` faction. Before you can start your journey, I need to get information from you first.\n\nPlease enter your \`Character Name\`.\n\nYou can have a name with up to 20 characters including spaces and numbers. You cannot use any special symbols as I will address you by this name moving forward.`
+				//     );
 				.setDescription(
 					'***Welcome to Eldelvain\'s Voyagers Guild.***\n\nBefore you can start your journey, I need to get information from you first.\n\nPlease enter your `Character Name`.\n\nYou can have a name with up to 20 characters including spaces and numbers. You cannot use any special symbols as I will address you by this name moving forward.',
 				);
@@ -99,7 +102,7 @@ module.exports = {
 						}
 						else if (
 							confirm.content === 'N' ||
-              (confirm.content === 'n' && attempt < 1)
+							(confirm.content === 'n' && attempt < 1)
 						) {
 							await interaction.followUp({
 								content: 'Alright. Please enter your `Character Name`.',
@@ -109,7 +112,7 @@ module.exports = {
 						else {
 							await interaction.followUp({
 								content:
-                  'Sorry, I did not get that. Please come back when you\'re ready.',
+									'Sorry, I did not get that. Please come back when you\'re ready.',
 								ephemeral: true,
 							});
 							break;
@@ -118,7 +121,7 @@ module.exports = {
 					else {
 						await interaction.followUp({
 							content:
-                'Your name is too long. I can\'t put that in our database.',
+								'Your name is too long. I can\'t put that in our database.',
 							ephemeral: true,
 						});
 					}
@@ -136,7 +139,7 @@ module.exports = {
 					// timed out after 2mins
 					await interaction.followUp({
 						content:
-              'Do you need more time? That\'s okay. Just run the command again when you\'re ready.',
+							'Do you need more time? That\'s okay. Just run the command again when you\'re ready.',
 						ephemeral: true,
 					});
 				}

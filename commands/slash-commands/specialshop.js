@@ -34,11 +34,11 @@ module.exports = {
 						.setDescription('Enter the item ID. No spaces.')
 						.setRequired(true)
 						.addChoices(
-							{ name: 'Whitelist', value: 'whitelist'},
-							{ name: 'Event Items', value: 'events'},
-							{ name: 'Digital Items', value: 'digital'},
-							{ name: 'NFTs', value: 'nfts'},
-							{ name: 'Cryptocurrencies', value: 'crypto'}
+							{ name: 'Whitelist', value: 'whitelist' },
+							{ name: 'Event Items', value: 'events' },
+							{ name: 'Digital Items', value: 'digital' },
+							{ name: 'NFTs', value: 'nfts' },
+							{ name: 'Cryptocurrencies', value: 'crypto' },
 						),
 				)
 				.addStringOption(option =>
@@ -133,7 +133,8 @@ module.exports = {
 					await Shop.addItem(item, price, stock, itemID, category, interaction.guild.id);
 					return await interaction.editReply({ content: `Item \`${item}\` added to the Special Shop.` });
 
-				} catch (error) {
+				}
+				catch (error) {
 					console.log(error);
 				}
 				break;
@@ -142,11 +143,12 @@ module.exports = {
 					await interaction.deferReply();
 					const getItem = await Shop.getItem(itemID);
 
-					if (!getItem) return await interaction.editReply({ content: `Item not found.` });
+					if (!getItem) return await interaction.editReply({ content: 'Item not found.' });
 
 					await Shop.removeItem(itemID);
 					return await interaction.editReply({ content: `Item \`${getItem.itemName}\` removed from the Special Shop.` });
-				} catch (error) {
+				}
+				catch (error) {
 					console.error(error);
 				}
 				break;
@@ -155,11 +157,12 @@ module.exports = {
 					await interaction.deferReply();
 					const getItem = await Shop.getItem(itemID);
 
-					if (!getItem) return await interaction.editReply({ content: `Item not found.` });
+					if (!getItem) return await interaction.editReply({ content: 'Item not found.' });
 
 					await Shop.updateItem({ item_ID: itemID, price });
 					return await interaction.editReply({ content: `Item \`${getItem.itemName}\` updated. New price set is \`${price}\` ${oreEmoji}` });
-				} catch (error) {
+				}
+				catch (error) {
 					console.error(error);
 				}
 				break;
@@ -168,11 +171,12 @@ module.exports = {
 					await interaction.deferReply();
 					const getItem = await Shop.getItem(itemID);
 
-					if (!getItem) return await interaction.editReply({ content: `Item not found.` });
+					if (!getItem) return await interaction.editReply({ content: 'Item not found.' });
 
 					await Shop.updateItem({ item_ID: itemID, stock });
 					return await interaction.editReply({ content: `Item \`${getItem.itemName}\` updated. New stock set is \`${stock}\`.` });
-				} catch (error) {
+				}
+				catch (error) {
 					console.error(error);
 				}
 				break;
@@ -187,8 +191,9 @@ module.exports = {
 
 					await guild.decrement({ walletAmount: amount });
 					await user.increment({ oresEarned: amount });
-					return await interaction.editReply({ content: `\`${amount}\` ${oreEmoji} has been transferred to ${userMention(user.discordID)}.`});
-				} catch (error) {
+					return await interaction.editReply({ content: `\`${amount}\` ${oreEmoji} has been transferred to ${userMention(user.discordID)}.` });
+				}
+				catch (error) {
 					console.error(error);
 				}
 				break;

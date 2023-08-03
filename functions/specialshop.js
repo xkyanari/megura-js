@@ -28,7 +28,7 @@ module.exports = async (interaction) => {
 				new StringSelectMenuOptionBuilder()
 					.setLabel('NFTs')
 					.setValue('nfts'),
-					new StringSelectMenuOptionBuilder()
+				new StringSelectMenuOptionBuilder()
 					.setLabel('Cryptocurrencies')
 					.setValue('crypto'),
 			);

@@ -10,7 +10,7 @@ const getFeaturesFromFile = async () => {
 	const data = await fs.readFile('assets/features.json', 'utf8');
 	const features = JSON.parse(data);
 	return features;
-}
+};
 
 const validateFeature = async (interaction, version, featureName) => {
 	const features = await getFeaturesFromFile();

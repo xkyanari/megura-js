@@ -55,7 +55,7 @@ module.exports = async (interaction) => {
 			const item = items[i];
 			const shopItem = await Shop.findOne({ where: { itemName: item.itemName } });
 			if (!shopItem) {
-				continue;  // Skip this iteration of the loop
+				continue; // Skip this iteration of the loop
 			}
 			const { item_ID, guildID } = shopItem;
 

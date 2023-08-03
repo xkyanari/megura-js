@@ -54,10 +54,10 @@ module.exports = async (message) => {
 		context.strokeRect(0, 0, canvas.width, canvas.height);
 
 		const { count: totalPlayers, rows: allPlayers } =
-      await Player.findAndCountAll({ where: { guildID: message.guild.id }, order: [['duelKills', 'DESC']] });
+			await Player.findAndCountAll({ where: { guildID: message.guild.id }, order: [['duelKills', 'DESC']] });
 
 		const rank =
-      allPlayers.findIndex((p) => p.discordID === player.discordID) + 1;
+			allPlayers.findIndex((p) => p.discordID === player.discordID) + 1;
 
 		context.font = applyText(
 			canvas,
@@ -76,8 +76,8 @@ module.exports = async (message) => {
 		context.fillText(
 			`Rank: ${rank}/${totalPlayers}`,
 			canvas.width -
-        context.measureText(`Rank: ${rank}/${totalPlayers}`).width -
-        50,
+			context.measureText(`Rank: ${rank}/${totalPlayers}`).width -
+			50,
 			canvas.height / 3.25,
 		);
 

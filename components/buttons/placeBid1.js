@@ -1,10 +1,10 @@
-const { executeBid } = require("../../functions/executeBid");
+const { executeBid } = require('../../functions/executeBid');
 
 module.exports = {
-    data: {
-        name: 'placeBid1',
-    },
-    async execute(interaction) {
-        await executeBid(interaction, 328943);
-    },
+	data: {
+		name: 'placeBid1',
+	},
+	async execute(interaction) {
+		await executeBid(interaction, 328943);
+	},
 };

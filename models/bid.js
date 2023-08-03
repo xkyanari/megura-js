@@ -8,21 +8,21 @@ module.exports = (sequelize, DataTypes) => {
 				primaryKey: true,
 			},
 			auctionId: {
-                type: DataTypes.INTEGER,
-                references: {
-                    model: 'Auction',
-                    key: 'id'
-                }
-            },
-            userId: {
-                type: DataTypes.STRING,
-                references: {
-                    model: 'User',
-                    key: 'userGuildId'
-                }
-            },
-            bidAmount: DataTypes.FLOAT,
-            bidDateTime: DataTypes.DATE,
+				type: DataTypes.INTEGER,
+				references: {
+					model: 'Auction',
+					key: 'id'
+				}
+			},
+			userId: {
+				type: DataTypes.STRING,
+				references: {
+					model: 'User',
+					key: 'userGuildId'
+				}
+			},
+			bidAmount: DataTypes.FLOAT,
+			bidDateTime: DataTypes.DATE,
 		},
 		{
 			freezeTableName: true,

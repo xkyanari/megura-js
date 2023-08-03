@@ -1,56 +1,57 @@
 const { sequelize, Auction, Bid } = require('../src/db');
 
 const endAuction = async (auctionId) => {
-    let transaction;
+	let transaction;
 
-    try {
-        transaction = await sequelize.transaction();
+	try {
+		transaction = await sequelize.transaction();
 
-        const auction = await Auction.findOne({
-            where: { id: auctionId },
-            transaction,
-        });
+		const auction = await Auction.findOne({
+			where: { id: auctionId },
+			transaction,
+		});
 
-        if (!auction) {
-            throw new Error(`Auction ID ${auctionId} not found`);
-        }
+		if (!auction) {
+			throw new Error(`Auction ID ${auctionId} not found`);
+		}
 
-        // find the highest bid
-        const highestBid = await Bid.findOne({
-            where: { auctionId: auction.id },
-            order: [['bidAmount', 'DESC']],
-            transaction,
-        });
+		// find the highest bid
+		const highestBid = await Bid.findOne({
+			where: { auctionId: auction.id },
+			order: [['bidAmount', 'DESC']],
+			transaction,
+		});
 
-        // if there's a highest bid, assign the winner
-        if (highestBid) {
-            auction.winnerId = highestBid.userId;
-            auction.currentPrice = highestBid.bidAmount;
-        }
+		// if there's a highest bid, assign the winner
+		if (highestBid) {
+			auction.winnerId = highestBid.userId;
+			auction.currentPrice = highestBid.bidAmount;
+		}
 
-        // set the end time to now
-        auction.endDateTime = new Date();
+		// set the end time to now
+		auction.endDateTime = new Date();
 
-        // save the auction
-        await auction.save({ transaction });
+		// save the auction
+		await auction.save({ transaction });
 
-        // commit the transaction
-        await transaction.commit();
+		// commit the transaction
+		await transaction.commit();
 
-        return {
-            success: true,
-        };
+		return {
+			success: true,
+		};
 
-    } catch (err) {
-        // if something goes wrong, rollback the transaction
-        if (transaction) await transaction.rollback();
+	}
+	catch (err) {
+		// if something goes wrong, rollback the transaction
+		if (transaction) await transaction.rollback();
 
-        console.error('Failed to end auction:', err);
+		console.error('Failed to end auction:', err);
 
-        return {
-            success: false,
-        };
-    }
+		return {
+			success: false,
+		};
+	}
 };
 
 module.exports = { endAuction };

@@ -83,7 +83,7 @@ module.exports = {
 			const hasExistingJob = jobs.some(job => job.data.userId === member.id);
 
 			if (hasExistingJob) {
-				return await interaction.reply({ content: 'You already have a portal waiting to be deleted. Please wait for it to be deleted before creating a new one or use \`/close\` to close the existing one manually.', ephemeral: true });
+				return await interaction.reply({ content: 'You already have a portal waiting to be deleted. Please wait for it to be deleted before creating a new one or use `/close` to close the existing one manually.', ephemeral: true });
 			}
 
 			await interaction.client.deleteChannelQueue.add({

@@ -5,13 +5,13 @@ const {
 	EmbedBuilder,
 } = require('discord.js');
 const {
-	TWITTER_CLIENT_ID,
-	TWITTER_CLIENT_SECRET,
-	TWITTER_CALLBACK_URL,
-	TWITTER_CALLBACK_URL_TESTNET,
+	// TWITTER_CLIENT_ID,
+	// TWITTER_CLIENT_SECRET,
+	// TWITTER_CALLBACK_URL,
+	// TWITTER_CALLBACK_URL_TESTNET,
 	isTestnet,
 	website,
-	website_testnet
+	website_testnet,
 } = require('../config.json');
 const { Twitter } = require('../src/db');
 const { generateId } = require('./generateId');
@@ -66,63 +66,66 @@ const twitterAuth = async (interaction) => {
 	}
 };
 
-const twitterCallback = async (req, res) => {
-	const { state, code } = req.query;
+// const twitterCallback = async (req, res) => {
+// 	const { state, code } = req.query;
 
-	try {
-		const codeVerifier = await keyv.get(`codeVerifier:${state}`);
+// 	try {
+// 		const codeVerifier = await keyv.get(`codeVerifier:${state}`);
 
-		if (!codeVerifier) {
-			return res
-				.status(400)
-				.send('You denied the app or your session expired.');
-		}
+// 		if (!codeVerifier) {
+// 			return res
+// 				.status(400)
+// 				.send('You denied the app or your session expired.');
+// 		}
 
-		const storedState = state;
+// 		const storedState = state;
 
-		if (state !== storedState) {
-			return res.status(400).send('Stored tokens didn\'t match!');
-		}
+// 		if (state !== storedState) {
+// 			return res.status(400).send('Stored tokens didn\'t match!');
+// 		}
 
-		const twitter_callback = isTestnet ? TWITTER_CALLBACK_URL_TESTNET : TWITTER_CALLBACK_URL;
+// 		const twitter_callback = isTestnet ? TWITTER_CALLBACK_URL_TESTNET : TWITTER_CALLBACK_URL;
 
-		const {
-			client: loggedClient,
-			accessToken,
-			refreshToken,
-			expiresIn,
-		} = await client.loginWithOAuth2({
-			code,
-			codeVerifier,
-			redirectUri: twitter_callback,
-		});
+// 		const {
+// 			client: loggedClient,
+// 			accessToken,
+// 			refreshToken,
+// 			expiresIn,
+// 		} = await client.loginWithOAuth2({
+// 			code,
+// 			codeVerifier,
+// 			redirectUri: twitter_callback,
+// 		});
 
-		const { data: userObject } = await loggedClient.v2.me();
+// 		const { data: userObject } = await loggedClient.v2.me();
 
-		const now = new Date();
-		const expiresInMs = expiresIn * 1000;
-		const expirationTime = new Date(now.getTime() + expiresInMs);
+// 		const now = new Date();
+// 		const expiresInMs = expiresIn * 1000;
+// 		const expirationTime = new Date(now.getTime() + expiresInMs);
 
-		await Twitter.update(
-			{
-				twitterID: userObject.id,
-				username: userObject.username,
-				accessToken,
-				refreshToken,
-				expiresIn,
-				expirationTime,
-			},
-			{ where: { codeVerifier } },
-		);
+// 		await Twitter.update(
+// 			{
+// 				twitterID: userObject.id,
+// 				username: userObject.username,
+// 				accessToken,
+// 				refreshToken,
+// 				expiresIn,
+// 				expirationTime,
+// 			},
+// 			{ where: { codeVerifier } },
+// 		);
 
-		await keyv.delete(`codeVerifier:${state}`);
+// 		await keyv.delete(`codeVerifier:${state}`);
 
-		res.render('twitterSuccess');
-	}
-	catch (error) {
-		console.error('Error in twitterCallback:', error);
-		res.status(500).send('Server error');
-	}
+// 		res.render('twitterSuccess');
+// 	}
+// 	catch (error) {
+// 		console.error('Error in twitterCallback:', error);
+// 		res.status(500).send('Server error');
+// 	}
+// };
+
+module.exports = {
+	twitterAuth,
+	// twitterCallback
 };
-
-module.exports = { twitterAuth, twitterCallback };

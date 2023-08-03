@@ -32,7 +32,7 @@ const createEmbedPages = async () => {
 
 			const pages = contractGroups.map((contractsGroup, index) => {
 				const blockchainName =
-          blockchain.charAt(0).toUpperCase() + blockchain.slice(1);
+					blockchain.charAt(0).toUpperCase() + blockchain.slice(1);
 				const pageNumber = index + 1;
 				const embed = new EmbedBuilder()
 					.setTitle(

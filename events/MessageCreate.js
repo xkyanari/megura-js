@@ -70,7 +70,7 @@ module.exports = {
 					> **Channel** : ${message.channel}
 				`,
 				);
-	
+
 			const logEntry = `Unable to send a message in ${message.guild.name} - ${message.channel.name}`;
 			return sendLogs(message.client, serverID, embed, logEntry);
 		}
@@ -229,7 +229,8 @@ module.exports = {
 
 		try {
 			await command.execute(message, args);
-		} catch (error) {
+		}
+		catch (error) {
 			console.error(error);
 			message.reply({
 				content: 'There was an error trying to execute that command!',

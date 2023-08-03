@@ -5,7 +5,10 @@ const {
 	ActionRowBuilder,
 } = require('discord.js');
 const { Player, Contract } = require('../src/db');
-const { footer, checkProfile } = require('../src/vars');
+const {
+	footer,
+	// checkProfile
+} = require('../src/vars');
 
 module.exports = async (interaction, member) => {
 	const button = new ActionRowBuilder().addComponents(
