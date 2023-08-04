@@ -38,7 +38,11 @@ const twitterAuth = async (interaction) => {
 		const registrationID = await generateId(10);
 		const registrationURL = isTestnet ? `${website_testnet}/connect/service/twitter?id=${registrationID}` : `${website}/connect/service/twitter?id=${registrationID}`;
 
-		if (!twitter) {
+		if (twitter) {
+			twitter.registrationID = registrationID;
+			await twitter.save();
+		}
+		else {
 			await Twitter.create({ discordID: interaction.member.id, registrationID });
 		}
 

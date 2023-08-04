@@ -82,32 +82,32 @@ module.exports = {
 						});
 					}
 					else {
-						await twitterAuth(interaction); // switch to generating a link with random ID
+						await twitterAuth(interaction);
 					}
 
-					setTimeout(() => {
-						Twitter.findOne({ where: { discordID: interaction.member.id } })
-							.then((user) => {
-								if (user.username !== null) {
-									return interaction.followUp({
-										content: `You're now logged in as \`${user.username}\`.`,
-										ephemeral: true,
-									});
-								}
-								else {
-									Twitter.destroy({
-										where: { discordID: interaction.member.id },
-									});
-									interaction.followUp({
-										content: 'Your session expired. Please try logging in again.',
-										ephemeral: true,
-									});
-								}
-							})
-							.catch((error) => {
-								console.error(error);
-							});
-					}, 180000);
+					// setTimeout(() => {
+					// 	Twitter.findOne({ where: { discordID: interaction.member.id } })
+					// 		.then((user) => {
+					// 			if (user.username !== null) {
+					// 				return interaction.followUp({
+					// 					content: `You're now logged in as \`${user.username}\`.`,
+					// 					ephemeral: true,
+					// 				});
+					// 			}
+					// 			else {
+					// 				Twitter.destroy({
+					// 					where: { discordID: interaction.member.id },
+					// 				});
+					// 				interaction.followUp({
+					// 					content: 'Your session expired. Please try logging in again.',
+					// 					ephemeral: true,
+					// 				});
+					// 			}
+					// 		})
+					// 		.catch((error) => {
+					// 			console.error(error);
+					// 		});
+					// }, 180000);
 				}
 				catch (error) {
 					console.error(error);

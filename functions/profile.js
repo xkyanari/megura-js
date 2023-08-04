@@ -30,7 +30,7 @@ module.exports = async (interaction, member) => {
 	);
 
 	const numFormat = (value) =>
-		new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
+		new Intl.NumberFormat('en-US').format(value ?? 0);
 	const guild = interaction.guild;
 	const oreEmoji = interaction.client.emojis.cache.get('1119212796136144956') || '💎';
 

@@ -69,6 +69,14 @@ module.exports = {
 		const subCommand = options.getSubcommand();
 		const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
 
+		const item1 = options.getString('item');
+		const description = options.getString('description');
+		const quantity = options.getInteger('quantity');
+		const startPrice = options.getNumber('startprice');
+		const endTime = options.getInteger('endtime');
+		const attachment = options.getAttachment('image');
+		let attachmentUrl = null;
+
 		switch (subCommand) {
 			case 'start':
 				await interaction.deferReply();
@@ -79,14 +87,6 @@ module.exports = {
 					return;
 				}
 
-				const item1 = options.getString('item');
-				const description = options.getString('description');
-				const quantity = options.getInteger('quantity');
-				const startPrice = options.getNumber('startprice');
-				const endTime = options.getInteger('endtime');
-				const attachment = options.getAttachment('image');
-
-				let attachmentUrl = null;
 				if (attachment) {
 					attachmentUrl = attachment.proxyURL;
 				}
