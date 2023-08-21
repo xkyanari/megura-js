@@ -39,7 +39,7 @@ const generateSummary = async (chatLog) => {
 		.join(' ')}"`;
 
 	const result = await openai.createChatCompletion({
-		model: 'gpt-3.5-turbo-0613',
+		model: 'gpt-4',
 		max_tokens: 1000,
 		temperature: 0.4,
 		messages: [{ role: 'system', content: prompt }],
@@ -170,7 +170,7 @@ module.exports = {
 					});
 
 					const result = await openai.createChatCompletion({
-						model: 'gpt-3.5-turbo-0613',
+						model: 'gpt-4',
 						max_tokens: 1000,
 						temperature: 0.4,
 						messages: chatLog,

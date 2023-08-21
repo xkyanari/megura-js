@@ -126,7 +126,7 @@
   {
     "blockchain": "solana",
     "collectionID": "cyberheroez",
-    "contractName": "Cyberheroez",
+    "contractName": "CyberHeroez",
     "contractAddress": "310fe0426095bfc7d98a41858dc7d65f848fffb82a7f75474f2057d7b2eb69a4",
     "traitWeapon": "Weapon",
     "traitArmor": "Armor",
@@ -135,7 +135,7 @@
   {
     "blockchain": "solana",
     "collectionID": "cybervillainz_reborn",
-    "contractName": "Cybervillainz: Reborn",
+    "contractName": "CyberVillainz Reborn",
     "contractAddress": "d193d75eafd2f7535b2e2cf147738b695eeecda77b89882de38a2a38524f9758",
     "traitWeapon": "Right Hand",
     "traitArmor": "Clothing",
@@ -152,7 +152,7 @@
   {
     "blockchain": "solana",
     "collectionID": "galactic_geckos",
-    "contractName": "Galactic Gecko Space Garage",
+    "contractName": "GGSG: Galactic Geckos",
     "contractAddress": "658a8a03214921923ef82ed2ddda27526b365e03b3f50370a1d3587fa89ccd8f",
     "traitArmor": "Armor",
     "collectionURL": "https://magiceden.io/marketplace/galactic_geckos"
@@ -192,7 +192,7 @@
   {
     "blockchain": "solana",
     "collectionID": "Nekozuma",
-    "contractName": "Nekozuma",
+    "contractName": "Nekozuma NFT",
     "contractAddress": "e4924435bcbbfc8e2e491408dfeb1da31c2c958ee36dc9fe8356acb55b1b7bc6",
     "traitWeapon": "Hand",
     "traitArmor": "Cloth",
