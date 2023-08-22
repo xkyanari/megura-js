@@ -15,6 +15,9 @@ const client = new Client({
 		GatewayIntentBits.GuildVoiceStates,
 		GatewayIntentBits.GuildMessageReactions,
 		GatewayIntentBits.GuildWebhooks,
+		GatewayIntentBits.DirectMessages,
+		GatewayIntentBits.DirectMessageTyping,
+		GatewayIntentBits.DirectMessageReactions,
 	],
 	// sweepers: Options.DefaultSweeperSettings,
 });

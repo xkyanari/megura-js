@@ -1,6 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const { Player, Contract } = require('../src/db');
-const { solscanApiToken } = require('../config.json');
+// const { solscanApiToken } = require('../config.json');
 
 module.exports = async (interaction, getWallet, member, guild) => {
 	try {
