@@ -217,4 +217,5 @@ const arenaBattle = async (interaction, players) => {
 
 module.exports = {
 	arenaBattle,
+	duelPlayer,
 };
