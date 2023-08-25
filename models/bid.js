@@ -11,15 +11,15 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.INTEGER,
 				references: {
 					model: 'Auction',
-					key: 'id'
-				}
+					key: 'id',
+				},
 			},
 			userId: {
 				type: DataTypes.STRING,
 				references: {
 					model: 'User',
-					key: 'userGuildId'
-				}
+					key: 'userGuildId',
+				},
 			},
 			bidAmount: DataTypes.FLOAT,
 			bidDateTime: DataTypes.DATE,
