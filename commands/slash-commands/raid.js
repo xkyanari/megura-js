@@ -75,39 +75,31 @@ module.exports = {
 		switch (subCommand) {
 			case 'join':
 				try {
-					if (twitter && twitter.username !== null) {
-						return interaction.reply({
-							content: `You're logged in as ${twitter.username}.`,
-							ephemeral: true,
-						});
-					}
-					else {
-						await twitterAuth(interaction);
-					}
+					await twitterAuth(interaction);
 
-					// setTimeout(() => {
-					// 	Twitter.findOne({ where: { discordID: interaction.member.id } })
-					// 		.then((user) => {
-					// 			if (user.username !== null) {
-					// 				return interaction.followUp({
-					// 					content: `You're now logged in as \`${user.username}\`.`,
-					// 					ephemeral: true,
-					// 				});
-					// 			}
-					// 			else {
-					// 				Twitter.destroy({
-					// 					where: { discordID: interaction.member.id },
-					// 				});
-					// 				interaction.followUp({
-					// 					content: 'Your session expired. Please try logging in again.',
-					// 					ephemeral: true,
-					// 				});
-					// 			}
-					// 		})
-					// 		.catch((error) => {
-					// 			console.error(error);
-					// 		});
-					// }, 180000);
+					setTimeout(() => {
+						Twitter.findOne({ where: { discordID: interaction.member.id } })
+							.then((user) => {
+								if (user.twitterID !== null) {
+									return interaction.followUp({
+										content: 'You\'re now logged in.',
+										ephemeral: true,
+									});
+								}
+								else {
+									Twitter.destroy({
+										where: { discordID: interaction.member.id },
+									});
+									interaction.followUp({
+										content: 'Your session expired. Please try logging in again.',
+										ephemeral: true,
+									});
+								}
+							})
+							.catch((error) => {
+								console.error(error);
+							});
+					}, 120000);
 				}
 				catch (error) {
 					console.error(error);

@@ -25,7 +25,7 @@ module.exports = {
 				where: { discordID: interaction.member.id },
 			});
 
-			if (!twitterUser) {
+			if (!twitterUser || !twitterUser.accessToken || !twitterUser.refreshToken) {
 				return interaction.reply({
 					content: 'Please login using `/raid join` first.',
 					ephemeral: true,
@@ -42,7 +42,6 @@ module.exports = {
 				});
 
 				const {
-					client: refreshedClient,
 					accessToken,
 					refreshToken: newRefreshToken,
 				} = await twitterClient.refreshOAuth2Token(twitterUser.refreshToken);
@@ -55,51 +54,28 @@ module.exports = {
 				twitterUser.expirationTime = expirationDate;
 
 				await twitterUser.save();
-
-				const rwClient = refreshedClient.readWrite;
-
-				const like = await rwClient.v2.like(twitterUser.twitterID, tweetId);
-				if (like) {
-					const raidTweet = await Raid.findOne({
-						where: { tweetUrlID: tweetId },
-					});
-					const likes = raidTweet.likers;
-					if (!likes.includes(interaction.member.id)) {
-						likes.push(interaction.member.id);
-						raidTweet.likers = likes;
-						await raidTweet.save();
-						await interaction.reply({ content: 'Liked!', ephemeral: true });
-					}
-					else {
-						await interaction.reply({
-							content: 'You already liked this tweet!',
-							ephemeral: true,
-						});
-					}
-				}
 			}
-			else {
-				const twitterClient = new TwitterApi(twitterUser.accessToken);
-				const rwClient = twitterClient.readWrite;
 
-				const like = await rwClient.v2.like(twitterUser.twitterID, tweetId);
-				if (like) {
-					const raidTweet = await Raid.findOne({
-						where: { tweetUrlID: tweetId },
+			const twitterClient = new TwitterApi(twitterUser.accessToken);
+			const rwClient = twitterClient.readWrite;
+
+			const like = await rwClient.v2.like(twitterUser.twitterID, tweetId);
+			if (like) {
+				const raidTweet = await Raid.findOne({
+					where: { tweetUrlID: tweetId },
+				});
+				const likes = raidTweet.likers;
+				if (!likes.includes(interaction.member.id)) {
+					likes.push(interaction.member.id);
+					raidTweet.likers = likes;
+					await raidTweet.save();
+					await interaction.reply({ content: 'Liked!', ephemeral: true });
+				}
+				else {
+					await interaction.reply({
+						content: 'You already liked this tweet!',
+						ephemeral: true,
 					});
-					const likes = raidTweet.likers;
-					if (!likes.includes(interaction.member.id)) {
-						likes.push(interaction.member.id);
-						raidTweet.likers = likes;
-						await raidTweet.save();
-						await interaction.reply({ content: 'Liked!', ephemeral: true });
-					}
-					else {
-						await interaction.reply({
-							content: 'You already liked this tweet!',
-							ephemeral: true,
-						});
-					}
 				}
 			}
 		}

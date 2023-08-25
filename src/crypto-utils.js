@@ -5,28 +5,18 @@ const IV_LENGTH = 16;
 
 function encrypt(text) {
 	const iv = crypto.randomBytes(IV_LENGTH);
-	const cipher = crypto.createCipheriv(
-		'aes-256-cbc',
-		Buffer.from(ENCRYPTION_KEY),
-		iv,
-	);
+	const keyBuffer = Buffer.from(ENCRYPTION_KEY, 'hex');
+	const cipher = crypto.createCipheriv('aes-256-cbc', keyBuffer, iv);
 	const encrypted = Buffer.concat([cipher.update(text), cipher.final()]);
 	return iv.toString('hex') + ':' + encrypted.toString('hex');
 }
 
 function decrypt(text) {
 	const textParts = text.split(':');
-	const iv = Buffer.from(textParts.shift(), 'hex');
-	const encryptedText = Buffer.from(textParts.join(':'), 'hex');
-	const decipher = crypto.createDecipheriv(
-		'aes-256-cbc',
-		Buffer.from(ENCRYPTION_KEY),
-		iv,
-	);
-	const decrypted = Buffer.concat([
-		decipher.update(encryptedText),
-		decipher.final(),
-	]);
+	const iv = Buffer.from(textParts.shift(), 'hex'); // Removes the IV from textParts
+	const encryptedText = Buffer.from(textParts.join(':'), 'hex'); // Joins the remaining parts
+	const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY, 'hex'), iv);
+	const decrypted = Buffer.concat([decipher.update(encryptedText), decipher.final()]);
 	return decrypted.toString();
 }
 
