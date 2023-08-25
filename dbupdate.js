@@ -15,6 +15,7 @@ const {
 	Auction,
 	AuctionItem,
 	Bid,
+	Brawl,
 } = require('./src/db');
 
 (async () => {
@@ -88,9 +89,15 @@ const {
 	// 	})
 	// 	.catch((error) => console.log(error));
 
-	await Twitter.sync({ alter: true })
+	// await Twitter.sync({ alter: true })
+	// 	.then(() => {
+	// 		console.log('Twitter table refreshed.');
+	// 	})
+	// 	.catch((error) => console.log(error));
+
+	await Brawl.sync({ alter: true })
 		.then(() => {
-			console.log('Twitter table refreshed.');
+			console.log('Brawl table refreshed.');
 		})
 		.catch((error) => console.log(error));
 
