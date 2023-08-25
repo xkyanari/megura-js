@@ -146,6 +146,20 @@ module.exports = {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand.setName('settings').setDescription('Show current server settings.'),
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('solana')
+				.setDescription('Select which API to use.')
+				.addStringOption(option =>
+					option.setName('type')
+						.setDescription('Choose one.')
+						.setRequired(true)
+						.addChoices(
+							{ name: 'Solscan', value: 'solscan' },
+							{ name: 'Magic Eden', value: 'magiceden' },
+						),
+				),
 		),
 	cooldown: 3000,
 	async execute(interaction) {
@@ -191,25 +205,26 @@ module.exports = {
 						});
 					}
 
-					if (guildCheck.twitterID) {
-						return await interaction.reply({
-							content: `Server logged in as \`${guildCheck.username}\`.`,
-							ephemeral: true,
-						});
-					}
-					else {
-						await twitterAuth(interaction);
-					}
+					// if (guildCheck.twitterID) {
+					// 	return await interaction.reply({
+					// 		content: `Server logged in as \`${guildCheck.username}\`.`,
+					// 		ephemeral: true,
+					// 	});
+					// }
+					// else {
+					// 	await twitterAuth(interaction);
+					// }
+					await twitterAuth(interaction);
 
 					setTimeout(() => {
 						Twitter.findOne({ where: { discordID: interaction.member.id } })
 							.then((user) => {
-								if (user.username !== null) {
+								console.log('Before transfer, accessToken:', user.accessToken);
+								if (user.twitterID !== null) {
 									// Transfers the tokens to the Guild table
 									Guild.update(
 										{
 											twitterID: user.twitterID,
-											username: user.username,
 											accessToken: user.accessToken,
 											refreshToken: user.refreshToken,
 											expiresIn: user.expiresIn,
@@ -218,12 +233,16 @@ module.exports = {
 										{ where: { guildID: interaction.guild.id } },
 									)
 										.then(() => {
+											Guild.findOne({ where: { guildID: interaction.guild.id } })
+												.then((guild) => {
+													console.log('After transfer, accessToken:', guild.accessToken);
+												});
 											Twitter.destroy({
 												where: { discordID: interaction.member.id },
 											})
 												.then(() => {
 													return interaction.followUp({
-														content: `Tokens transferred to the Guild.\n\nServer now logged in as \`${user.username}\`.`,
+														content: 'Tokens transferred to the Guild.\n\nServer now logged in.',
 														ephemeral: true,
 													});
 												})
@@ -266,7 +285,7 @@ module.exports = {
 							.catch((error) => {
 								console.error(error);
 							});
-					}, 180000);
+					}, 120000);
 				}
 				catch (error) {
 					console.error(error);
