@@ -89,6 +89,7 @@ module.exports = {
 				});
 
 				interaction.client.userData.set(interaction.user.id, {
+					collection: contractName,
 					weapon: weaponValue,
 					armor: armorValue,
 					walletAddress,

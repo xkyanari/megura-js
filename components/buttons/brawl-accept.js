@@ -1,6 +1,7 @@
 const { PermissionFlagsBits, ChannelType } = require('discord.js');
-const { Brawl } = require('../../src/db');
+const { Brawl, Player } = require('../../src/db');
 const { simulateBrawl } = require('../../functions/brawl');
+const { isTestnet } = require('../../config.json');
 
 module.exports = {
 	data: {
@@ -13,6 +14,16 @@ module.exports = {
 			const challenger = await Brawl.findOne({ where: { listingId: listingId } });
 
 			if (interaction.member.id === challenger.challengerId) return interaction.reply({ content: 'You cannot challenge yourself!', ephemeral: true });
+
+			const acceptor = await Player.findOne({ where: { discordID: interaction.member.id } });
+
+			if (!acceptor) {
+				throw new Error('profile not found');
+			}
+
+			if (!isTestnet) {
+				if (acceptor.oresEarned < challenger.wager) return interaction.reply({ content: 'You do not have enough ores to challenge!', ephemeral: true });
+			}
 
 			challenger.acceptorId = interaction.member.id;
 			await challenger.save();

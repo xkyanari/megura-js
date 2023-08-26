@@ -51,7 +51,6 @@ module.exports = {
 				});
 			}
 
-
 			const matches = userData.tokenID.match(/#(\d+)/);
 			let number;
 			if (matches) {
@@ -64,27 +63,24 @@ module.exports = {
 			player.tokenID = number ? number : userData.tokenID;
 			player.imageURL = userData.imageURL;
 
-			if (player.linked === true) {
-				await player.save();
-				await interaction.reply({
-					content: 'Your NFT has been linked successfully!',
-					components: [button],
-					ephemeral: true,
-				});
-			}
-			else {
+			if (!player.linked) {
 				player.totalAttack += 200;
 				player.totalDefense += 200;
 				player.linked = true;
-				await player.save();
-
-				interaction.client.userData.delete(interaction.user.id);
-				await interaction.reply({
-					content: 'Your NFT has been linked successfully!',
-					components: [button],
-					ephemeral: true,
-				});
 			}
+
+			if (userData.collection === 'Dropouts' && !player.linked) {
+				player.totalAttack += 25;
+				player.totalDefense += 25;
+			}
+
+			interaction.client.userData.delete(interaction.user.id);
+			await player.save();
+			await interaction.reply({
+				content: 'Your NFT has been linked successfully!',
+				components: [button],
+				ephemeral: true,
+			});
 		}
 		catch (error) {
 			console.error(error);

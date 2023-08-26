@@ -190,4 +190,40 @@ const auctionStatus = async (guildID, discordID, item, auction) => {
 	}
 };
 
-module.exports = { notifyPurchase, purchaseStatus, auctionStatus, changeChannel };
+const brawlStatus = async (guildID, challengerId, acceptorId, status, challengerScore, acceptorScore, listingId) => {
+	try {
+		const guild = await Guild.findOne({ where: { guildID } });
+		if (!guild) {
+			throw new Error('guild not found');
+		}
+		if (!guild.brawlChannelID || (!guild.brawlwebhookId && !guild.brawlwebhookToken)) return;
+
+		const webhookClient = new WebhookClient({ id: guild.brawlwebhookId, token: guild.brawlwebhookToken });
+
+		// Convert scores to emoji strings
+		const scoreEmojis = ['0️⃣', '1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣'];
+		const challengerEmojiScore = scoreEmojis[challengerScore];
+		const acceptorEmojiScore = scoreEmojis[acceptorScore];
+
+		const embed = new EmbedBuilder()
+			.setTitle(`⚔️ Brawl Scoreboard - ${status} ⚔️`)
+			.setColor(0xcd7f32)
+			.addFields(
+				{ name: '🏹 Challenger', value: `${userMention(challengerId)}`, inline: true },
+				{ name: 'Score', value: `${challengerEmojiScore} - ${acceptorEmojiScore}`, inline: true },
+				{ name: 'Acceptor 🎯', value: `${userMention(acceptorId)}`, inline: true },
+			)
+			.setFooter({ text: `Listing ID: ${listingId}` });
+
+		await webhookClient.send({
+			username: dahliaName,
+			avatarURL: dahliaAvatar,
+			embeds: [embed],
+		});
+	}
+	catch (error) {
+		console.error(error);
+	}
+};
+
+module.exports = { notifyPurchase, purchaseStatus, auctionStatus, changeChannel, brawlStatus };

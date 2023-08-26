@@ -1,5 +1,6 @@
 const { ComponentType, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, userMention } = require('discord.js');
 const { Brawl } = require('../src/db');
+const { brawlStatus } = require('./webhook');
 const wait = require('node:timers/promises').setTimeout;
 
 const getWinner = (player1, player1Move, player2, player2Move) => {
@@ -31,13 +32,18 @@ const simulateBrawl = async (interaction, channel, player1, player2) => {
 
 	try {
 		const brawl_channel = interaction.client.channels.cache.get(channel.id);
+		const listingId = brawl_channel.name.split('-')[1];
 
-		const introductionMessage = `# Welcome to the Brawl simulation!\n\n**${userMention(player1)} is challenging ${userMention(player2)} to a fierce battle.**\n\n- The game consists of 5 rounds where you and your opponent will face off in an intense battle.\n- Each round, you will have 30 seconds to select your move.\n- The available moves are Range, Melee, Block, and Dash. Choose wisely to outwit your opponent and emerge victorious!\n- The first player to win 3 rounds will be declared the overall winner.\n\n## Hints for each attack:\n- Long Range: Strong against Short Range and Block, Weak against Dash Attack.\n- Short Range: Strong against Block and Dash Attack, Weak against Long Range.\n- Block: Strong against Dash Attack, Weak against Short Range and Long Range.\n- Dash Attack: Strong against Long Range, Weak against Short Range and Block.\n\nLet the brawl begin!`;
+		const introductionMessage = `# Welcome to the Brawl simulation!\n\n**${userMention(player1)} is challenging ${userMention(player2)} to a fierce battle.**\n\n- The game consists of 5 rounds where you and your opponent will face off in an intense battle.\n- Each round, you will have 30 seconds to select your move.\n- The available moves are Range, Melee, Block, and Dash. Choose wisely to outwit your opponent and emerge victorious!\n- Your first move will be final and can't be changed.\n- The first player to win 3 rounds will be declared the overall winner.\n## Hints for each attack:\n- Long Range: Strong against Short Range and Block, Weak against Dash Attack.\n- Short Range: Strong against Block and Dash Attack, Weak against Long Range.\n- Block: Strong against Dash Attack, Weak against Short Range and Long Range.\n- Dash Attack: Strong against Long Range, Weak against Short Range and Block.\n\nLet the brawl begin!`;
 
 		await brawl_channel.send({ content: introductionMessage });
 
 		let message;
 		for (let round = 1; round <= 5; round++) {
+			const unixTimestampNow = Math.floor(Date.now() / 1000);
+			const unixTimestamp30SecondsLater = unixTimestampNow + 30;
+			const countdownMessage = `<t:${unixTimestamp30SecondsLater}:R>`;
+
 			const button = new ActionRowBuilder().addComponents(
 				new ButtonBuilder()
 					.setCustomId('brawl-range')
@@ -57,23 +63,10 @@ const simulateBrawl = async (interaction, channel, player1, player2) => {
 					.setStyle(ButtonStyle.Primary),
 			);
 
-			const unixTimestampNow = Math.floor(Date.now() / 1000);
-			const unixTimestamp30SecondsLater = unixTimestampNow + 30;
-
-			const countdownMessage = `<t:${unixTimestamp30SecondsLater}:R>`;
-
-			if (!message) {
-				const embed0 = new EmbedBuilder()
-					.setColor(0xcd7f32)
-					.setDescription(`**Round ${round}:**\nSelect your move!\nTimer: ${countdownMessage}`);
-				message = await brawl_channel.send({ embeds: [embed0], components: [button] });
-			}
-			else {
-				const embed0 = new EmbedBuilder()
-					.setColor(0xcd7f32)
-					.setDescription(`**Round ${round}:**\nSelect your move!\nTimer: ${countdownMessage}`);
-				await message.edit({ embeds: [embed0], components: [button] });
-			}
+			const embed0 = new EmbedBuilder()
+				.setColor(0xcd7f32)
+				.setDescription(`**Round ${round}:**\nSelect your move!\nTimer: ${countdownMessage}`);
+			message = await brawl_channel.send({ embeds: [embed0], components: [button] });
 
 			await new Promise(resolve => {
 				let player1Move = null;
@@ -99,19 +92,21 @@ const simulateBrawl = async (interaction, channel, player1, player2) => {
 					let resultMessage;
 					let roundWinner;
 
-					if (collected.size === 0) {
+					message.edit({ components: [] });
+
+					if (usersClicked.size === 0) {
 						roundWinner = null;
 						resultMessage = 'Looks like no one selected a move. Moving on to the next round!';
 					}
 
-					if (collected.size === 1) {
+					if (usersClicked.size === 1) {
 						roundWinner = player1Move ? player1 : player2;
 						resultMessage = `Only ${userMention(roundWinner)} picked a move so ${userMention(roundWinner)} wins by default!`;
 					}
 
-					if (collected.size === 2) {
+					if (usersClicked.size === 2) {
 						roundWinner = getWinner(player1, player1Move, player2, player2Move);
-						resultMessage = roundWinner ? `**Round ${round}:** ${userMention(roundWinner)} wins!\n\n${userMention(player1)} - ${player1Wins}\n${userMention(player2)} - ${player2Wins}` : `Round ${round}: It's draw!\n\n${userMention(player1)} - ${player1Wins}\n${userMention(player2)} - ${player2Wins}`;
+						resultMessage = roundWinner ? `**Round ${round}:** ${userMention(roundWinner)} wins!` : `**Round ${round}:** It's draw!`;
 					}
 
 					if (roundWinner === player1) {
@@ -120,6 +115,13 @@ const simulateBrawl = async (interaction, channel, player1, player2) => {
 					if (roundWinner === player2) {
 						player2Wins++;
 					}
+
+					const scoreMessage = `\n\nScore:\n${userMention(player1)} - ${player1Wins}\n${userMention(player2)} - ${player2Wins}`;
+					resultMessage += scoreMessage;
+
+					console.log('Round: ', round);
+					console.log('Player 1 Wins: ', player1Wins);
+					console.log('Player 2 Wins: ', player2Wins);
 
 					const embed = new EmbedBuilder()
 						.setColor(0xcd7f32)
@@ -135,10 +137,6 @@ const simulateBrawl = async (interaction, channel, player1, player2) => {
 			if (player1Wins === 3 || player2Wins === 3) {
 				break;
 			}
-
-			console.log('Round: ', round);
-			console.log('Player 1 Wins: ', player1Wins);
-			console.log('Player 2 Wins: ', player2Wins);
 		}
 
 		await wait(2000);
@@ -151,31 +149,30 @@ const simulateBrawl = async (interaction, channel, player1, player2) => {
 			winner = player2;
 		}
 
+		await brawlStatus(interaction.guild.id, player1, player2, 'Completed', player1Wins, player2Wins, listingId);
+
 		if (winner) {
-			// send a webhook to the announcement channel
-			// mention how much will be transferred to the winner
-			await message.delete();
 			const embed = new EmbedBuilder()
 				.setColor(0xcd7f32)
-				.setDescription(`${userMention(winner)} wins! Congratulations on your victory!`);
+				.setDescription(`${userMention(winner)} wins! Congratulations on your victory!\n\nThis channel will be deleted in 10 seconds.`);
 			await brawl_channel.send({ embeds: [embed] });
 		}
 		else {
 			const embed = new EmbedBuilder()
 				.setColor(0xcd7f32)
-				.setDescription(`The brawl ends in a **draw**. It was an intense battle between ${userMention(player1)} and ${userMention(player2)}!`);
+				.setDescription(`The brawl ends in a **draw**. It was an intense battle between ${userMention(player1)} and ${userMention(player2)}!\n\nThis channel will be deleted in 10 seconds.`);
 			await brawl_channel.send({ embeds: [embed] });
 		}
 
 		// transfer the ores to the winner
-		const listingId = brawl_channel.name.split('-')[1];
 		await Brawl.findOne({ where: { listingId: listingId } }).then(async (brawl) => {
 			brawl.status = 'completed';
 			brawl.outcome = winner === player1 ? 'challenger_win' : winner === player2 ? 'acceptor_win' : 'draw';
 			await brawl.save();
 		});
 		setTimeout(async () => {
-			brawl_channel.delete().catch(console.error);
+			if (brawl_channel) brawl_channel.delete().catch(console.error);
+			return;
 		}, 10000);
 	}
 	catch (error) {

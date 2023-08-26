@@ -71,6 +71,9 @@ module.exports = (sequelize, DataTypes) => {
 			auctionChannelID: DataTypes.STRING,
 			auctionwebhookId: DataTypes.STRING,
 			auctionwebhookToken: DataTypes.STRING,
+			brawlChannelID: DataTypes.STRING,
+			brawlwebhookId: DataTypes.STRING,
+			brawlwebhookToken: DataTypes.STRING,
 		},
 		{
 			freezeTableName: true,

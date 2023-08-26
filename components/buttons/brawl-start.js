@@ -13,6 +13,7 @@ module.exports = {
 			new TextInputBuilder()
 				.setCustomId('wager')
 				.setLabel(`Enter wager (Minimum: 1 ${oreEmoji}).`)
+				.setPlaceholder('Numbers only.')
 				.setStyle(TextInputStyle.Short)
 				.setRequired(true),
 		);

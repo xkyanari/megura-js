@@ -10,12 +10,12 @@ const { serverID } = require('../src/vars');
  */
 
 // Preparing connection to OpenAI API -----------------
-const { Configuration, OpenAIApi } = require('openai');
-const configuration = new Configuration({
+const OpenAI = require('openai');
+
+const openai = new OpenAI({
 	organization: openAIorg,
 	apiKey: openAIkey,
 });
-const openai = new OpenAIApi(configuration);
 
 const chatUsers = new Map();
 const userTimeouts = {};
@@ -38,7 +38,7 @@ const generateSummary = async (chatLog) => {
 		.map((log) => `${log.role}: ${log.content}`)
 		.join(' ')}"`;
 
-	const result = await openai.createChatCompletion({
+	const result = await openai.chat.completions.create({
 		model: 'gpt-4',
 		max_tokens: 1000,
 		temperature: 0.4,
@@ -47,7 +47,7 @@ const generateSummary = async (chatLog) => {
 		presence_penalty: 0.7,
 	});
 
-	const summary = result.data.choices[0].message.content;
+	const summary = result.choices[0].message.content;
 	return summary;
 };
 
@@ -169,7 +169,7 @@ module.exports = {
 						}
 					});
 
-					const result = await openai.createChatCompletion({
+					const result = await openai.chat.completions.create({
 						model: 'gpt-4',
 						max_tokens: 1000,
 						temperature: 0.4,
@@ -178,9 +178,9 @@ module.exports = {
 						presence_penalty: 0.7,
 					});
 
-					const response = result.data.choices[0].message.content;
+					const response = result.choices[0].message.content;
 
-					if (result.data.usage.total_tokens > 1500 || chatLog.length > 10) {
+					if (result.usage.total_tokens > 1500 || chatLog.length > 10) {
 						const summary = await generateSummary(chatLog.slice(0, 6));
 
 						chatLog = chatLog.slice(6);
@@ -204,11 +204,16 @@ module.exports = {
 				}
 				catch (error) {
 					message.reply('Yes?');
-					if (error.response) {
-						console.log(error.response.status);
-						console.log(error.response.data);
+					if (error instanceof OpenAI.APIError) {
+						console.error(error.status); // e.g. 401
+						console.error(error.message); // e.g. The authentication token you passed was invalid...
+						console.error(error.code); // e.g. 'invalid_api_key'
+						console.error(error.type); // e.g. 'invalid_request_error'
 					}
-					console.log(error.message);
+					else {
+						// Non-API error
+						console.log(error);
+					}
 				}
 			}
 		}

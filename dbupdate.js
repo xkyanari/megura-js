@@ -113,11 +113,11 @@ const {
 	// 	})
 	// 	.catch((error) => console.log(error));
 
-	// await Guild.sync({ alter: true })
-	// 	.then(() => {
-	// 		console.log('Guild table refreshed.');
-	// 	})
-	// 	.catch((error) => console.log(error));
+	await Guild.sync({ alter: true })
+		.then(() => {
+			console.log('Guild table refreshed.');
+		})
+		.catch((error) => console.log(error));
 
 	// await Order.sync({ alter: true })
 	// 	.then(() => {
