@@ -92,7 +92,11 @@ const simulateBrawl = async (interaction, channel, player1, player2) => {
 					let resultMessage;
 					let roundWinner;
 
-					message.edit({ components: [] });
+					const updatedEmbed = new EmbedBuilder()
+						.setColor(0xcd7f32)
+						.setDescription(`**Round ${round} is over!**`);
+
+					message.edit({ embeds: [updatedEmbed], components: [] });
 
 					if (usersClicked.size === 0) {
 						roundWinner = null;
