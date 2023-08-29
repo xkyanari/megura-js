@@ -27,6 +27,8 @@ const duelPlayer = async (interaction, player1, player2) => {
 
 	await battleUp(interaction, winner, loser);
 
+	await wait(2000);
+
 	const message = duelMessages[Math.floor(Math.random() * duelMessages.length)];
 	const filledMessage = message.replace(new RegExp('\\${winner.playerName}', 'g'), winner.playerName)
 		.replace(new RegExp('\\${loser.playerName}', 'g'), loser.playerName);
@@ -114,7 +116,7 @@ const monsterBattle = async (interaction, winner) => {
 	// announce the winner
 	await interaction.channel.send({ embeds: [embed1] });
 
-	await wait(10000);
+	await wait(8000);
 
 	const embed2 = new EmbedBuilder()
 		.setColor(0xcd7f32)
@@ -123,7 +125,7 @@ const monsterBattle = async (interaction, winner) => {
 
 	await interaction.channel.send({ embeds: [embed2] });
 
-	await wait(10000);
+	await wait(8000);
 
 	const embed3 = new EmbedBuilder()
 		.setColor(0xcd7f32)
@@ -132,11 +134,11 @@ const monsterBattle = async (interaction, winner) => {
 
 	await interaction.channel.send({ embeds: [embed3] });
 
-	await wait(10000);
+	await wait(8000);
 
 	const winnerBattle = await duelMonster(interaction, winner, bossObj);
 
-	await wait(10000);
+	await wait(8000);
 
 	if (winnerBattle === bossObj) {
 		const embed4 = new EmbedBuilder()
@@ -158,7 +160,13 @@ const monsterBattle = async (interaction, winner) => {
 const arenaBattle = async (interaction, players) => {
 	try {
 		const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
-		await wait(10000);
+
+		const embed3 = new EmbedBuilder()
+			.setColor(0xcd7f32)
+			.setDescription('Participants have gathered. Get ready to clash in the arena!\n\nYou have 10 seconds to prepare! Who will be the last one standing?');
+		interaction.channel.send({ embeds: [embed3] });
+
+		await wait(8000);
 
 		const embed1 = new EmbedBuilder()
 			.setColor(0xcd7f32)
@@ -190,7 +198,7 @@ const arenaBattle = async (interaction, players) => {
 				}
 				players.push(duelResult.winner);
 
-				await wait(10000);
+				await wait(8000);
 			}
 			catch (error) {
 				console.error('An error occurred during the arena battle:', error);
@@ -215,6 +223,125 @@ const arenaBattle = async (interaction, players) => {
 	}
 };
 
+const wantedBattle = async (interaction, players) => {
+	try {
+		const wantedIndex = Math.floor(Math.random() * players.length);
+		const wantedPlayer = players[wantedIndex];
+
+		await wait(5000);
+
+		const announceEmbed = new EmbedBuilder()
+			.setColor(0xFF0000)
+			.setDescription(`**${wantedPlayer.playerName}** has been selected as the wanted player!`);
+		await interaction.channel.send({ embeds: [announceEmbed] });
+
+		await wait(8000);
+
+		// Remove the wanted player from the players array
+		players.splice(wantedIndex, 1);
+
+		while (players.length > 0) {
+			const attackerIndex = Math.floor(Math.random() * players.length);
+			const attacker = players[attackerIndex];
+
+			// 25% chance to defeat the wanted player
+			if (Math.random() < 0.25) {
+				await battleUp(interaction, attacker, wantedPlayer);
+
+				await wait(2000);
+
+				const message = duelMessages[Math.floor(Math.random() * duelMessages.length)];
+				const filledMessage = message.replace(new RegExp('\\${winner.playerName}', 'g'), attacker.playerName)
+					.replace(new RegExp('\\${loser.playerName}', 'g'), wantedPlayer.playerName);
+				const embed = new EmbedBuilder()
+					.setColor(0xcd7f32)
+					.setDescription(filledMessage);
+				await interaction.channel.send({ embeds: [embed] });
+				return;
+			}
+			else {
+				players.splice(attackerIndex, 1);
+				await battleUp(interaction, wantedPlayer, attacker);
+
+				await wait(2000);
+
+				const message = duelMessages[Math.floor(Math.random() * duelMessages.length)];
+				const filledMessage = message.replace(new RegExp('\\${winner.playerName}', 'g'), wantedPlayer.playerName)
+					.replace(new RegExp('\\${loser.playerName}', 'g'), attacker.playerName);
+				const embed = new EmbedBuilder()
+					.setColor(0xcd7f32)
+					.setDescription(filledMessage);
+				await interaction.channel.send({ embeds: [embed] });
+			}
+
+			await wait(8000);
+		}
+
+		const embed = new EmbedBuilder()
+			.setColor(0xcd7f32)
+			.setDescription(`The wanted player, **${wantedPlayer.playerName}**, has defeated everyone!\n\nBetter luck next time!`);
+		await interaction.channel.send({ embeds: [embed] });
+	}
+	catch (error) {
+		console.error(error);
+	}
+};
+
+const ffaBattle = async (interaction, players) => {
+	const killCounts = players.map(player => ({ playerName: player.playerName, kills: 0 }));
+
+	const embed0 = new EmbedBuilder()
+		.setColor(0xcd7f32)
+		.setDescription('**START!**');
+	await interaction.channel.send({ embeds: [embed0] });
+
+	await wait(5000);
+
+	const timePerPlayer = 8000;
+	const endTime = Date.now() + (timePerPlayer * players.length) + 120000;
+
+	while (Date.now() < endTime) {
+		const attacker = players.shift();
+		const victim = players.length > 0 ? players.pop() : players[Math.floor(Math.random() * players.length)];
+
+		if (attacker && victim && attacker.playerName !== victim.playerName) {
+			if (Math.random() < 0.5) {
+				const attackerStats = killCounts.find(player => player.playerName === attacker.playerName);
+				attackerStats.kills++;
+
+				await battleUp(interaction, attacker, victim);
+
+				await wait(2000);
+
+				const message = duelMessages[Math.floor(Math.random() * duelMessages.length)];
+				const filledMessage = message.replace(new RegExp('\\${winner.playerName}', 'g'), attacker.playerName)
+					.replace(new RegExp('\\${loser.playerName}', 'g'), victim.playerName);
+				const embed = new EmbedBuilder()
+					.setColor(0xcd7f32)
+					.setDescription(filledMessage);
+				await interaction.channel.send({ embeds: [embed] });
+			}
+
+			players.unshift(victim);
+			players.push(attacker);
+
+			await wait(8000);
+		}
+	}
+
+	const top10 = killCounts.sort((a, b) => b.kills - a.kills).slice(0, 10);
+
+	const leaderboard = top10.map((player, index) => `${index + 1}. **${player.playerName}**: ${player.kills} kills`).join('\n');
+
+	const leaderboardEmbed = new EmbedBuilder()
+		.setColor(0xcd7f32)
+		.setDescription(`🏆 **Leaderboard** 🏆\n\n${leaderboard}`);
+	await interaction.channel.send({ embeds: [leaderboardEmbed] });
+};
+
 module.exports = {
 	arenaBattle,
+	wantedBattle,
+	ffaBattle,
+	duelPlayer,
 };

@@ -18,15 +18,15 @@ const {
 } = require('./src/db');
 
 (async () => {
-	// await Shop.sync({ alter: true })
-	// 	.then(() => {
-	// 		const items = require('./assets/item_db.json');
-	// 		for (let item = 0; item < items.length; item++) {
-	// 			Shop.create(items[item]);
-	// 		}
-	// 		console.log('Shop data import completed.');
-	// 	})
-	// 	.catch((error) => console.log(error));
+	await Shop.sync({ force: true })
+		.then(() => {
+			const items = require('./assets/item_db.json');
+			for (let item = 0; item < items.length; item++) {
+				Shop.create(items[item]);
+			}
+			console.log('Shop data import completed.');
+		})
+		.catch((error) => console.log(error));
 
 	// await Monster.sync({ force: true })
 	// 	.then(() => {

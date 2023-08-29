@@ -14,9 +14,10 @@ async function buttonPages(
 ) {
 	try {
 		if (pages.length === 1) {
+			const components = selectMenu ? [new ActionRowBuilder().addComponents(selectMenu)] : [];
 			const page = await interaction.editReply({
 				embeds: pages,
-				components: [],
+				components: components,
 				fetchReply: true,
 			});
 

@@ -14,10 +14,7 @@ module.exports = {
 				.setName('id')
 				.setDescription('Enter item ID.')
 				.setRequired(true)
-				.addChoices(...itemsJson.map(item => ({
-					name: `${item.item_ID}: ${item.itemName}`,
-					value: item.item_ID,
-				}))),
+				.setAutocomplete(true),
 		)
 		.addIntegerOption((option) =>
 			option.setName('amount').setDescription('Enter amount.').setRequired(true),
@@ -66,5 +63,12 @@ module.exports = {
 		catch (error) {
 			console.error(error);
 		}
+	},
+	async autocomplete(interaction) {
+		const focusedValue = interaction.options.getFocused();
+		const choices = itemsJson.map(item => item.item_ID);
+		const filtered = choices.filter(choice => choice.startsWith(focusedValue)).slice(0, 5);
+
+		await interaction.respond(filtered.map(choice => ({ name: choice, value: choice })));
 	},
 };

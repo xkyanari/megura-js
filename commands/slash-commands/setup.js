@@ -278,11 +278,51 @@ module.exports = {
 					if (!guildCheck) {
 						throw new Error('guild not found');
 					}
-					await guildCheck.destroy({
+
+					await interaction.deferReply({ ephemeral: true });
+
+					await guildCheck.update({
+						verifyChannelID: '',
+						verifyMessageID: '',
+						verifyRoleID: '',
+						logsChannelID: '',
+						specialShopChannelID: '',
+						specialShopWebhookID: '',
+						specialShopWebhookToken: '',
+						twitterChannelID: '',
+						raidRoleID: '',
+						margarethaID: '',
+						margarethaName: '',
+						cerberonID: '',
+						cerberonName: '',
+						chatPrefix: '',
+						chatChannelID: '',
+						chatPrompt: '',
+						intro: '',
+						rules: '',
+						closing: '',
+						arenaBoss: '',
+						customToken: '',
+						twitterID: '',
+						username: '',
+						accessToken: '',
+						refreshToken: '',
+						expiresIn: '',
+						expirationTime: '',
+						walletAmount: 500000,
+						webhookId: '',
+						webhookToken: '',
+						webhookChannelID: '',
+						auctionChannelID: '',
+						auctionwebhookId: '',
+						auctionwebhookToken: '',
+						brawlChannelID: '',
+						brawlwebhookId: '',
+						brawlwebhookToken: '',
 						where: { guildID: interaction.guild.id },
 					});
-					await interaction.reply({
-						content: 'Guild has been un-registered.',
+					await interaction.editReply({
+						content: 'Guild has been reset.',
 						ephemeral: true,
 					});
 				}
@@ -299,8 +339,10 @@ module.exports = {
 
 					const logsChannel = options.getChannel('channel');
 
+					await interaction.deferReply({ ephemeral: true });
+
 					await guildCheck.update({ logsChannelID: logsChannel.id });
-					await interaction.reply({
+					await interaction.editReply({
 						content: 'Audit Logs channel assigned.',
 						ephemeral: true,
 					});
@@ -318,6 +360,8 @@ module.exports = {
 
 					const modsChannel = options.getChannel('channel');
 
+					await interaction.deferReply({ ephemeral: true });
+
 					const fieldsToUpdate = {
 						channelField: 'webhookChannelID',
 						webhookIDField: 'webhookId',
@@ -328,7 +372,7 @@ module.exports = {
 					const moderationChannel = await changeChannel(interaction, interaction.guild.id, modsChannel.id, fieldsToUpdate);
 
 					if (moderationChannel) {
-						return await interaction.reply({
+						return await interaction.editReply({
 							content: 'Moderation Logs channel assigned.',
 							ephemeral: true,
 						});
@@ -374,6 +418,8 @@ module.exports = {
 
 					const specialShop = options.getChannel('channel');
 
+					await interaction.deferReply({ ephemeral: true });
+
 					const fieldsToUpdate = {
 						channelField: 'specialShopChannelID',
 						webhookIDField: 'specialShopWebhookID',
@@ -384,7 +430,7 @@ module.exports = {
 					const specialChannel = await changeChannel(interaction, interaction.guild.id, specialShop.id, fieldsToUpdate);
 
 					if (specialChannel) {
-						return await interaction.reply({
+						return await interaction.editReply({
 							content: 'Special Shop announcement channel saved!',
 							ephemeral: true,
 						});

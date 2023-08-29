@@ -1,6 +1,7 @@
-const { EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
+const { EmbedBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { Shop } = require('../../src/db');
 const { footer } = require('../../src/vars');
+const buttonPages = require('../../functions/paginator');
 
 module.exports = {
 	data: {
@@ -13,6 +14,13 @@ module.exports = {
 		const numFormat = (value) =>
 			new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
 
+		const categoryToEmoji = {
+			'weapons': '🗡️',
+			'armor': '🛡️',
+			'consumables': '🍔',
+			'miscellaneous': '🔮',
+		};
+
 		try {
 			const itemList = await Shop.findAll({
 				where: { category: selected },
@@ -20,85 +28,55 @@ module.exports = {
 
 			if (itemList.length === 0) return;
 
-			const embed = new EmbedBuilder()
-				.setColor(0xcd7f32)
-				.setTitle('🛒 **ITEM SHOP:** 🛒')
-				.setFooter(footer);
+			const pages = [];
+			const optionsPages = [];
+			for (let i = 0; i < itemList.length; i += 4) {
+				const embed = new EmbedBuilder()
+					.setColor(0xcd7f32)
+					.setTitle('🛒 **ITEM SHOP:** 🛒')
+					.setDescription('Type `/buy <item ID> <amount>` to buy in bulk.')
+					.setFooter(footer);
 
-			const button = new ActionRowBuilder().addComponents(
-				new ButtonBuilder()
-					.setCustomId('profile')
-					.setEmoji('👤')
-					.setLabel('Profile')
-					.setStyle(ButtonStyle.Success),
-				new ButtonBuilder()
-					.setCustomId('inventory')
-					.setEmoji('🛄')
-					.setLabel('Inventory')
-					.setStyle(ButtonStyle.Primary),
-			);
+				const slicedItems = itemList.slice(i, i + 4);
+				const itemOptions = slicedItems.map(item => ({ label: item.itemName, value: item.itemName }));
+				optionsPages.push(itemOptions);
 
-			const itemOptions = [];
-			itemList.forEach((item) => {
-				const itemStats = [];
-				if (item.totalHealth > 0) {
-					itemStats.push(`Total Health: ${item.totalHealth}\n`);
-				}
-				if (item.totalAttack > 0) {
-					itemStats.push(`Total Attack: ${item.totalAttack}\n`);
-				}
-				if (item.totalDefense > 0) {
-					itemStats.push(`Total Defense: ${item.totalDefense}\n`);
-				}
-				if (item.description) {
-					itemStats.push(`Description: ${item.description}\n`);
-				}
-				itemStats.push(`Level: ${item.level}\n`);
-				itemStats.push(`Price: $${numFormat(item.price)} IURA\n`);
-				itemStats.push(`Item ID: \`${item.item_ID}\``);
-				itemOptions.push({ label: item.itemName, value: item.itemName });
+				slicedItems.forEach((item) => {
+					const emoji = categoryToEmoji[item.category] || '🔍';
+					const itemStats = [];
+					if (item.totalHealth > 0) {
+						itemStats.push(`Total Health: ${item.totalHealth}\n`);
+					}
+					if (item.totalAttack > 0) {
+						itemStats.push(`Total Attack: ${item.totalAttack}\n`);
+					}
+					if (item.totalDefense > 0) {
+						itemStats.push(`Total Defense: ${item.totalDefense}\n`);
+					}
+					if (item.description) {
+						itemStats.push(`Description: ${item.description}\n`);
+					}
+					itemStats.push(`Level: ${item.level}\n`);
+					itemStats.push(`Price: $${numFormat(item.price)} IURA\n`);
+					itemStats.push(`Item ID: \`${item.item_ID}\``);
 
-				embed.addFields({
-					name: `__**${item.itemName}**__`,
-					value: itemStats.join(''),
-					inline: false,
+					embed.addFields({
+						name: `${emoji} __**${item.itemName}**__`,
+						value: itemStats.join(''),
+						inline: false,
+					});
+
 				});
-			});
 
-			const select1 = new StringSelectMenuBuilder()
+				pages.push(embed);
+			}
+
+			const selectMenu = new StringSelectMenuBuilder()
 				.setCustomId('getItem')
 				.setPlaceholder('Choose an item.')
-				.addOptions(itemOptions);
+				.addOptions(optionsPages[0]);
 
-			const select2 = new StringSelectMenuBuilder()
-				.setCustomId('category')
-				.setPlaceholder('Choose an item category.')
-				.addOptions(
-					new StringSelectMenuOptionBuilder()
-						.setLabel('Weapons')
-						.setValue('weapons'),
-					new StringSelectMenuOptionBuilder()
-						.setLabel('Armor')
-						.setValue('armor'),
-					new StringSelectMenuOptionBuilder()
-						.setLabel('Consumables')
-						.setValue('consumables'),
-					new StringSelectMenuOptionBuilder()
-						.setLabel('Miscellaneous Items')
-						.setValue('miscellaneous'),
-				);
-
-			const row1 = new ActionRowBuilder()
-				.addComponents(select1);
-			const row2 = new ActionRowBuilder()
-				.addComponents(select2);
-
-			const actionRow = [row1, row2, button];
-
-			return await interaction.editReply({
-				embeds: [embed],
-				components: actionRow,
-			});
+			await buttonPages(interaction, pages, selectMenu, optionsPages);
 		}
 		catch (error) {
 			console.log(error);

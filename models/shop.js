@@ -44,9 +44,7 @@ module.exports = (sequelize, DataTypes) => {
 				defaultValue: 0,
 				allowNull: false,
 			},
-			description: {
-				type: DataTypes.TEXT,
-			},
+			description: DataTypes.TEXT,
 			item_ID: DataTypes.TEXT,
 			guildID: DataTypes.TEXT,
 		},

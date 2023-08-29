@@ -1,4 +1,4 @@
-const { EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder } = require('discord.js');
 const { footer, shopImage } = require('../src/vars');
 
 module.exports = async (interaction) => {
@@ -31,22 +31,9 @@ module.exports = async (interaction) => {
 		const row = new ActionRowBuilder()
 			.addComponents(select);
 
-		const button1 = new ActionRowBuilder().addComponents(
-			new ButtonBuilder()
-				.setCustomId('profile')
-				.setEmoji('👤')
-				.setLabel('Profile')
-				.setStyle(ButtonStyle.Success),
-			new ButtonBuilder()
-				.setCustomId('inventory')
-				.setEmoji('🛄')
-				.setLabel('Inventory')
-				.setStyle(ButtonStyle.Primary),
-		);
-
 		await interaction.reply({
 			embeds: [embed],
-			components: [row, button1],
+			components: [row],
 		});
 
 	}

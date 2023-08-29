@@ -4,7 +4,7 @@ const {
 	PermissionFlagsBits,
 } = require('discord.js');
 const { Player, Guild } = require('../../src/db');
-const { arenaBattle } = require('../../functions/arena');
+const { arenaBattle, wantedBattle, ffaBattle } = require('../../functions/arena');
 const { footer } = require('../../src/vars');
 const { validateFeature } = require('../../src/feature');
 
@@ -37,6 +37,8 @@ module.exports = {
 							{ name: 'Battle Royale: Evolving Classic', value: 'evolving' },
 							{ name: 'Battle Royale: Evolving Deathmatch', value: 'evolving-deathmatch' },
 							{ name: 'Battle Royale: Deathmatch', value: 'deathmatch' },
+							{ name: 'Battle Royale: Most Wanted', value: 'wanted' },
+							{ name: 'Battle Royale: Free For All', value: 'ffa' },
 						)
 						.setRequired(false),
 				),
@@ -70,6 +72,8 @@ module.exports = {
 						evolving: 'Battle Royale: Evolving Classic',
 						'evolving-deathmatch': 'Battle Royale: Evolving Deathmatch',
 						deathmatch: 'Battle Royale: Deathmatch',
+						wanted: 'Battle Royale: Most Wanted',
+						ffa: 'Battle Royale: Free For All',
 					};
 					const mode = interaction.options.getString('mode') || 'classic';
 					const timer = interaction.options.getString('timer') || '2';
@@ -102,6 +106,8 @@ module.exports = {
 					}));
 
 					switch (mode) {
+						case 'ffa':
+						case 'wanted':
 						case 'classic':
 						case 'evolving':
 							playerObjects = playerObjects.map(player => ({
@@ -174,10 +180,15 @@ module.exports = {
 							.setDescription(`Looks like no one wanted to accept ${collectedPlayers[0].playerName}'s challenge.`);
 						if (collectedPlayers.length < 2) return interaction.channel.send({ embeds: [embed2] });
 
-						const embed3 = new EmbedBuilder()
-							.setColor(0xcd7f32)
-							.setDescription('Participants have gathered. Get ready to clash in the arena!\n\nYou have 10 seconds to prepare! Who will be the last one standing?');
-						interaction.channel.send({ embeds: [embed3] });
+						if (mode === 'wanted') {
+							wantedBattle(interaction, collectedPlayers);
+							return;
+						}
+						if (mode === 'ffa') {
+							ffaBattle(interaction, collectedPlayers);
+							return;
+						}
+
 						arenaBattle(interaction, collectedPlayers);
 					});
 				}
