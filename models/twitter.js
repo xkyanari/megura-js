@@ -49,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			registrationID: {
 				type: DataTypes.TEXT,
-			}
+			},
 		},
 		{
 			freezeTableName: true,

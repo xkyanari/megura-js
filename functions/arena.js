@@ -183,7 +183,8 @@ const monsterBattle = async (interaction, winner) => {
 			await user.increment({ oresEarned: amount });
 			return await interaction.editReply({ content: `${userMention(winner.discordID)} obtained ${amount} ${oreEmoji}.` });
 		}
-	} catch (error) {
+	}
+	catch (error) {
 		console.log(error);
 	}
 };
