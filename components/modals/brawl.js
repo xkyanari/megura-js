@@ -69,9 +69,28 @@ module.exports = {
 					if (brawl && !brawl.outcome) {
 						brawl.status = 'expired';
 						await brawl.save();
+
+						const expiredChallenger = await Player.findOne({ where: { discordID: challengerId, guildID: interaction.guild.id } });
+						if (expiredChallenger) {
+							expiredChallenger.oresEarned += wager;
+							await expiredChallenger.save();
+						}
+
+						if (!isTestnet) {
+							guild.walletAmount -= wager;
+							await guild.save();
+						}
 					}
 
-					if (message) await message.delete();
+					// Try to delete the message
+					try {
+						if (message) await message.delete();
+					}
+					catch (err) {
+						if (err.code !== 10008) {
+							console.error('An unexpected error occurred while deleting the message:', err);
+						}
+					}
 				}
 				catch (error) {
 					console.error('An error occurred:', error);

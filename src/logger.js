@@ -3,6 +3,8 @@ require('winston-daily-rotate-file');
 
 // time is in UTC
 
+const consoleTransport = new winston.transports.Console();
+
 const errorTransport = new winston.transports.DailyRotateFile({
 	filename: 'logs/error-%DATE%.log',
 	datePattern: 'YYYY-MM-DD',
@@ -24,7 +26,7 @@ const logger = winston.createLogger({
 	level: 'info',
 	format: winston.format.json(),
 	defaultMeta: { service: 'user-service' },
-	transports: [errorTransport, combinedTransport],
+	transports: [errorTransport, combinedTransport, consoleTransport],
 });
 
 module.exports = logger;

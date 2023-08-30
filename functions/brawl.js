@@ -169,7 +169,6 @@ const simulateBrawl = async (interaction, channel, player1, player2) => {
 			await brawl_channel.send({ embeds: [embed] });
 		}
 
-		// transfer the ores to the winner
 		await Brawl.findOne({ where: { listingId: listingId } }).then(async (brawl) => {
 			brawl.status = 'completed';
 			brawl.outcome = winner === player1 ? 'challenger_win' : winner === player2 ? 'acceptor_win' : 'draw';
@@ -177,13 +176,24 @@ const simulateBrawl = async (interaction, channel, player1, player2) => {
 
 			if (winner) {
 				const winningPlayer = await Player.findOne({ where: { discordID: winner, guildID: interaction.guild.id } });
-				winningPlayer.walletAmount += brawl.wager;
+				winningPlayer.walletAmount += brawl.wager * 2;
 				await winningPlayer.save();
+			}
+			else {
+				const player1Instance = await Player.findOne({ where: { discordID: player1, guildID: interaction.guild.id } });
+				const player2Instance = await Player.findOne({ where: { discordID: player2, guildID: interaction.guild.id } });
+
+				player1Instance.walletAmount += brawl.wager;
+				player2Instance.walletAmount += brawl.wager;
+
+				await player1Instance.save();
+				await player2Instance.save();
 			}
 
 			await brawl.save();
 			await guild.save();
 		});
+
 		setTimeout(async () => {
 			if (brawl_channel) brawl_channel.delete().catch(console.error);
 			return;
