@@ -15,14 +15,17 @@ module.exports = {
 
 			if (interaction.member.id === challenger.challengerId) return interaction.reply({ content: 'You cannot challenge yourself!', ephemeral: true });
 
-			const acceptor = await Player.findOne({ where: { discordID: interaction.member.id } });
+			const acceptor = await Player.findOne({ where: { discordID: interaction.member.id, guildID: interaction.guild.id } });
 
 			if (!acceptor) {
 				throw new Error('profile not found');
 			}
 
 			if (!isTestnet) {
-				if (acceptor.oresEarned < challenger.wager) return interaction.reply({ content: 'You do not have enough ores to challenge!', ephemeral: true });
+				if (acceptor.oresEarned < challenger.wager) return interaction.reply({ content: 'You do not have enough ores to accept the challenge!', ephemeral: true });
+				const originalWager = challenger.wager;
+				challenger.wager += challenger.wager;
+				acceptor.oresEarned -= originalWager;
 			}
 
 			challenger.acceptorId = interaction.member.id;

@@ -1,5 +1,5 @@
 const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, userMention } = require('discord.js');
-const { Brawl, Player } = require('../../src/db');
+const { Brawl, Player, Guild } = require('../../src/db');
 const { generateId } = require('../../functions/generateId');
 const { isTestnet } = require('../../config.json');
 
@@ -16,9 +16,10 @@ module.exports = {
 		if (!Number(wager)) return await interaction.reply({ content: `Please enter a valid wager. Minimum is 1 ${oreEmoji}`, ephemeral: true });
 
 		try {
-			const challenger = Player.findOne({
+			const challenger = await Player.findOne({
 				where: { discordID: interaction.member.id, guildID: interaction.guild.id },
 			});
+			const guild = await Guild.findOne({ where: { guildID: interaction.guild.id } });
 
 			if (!challenger) {
 				throw new Error('profile not found');
@@ -28,6 +29,8 @@ module.exports = {
 				if (challenger.oresEarned < wager || !challenger.oresEarned) {
 					return await interaction.reply({ content: `You do not have enough ${oreEmoji} to wager.`, ephemeral: true });
 				}
+				challenger.oresEarned -= wager;
+				guild.walletAmount += wager;
 			}
 
 			const listingId = await generateId(5);
