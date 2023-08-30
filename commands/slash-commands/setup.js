@@ -337,6 +337,8 @@ module.exports = {
 						throw new Error('guild not found');
 					}
 
+					await interaction.deferReply({ ephemeral: true });
+
 					const logsChannel = options.getChannel('channel');
 
 					await interaction.deferReply({ ephemeral: true });
@@ -357,6 +359,8 @@ module.exports = {
 					if (!guildCheck) {
 						throw new Error('guild not found');
 					}
+
+					await interaction.deferReply({ ephemeral: true });
 
 					const modsChannel = options.getChannel('channel');
 
@@ -389,6 +393,8 @@ module.exports = {
 						throw new Error('guild not found');
 					}
 
+					await interaction.deferReply({ ephemeral: true });
+
 					const type = options.getString('type');
 					const verifyChannel = options.getChannel('channel');
 					const role = options.getRole('role');
@@ -398,7 +404,7 @@ module.exports = {
 						verifyChannelID: verifyChannel.id,
 						verifyRoleID: role.id,
 					});
-					await interaction.reply({
+					await interaction.editReply({
 						content: 'Captcha settings saved!',
 						ephemeral: true,
 					});
@@ -415,6 +421,8 @@ module.exports = {
 					if (!guildCheck) {
 						throw new Error('guild not found');
 					}
+
+					await interaction.deferReply({ ephemeral: true });
 
 					const specialShop = options.getChannel('channel');
 

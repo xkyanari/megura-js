@@ -16,15 +16,31 @@ const {
 	AuctionItem,
 	Bid,
 } = require('./src/db');
+const fs = require('fs');
+const path = require('path');
 
 (async () => {
 	await Shop.sync({ force: true })
 		.then(() => {
+			// Import items from item_db.json
 			const items = require('./assets/item_db.json');
 			for (let item = 0; item < items.length; item++) {
 				Shop.create(items[item]);
 			}
-			console.log('Shop data import completed.');
+
+			// Import collections from /collections folder
+			const collectionsDir = path.join(__dirname, 'assets', 'collections');
+			fs.readdirSync(collectionsDir).forEach(file => {
+				if (path.extname(file) === '.json') {
+					const filePath = path.join(collectionsDir, file);
+					const collectionData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+					for (let entry = 0; entry < collectionData.length; entry++) {
+						Shop.create(collectionData[entry]);
+					}
+				}
+			});
+
+			console.log('Shop and collections data import completed.');
 		})
 		.catch((error) => console.log(error));
 
@@ -88,11 +104,11 @@ const {
 	// 	})
 	// 	.catch((error) => console.log(error));
 
-	await Twitter.sync({ alter: true })
-		.then(() => {
-			console.log('Twitter table refreshed.');
-		})
-		.catch((error) => console.log(error));
+	// await Twitter.sync({ alter: true })
+	// 	.then(() => {
+	// 		console.log('Twitter table refreshed.');
+	// 	})
+	// 	.catch((error) => console.log(error));
 
 	// await Raid.sync({ alter: true })
 	// 	.then(() => {
@@ -129,7 +145,6 @@ const {
 	// 		console.log('AuctionItem table refreshed.');
 	// 	})
 	// 	.catch((error) => console.log(error));
-
 
 	// 	await Auction.sync({ alter: true })
 	// 	.then(() => {

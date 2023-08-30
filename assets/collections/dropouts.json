@@ -1,0 +1,167 @@
+[
+  {
+    "itemName": "Laptop",
+    "level": 5,
+    "category": "weapons",
+    "totalHealth": 0,
+    "totalAttack": 150,
+    "totalDefense": 0,
+    "price": 150,
+    "description": "The notebook of computer geeks, which they use to jot down all their ideas to invent something that is still non-existent in the world.",
+    "item_ID": "laptop"
+  },
+  {
+    "itemName": "Pocket Money",
+    "level": 7,
+    "category": "weapons",
+    "totalHealth": 0,
+    "totalAttack": 180,
+    "totalDefense": 0,
+    "price": 260,
+    "description": "A small sum of money. It can be lethal if thrown into someone's eyes.",
+    "item_ID": "money"
+  },
+  {
+    "itemName": "Game Controller",
+    "level": 9,
+    "category": "weapons",
+    "totalHealth": 0,
+    "totalAttack": 210,
+    "totalDefense": 0,
+    "price": 370,
+    "description": "A device used with video games or entertainment systems to provide input to a video game, typically to control an object or character in the game.",
+    "item_ID": "controller"
+  },
+  {
+    "itemName": "Hazing Whip",
+    "level": 11,
+    "category": "weapons",
+    "totalHealth": 0,
+    "totalAttack": 250,
+    "totalDefense": 0,
+    "price": 420,
+    "description": "This tool is used for initiation rituals for you to be able to join a fraternity only if you could take 6,666 whip swings without kneeling.",
+    "item_ID": "whip"
+  },
+  {
+    "itemName": "Sharpened Pencil",
+    "level": 13,
+    "category": "weapons",
+    "totalHealth": 0,
+    "totalAttack": 290,
+    "totalDefense": 0,
+    "price": 580,
+    "description": "This sharpened pencil can be a lethal weapon, used as an alternative knife. It can penetrate through the skin and leave the tip of the pencil inside the punctured part.",
+    "item_ID": "pencil"
+  },
+  {
+    "itemName": "Leftover Lunchbox",
+    "level": 5,
+    "category": "consumables",
+    "totalHealth": 300,
+    "totalAttack": 0,
+    "totalDefense": 0,
+    "price": 160,
+    "description": "Some side dish veggies, a big chunck of meat with a bite mark, and a half-rice was left in the lunchbox...",
+    "item_ID": "lunchbox"
+  },
+  {
+    "itemName": "School ID Protector",
+    "level": 5,
+    "category": "armor",
+    "totalHealth": 0,
+    "totalAttack": 0,
+    "totalDefense": 110,
+    "price": 180,
+    "description": "This is used to hide or protect your face in the ID if you place your ID backward ^_^ oops! Rather, protects the edges of your ID from scratches and bumps.",
+    "item_ID": "protector"
+  },
+  {
+    "itemName": "Gaming Chair",
+    "level": 7,
+    "category": "miscellaneous",
+    "totalHealth": 200,
+    "totalAttack": 0,
+    "totalDefense": 120,
+    "price": 270,
+    "description": "These chairs often feature ergonomic design elements to support long hours of play, such as adjustable armrests, lumbar support, headrests, and high backrests.",
+    "item_ID": "chair"
+  },
+  {
+    "itemName": "Backpack",
+    "level": 7,
+    "category": "armor",
+    "totalHealth": 300,
+    "totalAttack": 0,
+    "totalDefense": 110,
+    "price": 300,
+    "description": "It's commonly used by most students because it's convenient for carrying various items such as laptops, books, and school supplies.",
+    "item_ID": "backpack"
+  },
+  {
+    "itemName": "Friendship Badge",
+    "level": 9,
+    "category": "miscellaneous",
+    "totalHealth": 400,
+    "totalAttack": 0,
+    "totalDefense": 140,
+    "price": 450,
+    "description": "A symbolic token given to signify a bond or relationship between two or more individuals",
+    "item_ID": "badge"
+  },
+  {
+    "itemName": "Turtleneck/Same T-shirt Everyday",
+    "level": 9,
+    "category": "armor",
+    "totalHealth": 550,
+    "totalAttack": 0,
+    "totalDefense": 150,
+    "price": 600,
+    "description": "This is the OOTD of richkid dropouts",
+    "item_ID": "turtleneck"
+  },
+  {
+    "itemName": "Blindfold",
+    "level": 11,
+    "category": "miscellaneous",
+    "totalHealth": 700,
+    "totalAttack": 0,
+    "totalDefense": 180,
+    "price": 800,
+    "description": "Commonly used for surprises, but not in this case it is used for hazing rituals.",
+    "item_ID": "blindfold"
+  },
+  {
+    "itemName": "Pro Player Team Shirt",
+    "level": 11,
+    "category": "armor",
+    "totalHealth": 700,
+    "totalAttack": 0,
+    "totalDefense": 200,
+    "price": 900,
+    "description": "One of the dreams of gamers is to become a pro gamer in the future and participate in different tournaments to compete with other leagues.",
+    "item_ID": "pro"
+  },
+  {
+    "itemName": "Dropout Shirt",
+    "level": 13,
+    "category": "armor",
+    "totalHealth": 900,
+    "totalAttack": 0,
+    "totalDefense": 210,
+    "price": 1300,
+    "description": "Tattered shirt with a lot of dirt. It was not washed for several days already... what is this red stains here?! OHHHHHH! ITS A A A- Ketchup only. ^_^",
+    "item_ID": "dropout"
+  },
+  {
+    "itemName": "Penshield Case",
+    "level": 13,
+    "category": "armor",
+    "totalHealth": 1000,
+    "totalAttack": 0,
+    "totalDefense": 230,
+    "price": 1500,
+    "description": "Your ultimate tool to go where your pencil, eraser, sharpener, and some candy wrappers. It can also be used a shield when someone tries to stab you with a pencil",
+    "item_ID": "case"
+  }
+]
