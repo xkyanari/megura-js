@@ -1,7 +1,7 @@
 const { isTestnet } = require('../config.json');
 
 // check environment for audit logs
-const serverID = isTestnet ? '1073827215957032960' : '1110421362255863918';
+const serverID = isTestnet ? '1073827215957032960' : '1032034043686035508';
 
 // text command prefix
 const prefix = '!';
@@ -56,6 +56,7 @@ const footer = {
 };
 const shopImage = 'https://res.cloudinary.com/dnjaazvr7/image/upload/v1686929595/megura/itemshop_ffpkkb.png';
 const specialShopImage = 'https://res.cloudinary.com/dnjaazvr7/image/upload/v1686929595/megura/specialshop_kwt1so.png';
+const brawlImage = 'https://res.cloudinary.com/dnjaazvr7/image/upload/v1692904165/megura/noticeboard_p0zf8k.png';
 
 module.exports = {
 	serverID,
@@ -81,4 +82,5 @@ module.exports = {
 	footer,
 	shopImage,
 	specialShopImage,
+	brawlImage,
 };

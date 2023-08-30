@@ -31,24 +31,35 @@ module.exports = {
 		),
 	cooldown: 3000,
 	async execute(interaction) {
-		const getWallet = interaction.options.getString('wallet');
-		const { member, guild } = interaction;
+		try {
+			const getWallet = interaction.options.getString('wallet');
+			const { member, guild } = interaction;
 
-		const player = await Player.findOne({
-			where: { discordID: member.id, guildID: guild.id },
-		});
+			if (!/^[a-z0-9]+$/i.test(getWallet)) {
+				return await interaction.reply({ content: 'Invalid wallet address.', ephemeral: true });
+			}
 
-		if (!player) {
-			throw new Error('profile not found');
+			const player = await Player.findOne({
+				where: { discordID: member.id, guildID: guild.id },
+			});
+
+			if (!player) {
+				throw new Error('profile not found');
+			}
+
+			await interaction.deferReply();
+
+			if (interaction.options.getSubcommand() === 'ethereum') {
+				await joinEthereum(interaction, getWallet, member, guild);
+			}
+
+			if (interaction.options.getSubcommand() === 'solana') {
+				await joinSolana(interaction, getWallet, member, guild);
+			}
+
 		}
-
-		await interaction.deferReply();
-
-		if (interaction.options.getSubcommand() === 'ethereum') {
-			await joinEthereum(interaction, getWallet, member, guild);
-		}
-		else if (interaction.options.getSubcommand() === 'solana') {
-			await joinSolana(interaction, getWallet, member, guild);
+		catch (error) {
+			console.error(error);
 		}
 	},
 };

@@ -15,6 +15,7 @@ const {
 	Auction,
 	AuctionItem,
 	Bid,
+	Brawl,
 } = require('./src/db');
 const fs = require('fs');
 const path = require('path');
@@ -110,6 +111,12 @@ const path = require('path');
 	// 	})
 	// 	.catch((error) => console.log(error));
 
+	await Brawl.sync({ alter: true })
+		.then(() => {
+			console.log('Brawl table refreshed.');
+		})
+		.catch((error) => console.log(error));
+
 	// await Raid.sync({ alter: true })
 	// 	.then(() => {
 	// 		console.log('Raid table refreshed.');
@@ -122,11 +129,11 @@ const path = require('path');
 	// 	})
 	// 	.catch((error) => console.log(error));
 
-	// await Guild.sync({ alter: true })
-	// 	.then(() => {
-	// 		console.log('Guild table refreshed.');
-	// 	})
-	// 	.catch((error) => console.log(error));
+	await Guild.sync({ alter: true })
+		.then(() => {
+			console.log('Guild table refreshed.');
+		})
+		.catch((error) => console.log(error));
 
 	// await Order.sync({ alter: true })
 	// 	.then(() => {

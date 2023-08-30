@@ -21,6 +21,7 @@ const Twitter = require('../models/twitter')(sequelize, Sequelize.DataTypes);
 const Raid = require('../models/raid')(sequelize, Sequelize.DataTypes);
 const Tweet = require('../models/tweet')(sequelize, Sequelize.DataTypes);
 const Order = require('../models/order')(sequelize, Sequelize.DataTypes);
+const Brawl = require('../models/brawl')(sequelize, Sequelize.DataTypes);
 
 const Auction = require('../models/auction')(sequelize, Sequelize.DataTypes);
 const User = require('../models/user')(sequelize, Sequelize.DataTypes);
@@ -352,4 +353,5 @@ module.exports = {
 	User,
 	Bid,
 	AuctionItem,
+	Brawl,
 };
