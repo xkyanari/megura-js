@@ -24,6 +24,9 @@ module.exports = {
 		try {
 			const itemList = await Shop.findAll({
 				where: { category: selected },
+				order: [
+					['level', 'ASC'],
+				],
 			});
 
 			if (itemList.length === 0) return;

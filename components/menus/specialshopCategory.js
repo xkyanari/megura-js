@@ -17,6 +17,9 @@ module.exports = {
 		try {
 			const itemList = await Shop.findAll({
 				where: { category: selected, guildID: interaction.guild.id },
+				order: [
+					['level', 'ASC'],
+				],
 			});
 
 			if (itemList.length === 0) return;
