@@ -21,11 +21,7 @@ module.exports = {
 					option
 						.setName('timer')
 						.setDescription('Choose a number in minutes.')
-						.addChoices(
-							{ name: '3 minutes', value: '3' },
-							{ name: '5 minutes', value: '5' },
-							{ name: '7 minutes', value: '7' },
-						)
+						.setAutocomplete(true)
 						.setRequired(false),
 				)
 				.addStringOption((option) =>
@@ -74,6 +70,10 @@ module.exports = {
 					const mode = interaction.options.getString('mode') || 'classic';
 					const timer = interaction.options.getString('timer') || '2';
 					const timerMilliseconds = parseInt(timer) * 60 * 1000;
+
+					const unit = timerMilliseconds >= 60000 ? 'minutes' : 'seconds';
+					const time1 = unit === 'minutes' ? (timerMilliseconds / 1000 / 60) / 2 : (timerMilliseconds / 1000) / 2;
+					const time2 = unit === 'minutes' ? (timerMilliseconds / 1000 / 60) / 4 : (timerMilliseconds / 1000) / 4;
 
 					const baseStats = {
 						level: 1,
@@ -149,14 +149,14 @@ module.exports = {
 					const reminder1 = setTimeout(() => {
 						const embed = new EmbedBuilder()
 							.setColor(0xcd7f32)
-							.setDescription(`Hurry up, voyagers! Only ${(timerMilliseconds / 1000) / 2} seconds left to join the battle!`);
+							.setDescription(`Hurry up, voyagers! Only ${time1} ${unit} seconds left to join the battle!`);
 						interaction.channel.send({ embeds: [embed] });
 					}, timerMilliseconds / 2);
 
 					const reminder2 = setTimeout(() => {
 						const embed = new EmbedBuilder()
 							.setColor(0xcd7f32)
-							.setDescription(`Last chance, voyagers! You have ${(timerMilliseconds / 1000) / 4} seconds to step into the arena!`);
+							.setDescription(`Last chance, voyagers! You have ${time2} ${unit} seconds to step into the arena!`);
 						interaction.channel.send({ embeds: [embed] });
 					}, (timerMilliseconds / 4) * 3);
 
@@ -219,5 +219,12 @@ module.exports = {
 				}
 				break;
 		}
+	},
+	async autocomplete(interaction) {
+		const focusedValue = interaction.options.getFocused();
+		const choices = ['3', '5', '7'];
+		const filtered = choices.filter(choice => choice.startsWith(focusedValue));
+
+		await interaction.respond(filtered.map(choice => ({ name: `${choice} minutes`, value: choice })));
 	},
 };

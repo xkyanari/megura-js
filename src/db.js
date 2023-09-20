@@ -14,18 +14,8 @@ const Monster = require('../models/monster')(sequelize, Sequelize.DataTypes);
 const Item = require('../models/item')(sequelize, Sequelize.DataTypes);
 const Iura = require('../models/iura')(sequelize, Sequelize.DataTypes);
 const Shop = require('../models/shop')(sequelize, Sequelize.DataTypes);
-const Contract = require('../models/contract')(sequelize, Sequelize.DataTypes);
-const Quest = require('../models/quest')(sequelize, Sequelize.DataTypes);
 const Guild = require('../models/guild')(sequelize, Sequelize.DataTypes);
-const Twitter = require('../models/twitter')(sequelize, Sequelize.DataTypes);
-const Raid = require('../models/raid')(sequelize, Sequelize.DataTypes);
-const Tweet = require('../models/tweet')(sequelize, Sequelize.DataTypes);
 const Order = require('../models/order')(sequelize, Sequelize.DataTypes);
-
-const Auction = require('../models/auction')(sequelize, Sequelize.DataTypes);
-const User = require('../models/user')(sequelize, Sequelize.DataTypes);
-const Bid = require('../models/bid')(sequelize, Sequelize.DataTypes);
-const AuctionItem = require('../models/auctionItem')(sequelize, Sequelize.DataTypes);
 
 Player.hasOne(Iura, {
 	as: 'iura',
@@ -34,15 +24,6 @@ Player.hasOne(Iura, {
 	onUpdate: 'CASCADE',
 });
 Player.hasMany(Item, { as: 'item', foreignKey: 'accountID' });
-
-User.hasMany(Bid, { foreignKey: 'userId' });
-Bid.belongsTo(User, { foreignKey: 'userId' });
-Auction.hasMany(Bid, { foreignKey: 'auctionId' });
-Bid.belongsTo(Auction, { foreignKey: 'auctionId' });
-Auction.belongsTo(User, { as: 'Winner', foreignKey: 'winnerId' });
-User.hasMany(Auction, { as: 'WonAuctions', foreignKey: 'winnerId' });
-AuctionItem.hasOne(Auction, { foreignKey: 'itemId' });
-Auction.belongsTo(AuctionItem, { foreignKey: 'itemId' });
 
 // for staking
 Reflect.defineProperty(Player.prototype, 'stake', {
@@ -341,15 +322,6 @@ module.exports = {
 	Item,
 	Iura,
 	Shop,
-	Contract,
-	Quest,
 	Guild,
-	Twitter,
-	Raid,
-	Tweet,
 	Order,
-	Auction,
-	User,
-	Bid,
-	AuctionItem,
 };

@@ -1,5 +1,3 @@
-const { encrypt, decrypt } = require('../src/crypto-utils');
-
 module.exports = (sequelize, DataTypes) => {
 	const Guild = sequelize.define(
 		'Guild',
@@ -27,33 +25,6 @@ module.exports = (sequelize, DataTypes) => {
 			closing: DataTypes.TEXT,
 			arenaBoss: DataTypes.BOOLEAN,
 			customToken: DataTypes.TEXT,
-			twitterID: {
-				type: DataTypes.STRING,
-				unique: true,
-			},
-			username: DataTypes.TEXT,
-			accessToken: {
-				type: DataTypes.TEXT,
-				get() {
-					const token = this.getDataValue('accessToken');
-					return token ? decrypt(token) : null;
-				},
-				set(value) {
-					this.setDataValue('accessToken', encrypt(value));
-				},
-			},
-			refreshToken: {
-				type: DataTypes.TEXT,
-				get() {
-					const token = this.getDataValue('refreshToken');
-					return token ? decrypt(token) : null;
-				},
-				set(value) {
-					this.setDataValue('refreshToken', encrypt(value));
-				},
-			},
-			expiresIn: DataTypes.TEXT,
-			expirationTime: DataTypes.DATE,
 			walletAmount: {
 				type: DataTypes.INTEGER,
 				defaultValue: 500000,

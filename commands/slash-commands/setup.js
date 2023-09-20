@@ -5,12 +5,8 @@ const {
 	channelMention,
 	roleMention,
 } = require('discord.js');
-const { Guild, Twitter } = require('../../src/db');
-const captcha = require('../../functions/verify');
-const { twitterAuth } = require('../../functions/twitter');
-const rules = require('../../functions/rules');
+const { Guild } = require('../../src/db');
 const { validateFeature } = require('../../src/feature');
-const { changeChannel } = require('../../functions/webhook');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -49,50 +45,6 @@ module.exports = {
 						.addChannelTypes(ChannelType.GuildText)
 						.setRequired(true),
 				),
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName('captcha')
-				.setDescription('Setup CAPTCHA.')
-				.addStringOption(option =>
-					option.setName('type')
-						.setDescription('Choose whether to use CAPTCHA or add role automatically after a button click.')
-						.setRequired(true)
-						.addChoices(
-							{ name: 'Button', value: 'button' },
-							{ name: 'CAPTCHA', value: 'captcha' },
-						),
-				)
-				.addRoleOption((option) =>
-					option
-						.setName('role')
-						.setDescription('Select the role for verified users.')
-						.setRequired(true),
-				)
-				.addChannelOption((option) =>
-					option
-						.setName('channel')
-						.setDescription(
-							'Choose the channel to post the verification and rules message.',
-						)
-						.addChannelTypes(ChannelType.GuildText)
-						.setRequired(true),
-				),
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName('shop')
-				.setDescription('Special Shop.')
-				.addChannelOption((option) =>
-					option
-						.setName('channel')
-						.setDescription('Choose the channel for the Special Shop announcements.')
-						.addChannelTypes(ChannelType.GuildText)
-						.setRequired(true),
-				),
-		)
-		.addSubcommand((subcommand) =>
-			subcommand.setName('deploy').setDescription('Deploy CAPTCHA to its assigned Verification channel.'),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -142,24 +94,7 @@ module.exports = {
 				),
 		)
 		.addSubcommand((subcommand) =>
-			subcommand.setName('rules').setDescription('Setup rules for the server.'),
-		)
-		.addSubcommand((subcommand) =>
 			subcommand.setName('settings').setDescription('Show current server settings.'),
-		)
-		.addSubcommand((subcommand) =>
-			subcommand
-				.setName('solana')
-				.setDescription('Select which API to use.')
-				.addStringOption(option =>
-					option.setName('type')
-						.setDescription('Choose one.')
-						.setRequired(true)
-						.addChoices(
-							{ name: 'Solscan', value: 'solscan' },
-							{ name: 'Magic Eden', value: 'magiceden' },
-						),
-				),
 		),
 	cooldown: 3000,
 	async execute(interaction) {
@@ -185,107 +120,6 @@ module.exports = {
 						content: 'Guild registered.',
 						ephemeral: true,
 					});
-				}
-				catch (error) {
-					console.error(error);
-				}
-				break;
-
-			case 'twitter':
-				if (!await validateFeature(interaction, guildCheck.subscription, 'ownTwitter')) {
-					return;
-				}
-
-				try {
-
-					if (interaction.member.id !== interaction.guild.ownerId) {
-						return await interaction.reply({
-							content: 'You do not have permission to perform this action.',
-							ephemeral: true,
-						});
-					}
-
-					// if (guildCheck.twitterID) {
-					// 	return await interaction.reply({
-					// 		content: `Server logged in as \`${guildCheck.username}\`.`,
-					// 		ephemeral: true,
-					// 	});
-					// }
-					// else {
-					// 	await twitterAuth(interaction);
-					// }
-					await twitterAuth(interaction);
-
-					setTimeout(() => {
-						Twitter.findOne({ where: { discordID: interaction.member.id } })
-							.then((user) => {
-								console.log('Before transfer, accessToken:', user.accessToken);
-								if (user.twitterID !== null) {
-									// Transfers the tokens to the Guild table
-									Guild.update(
-										{
-											twitterID: user.twitterID,
-											accessToken: user.accessToken,
-											refreshToken: user.refreshToken,
-											expiresIn: user.expiresIn,
-											expirationTime: user.expirationTime,
-										},
-										{ where: { guildID: interaction.guild.id } },
-									)
-										.then(() => {
-											Guild.findOne({ where: { guildID: interaction.guild.id } })
-												.then((guild) => {
-													console.log('After transfer, accessToken:', guild.accessToken);
-												});
-											Twitter.destroy({
-												where: { discordID: interaction.member.id },
-											})
-												.then(() => {
-													return interaction.followUp({
-														content: 'Tokens transferred to the Guild.\n\nServer now logged in.',
-														ephemeral: true,
-													});
-												})
-												.catch((error) => {
-													console.error(
-														'Error clearing tokens in Twitter table:',
-														error,
-													);
-												});
-										})
-										.catch((error) => {
-											console.error(
-												'Error transferring tokens to Guild table:',
-												error,
-											);
-										});
-								}
-								else {
-									Twitter.destroy({
-										where: { discordID: interaction.member.id },
-									});
-									Guild.update(
-										{
-											twitterID: '',
-											username: '',
-											accessToken: '',
-											refreshToken: '',
-											expiresIn: '',
-											expirationTime: '',
-										},
-										{ where: { guildID: interaction.guild.id } },
-									);
-
-									interaction.followUp({
-										content: 'Session expired. Please try logging in again.',
-										ephemeral: true,
-									});
-								}
-							})
-							.catch((error) => {
-								console.error(error);
-							});
-					}, 120000);
 				}
 				catch (error) {
 					console.error(error);
@@ -358,74 +192,6 @@ module.exports = {
 				}
 				break;
 
-			case 'captcha':
-				try {
-					if (!guildCheck) {
-						throw new Error('guild not found');
-					}
-
-					const type = options.getString('type');
-					const verifyChannel = options.getChannel('channel');
-					const role = options.getRole('role');
-
-					await guildCheck.update({
-						type: type,
-						verifyChannelID: verifyChannel.id,
-						verifyRoleID: role.id,
-					});
-					await interaction.reply({
-						content: 'Captcha settings saved!',
-						ephemeral: true,
-					});
-
-
-				}
-				catch (error) {
-					console.log(error);
-				}
-				break;
-
-			case 'shop':
-				try {
-					if (!guildCheck) {
-						throw new Error('guild not found');
-					}
-
-					const specialShop = options.getChannel('channel');
-
-					const fieldsToUpdate = {
-						channelField: 'specialShopChannelID',
-						webhookIDField: 'specialShopWebhookID',
-						webhookTokenField: 'specialShopWebhookToken',
-						webhookName: 'announcementChannel',
-						webhookReason: 'For announcement purchases',
-					};
-					const specialChannel = await changeChannel(interaction, interaction.guild.id, specialShop.id, fieldsToUpdate);
-
-					if (specialChannel) {
-						return await interaction.reply({
-							content: 'Special Shop announcement channel saved!',
-							ephemeral: true,
-						});
-					}
-				}
-				catch (error) {
-					console.error(error);
-				}
-				break;
-
-			case 'deploy':
-				try {
-					if (!guildCheck) {
-						throw new Error('guild not found');
-					}
-					await captcha(interaction, guildCheck.verifyChannelID);
-				}
-				catch (error) {
-					console.error(error);
-				}
-				break;
-
 			case 'factions':
 				if (!await validateFeature(interaction, guildCheck.subscription, 'hasRoles')) {
 					return;
@@ -452,19 +218,6 @@ module.exports = {
 				}
 				catch (error) {
 					console.error(error);
-				}
-				break;
-
-			case 'rules':
-				try {
-					if (!guildCheck) {
-						throw new Error('guild not found');
-					}
-
-					await rules(interaction);
-				}
-				catch (error) {
-					console.log(error);
 				}
 				break;
 
