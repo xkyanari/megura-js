@@ -47,7 +47,7 @@
     "sequelize": "^6.32.1",
     "sqlite3": "^5.1.6",
     "twitter-api-v2": "^1.15.1",
-    "undici": "^5.23.0",
+    "undici": "^5.26.2",
     "winston": "^3.10.0",
     "winston-daily-rotate-file": "^4.7.1"
   },
