@@ -21,8 +21,8 @@ Dahlia is a state-of-the-art Discord bot that runs on chatGPT and supports both 
 ## Packages
 
 - Node.js
-- Alchemy SDK
-- Solscan API
+- ~~Alchemy SDK~~
+- ~~Solscan API~~
 - Discord.js v14
 - Captcha-canvas
 - ChatGPT
@@ -35,7 +35,7 @@ Before running the bot, you will need the following:
 
 - **Node.js**: You will need Node.js installed on your machine to run the bot. You can download and install Node.js from the official website at https://nodejs.org.
 - **Discord Bot Token**: You will need a Discord bot token to authenticate your bot with the Discord API. You can obtain a token by creating a new bot application on the Discord Developer Portal at https://discord.com/developers/applications.
-- **Alchemy API Key**: You will need an Alchemy API key to access the Alchemy Web3 API. You can obtain a key by creating an account on the Alchemy website at https://alchemyapi.io.
+- ~~**Alchemy API Key**: You will need an Alchemy API key to access the Alchemy Web3 API. You can obtain a key by creating an account on the Alchemy website at https://alchemyapi.io.~~
 - **OpenAI API Key**: You will need an OpenAI API key to use the OpenAI package. You can obtain a key by creating an account on the OpenAI website at https://openai.com.
 - **Twitter API Keys and Tokens**: You will need Twitter API keys and tokens to authenticate and integrate the bot with Twitter. You can obtain these by creating a new project and developer account on the Twitter Developer Portal at https://developer.twitter.com.
 - **Database**: You will need a database to store data related to the bot. In this project, SQLite3 is used then later migrated to MySQL 8.0. You can download and install SQLite3 from the official website at https://www.sqlite.org/download.html. Alternatively, you can use other databases supported by Sequelize, such as PostgreSQL, MySQL, or MariaDB.
@@ -43,7 +43,7 @@ Before running the bot, you will need the following:
 ## List of Discord bot features (work in progress)
 
 - [x] Verification with Captcha
-- [x] NFT Verification
+- [x] ~~NFT Verification~~
 - [ ] Create and manage Giveaways
 - [ ] Create and manage Raffles
 - [x] Post announcements for orders, etc.
