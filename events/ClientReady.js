@@ -5,6 +5,7 @@ const Queue = require('bull');
 // const app = require('../server');
 const { endAuction } = require('../functions/endAuction');
 const { dahliaName, dahliaAvatar } = require('../config.json');
+const { cleanupOldLogs } = require('../functions/logs');
 
 let Discord;
 try {
@@ -50,6 +51,8 @@ module.exports = {
 
 		await sequelize.sync(sync.default);
 		console.log('Database connection successful.');
+		await cleanupOldLogs();
+		setInterval(cleanupOldLogs, 24 * 60 * 60 * 1000);
 
 		// app.listen(port, () => {
 		// 	console.log(`Express server is running on http://localhost:${port}`);
@@ -62,12 +65,13 @@ module.exports = {
 			const { channelId, guildId, userId, replyChannelId } = job.data;
 
 			const guild = client.guilds.cache.get(guildId);
-			const channel = guild.channels.cache.get(channelId);
 
 			if (!guild) {
 				console.error('Guild not found');
 				return done(new Error('guild not found'));
 			}
+
+			const channel = guild.channels.cache.get(channelId);
 
 			if (!channel) {
 				console.error('Channel not found');

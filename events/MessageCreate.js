@@ -54,7 +54,7 @@ const generateSummary = async (chatLog) => {
 module.exports = {
 	name: Events.MessageCreate,
 	async execute(message) {
-		if (message.author.bot) return;
+		if (!message.inGuild() || message.author.bot) return;
 
 		const botMember = message.channel.guild.members.cache.get(message.client.user.id);
 		const permissions = message.channel.permissionsFor(botMember);
@@ -92,7 +92,7 @@ module.exports = {
 			}
 
 			const isOnVerifyChannel =
-				message.channel.id === guildCheck.verifyChannelID;
+				message.channel.id === guildCheck?.verifyChannelID;
 
 			if (isOnVerifyChannel) {
 				await message.delete();
@@ -118,7 +118,7 @@ module.exports = {
 				resetUserTimeout(message.author.id);
 
 				try {
-					if (guildCheck.chatChannelID && message.channel.id !== guildCheck.chatChannelID) return;
+					if (guildCheck?.chatChannelID && message.channel.id !== guildCheck.chatChannelID) return;
 					if (message.channel.id !== chatUsers.get(message.author.id)) return;
 
 					let chatLog = [

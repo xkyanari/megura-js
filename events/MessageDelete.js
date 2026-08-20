@@ -8,23 +8,24 @@ const sendLogs = require('../functions/logs');
 module.exports = {
 	name: Events.MessageDelete,
 	async execute(message) {
-		if (message.author.bot) return;
+		if (!message.guild || !message.author || message.author.bot) return;
 
 		try {
+			const deletedContent = message.content ?? '[content unavailable]';
 			const embed = new EmbedBuilder()
 				.setTitle('Message Deleted.')
 				.setColor('Red').setDescription(`
                     > **Author** : <@${message.author.id}>
                     > **Date** : ${message.createdAt}
                     > **Channel** : <#${message.channel.id}>
-                    > **Deleted Message** : \`${message.content.replace(
+					> **Deleted Message** : \`${deletedContent.replace(
 		/`/g,
 		'\'',
 	)}\`
                 `);
 
 			const logEntry = `Message Deleted: ${message.author.tag} - ${message.author.id
-			} deleted "${message.content.replace(/`/g, '\'')}"`;
+			} deleted "${deletedContent.replace(/`/g, '\'')}"`;
 			return sendLogs(message.client, message.guild.id, embed, logEntry);
 		}
 		catch (error) {

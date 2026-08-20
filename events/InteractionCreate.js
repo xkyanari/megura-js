@@ -25,7 +25,8 @@ module.exports = {
 				return;
 			}
 
-			const counterKey = `counter:${interaction.user.id}:${interaction.guild.id}`;
+			const interactionScope = interaction.guildId ?? 'dm';
+			const counterKey = `counter:${interaction.user.id}:${interactionScope}`;
 
 			let counter = await redis.lrange(counterKey, 0, -1);
 			counter = counter ? counter.map(Number) : [];
@@ -66,7 +67,7 @@ module.exports = {
 			await redis.ltrim(counterKey, -MAX_CONSECUTIVE_COMMANDS, -1);
 			await redis.expire(counterKey, 30);
 
-			const cooldownData = `${interaction.user.id}:${interaction.guild.id}:${interaction.commandName}`;
+			const cooldownData = `${interaction.user.id}:${interactionScope}:${interaction.commandName}`;
 			const existingCooldown = await redis.get(cooldownData);
 			if (existingCooldown) {
 				const remainingTime = existingCooldown - Date.now();
@@ -116,6 +117,7 @@ module.exports = {
 
 					await interaction.reply({ embeds: [embed], ephemeral: true });
 					client.cooldown.delete(cooldownData);
+					return;
 				}
 
 				const embed = new EmbedBuilder().setColor('Red').setDescription(`
@@ -133,7 +135,8 @@ module.exports = {
 			const button = buttons.get(customId);
 			if (!button) return new Error('There is no code for this button.');
 
-			const cooldownData = `${customId}:${interaction.user.id}:${interaction.guild.id}`;
+			const interactionScope = interaction.guildId ?? 'dm';
+			const cooldownData = `${customId}:${interaction.user.id}:${interactionScope}`;
 
 			if (client.cooldown.has(cooldownData)) {
 				const timer = ms(client.cooldown.get(cooldownData) - Date.now());

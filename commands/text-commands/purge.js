@@ -8,17 +8,22 @@ module.exports = {
 	async execute(message, args) {
 		logger.log({
 			level: 'info',
-			message: `User: ${message.author.id}, Command: ${this.data.name}, Time: ${new Date().toISOString()}`,
+			message: `User: ${message.author.id}, Command: purge, Time: ${new Date().toISOString()}`,
 		});
+
+		if (!message.member.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
+			return message.reply({
+				content: 'You need the Manage Messages permission to use this command.',
+			});
+		}
 
 		if (
 			!message.channel
 				.permissionsFor(message.client.user)
 				.has(PermissionsBitField.Flags.ManageMessages)
 		) {
-			return await message.channel.send({
+			return message.channel.send({
 				content: 'I don\'t seem have permissions to purge messages here.',
-				ephemeral: true,
 			});
 		}
 
