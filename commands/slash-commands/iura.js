@@ -100,7 +100,7 @@ module.exports = {
 		const { member, guild } = interaction;
 
 		try {
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: 64 });
 
 			const player = await Player.findOne({
 				where: { discordID: member.id, guildID: guild.id },
@@ -140,7 +140,7 @@ module.exports = {
 						if (wallet_deposit > balance.walletAmount) {
 							return interaction.editReply({
 								content: 'You do not have sufficient balance!',
-								ephemeral: true,
+								flags: 64,
 							});
 						}
 
@@ -155,14 +155,14 @@ module.exports = {
 								`**$${numFormat(wallet_deposit)} IURA** has been deposited to \`${balance.bankName
 								}\` account.`,
 							);
-						await interaction.editReply({ embeds: [embed], ephemeral: true });
+						await interaction.editReply({ embeds: [embed], flags: 64 });
 					}
 					else if (wallet_withdraw) {
 						// bank ----> wallet
 						if (wallet_withdraw > balance.bankAmount) {
 							return interaction.editReply({
 								content: 'You do not have sufficient balance!',
-								ephemeral: true,
+								flags: 64,
 							});
 						}
 
@@ -178,7 +178,7 @@ module.exports = {
 									wallet_withdraw,
 								)} IURA** has been removed from \`${balance.bankName}\` account.`,
 							);
-						await interaction.editReply({ embeds: [embed], ephemeral: true });
+						await interaction.editReply({ embeds: [embed], flags: 64 });
 					}
 					else {
 						const embed = new EmbedBuilder()
@@ -186,7 +186,7 @@ module.exports = {
 							.setDescription(
 								'Please deposit and withdraw from your wallet balance only. Thanks!',
 							);
-						await interaction.editReply({ embeds: [embed], ephemeral: true });
+						await interaction.editReply({ embeds: [embed], flags: 64 });
 					}
 					break;
 
@@ -204,7 +204,7 @@ module.exports = {
 						if (bank_deposit > balance.bankAmount) {
 							return interaction.editReply({
 								content: 'You do not have sufficient balance!',
-								ephemeral: true,
+								flags: 64,
 							});
 						}
 
@@ -220,14 +220,14 @@ module.exports = {
 									bank_deposit,
 								)} IURA** has been added to your Stake account.`,
 							);
-						await interaction.editReply({ embeds: [embed1], ephemeral: true });
+						await interaction.editReply({ embeds: [embed1], flags: 64 });
 					}
 					else if (bank_withdraw) {
 						// stake ----> bank
 						if (bank_withdraw > balance.stakedAmount) {
 							return interaction.editReply({
 								content: 'You do not have sufficient balance!',
-								ephemeral: true,
+								flags: 64,
 							});
 						}
 
@@ -243,7 +243,7 @@ module.exports = {
 									bank_withdraw,
 								)} IURA** has been removed from your Stake account.`,
 							);
-						await interaction.editReply({ embeds: [embed1], ephemeral: true });
+						await interaction.editReply({ embeds: [embed1], flags: 64 });
 					}
 					else {
 						const embed1 = new EmbedBuilder()
@@ -251,7 +251,7 @@ module.exports = {
 							.setDescription(
 								'Please stake and unstake from your bank balance only. Thanks!',
 							);
-						await interaction.editReply({ embeds: [embed1], ephemeral: true });
+						await interaction.editReply({ embeds: [embed1], flags: 64 });
 					}
 					break;
 
@@ -262,7 +262,7 @@ module.exports = {
 							.setDescription(
 								`💰 **Wallet:** $${numFormat(balance.walletAmount)} IURA`,
 							);
-						await interaction.editReply({ embeds: [embed2], ephemeral: true });
+						await interaction.editReply({ embeds: [embed2], flags: 64 });
 					}
 					else if (check_balance === 'bank') {
 						const embed2 = new EmbedBuilder()
@@ -272,7 +272,7 @@ module.exports = {
 									balance.bankAmount,
 								)} IURA\n💵 **Staked:** $${numFormat(balance.stakedAmount)} IURA`,
 							);
-						await interaction.editReply({ embeds: [embed2], ephemeral: true });
+						await interaction.editReply({ embeds: [embed2], flags: 64 });
 					}
 					break;
 			}

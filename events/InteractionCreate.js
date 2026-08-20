@@ -59,7 +59,7 @@ module.exports = {
 
 				return interaction.reply({
 					content: 'You\'re doing that too frequently. Please wait a moment before trying again.',
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 
@@ -74,7 +74,7 @@ module.exports = {
 				const timer = ms(remainingTime > 0 ? remainingTime : 0);
 				return interaction.reply({
 					content: `You are on cooldown for another ${timer}`,
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 
@@ -96,14 +96,14 @@ module.exports = {
 				if (error.message === 'profile not found') {
 					return interaction.reply({
 						content: checkProfile,
-						ephemeral: true,
+						flags: 64,
 					});
 				}
 
 				if (error.message === 'guild not found') {
 					return interaction.reply({
 						content: 'Please register the guild first.',
-						ephemeral: true,
+						flags: 64,
 					});
 				}
 
@@ -115,7 +115,7 @@ module.exports = {
 							Please check the permissions and try again.
 						`);
 
-					await interaction.reply({ embeds: [embed], ephemeral: true });
+					await interaction.reply({ embeds: [embed], flags: 64 });
 					client.cooldown.delete(cooldownData);
 					return;
 				}
@@ -125,7 +125,7 @@ module.exports = {
                             Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
 
 				console.log(error);
-				await interaction.reply({ embeds: [embed], ephemeral: true });
+				await interaction.reply({ embeds: [embed], flags: 64 });
 				client.cooldown.delete(cooldownData);
 			}
 		}
@@ -142,7 +142,7 @@ module.exports = {
 				const timer = ms(client.cooldown.get(cooldownData) - Date.now());
 				return interaction.reply({
 					content: `You are on cooldown for another ${timer}.`,
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 
@@ -164,7 +164,7 @@ module.exports = {
                             Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
 
 				console.log(error);
-				await interaction.reply({ embeds: [embed], ephemeral: true });
+				await interaction.reply({ embeds: [embed], flags: 64 });
 				client.cooldown.delete(cooldownData);
 			}
 		}
@@ -186,7 +186,7 @@ module.exports = {
 				const embed = new EmbedBuilder().setColor('Red').setDescription(`
                             Error executing \`${interaction.customId}\`
                             Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
-				await interaction.reply({ embeds: [embed], ephemeral: true });
+				await interaction.reply({ embeds: [embed], flags: 64 });
 			}
 		}
 		if (interaction.isModalSubmit()) {
@@ -207,7 +207,7 @@ module.exports = {
 				const embed = new EmbedBuilder().setColor('Red').setDescription(`
                             Error executing \`${interaction.customId}\`
                             Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
-				await interaction.reply({ embeds: [embed], ephemeral: true });
+				await interaction.reply({ embeds: [embed], flags: 64 });
 			}
 		}
 		if (interaction.isUserContextMenuCommand()) {
@@ -232,7 +232,7 @@ module.exports = {
 				const embed = new EmbedBuilder().setColor('Red').setDescription(`
                             Error executing \`${interaction.commandName}\`
                             Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
-				await interaction.reply({ embeds: [embed], ephemeral: true });
+				await interaction.reply({ embeds: [embed], flags: 64 });
 			}
 		}
 		if (interaction.isAutocomplete()) {
@@ -257,7 +257,7 @@ module.exports = {
 				const embed = new EmbedBuilder().setColor('Red').setDescription(`
                             Error executing \`${interaction.commandName}\`
                             Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
-				await interaction.reply({ embeds: [embed], ephemeral: true });
+				await interaction.reply({ embeds: [embed], flags: 64 });
 			}
 		}
 	},

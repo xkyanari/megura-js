@@ -75,7 +75,7 @@ module.exports = {
 						throw new Error('guild not found');
 					}
 
-					await interaction.deferReply({ ephemeral: true });
+					await interaction.deferReply({ flags: 64 });
 
 					const channel = options.getChannel('channel');
 
@@ -91,7 +91,7 @@ module.exports = {
 					if (brawlChannel) {
 						return await interaction.editReply({
 							content: 'Brawl channel assigned.',
-							ephemeral: true,
+							flags: 64,
 						});
 					}
 				}

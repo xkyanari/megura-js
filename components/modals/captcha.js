@@ -14,7 +14,7 @@ module.exports = {
 		if (!captchaData) {
 			return interaction.reply({
 				content: 'This CAPTCHA has expired. Please click Verify and try again.',
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 
@@ -23,14 +23,14 @@ module.exports = {
 		if (interaction.guild.id !== guildID || interaction.member.id !== userID) {
 			return interaction.reply({
 				content: 'This CAPTCHA was created for a different user or server.',
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 
 		if (captchaCode.toLowerCase() !== text.toLowerCase()) {
 			return interaction.reply({
 				content: 'The captcha code you entered is incorrect. Please try again.',
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 
@@ -41,7 +41,7 @@ module.exports = {
 		if (!guildCheck || !guildCheck.verifyRoleID) {
 			return interaction.reply({
 				content: 'The "Verified" role does not exist. Please contact the guild admins.',
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 
@@ -49,7 +49,7 @@ module.exports = {
 		if (!addRole) {
 			return interaction.reply({
 				content: 'The "Verified" role could not be found. Please contact the guild admins.',
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 
@@ -59,7 +59,7 @@ module.exports = {
 
 		await interaction.reply({
 			content: 'You have been successfully verified!',
-			ephemeral: true,
+			flags: 64,
 		});
 	},
 };

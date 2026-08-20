@@ -23,14 +23,14 @@ module.exports = async (interaction, channelID) => {
 	) {
 		return await interaction.reply({
 			content: 'I don\'t seem to have permissions to send messages on that channel.',
-			ephemeral: true,
+			flags: 64,
 		});
 	}
 
 	if (!guild.intro || !guild.rules || !guild.closing) {
 		return interaction.reply({
 			content: 'You don\'t have any rules set yet.',
-			ephemeral: true,
+			flags: 64,
 		});
 	}
 
@@ -75,7 +75,7 @@ module.exports = async (interaction, channelID) => {
 
 		await interaction.reply({
 			content: 'Verification message has been deployed!',
-			ephemeral: true,
+			flags: 64,
 		});
 	}
 	catch (error) {

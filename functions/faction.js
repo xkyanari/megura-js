@@ -10,7 +10,7 @@ module.exports = async (interaction) => {
 		if (!guildCheck.margarethaID || !guildCheck.cerberonID) {
 			return interaction.reply({
 				content: 'Please assign roles for Margaretha and/or Cerberon first.',
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 

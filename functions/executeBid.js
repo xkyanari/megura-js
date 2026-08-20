@@ -6,11 +6,11 @@ const { dahliaAvatar, dahliaName } = require('../src/vars');
 
 const executeBid = async (interaction, bidAmount) => {
 	try {
-		await interaction.deferReply({ ephemeral: true });
+		await interaction.deferReply({ flags: 64 });
 		const userGuildId = `${interaction.member.id}-${interaction.guild.id}`;
 		const user = await User.findOne({ where: { userGuildId } });
 
-		if (!user || !user.walletAddress) return await interaction.editReply({ content: 'Please register your wallet first.', ephemeral: true });
+		if (!user || !user.walletAddress) return await interaction.editReply({ content: 'Please register your wallet first.', flags: 64 });
 
 		const bid = await placeBid(interaction, user, bidAmount);
 
@@ -76,7 +76,7 @@ const executeBid = async (interaction, bidAmount) => {
 		if (message) {
 			return await interaction.editReply({
 				content: `Placed bid for ${bid.bidAmount / 100000000} 🪙.`,
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 
@@ -85,19 +85,19 @@ const executeBid = async (interaction, bidAmount) => {
 		if (error instanceof OptimisticLockError) {
 			return await interaction.editReply({
 				content: 'Your bid was unsuccessful because you were outbid. Please try again.',
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 
 		if (error.message === 'Insufficient funds') {
-			return await interaction.editReply({ content: 'You do not have enough funds to place this bid.', ephemeral: true });
+			return await interaction.editReply({ content: 'You do not have enough funds to place this bid.', flags: 64 });
 		}
 		if (error.message === 'The auction has already ended.') {
-			return await interaction.editReply({ content: 'The auction has already ended.', ephemeral: true });
+			return await interaction.editReply({ content: 'The auction has already ended.', flags: 64 });
 		}
 		else {
 			console.error(error);
-			return await interaction.editReply({ content: 'Failed to place a bid due to an error.', ephemeral: true });
+			return await interaction.editReply({ content: 'Failed to place a bid due to an error.', flags: 64 });
 		}
 	}
 };

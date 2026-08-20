@@ -19,7 +19,7 @@ module.exports = async (interaction) => {
 		if (!guildCheck || !guildCheck.verifyRoleID) {
 			return interaction.reply({
 				content: 'The "Verified" role does not exist. Please contact the guild admins.',
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 
@@ -27,7 +27,7 @@ module.exports = async (interaction) => {
 		if (verifiedRole) {
 			return interaction.reply({
 				content: 'You\'re already verified!',
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 
@@ -66,7 +66,7 @@ module.exports = async (interaction) => {
 		await interaction.reply({
 			embeds: [embed],
 			components: [button],
-			ephemeral: true,
+			flags: 64,
 		});
 	}
 	catch (error) {

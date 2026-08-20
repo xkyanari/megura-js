@@ -12,8 +12,8 @@ module.exports = {
 		const oreEmoji = interaction.client.emojis.cache.get('1119212796136144956') || '💎';
 		const challengerId = interaction.member.id;
 
-		if (wager < 1) return await interaction.reply({ content: `Please enter a valid wager. Minimum is 1 ${oreEmoji}`, ephemeral: true });
-		if (!Number(wager)) return await interaction.reply({ content: `Please enter a valid wager. Minimum is 1 ${oreEmoji}`, ephemeral: true });
+		if (wager < 1) return await interaction.reply({ content: `Please enter a valid wager. Minimum is 1 ${oreEmoji}`, flags: 64 });
+		if (!Number(wager)) return await interaction.reply({ content: `Please enter a valid wager. Minimum is 1 ${oreEmoji}`, flags: 64 });
 
 		try {
 			const challenger = await Player.findOne({
@@ -27,7 +27,7 @@ module.exports = {
 
 			if (!isTestnet) {
 				if (challenger.oresEarned < wager || !challenger.oresEarned) {
-					return await interaction.reply({ content: `You do not have enough ${oreEmoji} to wager.`, ephemeral: true });
+					return await interaction.reply({ content: `You do not have enough ${oreEmoji} to wager.`, flags: 64 });
 				}
 				challenger.oresEarned -= wager;
 				guild.walletAmount += wager;

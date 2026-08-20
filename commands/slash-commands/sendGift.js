@@ -18,7 +18,7 @@ module.exports = {
 			if (member.id === recipient.id) {
 				return interaction.reply({
 					content: 'You can\'t transfer money to yourself!',
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 
@@ -52,7 +52,7 @@ module.exports = {
 			if (amount > updatedPlayer1.iura.walletAmount) {
 				return interaction.editReply({
 					content: 'You do not have sufficient balance!',
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 

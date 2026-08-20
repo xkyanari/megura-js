@@ -109,7 +109,7 @@ module.exports = {
 
 				}
 				else {
-					await interaction.editReply({ content: 'Sorry, there was a problem starting the auction.', ephemeral: true });
+					await interaction.editReply({ content: 'Sorry, there was a problem starting the auction.', flags: 64 });
 				}
 				break;
 
@@ -174,7 +174,7 @@ module.exports = {
 							components: [],
 						});
 
-						if (message) return await interaction.editReply({ content: 'Auction ended successfully.', ephemeral: true });
+						if (message) return await interaction.editReply({ content: 'Auction ended successfully.', flags: 64 });
 					}
 					else {
 						await interaction.editReply({ content: 'Failed to end auction due to an error.' });
@@ -207,7 +207,7 @@ module.exports = {
 					if (updateChannel) {
 						return await interaction.editReply({
 							content: `Auction Channel has been set to ${channelMention(channel.id)}.\n`,
-							ephemeral: true,
+							flags: 64,
 						});
 					}
 				}

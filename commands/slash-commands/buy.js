@@ -42,13 +42,13 @@ module.exports = {
 			if (price * amount > player.iura.walletAmount) {
 				return interaction.reply({
 					content: 'You do not have sufficient balance!',
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 			if (amount <= 0) {
 				return interaction.reply({
 					content: 'Item quantity entered should be at least 1.',
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 

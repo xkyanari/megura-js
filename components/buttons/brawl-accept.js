@@ -13,7 +13,7 @@ module.exports = {
 
 			const challenger = await Brawl.findOne({ where: { listingId: listingId } });
 
-			if (interaction.member.id === challenger.challengerId) return interaction.reply({ content: 'You cannot challenge yourself!', ephemeral: true });
+			if (interaction.member.id === challenger.challengerId) return interaction.reply({ content: 'You cannot challenge yourself!', flags: 64 });
 
 			const acceptor = await Player.findOne({ where: { discordID: interaction.member.id, guildID: interaction.guild.id } });
 
@@ -22,7 +22,7 @@ module.exports = {
 			}
 
 			if (!isTestnet) {
-				if (acceptor.oresEarned < challenger.wager) return interaction.reply({ content: 'You do not have enough ores to accept the challenge!', ephemeral: true });
+				if (acceptor.oresEarned < challenger.wager) return interaction.reply({ content: 'You do not have enough ores to accept the challenge!', flags: 64 });
 				const originalWager = challenger.wager;
 				challenger.wager += challenger.wager;
 				acceptor.oresEarned -= originalWager;

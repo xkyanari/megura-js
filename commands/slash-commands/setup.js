@@ -158,14 +158,14 @@ module.exports = {
 					if (guildCheck) {
 						return await interaction.reply({
 							content: 'Guild already registered.',
-							ephemeral: true,
+							flags: 64,
 						});
 					}
 
 					await Guild.create({ guildID: interaction.guild.id });
 					await interaction.reply({
 						content: 'Guild registered.',
-						ephemeral: true,
+						flags: 64,
 					});
 				}
 				catch (error) {
@@ -179,7 +179,7 @@ module.exports = {
 						throw new Error('guild not found');
 					}
 
-					await interaction.deferReply({ ephemeral: true });
+					await interaction.deferReply({ flags: 64 });
 
 					await guildCheck.update({
 						verifyChannelID: '',
@@ -223,7 +223,7 @@ module.exports = {
 					});
 					await interaction.editReply({
 						content: 'Guild has been reset.',
-						ephemeral: true,
+						flags: 64,
 					});
 				}
 				catch (error) {
@@ -237,16 +237,16 @@ module.exports = {
 						throw new Error('guild not found');
 					}
 
-					await interaction.deferReply({ ephemeral: true });
+					await interaction.deferReply({ flags: 64 });
 
 					const logsChannel = options.getChannel('channel');
 
-					await interaction.deferReply({ ephemeral: true });
+					await interaction.deferReply({ flags: 64 });
 
 					await guildCheck.update({ logsChannelID: logsChannel.id });
 					await interaction.editReply({
 						content: 'Audit Logs channel assigned.',
-						ephemeral: true,
+						flags: 64,
 					});
 				}
 				catch (error) {
@@ -260,11 +260,11 @@ module.exports = {
 						throw new Error('guild not found');
 					}
 
-					await interaction.deferReply({ ephemeral: true });
+					await interaction.deferReply({ flags: 64 });
 
 					const modsChannel = options.getChannel('channel');
 
-					await interaction.deferReply({ ephemeral: true });
+					await interaction.deferReply({ flags: 64 });
 
 					const fieldsToUpdate = {
 						channelField: 'webhookChannelID',
@@ -278,7 +278,7 @@ module.exports = {
 					if (moderationChannel) {
 						return await interaction.editReply({
 							content: 'Moderation Logs channel assigned.',
-							ephemeral: true,
+							flags: 64,
 						});
 					}
 				}
@@ -293,7 +293,7 @@ module.exports = {
 						throw new Error('guild not found');
 					}
 
-					await interaction.deferReply({ ephemeral: true });
+					await interaction.deferReply({ flags: 64 });
 
 					const type = options.getString('type');
 					const verifyChannel = options.getChannel('channel');
@@ -306,7 +306,7 @@ module.exports = {
 					});
 					await interaction.editReply({
 						content: 'Captcha settings saved!',
-						ephemeral: true,
+						flags: 64,
 					});
 
 
@@ -322,11 +322,11 @@ module.exports = {
 						throw new Error('guild not found');
 					}
 
-					await interaction.deferReply({ ephemeral: true });
+					await interaction.deferReply({ flags: 64 });
 
 					const specialShop = options.getChannel('channel');
 
-					await interaction.deferReply({ ephemeral: true });
+					await interaction.deferReply({ flags: 64 });
 
 					const fieldsToUpdate = {
 						channelField: 'specialShopChannelID',
@@ -340,7 +340,7 @@ module.exports = {
 					if (specialChannel) {
 						return await interaction.editReply({
 							content: 'Special Shop announcement channel saved!',
-							ephemeral: true,
+							flags: 64,
 						});
 					}
 				}
@@ -382,7 +382,7 @@ module.exports = {
 					});
 					await interaction.reply({
 						content: 'Factions roles have been set successfully!',
-						ephemeral: true,
+						flags: 64,
 					});
 				}
 				catch (error) {
@@ -501,7 +501,7 @@ module.exports = {
 						embed.addFields(...fields);
 					}
 
-					await interaction.reply({ embeds: [embed], ephemeral: true });
+					await interaction.reply({ embeds: [embed], flags: 64 });
 				}
 				catch (error) {
 					console.error(error);
@@ -551,13 +551,13 @@ module.exports = {
 						await guildCheck.update(updateFields);
 						await interaction.reply({
 							content: responseMsg,
-							ephemeral: true,
+							flags: 64,
 						});
 					}
 					else {
 						await interaction.reply({
 							content: 'No chat settings were provided to update.',
-							ephemeral: true,
+							flags: 64,
 						});
 					}
 				}

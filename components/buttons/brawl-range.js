@@ -3,6 +3,6 @@ module.exports = {
 		name: 'brawl-range',
 	},
 	async execute(interaction) {
-		await interaction.reply({ content: 'You picked `range`.', ephemeral: true });
+		await interaction.reply({ content: 'You picked `range`.', flags: 64 });
 	},
 };

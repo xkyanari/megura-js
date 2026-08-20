@@ -9,7 +9,7 @@ module.exports = {
 	async execute(interaction) {
 		const selected = await interaction.values[0];
 		const oreEmoji = interaction.client.emojis.cache.get('1119212796136144956') || '💎';
-		await interaction.deferUpdate({ ephemeral: true });
+		await interaction.deferUpdate();
 
 		const numFormat = (value) =>
 			new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
@@ -66,7 +66,7 @@ module.exports = {
 			return await interaction.followUp({
 				embeds: [embed],
 				components: [row1],
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 		catch (error) {

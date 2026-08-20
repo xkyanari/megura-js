@@ -29,14 +29,14 @@ module.exports = {
 			if (!item) {
 				return interaction.reply({
 					content: 'You don\'t own that item.',
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 
 			if (!item.equippedAmount === 0) {
 				return interaction.reply({
 					content: `You already have \`${item.itemName}\` unequipped.`,
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 

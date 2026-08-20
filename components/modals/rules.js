@@ -40,7 +40,7 @@ module.exports = {
 			await interaction.reply({
 				content: 'Rules have been saved in the server.',
 				embeds: [embed],
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 		catch (error) {

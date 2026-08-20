@@ -28,7 +28,7 @@ module.exports = {
 		if (!player) {
 			return interaction.reply({
 				content: checkProfile,
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 

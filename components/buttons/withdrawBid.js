@@ -9,12 +9,12 @@ module.exports = {
 	},
 	async execute(interaction) {
 		try {
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: 64 });
 
 			const userGuildId = `${interaction.member.id}-${interaction.guild.id}`;
 			const user = await User.findOne({ where: { userGuildId } });
 
-			if (!user || !user.walletAddress) return await interaction.reply({ content: 'Please register your wallet first.', ephemeral: true });
+			if (!user || !user.walletAddress) return await interaction.reply({ content: 'Please register your wallet first.', flags: 64 });
 
 			const withdraw = await withdrawBid(interaction);
 
@@ -76,7 +76,7 @@ module.exports = {
 			if (message) {
 				return await interaction.editReply({
 					content: 'Your bid was withdrawn.',
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 

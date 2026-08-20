@@ -10,7 +10,7 @@ module.exports = {
 	},
 	async execute(interaction) {
 		try {
-			await interaction.deferReply({ ephemeral: true });
+			await interaction.deferReply({ flags: 64 });
 			const user = await User.findOne({ where: { userGuildId: `${interaction.member.id}-${interaction.guild.id}` } });
 
 			const registrationID = await generateId(10);
@@ -44,7 +44,7 @@ module.exports = {
 			await interaction.editReply({
 				embeds: [embed1],
 				components: [button],
-				ephemeral: true,
+				flags: 64,
 			});
 
 			setTimeout(() => {
@@ -53,13 +53,13 @@ module.exports = {
 						if (user1.walletAddress !== null) {
 							return interaction.followUp({
 								content: 'You\'re now connected!',
-								ephemeral: true,
+								flags: 64,
 							});
 						}
 						else {
 							interaction.followUp({
 								content: 'Please try connecting your wallet again.',
-								ephemeral: true,
+								flags: 64,
 							});
 						}
 					})

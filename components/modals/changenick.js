@@ -14,7 +14,7 @@ module.exports = {
 		if (!VALID_PLAYER_NAME.test(playerName)) {
 			return interaction.reply({
 				content: 'Please use up to 20 letters, numbers, and spaces for your character name.',
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 
@@ -25,7 +25,7 @@ module.exports = {
 		if (!player) {
 			return interaction.reply({
 				content: checkProfile,
-				ephemeral: true,
+				flags: 64,
 			});
 		}
 
@@ -41,7 +41,7 @@ module.exports = {
 
 		await interaction.reply({
 			content: `Thank you, \`${playerName}\`. I like your old name though.`,
-			ephemeral: true,
+			flags: 64,
 		});
 	},
 };

@@ -23,7 +23,7 @@ module.exports = {
 			if (player && player.playerName) {
 				return interaction.reply({
 					content: 'You\'re all set!',
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 

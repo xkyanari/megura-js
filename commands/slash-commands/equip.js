@@ -30,42 +30,42 @@ module.exports = {
 			if (!item) {
 				return interaction.reply({
 					content: 'You don\'t own that item.',
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 
 			if (equipped.length >= 5) {
 				return interaction.reply({
 					content: 'You can equip up to 5 different items only.',
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 
 			if (player.level < item.level) {
 				return interaction.reply({
 					content: 'Your level is too low to equip this item.',
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 
 			if (item.equippedAmount === amount) {
 				return interaction.reply({
 					content: `You already have all \`${item.itemName}\` equipped.`,
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 
 			if (item.quantity < amount) {
 				return interaction.reply({
 					content: `You do not have enough \`${item.itemName}\` to equip.`,
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 
 			await player.updateStats(item.itemName, true, amount);
 			await player.updateItem(id, true);
 
-			await interaction.reply({ content: `You equipped \`${item.itemName}\`.`, ephemeral: true });
+			await interaction.reply({ content: `You equipped \`${item.itemName}\`.`, flags: 64 });
 		}
 		catch (error) {
 			console.error(error);

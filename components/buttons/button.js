@@ -13,11 +13,11 @@ module.exports = {
 		if (
 			interaction.member.roles.cache.some((role) => role.name === verified.name)
 		) {
-			return interaction.reply({ content: 'You\'re all set!', ephemeral: true });
+			return interaction.reply({ content: 'You\'re all set!', flags: 64 });
 		}
 		else {
 			await interaction.member.roles.add(verified);
-			await interaction.reply({ content: 'Verified!', ephemeral: true });
+			await interaction.reply({ content: 'Verified!', flags: 64 });
 		}
 	},
 };

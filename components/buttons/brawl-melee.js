@@ -3,6 +3,6 @@ module.exports = {
 		name: 'brawl-melee',
 	},
 	async execute(interaction) {
-		await interaction.reply({ content: 'You picked `melee`.', ephemeral: true });
+		await interaction.reply({ content: 'You picked `melee`.', flags: 64 });
 	},
 };

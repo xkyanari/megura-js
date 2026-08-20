@@ -217,11 +217,11 @@ module.exports = {
 					const show = interaction.options.getBoolean('show');
 					if (show) {
 						guildCheck.arenaBoss = true;
-						await interaction.reply({ content: 'Arena Boss is turned ON', ephemeral: true });
+						await interaction.reply({ content: 'Arena Boss is turned ON', flags: 64 });
 					}
 					else {
 						guildCheck.arenaBoss = false;
-						await interaction.reply({ content: 'Arena Boss is turned OFF', ephemeral: true });
+						await interaction.reply({ content: 'Arena Boss is turned OFF', flags: 64 });
 					}
 					return guildCheck.save();
 				}

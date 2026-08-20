@@ -10,7 +10,7 @@ module.exports = {
 		const guild = interaction.guild;
 
 		const selected = await interaction.values[0];
-		await interaction.deferReply({ ephemeral: true });
+		await interaction.deferReply({ flags: 64 });
 
 		try {
 			const player = await Player.findOne({

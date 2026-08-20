@@ -33,7 +33,7 @@ module.exports = {
 					)
 					.setDescription(`💰 **Wallet:** $${balanceWallet} IURA`);
 				await interaction
-					.reply({ embeds: [embed], ephemeral: true })
+					.reply({ embeds: [embed], flags: 64 })
 					.catch(console.error);
 			}
 			catch (error) {

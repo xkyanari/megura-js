@@ -63,7 +63,7 @@ async function buttonPages(
 			if (button.user.id !== interaction.user.id) {
 				return button.reply({
 					content: 'You cannot use these buttons',
-					ephemeral: true,
+					flags: 64,
 				});
 			}
 
