@@ -14,12 +14,8 @@ const Monster = require('../models/monster')(sequelize, Sequelize.DataTypes);
 const Item = require('../models/item')(sequelize, Sequelize.DataTypes);
 const Iura = require('../models/iura')(sequelize, Sequelize.DataTypes);
 const Shop = require('../models/shop')(sequelize, Sequelize.DataTypes);
-const Contract = require('../models/contract')(sequelize, Sequelize.DataTypes);
 const Quest = require('../models/quest')(sequelize, Sequelize.DataTypes);
 const Guild = require('../models/guild')(sequelize, Sequelize.DataTypes);
-const Twitter = require('../models/twitter')(sequelize, Sequelize.DataTypes);
-const Raid = require('../models/raid')(sequelize, Sequelize.DataTypes);
-const Tweet = require('../models/tweet')(sequelize, Sequelize.DataTypes);
 const Order = require('../models/order')(sequelize, Sequelize.DataTypes);
 const Brawl = require('../models/brawl')(sequelize, Sequelize.DataTypes);
 
@@ -342,12 +338,8 @@ module.exports = {
 	Item,
 	Iura,
 	Shop,
-	Contract,
 	Quest,
 	Guild,
-	Twitter,
-	Raid,
-	Tweet,
 	Order,
 	Auction,
 	User,

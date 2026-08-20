@@ -20,8 +20,6 @@ module.exports = {
                 > **_/start_** - Initiate creating own character.
                 > **_/profile <username>_** -  Show profile of a user (blank for self).
                 > **_/changenick_** -  Updates player name.
-                > **_/join_** -  Adds your NFT to your player profile.
-                
                 **Quests**
                 > **_/daily_** - Do a random quest to increase/decrease stats or gain Iura.
                 

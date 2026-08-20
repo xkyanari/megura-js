@@ -1,4 +1,4 @@
-const { Monster, Shop, Contract, Quest, Player } = require('../src/db');
+const { Monster, Shop, Quest, Player } = require('../src/db');
 
 module.exports = async () => {
 	try {
@@ -32,13 +32,6 @@ module.exports = async () => {
 			Shop.create(items[item]);
 		}
 		console.log('Item data import completed.');
-
-		// loading contracts
-		const contracts = require('../assets/contracts.json');
-		for (let contract = 0; contract < contracts.length; contract++) {
-			Contract.create(contracts[contract]);
-		}
-		console.log('Contract data import completed.');
 	}
 	catch (error) {
 		console.error(error);

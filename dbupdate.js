@@ -1,14 +1,10 @@
 const {
 	Monster,
 	Shop,
-	Contract,
 	Quest,
 	Player,
 	Item,
 	Iura,
-	Twitter,
-	Raid,
-	Tweet,
 	Order,
 	Guild,
 	User,
@@ -31,15 +27,17 @@ const path = require('path');
 
 			// Import collections from /collections folder
 			const collectionsDir = path.join(__dirname, 'assets', 'collections');
-			fs.readdirSync(collectionsDir).forEach(file => {
-				if (path.extname(file) === '.json') {
-					const filePath = path.join(collectionsDir, file);
-					const collectionData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
-					for (let entry = 0; entry < collectionData.length; entry++) {
-						Shop.create(collectionData[entry]);
+			if (fs.existsSync(collectionsDir)) {
+				fs.readdirSync(collectionsDir).forEach(file => {
+					if (path.extname(file) === '.json') {
+						const filePath = path.join(collectionsDir, file);
+						const collectionData = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+						for (let entry = 0; entry < collectionData.length; entry++) {
+							Shop.create(collectionData[entry]);
+						}
 					}
-				}
-			});
+				});
+			}
 
 			console.log('Shop and collections data import completed.');
 		})
@@ -62,16 +60,6 @@ const path = require('path');
 	// 			Quest.create(quests[quest]);
 	// 		}
 	// 		console.log('Quest data import completed.');
-	// 	})
-	// 	.catch((error) => console.log(error));
-
-	// await Contract.sync({ force: true })
-	// 	.then(() => {
-	// 		const contracts = require('./assets/contracts.json');
-	// 		for (let contract = 0; contract < contracts.length; contract++) {
-	// 			Contract.create(contracts[contract]);
-	// 		}
-	// 		console.log('Contract data import completed.');
 	// 	})
 	// 	.catch((error) => console.log(error));
 
@@ -105,29 +93,11 @@ const path = require('path');
 	// 	})
 	// 	.catch((error) => console.log(error));
 
-	// await Twitter.sync({ alter: true })
-	// 	.then(() => {
-	// 		console.log('Twitter table refreshed.');
-	// 	})
-	// 	.catch((error) => console.log(error));
-
 	await Brawl.sync({ alter: true })
 		.then(() => {
 			console.log('Brawl table refreshed.');
 		})
 		.catch((error) => console.log(error));
-
-	// await Raid.sync({ alter: true })
-	// 	.then(() => {
-	// 		console.log('Raid table refreshed.');
-	// 	})
-	// 	.catch((error) => console.log(error));
-
-	// await Tweet.sync({ alter: true })
-	// 	.then(() => {
-	// 		console.log('Tweet table refreshed.');
-	// 	})
-	// 	.catch((error) => console.log(error));
 
 	await Guild.sync({ alter: true })
 		.then(() => {

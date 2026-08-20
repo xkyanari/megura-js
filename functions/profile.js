@@ -4,7 +4,7 @@ const {
 	ButtonStyle,
 	ActionRowBuilder,
 } = require('discord.js');
-const { Player, Contract } = require('../src/db');
+const { Player } = require('../src/db');
 const {
 	footer,
 	// checkProfile
@@ -86,18 +86,6 @@ module.exports = async (interaction, member) => {
 				value: `${numFormat(player.oresEarned)}`,
 				inline: true,
 			});
-		}
-
-		if (player.imageURL) {
-			const contract = await Contract.findOne({
-				where: { contractAddress: player.contractAddress },
-			});
-			embed.addFields({
-				name: '🖼️ NFT Collection',
-				value: `[${contract.contractName}](${contract.collectionURL})`,
-				inline: false,
-			});
-			embed.setImage(`${player.imageURL}`);
 		}
 
 		await interaction.reply({

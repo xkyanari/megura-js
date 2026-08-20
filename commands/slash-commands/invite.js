@@ -14,7 +14,7 @@ module.exports = {
 			)
 			.setDescription(
 				`**Messinia Graciene: Project DAHLIA**
-                Dahlia is a Discord bot that can read NFT metadata from any collection, allowing it to be utilized for gameplay purposes. We're looking for awesome NFT projects to collaborate with and bring more value to our community!
+                Dahlia is a Discord RPG and server utility bot with storytelling, moderation, and multiplayer game features.
 
                 [>> CLICK ME TO ADD <<](https://discord.com/api/oauth2/authorize?client_id=1108464420465692795&permissions=139855260823&scope=bot)
                 

@@ -7,7 +7,6 @@ const {
 const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const { twitterCallback } = require('./functions/twitter');
 const { voteWebhook } = require('./functions/vote');
 
 // Express server
@@ -36,10 +35,6 @@ app.get('/', (req, res) => {
 
 app.get('/connect', (req, res) => {
 	res.render('wallet');
-});
-
-app.get('/twitter/auth/callback', async (req, res) => {
-	await twitterCallback(req, res);
 });
 
 app.post('/dbl/upvote', async (req, res) => {
