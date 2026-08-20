@@ -19,7 +19,7 @@ const client = new Client({
 	// sweepers: Options.DefaultSweeperSettings,
 });
 
-logs(client, { debug: true });
+logs(client, { debug: false });
 
 client.commands = new Collection();
 client.subCommands = new Collection();
@@ -68,10 +68,12 @@ for (const file of eventFiles) {
 
 // For running components -----------------
 
-const componentsPath = fs.readdirSync('./components');
-for (const folder of componentsPath) {
+const componentsPath = path.join(__dirname, 'components');
+const componentFolders = fs.readdirSync(componentsPath);
+for (const folder of componentFolders) {
+	const folderPath = path.join(componentsPath, folder);
 	const componentFiles = fs
-		.readdirSync(`./components/${folder}`)
+		.readdirSync(folderPath)
 		.filter((file) => file.endsWith('.js'));
 
 	const { buttons, menus, modals } = client;
@@ -81,7 +83,7 @@ for (const folder of componentsPath) {
 	) {
 		case 'buttons':
 			for (const file of componentFiles) {
-				const button = require(`./components/${folder}/${file}`);
+				const button = require(path.join(folderPath, file));
 				buttons.set(button.data.name, button);
 			}
 			break;
@@ -89,7 +91,7 @@ for (const folder of componentsPath) {
 			// select menus
 		case 'menus':
 			for (const file of componentFiles) {
-				const menu = require(`./components/${folder}/${file}`);
+				const menu = require(path.join(folderPath, file));
 				menus.set(menu.data.name, menu);
 			}
 			break;
@@ -97,7 +99,7 @@ for (const folder of componentsPath) {
 			// modals
 		case 'modals':
 			for (const file of componentFiles) {
-				const modal = require(`./components/${folder}/${file}`);
+				const modal = require(path.join(folderPath, file));
 				modals.set(modal.data.name, modal);
 			}
 			break;
