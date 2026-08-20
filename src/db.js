@@ -3,8 +3,8 @@ const {
 	mysql_dbname,
 	mysql_dbuser,
 	mysql_dbpass,
-	mysql_host = '127.0.0.1',
-	mysql_port = 3306,
+	mysql_host,
+	mysql_port,
 } = require('../config.json');
 
 // Connecting to the database using Sequelize -----------------
