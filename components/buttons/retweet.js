@@ -25,7 +25,7 @@ module.exports = {
 				where: { discordID: interaction.member.id },
 			});
 
-			if (!twitterUser) {
+			if (!twitterUser || !twitterUser.accessToken || !twitterUser.refreshToken) {
 				return interaction.reply({
 					content: 'Please login using `/raid join` first.',
 					ephemeral: true,
@@ -58,59 +58,39 @@ module.exports = {
 
 				const rwClient = refreshedClient.readWrite;
 
-				const retweet = await rwClient.v2.retweet(
-					twitterUser.twitterID,
-					tweetId,
-				);
-				if (retweet) {
-					const raidTweet = await Raid.findOne({
-						where: { tweetUrlID: tweetId },
-					});
-					const retweets = raidTweet.retweeters;
-					if (!retweets.includes(interaction.member.id)) {
-						retweets.push(interaction.member.id);
-						raidTweet.retweeters = retweets;
-						await raidTweet.save();
-						await interaction.reply({ content: 'Retweeted!', ephemeral: true });
-					}
-					else {
-						await interaction.reply({
-							content: 'You already retweeted this tweet!',
-							ephemeral: true,
-						});
-					}
-				}
+				await this.handleRetweet(interaction, rwClient, tweetId);
 			}
 			else {
 				const twitterClient = new TwitterApi(twitterUser.accessToken);
 				const rwClient = twitterClient.readWrite;
 
-				const retweet = await rwClient.v2.retweet(
-					twitterUser.twitterID,
-					tweetId,
-				);
-				if (retweet) {
-					const raidTweet = await Raid.findOne({
-						where: { tweetUrlID: tweetId },
-					});
-					const retweets = raidTweet.retweeters;
-					if (!retweets.includes(interaction.member.id)) {
-						retweets.push(interaction.member.id);
-						raidTweet.retweeters = retweets;
-						await raidTweet.save();
-						await interaction.reply({ content: 'Retweeted!', ephemeral: true });
-					}
-					else {
-						await interaction.reply({
-							content: 'You already retweeted this tweet!',
-							ephemeral: true,
-						});
-					}
-				}
+				await this.handleRetweet(interaction, rwClient, tweetId);
 			}
 		}
 		catch (error) {
 			console.error(error);
+		}
+	},
+
+	async handleRetweet(interaction, rwClient, tweetId) {
+		const retweet = await rwClient.v2.retweet(tweetId);
+		if (retweet) {
+			const raidTweet = await Raid.findOne({
+				where: { tweetUrlID: tweetId },
+			});
+			const retweets = raidTweet.retweeters;
+			if (!retweets.includes(interaction.member.id)) {
+				retweets.push(interaction.member.id);
+				raidTweet.retweeters = retweets;
+				await raidTweet.save();
+				await interaction.reply({ content: 'Retweeted!', ephemeral: true });
+			}
+			else {
+				await interaction.reply({
+					content: 'You already retweeted this tweet!',
+					ephemeral: true,
+				});
+			}
 		}
 	},
 };

@@ -5,9 +5,15 @@ const {
 	ButtonStyle,
 	ActionRowBuilder,
 } = require('discord.js');
-const { TWITTER_BEARER_TOKEN } = require('../config.json');
-const { TwitterApi } = require('twitter-api-v2');
-const { Raid } = require('../src/db');
+const {
+	isTestnet,
+	website_testnet,
+	website,
+} = require('../config.json');
+const {
+	// Raid,
+	Guild,
+} = require('../src/db');
 const { footer } = require('../src/vars');
 
 module.exports = async (interaction, channel, role) => {
@@ -28,27 +34,33 @@ module.exports = async (interaction, channel, role) => {
 	}
 
 	try {
-		const twitterClient = new TwitterApi(TWITTER_BEARER_TOKEN);
-		const tweetURL = interaction.options.getString('tweet');
-
-		const tweetId = tweetURL.match(/(\d+)/)[0];
-
-		const tweet = await twitterClient.v2.singleTweet(tweetId, {
-			'expansions': [
-				'author_id',
-				'referenced_tweets.id',
-				'entities.mentions.username',
-				'attachments.media_keys',
-			],
-			'tweet.fields': [
-				'created_at',
-				'public_metrics',
-				'referenced_tweets',
-				'text',
-			],
-			'user.fields': ['name', 'profile_image_url', 'username', 'verified'],
-			'media.fields': ['url'],
+		const guildCheck = await Guild.findOne({
+			where: { guildID: interaction.guild.id },
 		});
+
+		if (
+			!guildCheck ||
+			!guildCheck.twitterChannelID ||
+			!guildCheck.raidRoleID
+		) {
+			return await interaction.reply({
+				content: 'Please register the guild first and update your Twitter settings.',
+				ephemeral: true,
+			});
+		}
+
+		const tweetURL = interaction.options.getString('tweet');
+		const tweetId = tweetURL.match(/(\d+)/)[0];
+		const websiteURL = isTestnet ? website_testnet : website;
+
+		const tweet = fetch(websiteURL, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify({ query: tweetId }),
+		});
+		console.log(tweet.json());
 
 		const mediaKey = tweet.includes?.media?.[0]?.media_key;
 		const imageUrl = mediaKey ?
@@ -69,30 +81,31 @@ module.exports = async (interaction, channel, role) => {
 			embed.setImage(imageUrl);
 		}
 
-		const button = new ActionRowBuilder().addComponents(
-			new ButtonBuilder()
-				.setCustomId('retweet')
-				.setLabel('RT')
-				.setEmoji('🐦')
-				.setStyle(ButtonStyle.Secondary),
-			new ButtonBuilder()
-				.setCustomId('like')
-				.setLabel('Like')
-				.setEmoji('❤️')
-				.setStyle(ButtonStyle.Secondary),
-		);
+		const button = new ActionRowBuilder()
+			.addComponents(
+				new ButtonBuilder()
+					.setCustomId('retweet')
+					.setLabel('RT')
+					.setEmoji('🐦')
+					.setStyle(ButtonStyle.Secondary),
+				new ButtonBuilder()
+					.setCustomId('like')
+					.setLabel('Like')
+					.setEmoji('❤️')
+					.setStyle(ButtonStyle.Secondary),
+			);
 
 		await message.send({
 			content: roleMention,
 			embeds: [embed],
 			components: [button],
 		});
-		await Raid.create({
-			tweetUrlID: tweetId,
-			postedBy: interaction.member.id,
-			postedIn: interaction.guild.id,
-		});
-		await interaction.reply({ content: 'Raid tweet posted.', ephemeral: true });
+		// await Raid.create({
+		// 	tweetUrlID: tweetId,
+		// 	postedBy: interaction.member.id,
+		// 	postedIn: interaction.guild.id,
+		// });
+		// await interaction.reply({ content: 'Raid tweet posted.', ephemeral: true });
 	}
 	catch (error) {
 		console.log(error);
