@@ -354,10 +354,17 @@ module.exports = {
 					if (!guildCheck) {
 						throw new Error('guild not found');
 					}
+					await interaction.deferReply({ flags: 64 });
 					await captcha(interaction, guildCheck.verifyChannelID);
 				}
 				catch (error) {
 					console.error(error);
+					if (!interaction.replied && !interaction.deferred) {
+						await interaction.reply({
+							content: 'I could not deploy the verification message. Please run `/setup register`, `/setup captcha`, and `/setup rules`, then try again.',
+							flags: 64,
+						});
+					}
 				}
 				break;
 
