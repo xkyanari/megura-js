@@ -1,10 +1,17 @@
-const { EmbedBuilder, MessageCollector } = require('discord.js');
+const {
+	EmbedBuilder,
+	ActionRowBuilder,
+	ButtonBuilder,
+	ButtonStyle,
+} = require('discord.js');
 const { CaptchaGenerator } = require('captcha-canvas');
+const crypto = require('node:crypto');
 const { Guild } = require('../src/db');
-const { uploadImage, deleteImage } = require('./upload');
+const { uploadImage } = require('./upload');
+const redis = require('../redis');
 
 module.exports = async (interaction) => {
-	const { channel, guild, member } = interaction;
+	const { guild, member } = interaction;
 
 	try {
 		const guildCheck = await Guild.findOne({ where: { guildID: guild.id } });
@@ -29,65 +36,37 @@ module.exports = async (interaction) => {
 			.setDecoy({ opacity: 0.5 })
 			.setTrace({ color: 'deeppink' });
 		const buffer = captcha.generateSync();
-		const flag = 'captcha_image';
-
+		const flag = `captcha_${guild.id}_${member.id}_${Date.now()}`;
 		const imageURL = await uploadImage(buffer, flag);
+		const token = crypto.randomUUID();
+		await redis.set(
+			`captcha:${token}`,
+			JSON.stringify({
+				text: captcha.text,
+				flag,
+				guildID: guild.id,
+				userID: member.id,
+			}),
+			'EX',
+			180,
+		);
+
 		const embed = new EmbedBuilder()
 			.setTitle('Verification')
-			.setDescription(
-				'Please complete the CAPTCHA by entering the code in the channel. Don\'t worry about upper or lower case letters.',
-			)
+			.setDescription('Please complete the CAPTCHA by clicking the button below and entering the code shown in the image. Don\'t worry about upper or lower case letters.')
 			.setImage(imageURL);
 
-		let isVerified = false;
-		const captchaMessage = await interaction.reply({
+		const button = new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
+				.setCustomId(`captcha-submit:${token}`)
+				.setLabel('Enter Code')
+				.setStyle(ButtonStyle.Primary),
+		);
+
+		await interaction.reply({
 			embeds: [embed],
+			components: [button],
 			ephemeral: true,
-		});
-
-		const collector = new MessageCollector(channel, { time: 180000 });
-		collector.on('collect', async (collectedMessage) => {
-			if (collectedMessage.author.id !== member.id) return;
-			if (
-				collectedMessage.content.toLowerCase() === captcha.text.toLowerCase()
-			) {
-				const addRole = guild.roles.cache.get(guildCheck.verifyRoleID);
-				await member.roles.add(addRole);
-				if (captchaMessage) {
-					try {
-						await captchaMessage.delete();
-					}
-					catch (error) {
-						if (error.code !== 10008) {
-							console.error('Error deleting captchaMessage:', error);
-						}
-					}
-				}
-				await deleteImage(flag);
-				await interaction.followUp({
-					content: 'You have been successfully verified!',
-					ephemeral: true,
-				});
-				isVerified = true;
-				collector.stop();
-			}
-			else {
-				await interaction.followUp({
-					content: 'The captcha code you entered is incorrect. Please try again.',
-					ephemeral: true,
-				});
-			}
-		});
-
-		collector.on('end', async () => {
-			if (!isVerified) {
-				if (captchaMessage) await captchaMessage.delete();
-				await deleteImage(flag);
-				await interaction.followUp({
-					content: 'The verification process has timed out. Please try again.',
-					ephemeral: true,
-				});
-			}
 		});
 	}
 	catch (error) {

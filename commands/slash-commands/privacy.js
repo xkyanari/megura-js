@@ -10,24 +10,28 @@ module.exports = {
 			.setTitle('Privacy Notice')
 			.setColor(0xcd7f32)
 			.setDescription(
-				'Dahlia reads message content when users run text commands, speak to the bot using the configured chat prefix, use verification/captcha channels, or when moderation logs are enabled. Message content is not used to train machine learning or AI models.',
+				'Dahlia uses data provided through slash commands, buttons, menus, and modals to run server tools and game features. Dahlia does not request privileged Message Content, Server Members, or Presence intents.',
 			)
 			.addFields(
 				{
-					name: 'Message Content',
-					value: 'Conversation messages may be sent to OpenAI only to generate the bot response. Deleted messages may be posted to the configured server log channel and written to local daily log files for moderation transparency.',
+					name: 'Player and Game Data',
+					value: 'When users play, Dahlia stores Discord user IDs, guild IDs, player names, profile stats, level/experience, inventory, shop purchases, wallet/game balances, battle/duel/brawl results, auction activity, and related timestamps as needed for gameplay.',
 				},
 				{
-					name: 'Member Data',
-					value: 'Dahlia uses member data to verify users, manage roles, show profiles, run RPG features, and write join/leave moderation logs.',
+					name: 'Server Configuration',
+					value: 'Server setup can store guild IDs, channel IDs, role IDs, feature settings, webhook settings, and configured log channel settings.',
+				},
+				{
+					name: 'Message Content',
+					value: 'Dahlia does not collect normal channel message text for commands, AI chat, or deleted-message logging.',
 				},
 				{
 					name: 'Retention',
-					value: 'Local moderation log files are automatically removed after 30 days. Server admins can disable setup data with `/setup disable`.',
+					value: 'Local log files are automatically removed after 30 days. Server admins can disable setup data with `/setup disable` where supported.',
 				},
 				{
 					name: 'Opt-Out',
-					value: 'Users can stop AI chat by sending the configured chat prefix followed by `stop`. Message content processing cannot be disabled per user while using text commands, verification channels, moderation logging, or AI chat features.',
+					value: 'Users can stop creating new player/activity data by not using gameplay commands. For deletion requests, contact the support server listed in `/support` with your Discord ID and server/guild ID.',
 				},
 			);
 

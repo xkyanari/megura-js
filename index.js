@@ -8,9 +8,7 @@ const logs = require('discord-logs');
 const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
-		GatewayIntentBits.GuildMembers,
 		GatewayIntentBits.GuildMessages,
-		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.GuildVoiceStates,
 		GatewayIntentBits.GuildMessageReactions,
 		GatewayIntentBits.GuildWebhooks,
@@ -29,7 +27,6 @@ client.buttons = new Collection();
 client.menus = new Collection();
 client.modals = new Collection();
 client.cooldown = new Collection();
-client.userData = new Collection();
 
 // For registering slash commands -----------------
 
@@ -47,26 +44,6 @@ for (const file of slashCommandFiles) {
 	else {
 		console.log(
 			`[WARNING] The command at ${filePath} is missing a required "data" or "execute" or "cooldown" property.`,
-		);
-	}
-}
-
-// For registering text commands -----------------
-
-const textCommandsPath = path.join(__dirname, 'commands', 'text-commands');
-const textCommandFiles = fs
-	.readdirSync(textCommandsPath)
-	.filter((file) => file.endsWith('.js'));
-
-for (const file of textCommandFiles) {
-	const filePath = path.join(textCommandsPath, file);
-	const command = require(filePath);
-	if ('name' in command && 'execute' in command) {
-		client.commands.set(command.name, command);
-	}
-	else {
-		console.log(
-			`[WARNING] The command at ${filePath} is missing a required "name" or "execute" property.`,
 		);
 	}
 }

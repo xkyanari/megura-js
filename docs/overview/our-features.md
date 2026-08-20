@@ -35,6 +35,6 @@ For players who prefer not to engage in player-versus-player (PVP) modes, the ga
 
 ## Customized bot personality
 
-The integration of ChatGPT in our project empowers Discord community owners and users with the ability to tailor the personality and style of the Discord bot to their preferences. By offering a selection of pre-set personalities or the option to create a completely unique persona, we ensure that interactions with the bot are not only enjoyable but also truly distinctive. This customization fosters a more engaging and immersive experience for users, as the bot adapts to resonate with their individual tastes, creating a lively and dynamic atmosphere within the Discord community.
+Dahlia's personality and storytelling style can be tailored through explicit bot interactions such as slash commands, buttons, menus, and modals. Open channel AI chat is currently disabled so Dahlia can operate without reading normal server messages.
 
 Overall, the game's commitment to balance and fairness is a key aspect of its design, providing players with a fun and engaging gaming experience that caters to all play styles.

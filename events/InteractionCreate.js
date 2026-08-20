@@ -132,7 +132,7 @@ module.exports = {
 		if (interaction.isButton()) {
 			const { buttons } = interaction.client;
 			const { customId } = interaction;
-			const button = buttons.get(customId);
+			const button = buttons.get(customId) || buttons.get(customId.split(':')[0]);
 			if (!button) return new Error('There is no code for this button.');
 
 			const interactionScope = interaction.guildId ?? 'dm';
@@ -192,7 +192,7 @@ module.exports = {
 		if (interaction.isModalSubmit()) {
 			const { modals } = interaction.client;
 			const { customId } = interaction;
-			const modal = modals.get(customId);
+			const modal = modals.get(customId) || modals.get(customId.split(':')[0]);
 			if (!modal) return new Error('There is no code for this modal.');
 
 			try {

@@ -13,6 +13,7 @@
 
 * [📪 About Dahlia](project-dahlia/about-dahlia.md)
 * [💰 Subscription Models](project-dahlia/subscription-models.md)
+* [🔐 Privacy and Data](privacy-and-data.md)
 
 ## Tokenomics
 
@@ -23,7 +24,6 @@
 
 * [🛠 Setting up Dahlia](getting-started-with-dahlia/setting-up-dahlia/README.md)
   * [/setup](getting-started-with-dahlia/setting-up-dahlia/setup.md)
-  * [/raid](getting-started-with-dahlia/setting-up-dahlia/raid.md)
 * [🎮 Playing the Game](getting-started-with-dahlia/playing-the-game/README.md)
   * [/arena](getting-started-with-dahlia/playing-the-game/arena.md)
   * [/brawl](getting-started-with-dahlia/playing-the-game/brawl.md)

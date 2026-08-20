@@ -23,9 +23,11 @@ Project DAHLIA is an important aspect of the game's lore and history, providing 
 
 ## Dahlia as a Discord Bot
 
-Dahlia is a highly sophisticated bot that runs on Discord, offering a range of utilities and functions for players of this text-based RPG. Players can interact with Dahlia using slash and text commands, using her as a versatile and all-rounder Discord bot. While Dahlia offers many utilities, her primary function is to serve as a storyteller for the game, providing players with an immersive and engaging experience.
+Dahlia is a highly sophisticated bot that runs on Discord, offering a range of utilities and functions for players of this text-based RPG. Players interact with Dahlia through slash commands, buttons, select menus, and other explicit Discord interactions. While Dahlia offers many utilities, her primary function is to serve as a storyteller for the game, providing players with an immersive and engaging experience.
 
-To participate in the game, players must have supported NFT collections and can communicate with Dahlia through Discord. By using her commands, players can progress through the game, uncover its mysteries, and engage with other members of the game's community.
+Players can participate through Discord without linking an external collection. By using Dahlia's commands, they can progress through the game, uncover its mysteries, and engage with other members of the community.
+
+Dahlia does not require Discord's privileged Message Content, Server Members, or Presence gateway intents. This means she does not scan normal channel conversations, presence/activity status, or the full server member list.
 
 #### List of Discord bot features:
 
@@ -34,12 +36,9 @@ To participate in the game, players must have supported NFT collections and can 
 * Raffles
 * Announcements
 * Mini games
-* Auto purge messages
-* Action log
-* Custom commands
+* Server setup logs
 * Reaction roles
 * Forms
-* Auto Message
 * Storytelling
 * Creating and closing private channels
 * Creating, modifying, deleting sub-guilds (channels)
