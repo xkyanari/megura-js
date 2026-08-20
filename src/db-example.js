@@ -1,11 +1,17 @@
 const Sequelize = require('sequelize');
-const { mysql_dbname, mysql_dbuser, mysql_dbpass } = require('../config.json');
+const {
+	mysql_dbname,
+	mysql_dbuser,
+	mysql_dbpass,
+	mysql_host = '127.0.0.1',
+	mysql_port = 3306,
+} = require('../config.json');
 
 // Connecting to the database using Sequelize -----------------
 
-// Update your settings here
 const sequelize = new Sequelize(mysql_dbname, mysql_dbuser, mysql_dbpass, {
-	host: 'ENTER_YOUR_HOSTNAME_HERE',
+	host: mysql_host,
+	port: mysql_port,
 	dialect: 'mysql',
 	logging: false,
 });

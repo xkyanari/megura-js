@@ -5,6 +5,8 @@
     "mysql_dbname": "",
     "mysql_dbuser": "",
     "mysql_dbpass": "",
+    "mysql_host": "127.0.0.1",
+    "mysql_port": 3306,
     "token": "",
     "clientId": "",
     "guildId": "",
