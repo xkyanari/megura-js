@@ -14,6 +14,7 @@
 * [📪 About Dahlia](project-dahlia/about-dahlia.md)
 * [💰 Subscription Models](project-dahlia/subscription-models.md)
 * [🔐 Privacy and Data](privacy-and-data.md)
+* [🔏 Privacy Policy](privacy-policy.md)
 * [📜 Terms of Service](terms-of-service.md)
 
 ## Tokenomics
