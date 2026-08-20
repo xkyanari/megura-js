@@ -64,6 +64,9 @@ module.exports = {
 						allow: [
 							PermissionFlagsBits.ViewChannel,
 							PermissionFlagsBits.ManageChannels,
+							PermissionFlagsBits.SendMessages,
+							PermissionFlagsBits.ReadMessageHistory,
+							PermissionFlagsBits.UseApplicationCommands,
 						],
 					},
 					{
@@ -71,6 +74,9 @@ module.exports = {
 						allow: [
 							PermissionFlagsBits.ViewChannel,
 							PermissionFlagsBits.ManageChannels,
+							PermissionFlagsBits.SendMessages,
+							PermissionFlagsBits.ReadMessageHistory,
+							PermissionFlagsBits.UseApplicationCommands,
 						],
 					},
 				],

@@ -37,6 +37,7 @@ const changeChannel = async (interaction, guildID, channelID, fieldsToUpdate) =>
 	}
 };
 
+// sending notification to the mod channel
 const notifyPurchase = async (guildID, discordID, itemName) => {
 	try {
 		const guild = await Guild.findOne({ where: { guildID } });
@@ -95,6 +96,7 @@ const notifyPurchase = async (guildID, discordID, itemName) => {
 	}
 };
 
+// sending notification to the user on the announcement channel
 const purchaseStatus = async (guildID, discordID, itemName, status) => {
 	try {
 		const guild = await Guild.findOne({ where: { guildID } });
