@@ -1,8 +1,9 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { Player, Shop } = require('../../src/db');
 const fs = require('fs');
+const path = require('node:path');
 
-const itemsData = fs.readFileSync('./assets/item_db.json');
+const itemsData = fs.readFileSync(path.join(__dirname, '../../assets/item_db.json'));
 const itemsJson = JSON.parse(itemsData);
 
 module.exports = {
