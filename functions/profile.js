@@ -4,13 +4,13 @@ const {
 	ButtonStyle,
 	ActionRowBuilder,
 } = require('discord.js');
-const { Player } = require('../src/db');
-const {
-	footer,
-	// checkProfile
-} = require('../src/vars');
+const { Player, Guild } = require('../src/db');
+const { footer, wanderer } = require('../src/vars');
+const { syncFaction, factionLabel, pointsThisWeek } = require('./factions');
+const { currentLocation } = require('./explore');
+const { questsDoneThisWeek, placesDiscovered } = require('./rankings');
 
-module.exports = async (interaction, member) => {
+module.exports = async (interaction, member, { now = Date.now() } = {}) => {
 	const button = new ActionRowBuilder().addComponents(
 		new ButtonBuilder()
 			.setCustomId('profile')
@@ -49,6 +49,16 @@ module.exports = async (interaction, member) => {
 		);
 	}
 
+	const guildRow = await Guild.findOne({ where: { guildID: guild.id } });
+	// `member` is a user; for your own profile, your roles keep the stored faction in step
+	const faction = await syncFaction(player, guildRow, member.id === interaction.user.id ? interaction.member : null);
+	const [location, questsDone, places, points] = await Promise.all([
+		currentLocation(player.accountID),
+		questsDoneThisWeek(player.accountID, now),
+		placesDiscovered(player.accountID),
+		pointsThisWeek(guild.id, player.accountID, now),
+	]);
+
 	const embed = new EmbedBuilder()
 		.setColor(0xcd7f32)
 		.setTitle('**VOYAGER ID CARD**')
@@ -65,7 +75,8 @@ module.exports = async (interaction, member) => {
 				value: `${player.level}`,
 				inline: false,
 			},
-			// { name: '👥 Faction', value: `${player.faction}`, inline: false },
+			{ name: '👥 Faction', value: faction ? factionLabel(faction, guildRow) : wanderer, inline: true },
+			{ name: '🧭 Exploring', value: location?.name ?? 'Not yet', inline: true },
 			{ name: '🩸 HP', value: `${player.totalHealth}`, inline: true },
 			{ name: '⚔️ ATK', value: `${player.totalAttack}`, inline: true },
 			{ name: '🛡️ DEF', value: `${player.totalDefense}`, inline: true },
@@ -76,6 +87,11 @@ module.exports = async (interaction, member) => {
 				value: `$${numFormat(player.iura?.walletAmount ?? null)}`,
 				inline: true,
 			},
+		)
+		.addFields(
+			{ name: '📜 Quests this week', value: `${questsDone}`, inline: true },
+			{ name: '🗺️ Places discovered', value: `${places}`, inline: true },
+			{ name: '⚔️ Faction points this week', value: `${points}`, inline: true },
 		)
 		.setFooter(footer);
 
