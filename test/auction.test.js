@@ -212,3 +212,17 @@ describe('timers and messages', () => {
 		assert.deepEqual(rec.kinds(), ['editReply']);
 	});
 });
+
+describe('startup recovery', () => {
+	test('overdue auctions that never ended are picked up; finalized ones are not', async () => {
+		const overdue = await makeAuction({ hours: -2 });
+		const finished = await makeAuction({ hours: -2 });
+		await endAuction(finished.id);
+		const ancient = await makeAuction({ hours: -24 * 30 });
+
+		const ids = (await runningAuctions()).map((a) => a.id);
+		assert.ok(ids.includes(overdue.id), 'overdue and never ended');
+		assert.ok(!ids.includes(finished.id), 'already finalized');
+		assert.ok(!ids.includes(ancient.id), 'outside the recovery window');
+	});
+});

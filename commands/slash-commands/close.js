@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { portalJobOptions, findPortalJob } = require('../../functions/portal');
+const { portalJobOptions, findPortalJob, fetchPortalChannel } = require('../../functions/portal');
 
 // Seconds between /close and the portal being deleted.
 const CLOSE_SECONDS = 10;
@@ -17,7 +17,8 @@ module.exports = {
 		const job = await findPortalJob(queue, guild.id, member.id);
 		if (!job) return interaction.editReply('You do not have an active portal.');
 
-		const channel = await client.channels.fetch(job.data.channelId).catch(() => null);
+		// throws on a transient error, so the job (the portal's only timer) is kept
+		const channel = await fetchPortalChannel(client, job.data.channelId);
 		if (!channel) {
 			// deleted by hand: free the member up to open a new one
 			await job.remove().catch(() => null);

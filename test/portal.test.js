@@ -175,3 +175,12 @@ describe('/open and /close', () => {
 		await (await findPortalJob(queue, 'GP', 'U3')).remove();
 	});
 });
+
+describe('transient Discord errors', () => {
+	test('a failed fetch that isn\'t Unknown Channel keeps the job and is retried', async () => {
+		const flaky = { channels: { fetch: async () => { throw Object.assign(new Error('socket hang up'), { code: 'ECONNRESET' }); } } };
+		await assert.rejects(processPortalJob(flaky, { channelId: 'P1' }), /socket hang up/);
+		const gone = { channels: { fetch: async () => { throw Object.assign(new Error('Unknown Channel'), { code: 10003 }); } } };
+		assert.equal(await processPortalJob(gone, { channelId: 'P1' }), false);
+	});
+});

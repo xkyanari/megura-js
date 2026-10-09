@@ -16,6 +16,14 @@ const portalJobOptions = (guildId, userId, delay) => ({
 	removeOnFail: true,
 });
 
+// The channel, or null only if Discord says it no longer exists (Unknown Channel).
+// Any other failure (network, rate limit) is thrown, so nothing is mistaken for deleted.
+const UNKNOWN_CHANNEL = 10003;
+const fetchPortalChannel = (client, channelId) => client.channels.fetch(channelId).catch((error) => {
+	if (error.code === UNKNOWN_CHANNEL) return null;
+	throw error;
+});
+
 const findPortalJob = async (queue, guildId, userId) => {
 	const jobs = await queue.getJobs(['waiting', 'delayed']);
 	return jobs.find((job) => job.data.userId === userId && job.data.guildId === guildId) ?? null;
@@ -23,7 +31,8 @@ const findPortalJob = async (queue, guildId, userId) => {
 
 // Deletes a portal when its time is up (or after /close). Returns false if it was already gone.
 const processPortalJob = async (client, { channelId, userId, replyChannelId }) => {
-	const channel = await client.channels.fetch(channelId).catch(() => null);
+	// a transient error throws, so Bull retries; only a deleted channel ends the job here
+	const channel = await fetchPortalChannel(client, channelId);
 	// deleted by hand already: nothing left to do, so don't retry
 	if (!channel) return false;
 
@@ -42,4 +51,4 @@ const processPortalJob = async (client, { channelId, userId, replyChannelId }) =
 	return true;
 };
 
-module.exports = { portalJobId, portalJobOptions, findPortalJob, processPortalJob };
+module.exports = { portalJobId, portalJobOptions, findPortalJob, fetchPortalChannel, processPortalJob };

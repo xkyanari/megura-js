@@ -83,6 +83,17 @@ describe('duel payout', () => {
 	});
 });
 
+test('reciprocal duels settling at once don\'t deadlock', async () => {
+	const a = await createPlayer('RA', 1000);
+	const b = await createPlayer('RB', 1000);
+	const results = await Promise.all([
+		D.settleDuel({ winner: a, loser: b, challengerWon: true }),
+		D.settleDuel({ winner: b, loser: a, challengerWon: true }),
+	]);
+	assert.equal(results.length, 2);
+	assert.equal((await walletOf(a)) + (await walletOf(b)), 2000, 'no IURA created or lost');
+});
+
 describe('duel checks', () => {
 	test('refuses missing profiles, rank gaps and thin wallets', async () => {
 		await createPlayer('ME', 500);
