@@ -26,6 +26,7 @@
 
 * [🛠 Setting up Dahlia](getting-started-with-dahlia/setting-up-dahlia/README.md)
   * [/setup](getting-started-with-dahlia/setting-up-dahlia/setup.md)
+  * [/giveaway](getting-started-with-dahlia/setting-up-dahlia/giveaways.md)
 * [🎮 Playing the Game](getting-started-with-dahlia/playing-the-game/README.md)
   * [/arena](getting-started-with-dahlia/playing-the-game/arena.md)
   * [/brawl](getting-started-with-dahlia/playing-the-game/brawl.md)

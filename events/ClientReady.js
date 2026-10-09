@@ -8,6 +8,8 @@ const { dahliaName, dahliaAvatar } = require('../src/vars');
 const { redisURL } = require('../redis');
 const { cleanupOldLogs } = require('../functions/logs');
 const { processBrawlJob } = require('../functions/brawlWager');
+const { processGiveawayJob } = require('../functions/giveaway');
+const { Giveaway } = require('../src/db');
 
 let Discord;
 try {
@@ -123,6 +125,21 @@ module.exports = {
 				});
 			}
 		});
+
+		// Giveaway endings (see functions/giveaway.js)
+		const giveawayQueue = new Queue('giveawayQueue', redisURL);
+		client.giveawayQueue = giveawayQueue;
+		giveawayQueue.process((job) => processGiveawayJob(client, job.data));
+
+		// Make sure every running giveaway has its end scheduled, e.g. if adding
+		// the job failed when it started. Bull ignores a jobId it already has.
+		const running = await Giveaway.findAll({ where: { status: 'running' } });
+		for (const giveaway of running) {
+			await giveawayQueue.add(
+				{ giveawayId: giveaway.id },
+				{ jobId: `giveaway-${giveaway.id}`, delay: Math.max(0, giveaway.endsAt - Date.now()), removeOnComplete: true },
+			).catch((error) => console.error(`Could not schedule giveaway ${giveaway.id}:`, error));
+		}
 
 		const auctionQueue = new Queue('auctionQueue', redisURL);
 		client.auctionQueue = auctionQueue;

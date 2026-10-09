@@ -30,6 +30,8 @@ const Auction = require('../models/auction')(sequelize, Sequelize.DataTypes);
 const User = require('../models/user')(sequelize, Sequelize.DataTypes);
 const Bid = require('../models/bid')(sequelize, Sequelize.DataTypes);
 const AuctionItem = require('../models/auctionItem')(sequelize, Sequelize.DataTypes);
+const Giveaway = require('../models/giveaway')(sequelize, Sequelize.DataTypes);
+const GiveawayEntry = require('../models/giveawayEntry')(sequelize, Sequelize.DataTypes);
 
 Player.hasOne(Iura, {
 	as: 'iura',
@@ -47,6 +49,7 @@ Auction.belongsTo(User, { as: 'Winner', foreignKey: 'winnerId' });
 User.hasMany(Auction, { as: 'WonAuctions', foreignKey: 'winnerId' });
 AuctionItem.hasOne(Auction, { foreignKey: 'itemId' });
 Auction.belongsTo(AuctionItem, { foreignKey: 'itemId' });
+Giveaway.hasMany(GiveawayEntry, { as: 'entries', foreignKey: 'giveawayId', onDelete: 'CASCADE' });
 
 // Atomic balance helpers -----------------
 
@@ -411,6 +414,8 @@ module.exports = {
 	Bid,
 	AuctionItem,
 	Brawl,
+	Giveaway,
+	GiveawayEntry,
 	transferIura,
 	escrowOres,
 	releaseOres,

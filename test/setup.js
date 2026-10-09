@@ -13,6 +13,9 @@ const TEST_CONFIG = path.join(__dirname, 'config.js');
 
 const config = require(TEST_CONFIG);
 
+// feature-gated commands read their flags from the example file in tests
+process.env.FEATURES_FILE = path.join(ROOT, 'assets', 'features-example.json');
+
 // Tests drop every table, so refuse to run against anything that isn't clearly a test database.
 if (!/test/i.test(config.mysql_dbname)) {
 	throw new Error(`Refusing to run tests against database "${config.mysql_dbname}": its name must contain "test".`);
