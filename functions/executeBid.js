@@ -1,97 +1,32 @@
-const { WebhookClient, ActionRowBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, userMention } = require('discord.js');
 const { placeBid } = require('./placeBid');
-const { User, Auction, Guild } = require('../src/db');
-const { dahliaAvatar, dahliaName } = require('../src/vars');
+const { refreshOpenAuction, coins } = require('./auctionMessage');
+const { User, Auction } = require('../src/db');
+
+const REFUSALS = {
+	'Auction not found': 'This auction no longer exists.',
+	'Insufficient funds': 'You do not have enough funds to place this bid.',
+	'The auction has already ended.': 'The auction has already ended.',
+	'The price changed.': 'Someone else bid at the same time. Please try again.',
+};
 
 const executeBid = async (interaction, bidAmount) => {
+	await interaction.deferReply({ flags: 64 });
+	const userGuildId = `${interaction.member.id}-${interaction.guild.id}`;
+	const user = await User.findOne({ where: { userGuildId } });
+
+	if (!user || !user.walletAddress) return interaction.editReply({ content: 'Please register your wallet first.' });
+
+	let bid;
 	try {
-		await interaction.deferReply({ flags: 64 });
-		const userGuildId = `${interaction.member.id}-${interaction.guild.id}`;
-		const user = await User.findOne({ where: { userGuildId } });
-
-		if (!user || !user.walletAddress) return await interaction.editReply({ content: 'Please register your wallet first.', flags: 64 });
-
-		const bid = await placeBid(interaction, user, bidAmount);
-
-		const auction = await Auction.findByPk(bid.auctionId);
-		const item = await auction.getAuctionItem();
-		const { auctionwebhookId, auctionwebhookToken } = await Guild.findOne({ where: { guildId: interaction.guild.id } });
-		const webhookClient = new WebhookClient({ id: auctionwebhookId, token: auctionwebhookToken });
-
-		const startDateTimeUnix = Math.floor(auction.startDateTime.getTime() / 1000);
-		const endDateTimeUnix = Math.floor(auction.endDateTime.getTime() / 1000);
-		const newEmbed = new EmbedBuilder()
-			.setTitle(`${item.itemName}`)
-			.setColor(0xcd7f32)
-			.addFields(
-				{ name: 'Quantity:', value: `${item.quantity}`, inline: true },
-				{ name: 'Starting Price:', value: `${auction.startPrice / 100000000}🪙`, inline: true },
-				{ name: 'Highest Bid:', value: `${auction.currentPrice / 100000000}🪙`, inline: true },
-				{ name: 'Start:', value: `<t:${startDateTimeUnix}:f>`, inline: true },
-				{ name: 'End:', value: `<t:${endDateTimeUnix}:f>`, inline: true },
-				{ name: 'Auctioneer:', value: `${userMention(auction.userID)}`, inline: false },
-			)
-			.setFooter({ text: `Auction ID: ${auction.id}` });
-
-		if (auction.attachmentURL) {
-			newEmbed.setImage(auction.attachmentURL);
-		}
-
-		if (item.description !== 'No description provided') {
-			newEmbed.setDescription(item.description);
-		}
-
-		const button = new ActionRowBuilder().addComponents(
-			new ButtonBuilder()
-				.setCustomId('registerAuction')
-				.setLabel('Register')
-				.setStyle(ButtonStyle.Success),
-			new ButtonBuilder()
-				.setCustomId('placeBid1')
-				.setLabel('Bid [+0.0033🪙]')
-				.setStyle(ButtonStyle.Primary),
-			new ButtonBuilder()
-				.setCustomId('placeBid2')
-				.setLabel('Bid [+0.01🪙]')
-				.setStyle(ButtonStyle.Primary),
-			new ButtonBuilder()
-				.setCustomId('placeBid3')
-				.setLabel('Bid [+0.02🪙]')
-				.setStyle(ButtonStyle.Primary),
-			new ButtonBuilder()
-				.setCustomId('withdrawBid')
-				.setLabel('Withdraw')
-				.setStyle(ButtonStyle.Danger),
-		);
-
-		const message = await webhookClient.editMessage(auction.messageID, {
-			content: '**The Auction is now OPEN!**',
-			username: dahliaName,
-			avatarURL: dahliaAvatar,
-			embeds: [newEmbed],
-			components: [button],
-		});
-
-		if (message) {
-			return await interaction.editReply({
-				content: `Placed bid for ${bid.bidAmount / 100000000} 🪙.`,
-				flags: 64,
-			});
-		}
-
+		bid = await placeBid(interaction, user, bidAmount);
 	}
 	catch (error) {
-		if (error.message === 'Insufficient funds') {
-			return await interaction.editReply({ content: 'You do not have enough funds to place this bid.', flags: 64 });
-		}
-		if (error.message === 'The auction has already ended.') {
-			return await interaction.editReply({ content: 'The auction has already ended.', flags: 64 });
-		}
-		else {
-			console.error(error);
-			return await interaction.editReply({ content: 'Failed to place a bid due to an error.', flags: 64 });
-		}
+		if (REFUSALS[error.message]) return interaction.editReply({ content: REFUSALS[error.message] });
+		throw error;
 	}
+
+	await refreshOpenAuction(await Auction.findByPk(bid.auctionId));
+	return interaction.editReply({ content: `Placed bid for ${coins(bid.bidAmount)} 🪙.` });
 };
 
 module.exports = { executeBid };

@@ -1,10 +1,10 @@
-const { SlashCommandBuilder, EmbedBuilder, ChannelType, channelMention, userMention, WebhookClient } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ChannelType, channelMention, userMention } = require('discord.js');
 const { validateFeature } = require('../../src/feature');
-const { startAuction } = require('../../functions/startAuction');
+const { startAuction, MAX_HOURS } = require('../../functions/startAuction');
 const { endAuction } = require('../../functions/endAuction');
 const { changeChannel } = require('../../functions/webhook');
-const { Guild, Auction } = require('../../src/db');
-const { dahliaAvatar, dahliaName } = require('../../src/vars');
+const { Guild } = require('../../src/db');
+const { announceAuctionEnd } = require('../../functions/auctionMessage');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -22,11 +22,14 @@ module.exports = {
 				.addNumberOption(option =>
 					option.setName('startprice')
 						.setDescription('Starting price of the auction in Bitcoin')
+						.setMinValue(0.00000001)
 						.setMaxValue(999999)
 						.setRequired(true))
 				.addIntegerOption(option =>
 					option.setName('endtime')
 						.setDescription('Duration of the auction in hours')
+						.setMinValue(1)
+						.setMaxValue(MAX_HOURS)
 						.setRequired(true))
 				.addStringOption(option =>
 					option.setName('description')
@@ -35,6 +38,7 @@ module.exports = {
 				.addIntegerOption(option =>
 					option.setName('quantity')
 						.setDescription('Quantity of the item')
+						.setMinValue(1)
 						.setRequired(false))
 				.addAttachmentOption(option =>
 					option
@@ -48,7 +52,8 @@ module.exports = {
 				.setDescription('End an Auction.')
 				.addIntegerOption(option =>
 					option.setName('auctionid')
-						.setDescription('Enter the auction ID of the auction you want to remote')
+						.setDescription('Enter the auction ID of the auction you want to end')
+						.setMinValue(1)
 						.setRequired(true)),
 		)
 		.addSubcommand((subcommand) =>
@@ -125,60 +130,22 @@ module.exports = {
 				}
 
 				const id = options.getInteger('auctionid');
-				const end = await endAuction(id);
-
-				if (end) {
-					// remove the job from the queue
-					const jobs = await interaction.client.auctionQueue.getJobs(['waiting', 'delayed']);
-					const job = jobs.find(job1 => job1.data.auctionId === id);
-
-					if (job) await job.remove();
-
-					const auction = await Auction.findByPk(id);
-					const item = await auction.getAuctionItem();
-					const { auctionwebhookId, auctionwebhookToken } = await Guild.findOne({ where: { guildId: interaction.guild.id } });
-					const webhookClient = new WebhookClient({ id: auctionwebhookId, token: auctionwebhookToken });
-
-					const newEmbed = new EmbedBuilder()
-						.setTitle(`Auction: ${item.itemName}`)
-						.setColor(0xcd7f32)
-						.addFields(
-							{ name: 'Quantity:', value: `${item.quantity}`, inline: true },
-							{ name: 'Starting Price:', value: `${auction.startPrice / 100000000} 🪙`, inline: true },
-							{ name: 'Highest Bid:', value: `${auction.currentPrice / 100000000} 🪙`, inline: true },
-							{ name: 'Auctioneer:', value: `${userMention(auction.userID)}`, inline: true },
-						)
-						.setFooter({ text: `Auction ID: ${auction.id}` });
-
-					if (auction.attachmentURL) {
-						newEmbed.setImage(auction.attachmentURL);
-					}
-
-					if (item.description !== 'No description provided') {
-						newEmbed.setDescription(item.description);
-					}
-
-					if (auction.winnerId) {
-						const discordID = auction.winnerId.split('-');
-						const winningID = discordID[0];
-						newEmbed.addFields(
-							{ name: 'Winner:', value: `${userMention(winningID)}`, inline: true },
-						);
-					}
-
-					const message = await webhookClient.editMessage(auction.messageID, {
-						content: '**The Auction is now CLOSED!**',
-						username: dahliaName,
-						avatarURL: dahliaAvatar,
-						embeds: [newEmbed],
-						components: [],
-					});
-
-					if (message) return await interaction.editReply({ content: 'Auction ended successfully.', flags: 64 });
+				const auction = await endAuction(id, interaction.guild.id);
+				if (!auction) {
+					return interaction.editReply({ content: `There's no auction #${id} in this server.` });
 				}
-				else {
-					await interaction.editReply({ content: 'Failed to end auction due to an error.' });
-				}
+
+				// the timer is no longer needed
+				const job = await interaction.client.auctionQueue.getJob(`auction-${id}`).catch(() => null)
+					?? (await interaction.client.auctionQueue.getJobs(['waiting', 'delayed'])).find((j) => j.data.auctionId === id);
+				await job?.remove().catch(() => null);
+
+				const posted = await announceAuctionEnd(auction);
+				await interaction.editReply({
+					content: posted
+						? 'Auction ended successfully.'
+						: 'Auction ended. I couldn\'t update its post: check the auction channel with `/auction settings`.',
+				});
 				break;
 			}
 			case 'settings': {
