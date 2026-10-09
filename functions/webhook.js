@@ -2,39 +2,36 @@ const { EmbedBuilder, WebhookClient, userMention, ActionRowBuilder, ButtonBuilde
 const { Shop, Order, Guild, Auction } = require('../src/db');
 const { dahliaAvatar, dahliaName } = require('../src/vars');
 
+// Errors (e.g. missing Manage Webhooks) propagate so the command's caller,
+// and the global interaction handler, can tell the admin what went wrong.
 const changeChannel = async (interaction, guildID, channelID, fieldsToUpdate) => {
-	try {
-		const channel = interaction.client.channels.cache.get(channelID);
+	const channel = interaction.client.channels.cache.get(channelID)
+		?? await interaction.client.channels.fetch(channelID);
 
-		// Fetch all existing webhooks in the channel
-		const existingWebhooks = await channel.fetchWebhooks();
+	// Fetch all existing webhooks in the channel
+	const existingWebhooks = await channel.fetchWebhooks();
 
-		// Delete all existing webhooks
-		for (const [, webhook] of existingWebhooks) {
-			await webhook.delete();
-		}
-
-		// Create a new webhook
-		const webhook = await channel.createWebhook({
-			name: fieldsToUpdate.webhookName,
-			avatar: dahliaAvatar,
-			reason: fieldsToUpdate.webhookReason,
-		});
-
-		await Guild.update({
-			[fieldsToUpdate.channelField]: channelID,
-			[fieldsToUpdate.webhookIDField]: webhook.id,
-			[fieldsToUpdate.webhookTokenField]: webhook.token,
-		}, {
-			where: { guildID: guildID },
-		});
-
-		return webhook;
-
+	// Delete all existing webhooks
+	for (const [, webhook] of existingWebhooks) {
+		await webhook.delete();
 	}
-	catch (error) {
-		console.error(error);
-	}
+
+	// Create a new webhook
+	const webhook = await channel.createWebhook({
+		name: fieldsToUpdate.webhookName,
+		avatar: dahliaAvatar,
+		reason: fieldsToUpdate.webhookReason,
+	});
+
+	await Guild.update({
+		[fieldsToUpdate.channelField]: channelID,
+		[fieldsToUpdate.webhookIDField]: webhook.id,
+		[fieldsToUpdate.webhookTokenField]: webhook.token,
+	}, {
+		where: { guildID: guildID },
+	});
+
+	return webhook;
 };
 
 // sending notification to the mod channel

@@ -4,7 +4,14 @@
     "buyGlobal": "",
     "hasRoles": "",
     "transferIura": "",
-    "sellGlobal": ""
+    "sellGlobal": "",
+    "hasAuction": false,
+    "hasGiveaways": false,
+    "hasRaffles": false,
+    "hasScheduling": false,
+    "hasButtonRoles": true,
+    "hasTickets": true,
+    "hasForms": true
   },
   "premium": {
     "stakingRate": "",
@@ -13,7 +20,14 @@
     "ownEvents": "",
     "transferIura": "",
     "sellGlobal": "",
-    "iuraOnly": ""
+    "iuraOnly": "",
+    "hasAuction": true,
+    "hasGiveaways": true,
+    "hasRaffles": true,
+    "hasScheduling": false,
+    "hasButtonRoles": true,
+    "hasTickets": true,
+    "hasForms": true
   },
   "enterprise": {
     "stakingRate": "",
@@ -29,7 +43,14 @@
     "transferIura": "",
     "sellGlobal": "",
     "iuraOnly": "",
-    "hasArena": ""
+    "hasArena": "",
+    "hasAuction": true,
+    "hasGiveaways": true,
+    "hasRaffles": true,
+    "hasScheduling": true,
+    "hasButtonRoles": true,
+    "hasTickets": true,
+    "hasForms": true
   },
   "megura": {
     "stakingRate": "",
@@ -45,6 +66,13 @@
     "transferIura": "",
     "sellGlobal": "",
     "iuraOnly": "",
-    "hasArena": ""
+    "hasArena": "",
+    "hasAuction": true,
+    "hasGiveaways": true,
+    "hasRaffles": true,
+    "hasScheduling": true,
+    "hasButtonRoles": true,
+    "hasTickets": true,
+    "hasForms": true
   }
 }
