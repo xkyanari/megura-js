@@ -36,7 +36,7 @@ The **special shop** is each server's own store. Admins stock it with community 
 
 ### Buying (Voyagers)
 
-1. On the posted shop, pick a category, then the item.
+1. On the posted shop, pick a category. Its items open in a reply only you can see, 10 to a page: use ◀️ 🏠 ▶️ to turn pages, then pick the item.
 2. The item's price is taken from your ores and its stock goes down by one.
 3. Your team is notified in the orders channel, and Dahlia tells you the order was placed.
 

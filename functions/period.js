@@ -29,4 +29,11 @@ const nextWeekStart = (now = Date.now()) => {
 
 const previousWeekKey = (now = Date.now()) => weekKey(now - 7 * DAY);
 
-module.exports = { dayKey, weekKey, previousWeekKey, nextDayStart, nextWeekStart };
+// This week's period keys: the week's own, and each day's from Monday through today.
+const thisWeekKeys = (now = Date.now()) => {
+	const monday = nextWeekStart(now) - 7 * DAY;
+	const days = Array.from({ length: Math.floor((now - monday) / DAY) + 1 }, (_, i) => dayKey(monday + i * DAY));
+	return [weekKey(now), ...days];
+};
+
+module.exports = { dayKey, weekKey, previousWeekKey, thisWeekKeys, nextDayStart, nextWeekStart };
