@@ -1,22 +1,5 @@
 const { Player } = require('./src/db');
-
-// base stats
-const baseHealth = 2000;
-const baseAttack = 500;
-const baseDefense = 500;
-
-// scaling factors
-const attackIncreasePerLevel = 0.05; // 5% increase per level
-const levelHealthMultiplier = 175;
-const levelDefenseMultiplier = 10;
-
-// leveling bonuses
-const attackPerLevel = (level) =>
-	Math.round(baseAttack * (1 + attackIncreasePerLevel) ** (level - 1));
-const defensePerLevel = (level) =>
-	baseDefense + levelDefenseMultiplier * (level - 1);
-const healthPerLevel = (level) =>
-	baseHealth + levelHealthMultiplier * (level - 1);
+const { attackPerLevel, defensePerLevel, healthPerLevel } = require('./src/vars');
 
 // Update player stats based on level
 async function updatePlayerStats() {

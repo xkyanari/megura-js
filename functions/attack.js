@@ -5,10 +5,12 @@ const {
 	EmbedBuilder,
 	userMention,
 } = require('discord.js');
-const { Player, Monster, sequelize } = require('../src/db');
+const { Player, Monster, Guild, sequelize } = require('../src/db');
 const { simulateBattle } = require('./battle');
 const { expPoints, monsterStats } = require('../src/vars');
 const { rollLoot, loadConsumables } = require('./loot');
+const { RIVAL_DAMAGE_BONUS, syncFaction, isRival, factionLabel, addFactionPoint } = require('./factions');
+const { recordProgress, completedLines } = require('./quests');
 const leveling = require('./level');
 const levelcheck = require('./levelup');
 
@@ -93,16 +95,21 @@ const executeAttack = async (interaction, { delay } = {}) => {
 		throw new Error('no monsters configured');
 	}
 
+	const guildRow = await Guild.findOne({ where: { guildID: guild.id } });
+	const faction = await syncFaction(player, guildRow, member);
+	const rival = isRival(faction, monster.faction);
+
 	const playerObj = {
 		playerName: player.playerName,
 		level: player.level,
 		totalHealth: player.totalHealth,
-		totalAttack: player.totalAttack,
+		// fighting the rival faction's monsters hits harder
+		totalAttack: rival ? Math.round(player.totalAttack * (1 + RIVAL_DAMAGE_BONUS)) : player.totalAttack,
 		totalDefense: player.totalDefense,
 	};
 	const monsterObj = { playerName: monster.monsterName, ...monsterStats(monster, player.level) };
 
-	const title = `⚔️ A wild ${monster.monsterName} appears!`;
+	const title = `⚔️ A wild ${monster.monsterName} appears!${rival ? ` (rival: ${factionLabel(monster.faction, guildRow)})` : ''}`;
 	let lastEmbed;
 	const winner = await simulateBattle(interaction, playerObj, monsterObj, {
 		title,
@@ -124,12 +131,22 @@ const executeAttack = async (interaction, { delay } = {}) => {
 			monsterKills: 1,
 		});
 		const loot = await rollLoot(player, monster.monsterName);
+		if (rival) await addFactionPoint(guild.id, faction);
+
+		const quests = [
+			...await recordProgress(player.accountID, 'monsterWin'),
+			...(loot ? await recordProgress(player.accountID, 'loot') : []),
+			...(rival ? await recordProgress(player.accountID, 'rivalKill') : []),
+		];
+
 		const rewards = [
 			`- \`${monsterObj.iuraDropped} IURA\``,
 			`- \`${monsterObj.expDropped} EXP\``,
 			loot && `- 🎁 \`${loot}\``,
+			rival && `- ⚔️ +1 for ${factionLabel(faction, guildRow)} this week (+${RIVAL_DAMAGE_BONUS * 100}% damage against rivals)`,
+			...completedLines(quests),
 		].filter(Boolean).join('\n');
-		result = `🎉 **WELL DONE!** You received:\n${rewards}\n\n> “${getRandomVictoryQuote()}”`;
+		result = `🎉 **WELL DONE!** You received:\n${rewards}\n\n> “${getRandomVictoryQuote()}”`.slice(0, 1024);
 	}
 	else if (winner === monsterObj) {
 		result = `😔 **Better luck next time!** You retreat to patch yourself up.\n\n> “${getRandomDefeatQuote()}”`;

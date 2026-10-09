@@ -42,6 +42,8 @@ const Form = require('../models/form')(sequelize, Sequelize.DataTypes);
 const FormField = require('../models/formField')(sequelize, Sequelize.DataTypes);
 const ScheduledPost = require('../models/scheduledPost')(sequelize, Sequelize.DataTypes);
 const AuctionClosure = require('../models/auctionClosure')(sequelize, Sequelize.DataTypes);
+const QuestProgress = require('../models/questProgress')(sequelize, Sequelize.DataTypes);
+const FactionScore = require('../models/factionScore')(sequelize, Sequelize.DataTypes);
 
 Player.hasOne(Iura, {
 	as: 'iura',
@@ -472,6 +474,8 @@ module.exports = {
 	FormField,
 	ScheduledPost,
 	AuctionClosure,
+	QuestProgress,
+	FactionScore,
 	moveIura,
 	transferIura,
 	escrowOres,

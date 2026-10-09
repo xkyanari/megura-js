@@ -226,6 +226,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/daily`: Do a random quest to gain IURA. Claiming within 48 hours keeps a streak going, worth up to +60%.
 - `/duel`: Initiate a duel against another player.
 - `/equip`: Equip an inventory item: one copy each, in 1 weapon, 3 armor and 1 accessory slot.
+- `/factions`: `join` picks your faction; `standings` shows this week's faction points (from defeating the rival faction's monsters).
 - `/info`: Shows the list of commands.
 - `/inventory`: Opens your inventory.
 - `/invite`: Shows the bot invite link.
@@ -233,9 +234,11 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/open <name of channel>`: Creates a private channel, auto-closes in 10 minutes.
 - `/privacy`: Shows the privacy notice.
 - `/profile`: Show profile of a user (blank for self).
+- `/quests`: See your daily and weekly quest objectives and their rewards.
 - `/ranks`: Show leaderboards.
 - `/requestduel`: Respond to a duel request.
 - `/reset`: Delete voyager profile.
+- `/sell`: Sell inventory items back to the shop for 40% of their price.
 - `/sendgift`: Send a gift to another player.
 - `/setup`: Setup server for moderation tools.
 - `/shop`: Opens the Item Shop.
