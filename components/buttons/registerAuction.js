@@ -1,6 +1,7 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { User } = require('../../src/db');
-const { isTestnet, website, website_testnet } = require('../../config.json');
+const { website, website_testnet } = require('../../config.json');
+const { isTestnet } = require('../../src/vars');
 const { generateId } = require('../../functions/generateId');
 
 module.exports = {

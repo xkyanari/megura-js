@@ -18,7 +18,11 @@ module.exports = {
 				.setAutocomplete(true),
 		)
 		.addIntegerOption((option) =>
-			option.setName('amount').setDescription('Enter amount.').setRequired(true),
+			option
+				.setName('amount')
+				.setDescription('Enter amount.')
+				.setMinValue(1)
+				.setRequired(true),
 		),
 	cooldown: 3000,
 	async execute(interaction) {
@@ -26,44 +30,45 @@ module.exports = {
 		const id = interaction.options.getString('id');
 		const amount = interaction.options.getInteger('amount');
 
+		if (amount <= 0) {
+			return interaction.reply({
+				content: 'Item quantity entered should be at least 1.',
+				flags: 64,
+			});
+		}
+
+		const player = await Player.findOne({
+			where: { discordID: member.id, guildID: guild.id },
+		});
+		if (!player) {
+			throw new Error('profile not found');
+		}
+
+		const shopItem = await Shop.findOne({ where: { item_ID: id } });
+		if (!shopItem) {
+			return interaction.reply({ content: 'Item not found.', flags: 64 });
+		}
+
+		const { price, itemName } = shopItem;
+		const total = price * amount;
+
 		try {
-			const player = await Player.findOne({
-				where: { discordID: member.id, guildID: guild.id },
-				include: 'iura',
-			});
-			const { price, itemName } = await Shop.findOne({
-				where: { item_ID: id },
-			});
-
-			if (!player) {
-				throw new Error('profile not found');
-			}
-
-			if (price * amount > player.iura.walletAmount) {
+			await player.spendIura(total);
+		}
+		catch (error) {
+			if (error.message === 'insufficient funds') {
 				return interaction.reply({
 					content: 'You do not have sufficient balance!',
 					flags: 64,
 				});
 			}
-			if (amount <= 0) {
-				return interaction.reply({
-					content: 'Item quantity entered should be at least 1.',
-					flags: 64,
-				});
-			}
-
-			await player.withdraw(-(price * amount));
-			await player.addItem(itemName, amount);
-			await Player.increment(
-				{ iuraSpent: price },
-				{ where: { discordID: member.id } },
-			);
-
-			await interaction.reply(`\`${itemName}\` has been purchased.`);
+			throw error;
 		}
-		catch (error) {
-			console.error(error);
-		}
+
+		await player.addItem(itemName, amount);
+		await player.increment({ iuraSpent: total });
+
+		await interaction.reply(`\`${itemName}\` has been purchased.`);
 	},
 	async autocomplete(interaction) {
 		const focusedValue = interaction.options.getFocused();

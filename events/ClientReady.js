@@ -4,8 +4,10 @@ const { sequelize, Auction, Guild } = require('../src/db');
 const Queue = require('bull');
 // const app = require('../server');
 const { endAuction } = require('../functions/endAuction');
-const { dahliaName, dahliaAvatar } = require('../config.json');
+const { dahliaName, dahliaAvatar } = require('../src/vars');
+const { redisURL } = require('../redis');
 const { cleanupOldLogs } = require('../functions/logs');
+const { processBrawlJob } = require('../functions/brawlWager');
 
 let Discord;
 try {
@@ -29,7 +31,7 @@ module.exports = {
 		client.user.setPresence({
 			activities: [
 				{
-					name: '\/start | \/info',
+					name: '/start | /info',
 					type: ActivityType.Listening,
 				},
 			],
@@ -58,7 +60,7 @@ module.exports = {
 		// 	console.log(`Express server is running on http://localhost:${port}`);
 		// });
 
-		const deleteChannelQueue = new Queue('deleteChannel', 'redis://127.0.0.1:6379');
+		const deleteChannelQueue = new Queue('deleteChannel', redisURL);
 		client.deleteChannelQueue = deleteChannelQueue;
 
 		deleteChannelQueue.process(async (job, done) => {
@@ -105,7 +107,24 @@ module.exports = {
 			}
 		});
 
-		const auctionQueue = new Queue('auctionQueue', 'redis://127.0.0.1:6379');
+		// Brawl expiry and settle timeouts (see functions/brawlWager.js)
+		const brawlQueue = new Queue('brawlQueue', redisURL);
+		client.brawlQueue = brawlQueue;
+
+		brawlQueue.process(async (job) => {
+			const expired = await processBrawlJob(job.data);
+			const { channelId, messageId } = job.data;
+
+			// remove the listing that nobody accepted
+			if (expired && channelId && messageId) {
+				const channel = await client.channels.fetch(channelId).catch(() => null);
+				await channel?.messages.delete(messageId).catch((err) => {
+					if (err.code !== 10008) console.error('Failed to delete brawl listing:', err);
+				});
+			}
+		});
+
+		const auctionQueue = new Queue('auctionQueue', redisURL);
 		client.auctionQueue = auctionQueue;
 
 		auctionQueue.process(async (job, done) => {

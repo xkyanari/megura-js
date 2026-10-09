@@ -7,6 +7,7 @@
     "mysql_dbpass": "",
     "mysql_host": "127.0.0.1",
     "mysql_port": 3306,
+    "redis_url": "redis://127.0.0.1:6379",
     "token": "",
     "clientId": "",
     "guildId": "",
@@ -19,5 +20,5 @@
     "dblApiKey": "",
     "dblWebhookSecret": "",
     "topWebhookSecret": "",
-    "isTestnet": "true"
+    "isTestnet": true
 }

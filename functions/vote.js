@@ -1,20 +1,17 @@
 const { Player } = require('../src/db');
 
+const VOTE_REWARD = 50;
+
+// Credits the vote reward to the user's oldest profile.
 const voteWebhook = async (id, votes = 1) => {
-	try {
-		const player = await Player.findOne({
-			where: { discordID: id },
-			include: 'iura',
-		});
+	const player = await Player.findOne({
+		where: { discordID: id },
+		order: [['accountID', 'ASC']],
+	});
 
-		if (!player) return;
+	if (!player) return;
 
-		player.iura.walletAmount += 50 * votes;
-		await player.iura.save();
-	}
-	catch (error) {
-		console.error(error);
-	}
+	await player.addIura(VOTE_REWARD * votes);
 };
 
 module.exports = { voteWebhook };

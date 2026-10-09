@@ -10,7 +10,7 @@
     "start:prod": "node index.js",
     "start:dev": "nodemon index.js",
     "lint": "eslint .",
-    "jest": "jest"
+    "test:integration": "node --require ./test/setup.js --test --test-concurrency=1 --test-force-exit \"test/**/*.test.js\""
   },
   "author": "Kyanari",
   "license": "GPL-3.0-or-later",

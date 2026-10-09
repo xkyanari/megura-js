@@ -1,104 +1,90 @@
 const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, userMention } = require('discord.js');
-const { Brawl, Player, Guild } = require('../../src/db');
+const { Player } = require('../../src/db');
 const { generateId } = require('../../functions/generateId');
-const { isTestnet } = require('../../config.json');
+const { openBrawl, expireBrawl, BRAWL_EXPIRY } = require('../../functions/brawlWager');
 
 module.exports = {
 	data: {
 		name: 'brawl-register',
 	},
 	async execute(interaction) {
-		const wager = interaction.fields.getTextInputValue('wager');
+		const input = interaction.fields.getTextInputValue('wager').trim();
+		const wager = Number(input);
 		const oreEmoji = interaction.client.emojis.cache.get('1119212796136144956') || '💎';
 		const challengerId = interaction.member.id;
+		const guildID = interaction.guild.id;
 
-		if (wager < 1) return await interaction.reply({ content: `Please enter a valid wager. Minimum is 1 ${oreEmoji}`, flags: 64 });
-		if (!Number(wager)) return await interaction.reply({ content: `Please enter a valid wager. Minimum is 1 ${oreEmoji}`, flags: 64 });
+		if (!/^\d+$/.test(input) || !Number.isSafeInteger(wager) || wager < 1) {
+			return await interaction.reply({ content: `Please enter a valid wager. Minimum is 1 ${oreEmoji}`, flags: 64 });
+		}
 
-		try {
-			const challenger = await Player.findOne({
-				where: { discordID: interaction.member.id, guildID: interaction.guild.id },
-			});
-			const guild = await Guild.findOne({ where: { guildID: interaction.guild.id } });
+		const challenger = await Player.findOne({
+			where: { discordID: challengerId, guildID },
+		});
 
-			if (!challenger) {
-				throw new Error('profile not found');
+		if (!challenger) {
+			throw new Error('profile not found');
+		}
+
+		const embed = new EmbedBuilder()
+			.setTitle('⚔️ Brawl Challenge Open ⚔️')
+			.setColor(0xcd7f32)
+			.setDescription(`**Challenger:** ${userMention(challengerId)}\nWager: ${wager} ${oreEmoji}\nStatus: Pending`)
+			.setTimestamp()
+			.setThumbnail(`${interaction.member.displayAvatarURL({ extension: 'png', size: 512 })}`);
+
+		const button = new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
+				.setCustomId('brawl-accept')
+				.setEmoji('✋')
+				.setLabel('Accept')
+				.setStyle(ButtonStyle.Primary),
+		);
+
+		// listing ids are short and random, so retry on the rare collision
+		let listingId;
+		for (let attempt = 1; !listingId; attempt++) {
+			const candidate = await generateId(5);
+			try {
+				await openBrawl({ listingId: candidate, challengerId, guildID, wager });
+				listingId = candidate;
 			}
-
-			if (!isTestnet) {
-				if (challenger.oresEarned < wager || !challenger.oresEarned) {
+			catch (error) {
+				if (error.message === 'insufficient funds') {
 					return await interaction.reply({ content: `You do not have enough ${oreEmoji} to wager.`, flags: 64 });
 				}
-				challenger.oresEarned -= wager;
-				guild.walletAmount += wager;
+				if (error.message !== 'duplicate listing' || attempt >= 5) throw error;
 			}
+		}
 
-			const listingId = await generateId(5);
-			const embed = new EmbedBuilder()
-				.setTitle('⚔️ Brawl Challenge Open ⚔️')
-				.setColor(0xcd7f32)
-				.setDescription(`**Challenger:** ${userMention(challengerId)}\nWager: ${wager} ${oreEmoji}\nStatus: Pending`)
-				.setTimestamp()
-				.setThumbnail(`${interaction.member.displayAvatarURL({ extension: 'png', size: 512 })}`)
-				.setFooter({ text: `Listing ID: ${listingId}` });
+		embed.setFooter({ text: `Listing ID: ${listingId}` });
 
-			const button = new ActionRowBuilder().addComponents(
-				new ButtonBuilder()
-					.setCustomId('brawl-accept')
-					.setEmoji('✋')
-					.setLabel('Accept')
-					.setStyle(ButtonStyle.Primary),
-			);
-
-			const message = await interaction.reply({
+		let message;
+		try {
+			await interaction.reply({
 				content: 'A new challenge has been created!',
 				embeds: [embed],
 				components: [button],
 			});
-
-			await Brawl.create({
-				listingId,
-				challengerId,
-				wager,
-				status: 'pending',
-			});
-
-			setTimeout(async () => {
-				try {
-					const brawl = await Brawl.findOne({ where: { listingId } });
-					if (brawl && !brawl.outcome) {
-						brawl.status = 'expired';
-						await brawl.save();
-
-						const expiredChallenger = await Player.findOne({ where: { discordID: challengerId, guildID: interaction.guild.id } });
-						if (expiredChallenger) {
-							expiredChallenger.oresEarned += wager;
-							await expiredChallenger.save();
-						}
-
-						if (!isTestnet) {
-							guild.walletAmount -= wager;
-							await guild.save();
-						}
-					}
-
-					// Try to delete the message
-					try {
-						if (message) await message.delete();
-					}
-					catch (err) {
-						if (err.code !== 10008) {
-							console.error('An unexpected error occurred while deleting the message:', err);
-						}
-					}
-				}
-				catch (error) {
-					console.error('An error occurred:', error);
-				}
-			}, 10 * 60 * 1000);
+			message = await interaction.fetchReply();
 		}
 		catch (error) {
-			console.error(error);
+			// nobody can see the listing, so give the stake back right away
+			await expireBrawl(listingId, guildID);
+			throw error;
+		}
+
+		// Expires the listing and refunds the challenger if nobody accepts.
+		// Queued in Redis so it still runs after a restart.
+		try {
+			await interaction.client.brawlQueue.add(
+				{ type: 'expire', listingId, guildID, channelId: message.channelId, messageId: message.id },
+				{ delay: BRAWL_EXPIRY, removeOnComplete: true },
+			);
+		}
+		catch (error) {
+			console.error('Could not queue brawl expiry, falling back to a timer:', error);
+			setTimeout(() => expireBrawl(listingId, guildID).catch(console.error), BRAWL_EXPIRY);
 		}
 	},
 };

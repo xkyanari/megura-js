@@ -1,31 +1,25 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { UniqueConstraintError } = require('sequelize');
 const { Player, Iura } = require('../../src/db');
 
 async function updateName(interaction, player, type, name) {
-	if (type === 'wallet') {
-		Iura.update(
-			{ walletName: name },
+	const field = type === 'wallet' ? 'walletName' : 'bankName';
+	const label = type === 'wallet' ? 'Wallet' : 'Bank';
+
+	try {
+		await Iura.update(
+			{ [field]: name },
 			{ where: { accountID: player.iura.accountID } },
-		)
-			.then(() => Iura.findOne({ where: { accountID: player.iura.accountID } }))
-			.then((create_wallet) =>
-				interaction.editReply(
-					`Wallet: \`${create_wallet.walletName}\` has been updated successfully.`,
-				),
-			);
+		);
 	}
-	else {
-		Iura.update(
-			{ bankName: name },
-			{ where: { accountID: player.iura.accountID } },
-		)
-			.then(() => Iura.findOne({ where: { accountID: player.iura.accountID } }))
-			.then((create_bank) =>
-				interaction.editReply(
-					`Bank: \`${create_bank.bankName}\` has been updated successfully.`,
-				),
-			);
+	catch (error) {
+		if (error instanceof UniqueConstraintError) {
+			return interaction.editReply(`The name \`${name}\` is already taken.`);
+		}
+		throw error;
 	}
+
+	await interaction.editReply(`${label}: \`${name}\` has been updated successfully.`);
 }
 
 module.exports = {
@@ -46,12 +40,14 @@ module.exports = {
 				.addIntegerOption((option) =>
 					option
 						.setName('deposit')
+						.setMinValue(1)
 						.setDescription('Deposit funds to the bank.')
 						.setRequired(false),
 				)
 				.addIntegerOption((option) =>
 					option
 						.setName('withdraw')
+						.setMinValue(1)
 						.setDescription('Withdraw funds from the bank.')
 						.setRequired(false),
 				),
@@ -70,12 +66,14 @@ module.exports = {
 				.addIntegerOption((option) =>
 					option
 						.setName('stake')
+						.setMinValue(1)
 						.setDescription('Stake your funds in the bank.')
 						.setRequired(false),
 				)
 				.addIntegerOption((option) =>
 					option
 						.setName('unstake')
+						.setMinValue(1)
 						.setDescription('Unstake funds from the bank.')
 						.setRequired(false),
 				),
@@ -99,19 +97,20 @@ module.exports = {
 	async execute(interaction) {
 		const { member, guild } = interaction;
 
+		await interaction.deferReply({ flags: 64 });
+
+		const player = await Player.findOne({
+			where: { discordID: member.id, guildID: guild.id },
+			include: 'iura',
+		});
+
+		if (!player) {
+			throw new Error('profile not found');
+		}
+
+		const balance = player.iura;
+
 		try {
-			await interaction.deferReply({ flags: 64 });
-
-			const player = await Player.findOne({
-				where: { discordID: member.id, guildID: guild.id },
-				include: 'iura',
-			});
-			const balance = await player.balance();
-
-			if (!player) {
-				throw new Error('profile not found');
-			}
-
 			const numFormat = (value) =>
 				new Intl.NumberFormat('en-US').format(value === null ? 0 : value);
 
@@ -140,14 +139,10 @@ module.exports = {
 						if (wallet_deposit > balance.walletAmount) {
 							return interaction.editReply({
 								content: 'You do not have sufficient balance!',
-								flags: 64,
 							});
 						}
 
-						await player.deposit(
-							wallet_deposit,
-							interaction.options.getSubcommand(),
-						);
+						await player.deposit(wallet_deposit, 'wallet');
 
 						const embed = new EmbedBuilder()
 							.setTitle('Deposited.')
@@ -155,21 +150,17 @@ module.exports = {
 								`**$${numFormat(wallet_deposit)} IURA** has been deposited to \`${balance.bankName
 								}\` account.`,
 							);
-						await interaction.editReply({ embeds: [embed], flags: 64 });
+						await interaction.editReply({ embeds: [embed] });
 					}
 					else if (wallet_withdraw) {
 						// bank ----> wallet
 						if (wallet_withdraw > balance.bankAmount) {
 							return interaction.editReply({
 								content: 'You do not have sufficient balance!',
-								flags: 64,
 							});
 						}
 
-						await player.withdraw(
-							wallet_withdraw,
-							interaction.options.getSubcommand(),
-						);
+						await player.withdraw(wallet_withdraw, 'bank');
 
 						const embed = new EmbedBuilder()
 							.setTitle('Withdrawn.')
@@ -178,7 +169,7 @@ module.exports = {
 									wallet_withdraw,
 								)} IURA** has been removed from \`${balance.bankName}\` account.`,
 							);
-						await interaction.editReply({ embeds: [embed], flags: 64 });
+						await interaction.editReply({ embeds: [embed] });
 					}
 					else {
 						const embed = new EmbedBuilder()
@@ -186,7 +177,7 @@ module.exports = {
 							.setDescription(
 								'Please deposit and withdraw from your wallet balance only. Thanks!',
 							);
-						await interaction.editReply({ embeds: [embed], flags: 64 });
+						await interaction.editReply({ embeds: [embed] });
 					}
 					break;
 
@@ -204,14 +195,10 @@ module.exports = {
 						if (bank_deposit > balance.bankAmount) {
 							return interaction.editReply({
 								content: 'You do not have sufficient balance!',
-								flags: 64,
 							});
 						}
 
-						await player.deposit(
-							bank_deposit,
-							interaction.options.getSubcommand(),
-						);
+						await player.deposit(bank_deposit, 'bank');
 
 						const embed1 = new EmbedBuilder()
 							.setTitle('Staked.')
@@ -220,21 +207,17 @@ module.exports = {
 									bank_deposit,
 								)} IURA** has been added to your Stake account.`,
 							);
-						await interaction.editReply({ embeds: [embed1], flags: 64 });
+						await interaction.editReply({ embeds: [embed1] });
 					}
 					else if (bank_withdraw) {
 						// stake ----> bank
 						if (bank_withdraw > balance.stakedAmount) {
 							return interaction.editReply({
 								content: 'You do not have sufficient balance!',
-								flags: 64,
 							});
 						}
 
-						await player.withdraw(
-							bank_withdraw,
-							interaction.options.getSubcommand(),
-						);
+						await player.withdraw(bank_withdraw, 'stake');
 
 						const embed1 = new EmbedBuilder()
 							.setTitle('Withdrawn.')
@@ -243,7 +226,7 @@ module.exports = {
 									bank_withdraw,
 								)} IURA** has been removed from your Stake account.`,
 							);
-						await interaction.editReply({ embeds: [embed1], flags: 64 });
+						await interaction.editReply({ embeds: [embed1] });
 					}
 					else {
 						const embed1 = new EmbedBuilder()
@@ -251,7 +234,7 @@ module.exports = {
 							.setDescription(
 								'Please stake and unstake from your bank balance only. Thanks!',
 							);
-						await interaction.editReply({ embeds: [embed1], flags: 64 });
+						await interaction.editReply({ embeds: [embed1] });
 					}
 					break;
 
@@ -262,7 +245,7 @@ module.exports = {
 							.setDescription(
 								`💰 **Wallet:** $${numFormat(balance.walletAmount)} IURA`,
 							);
-						await interaction.editReply({ embeds: [embed2], flags: 64 });
+						await interaction.editReply({ embeds: [embed2] });
 					}
 					else if (check_balance === 'bank') {
 						const embed2 = new EmbedBuilder()
@@ -272,13 +255,17 @@ module.exports = {
 									balance.bankAmount,
 								)} IURA\n💵 **Staked:** $${numFormat(balance.stakedAmount)} IURA`,
 							);
-						await interaction.editReply({ embeds: [embed2], flags: 64 });
+						await interaction.editReply({ embeds: [embed2] });
 					}
 					break;
 			}
 		}
 		catch (error) {
-			console.error(error);
+			// balance changed between the check above and the update
+			if (error.message === 'insufficient funds') {
+				return interaction.editReply('You do not have sufficient balance!');
+			}
+			throw error;
 		}
 	},
 };

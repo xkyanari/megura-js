@@ -48,6 +48,83 @@ User.hasMany(Auction, { as: 'WonAuctions', foreignKey: 'winnerId' });
 AuctionItem.hasOne(Auction, { foreignKey: 'itemId' });
 Auction.belongsTo(AuctionItem, { foreignKey: 'itemId' });
 
+// Atomic balance helpers -----------------
+
+const { Op } = Sequelize;
+
+const IURA_COLUMNS = {
+	wallet: 'walletAmount',
+	bank: 'bankAmount',
+	stake: 'stakedAmount',
+};
+
+const assertAmount = (amount) => {
+	if (!Number.isSafeInteger(amount) || amount <= 0) {
+		throw new Error('invalid amount');
+	}
+};
+
+// Moves `amount` from one balance column to another in a single UPDATE.
+// Pass null for `from` to only credit, or null for `to` to only debit.
+// A debit never lets the source column go negative.
+async function moveIura(accountID, from, to, amount, transaction) {
+	assertAmount(amount);
+
+	const values = {};
+	const where = { accountID };
+	if (from) {
+		const column = IURA_COLUMNS[from];
+		values[column] = sequelize.literal(`\`${column}\` - ${amount}`);
+		where[column] = { [Op.gte]: amount };
+	}
+	if (to) {
+		const column = IURA_COLUMNS[to];
+		values[column] = sequelize.literal(`\`${column}\` + ${amount}`);
+	}
+
+	const [affected] = await Iura.update(values, { where, transaction });
+	if (!affected) {
+		throw new Error(from ? 'insufficient funds' : 'account not found');
+	}
+}
+
+// Moves `amount` from one player's wallet to another's, all or nothing.
+async function transferIura(fromAccountID, toAccountID, amount) {
+	return sequelize.transaction(async (transaction) => {
+		await moveIura(fromAccountID, 'wallet', null, amount, transaction);
+		await moveIura(toAccountID, null, 'wallet', amount, transaction);
+	});
+}
+
+// Moves a player's ores into the guild wallet (e.g. a brawl stake).
+// Throws 'insufficient funds' without changing anything if the player can't cover it.
+async function escrowOres(discordID, guildID, amount, transaction) {
+	assertAmount(amount);
+
+	const [affected] = await Player.update(
+		{ oresEarned: sequelize.literal(`\`oresEarned\` - ${amount}`) },
+		{ where: { discordID, guildID, oresEarned: { [Op.gte]: amount } }, transaction },
+	);
+	if (!affected) throw new Error('insufficient funds');
+
+	await Guild.increment({ walletAmount: amount }, { where: { guildID }, transaction });
+}
+
+// Pays ores from the guild wallet back to a player (e.g. a brawl payout or refund).
+// If the player no longer has a profile, the ores stay in the guild wallet.
+async function releaseOres(discordID, guildID, amount, transaction) {
+	assertAmount(amount);
+
+	const [affected] = await Player.update(
+		{ oresEarned: sequelize.literal(`\`oresEarned\` + ${amount}`) },
+		{ where: { discordID, guildID }, transaction },
+	);
+	if (!affected) return false;
+
+	await Guild.decrement({ walletAmount: amount }, { where: { guildID }, transaction });
+	return true;
+}
+
 // for staking
 Reflect.defineProperty(Player.prototype, 'stake', {
 	value: async function stake() {
@@ -75,8 +152,11 @@ Reflect.defineProperty(Player.prototype, 'getItems', {
 
 Reflect.defineProperty(Player.prototype, 'getItem', {
 	value: async function getItem(itemID) {
-		const { itemName, level } = await Shop.findOne({ where: { item_ID: itemID } });
+		const shopItem = await Shop.findOne({ where: { item_ID: itemID } });
+		if (!shopItem) return;
+		const { itemName, level } = shopItem;
 		const item = await Item.findOne({ where: { accountID: this.accountID, itemName } });
+		if (!item) return;
 
 		return {
 			...item.toJSON(),
@@ -87,8 +167,10 @@ Reflect.defineProperty(Player.prototype, 'getItem', {
 
 Reflect.defineProperty(Player.prototype, 'updateItem', {
 	value: async function updateItem(itemID, isEquipped) {
-		const { itemName } = await Shop.findOne({ where: { item_ID: itemID } });
-		const item = await Item.findOne({ where: { accountID: this.accountID, itemName } });
+		const shopItem = await Shop.findOne({ where: { item_ID: itemID } });
+		if (!shopItem) return;
+		const item = await Item.findOne({ where: { accountID: this.accountID, itemName: shopItem.itemName } });
+		if (!item) return;
 		item.equipped = isEquipped;
 		return item.save();
 	},
@@ -97,9 +179,9 @@ Reflect.defineProperty(Player.prototype, 'updateItem', {
 // adds only the item (no deduction of payment yet) to the user's inventory
 Reflect.defineProperty(Player.prototype, 'addItem', {
 	value: async function addItem(item, amount = 1) {
-		const { itemID } = await Shop.findOne({ where: { itemName: item } });
+		const shopItem = await Shop.findOne({ where: { itemName: item } });
 
-		if (!itemID) return;
+		if (!shopItem) return;
 
 		const purchasedItem = await Item.findOne({
 			where: { accountID: this.accountID, itemName: item },
@@ -144,47 +226,56 @@ Reflect.defineProperty(Shop, 'updateItem', {
 	},
 });
 
-// buy an item from the Shop
+// buy a guild item from the Shop, paid in ores
 Reflect.defineProperty(Shop, 'buyItem', {
 	value: async function buyItem(item, quantity, discordID, guildID) {
+		assertAmount(quantity);
 
-		const shopItem = await this.findOne({ where: { itemName: item } });
+		return sequelize.transaction(async (transaction) => {
+			const shopItem = await this.findOne({
+				where: { itemName: item, guildID },
+				transaction,
+				lock: transaction.LOCK.UPDATE,
+			});
+			if (!shopItem) throw new Error('item not found');
+			if (shopItem.quantity < quantity) throw new Error('out of stock');
 
-		const user = await Player.findOne({ where: { discordID, guildID } });
-		const guild = await Guild.findOne({ where: { guildID } });
+			const cost = shopItem.price * quantity;
 
-		// Update user balance
-		await Player.update({ oresEarned: user.oresEarned - shopItem.price * quantity }, { where: { discordID } });
+			// Deduct from the player, only if they can afford it
+			const [affected] = await Player.update(
+				{ oresEarned: sequelize.literal(`\`oresEarned\` - ${cost}`) },
+				{ where: { discordID, guildID, oresEarned: { [Op.gte]: cost } }, transaction },
+			);
+			if (!affected) throw new Error('insufficient funds');
 
-		// Update guild wallet
-		await Guild.update({ walletAmount: guild.walletAmount + shopItem.price * quantity }, { where: { guildID } });
-
-		// Update shop stock
-		await this.update({ quantity: shopItem.quantity - quantity }, { where: { itemName: item } });
-
-		return;
+			await Guild.increment({ walletAmount: cost }, { where: { guildID }, transaction });
+			await shopItem.decrement({ quantity }, { transaction });
+		});
 	},
 });
 
-// refund the ores to the player
+// refund the ores to the player; returns the amount refunded
+// (0 if the player no longer has a profile, in which case the ores stay in the guild wallet)
 Reflect.defineProperty(Shop, 'returnOres', {
 	value: async function returnOres(item, quantity, discordID, guildID) {
-		const shopItem = await this.findOne({ where: { itemName: item } });
-		const user = await Player.findOne({ where: { discordID, guildID } });
-		const guild = await Guild.findOne({ where: { guildID } });
+		assertAmount(quantity);
 
-		const oreReturned = shopItem.price * quantity;
+		return sequelize.transaction(async (transaction) => {
+			const shopItem = await this.findOne({
+				where: { itemName: item, guildID },
+				transaction,
+				lock: transaction.LOCK.UPDATE,
+			});
+			if (!shopItem) throw new Error('item not found');
 
-		// Refund ores to user
-		await Player.update({ oresEarned: user.oresEarned + oreReturned }, { where: { discordID } });
+			const oreReturned = shopItem.price * quantity;
 
-		// Deduct from guild wallet
-		await Guild.update({ walletAmount: guild.walletAmount - oreReturned }, { where: { guildID } });
+			const refunded = await releaseOres(discordID, guildID, oreReturned, transaction);
+			await shopItem.increment({ quantity }, { transaction });
 
-		// Increase shop stock
-		await this.update({ quantity: shopItem.quantity + quantity }, { where: { itemName: item } });
-
-		return oreReturned;
+			return refunded ? oreReturned : 0;
+		});
 	},
 });
 
@@ -200,81 +291,48 @@ Reflect.defineProperty(Shop, 'getItem', {
 	},
 });
 
+// wallet ---> bank (type 'wallet'), or bank ---> stake (type 'bank')
 Reflect.defineProperty(Player.prototype, 'deposit', {
 	value: async function deposit(amount, type = 'bank') {
-		const iura = await Iura.findOne({ where: { accountID: this.accountID } });
-
-		if (type === 'wallet') {
-			// wallet ---> bank
-			Iura.decrement(
-				{ walletAmount: amount },
-				{ where: { accountID: this.accountID } },
-			);
-			Iura.increment(
-				{ bankAmount: amount },
-				{ where: { accountID: this.accountID } },
-			);
-			return iura.save();
-		}
-		else if (type === 'bank') {
-			// bank ---> stake
-			Iura.decrement(
-				{ bankAmount: amount },
-				{ where: { accountID: this.accountID } },
-			);
-			Iura.increment(
-				{ stakedAmount: amount },
-				{ where: { accountID: this.accountID } },
-			);
-			return iura.save();
-		}
+		if (type === 'wallet') return moveIura(this.accountID, 'wallet', 'bank', amount);
+		if (type === 'bank') return moveIura(this.accountID, 'bank', 'stake', amount);
+		throw new Error(`Unknown deposit type: ${type}`);
 	},
 });
 
+// bank ---> wallet (type 'bank'), or stake ---> bank (type 'stake')
 Reflect.defineProperty(Player.prototype, 'withdraw', {
-	value: async function withdraw(amount, type = 'wallet') {
-		const iura = await Iura.findOne({ where: { accountID: this.accountID } });
+	value: async function withdraw(amount, type) {
+		if (type === 'bank') return moveIura(this.accountID, 'bank', 'wallet', amount);
+		if (type === 'stake') return moveIura(this.accountID, 'stake', 'bank', amount);
+		throw new Error(`Unknown withdraw type: ${type}`);
+	},
+});
 
-		if (type === 'wallet') {
-			iura.walletAmount += Number(amount);
-			return iura.save();
-		}
-		else if (type === 'bank') {
-			// bank ---> wallet
-			Iura.decrement(
-				{ bankAmount: amount },
-				{ where: { accountID: this.accountID } },
-			);
-			Iura.increment(
-				{ walletAmount: amount },
-				{ where: { accountID: this.accountID } },
-			);
-			return iura.save();
-		}
-		else if (type === 'stake') {
-			// stake ---> bank
-			Iura.decrement(
-				{ stakedAmount: amount },
-				{ where: { accountID: this.accountID } },
-			);
-			Iura.increment(
-				{ bankAmount: amount },
-				{ where: { accountID: this.accountID } },
-			);
-			return iura.save();
-		}
+// adds IURA to the wallet
+Reflect.defineProperty(Player.prototype, 'addIura', {
+	value: async function addIura(amount) {
+		return moveIura(this.accountID, null, 'wallet', amount);
+	},
+});
+
+// deducts IURA from the wallet; throws 'insufficient funds' if it can't cover it
+Reflect.defineProperty(Player.prototype, 'spendIura', {
+	value: async function spendIura(amount) {
+		return moveIura(this.accountID, 'wallet', null, amount);
 	},
 });
 
 Reflect.defineProperty(Player.prototype, 'updateStats', {
 	value: async function updateStats(itemName, add = true, amount = 1) {
 		try {
-			const { itemID, totalHealth, totalAttack, totalDefense, category } =
-				await Shop.findOne({ where: { itemName } });
+			const shopItem = await Shop.findOne({ where: { itemName } });
 
-			if (!itemID) {
+			if (!shopItem) {
 				throw new Error(`Item ${itemName} not found in Shop`);
 			}
+
+			const { totalHealth, totalAttack, totalDefense, category } = shopItem;
 
 			const newTotalHealth = totalHealth * amount;
 			const newTotalAttack = totalAttack * amount;
@@ -353,4 +411,7 @@ module.exports = {
 	Bid,
 	AuctionItem,
 	Brawl,
+	transferIura,
+	escrowOres,
+	releaseOres,
 };
