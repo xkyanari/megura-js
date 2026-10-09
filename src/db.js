@@ -34,6 +34,8 @@ const Raffle = require('../models/raffle')(sequelize, Sequelize.DataTypes);
 const RaffleTicket = require('../models/raffleTicket')(sequelize, Sequelize.DataTypes);
 const Giveaway = require('../models/giveaway')(sequelize, Sequelize.DataTypes);
 const GiveawayEntry = require('../models/giveawayEntry')(sequelize, Sequelize.DataTypes);
+const RolePanel = require('../models/rolePanel')(sequelize, Sequelize.DataTypes);
+const RolePanelRole = require('../models/rolePanelRole')(sequelize, Sequelize.DataTypes);
 
 Player.hasOne(Iura, {
 	as: 'iura',
@@ -53,6 +55,7 @@ AuctionItem.hasOne(Auction, { foreignKey: 'itemId' });
 Auction.belongsTo(AuctionItem, { foreignKey: 'itemId' });
 Giveaway.hasMany(GiveawayEntry, { as: 'entries', foreignKey: 'giveawayId', onDelete: 'CASCADE' });
 Raffle.hasMany(RaffleTicket, { as: 'tickets', foreignKey: 'raffleId', onDelete: 'CASCADE' });
+RolePanel.hasMany(RolePanelRole, { as: 'roles', foreignKey: 'panelId', onDelete: 'CASCADE' });
 
 // Atomic balance helpers -----------------
 
@@ -421,6 +424,8 @@ module.exports = {
 	GiveawayEntry,
 	Raffle,
 	RaffleTicket,
+	RolePanel,
+	RolePanelRole,
 	moveIura,
 	transferIura,
 	escrowOres,
