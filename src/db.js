@@ -140,6 +140,26 @@ async function releaseOres(discordID, guildID, amount, transaction) {
 	return true;
 }
 
+// Pays ores from the guild wallet to a player (e.g. /specialshop transfer).
+// Throws 'insufficient funds' if the guild wallet can't cover it, or
+// 'profile not found' if the player has no profile; nothing changes then.
+async function grantOres(discordID, guildID, amount) {
+	assertAmount(amount);
+	return sequelize.transaction(async (transaction) => {
+		const [taken] = await Guild.update(
+			{ walletAmount: sequelize.literal(`\`walletAmount\` - ${amount}`) },
+			{ where: { guildID, walletAmount: { [Op.gte]: amount } }, transaction },
+		);
+		if (!taken) throw new Error('insufficient funds');
+
+		const [given] = await Player.update(
+			{ oresEarned: sequelize.literal(`\`oresEarned\` + ${amount}`) },
+			{ where: { discordID, guildID }, transaction },
+		);
+		if (!given) throw new Error('profile not found');
+	});
+}
+
 // for staking
 Reflect.defineProperty(Player.prototype, 'stake', {
 	value: async function stake() {
@@ -194,42 +214,53 @@ Reflect.defineProperty(Player.prototype, 'updateItem', {
 // adds only the item (no deduction of payment yet) to the user's inventory
 Reflect.defineProperty(Player.prototype, 'addItem', {
 	value: async function addItem(item, amount = 1) {
+		assertAmount(amount);
 		const shopItem = await Shop.findOne({ where: { itemName: item } });
 
 		if (!shopItem) return;
 
-		const purchasedItem = await Item.findOne({
-			where: { accountID: this.accountID, itemName: item },
+		// lock the player so two purchases at once add both, into one row
+		return sequelize.transaction(async (transaction) => {
+			await Player.findByPk(this.accountID, { transaction, lock: transaction.LOCK.UPDATE });
+			const [added] = await Item.increment(
+				{ quantity: amount },
+				{ where: { accountID: this.accountID, itemName: item }, transaction },
+			);
+			// MySQL reports affected rows as [[rows, count]] for increment
+			const count = Array.isArray(added) ? added[1] : added;
+			if (!count) {
+				await Item.create({ accountID: this.accountID, itemName: item, quantity: amount }, { transaction });
+			}
 		});
-
-		if (purchasedItem) {
-			purchasedItem.quantity += amount;
-			return purchasedItem.save();
-		}
-
-		await this.createItem({ itemName: item, quantity: amount });
 	},
 });
 
-// adds an item to the Shop
+// Adds an item to a server's special shop. Returns false if the ID or name is
+// already used by that server or by the global shop (purchases look items up by name).
 Reflect.defineProperty(Shop, 'addItem', {
 	value: async function addItem(itemName, price, quantity, item_ID, category, guildID) {
-		return await this.upsert({ itemName, price, quantity, item_ID, category, guildID });
+		const clash = await this.findOne({
+			where: {
+				guildID: { [Op.or]: [guildID, null] },
+				[Op.or]: [{ item_ID }, { itemName }],
+			},
+		});
+		if (clash) return false;
+		await this.create({ itemName, price, quantity, item_ID, category, guildID });
+		return true;
 	},
 });
 
-// removes an item from the Shop
+// removes an item from a server's special shop
 Reflect.defineProperty(Shop, 'removeItem', {
-	value: async function removeItem(item_ID) {
-		const shopItem = await this.findOne({ where: { item_ID } });
-		if (shopItem) return await this.destroy({ where: { item_ID } });
-		return;
+	value: async function removeItem(item_ID, guildID) {
+		return this.destroy({ where: { item_ID, guildID } });
 	},
 });
 
-// updates an item from the Shop
+// updates an item in a server's special shop
 Reflect.defineProperty(Shop, 'updateItem', {
-	value: async function updateItem({ item_ID, price, stock }) {
+	value: async function updateItem({ item_ID, guildID, price, stock }) {
 		const updatedValues = {};
 		if (price !== undefined) {
 			updatedValues.price = price;
@@ -237,7 +268,7 @@ Reflect.defineProperty(Shop, 'updateItem', {
 		if (stock !== undefined) {
 			updatedValues.quantity = stock;
 		}
-		return await this.update(updatedValues, { where: { item_ID } });
+		return await this.update(updatedValues, { where: { item_ID, guildID } });
 	},
 });
 
@@ -256,6 +287,7 @@ Reflect.defineProperty(Shop, 'buyItem', {
 			if (shopItem.quantity < quantity) throw new Error('out of stock');
 
 			const cost = shopItem.price * quantity;
+			assertAmount(cost);
 
 			// Deduct from the player, only if they can afford it
 			const [affected] = await Player.update(
@@ -285,6 +317,7 @@ Reflect.defineProperty(Shop, 'returnOres', {
 			if (!shopItem) throw new Error('item not found');
 
 			const oreReturned = shopItem.price * quantity;
+			assertAmount(oreReturned);
 
 			const refunded = await releaseOres(discordID, guildID, oreReturned, transaction);
 			await shopItem.increment({ quantity }, { transaction });
@@ -295,10 +328,10 @@ Reflect.defineProperty(Shop, 'returnOres', {
 });
 
 
-// gets an item from the Shop
+// gets an item from a server's special shop
 Reflect.defineProperty(Shop, 'getItem', {
-	value: async function getItem(item_ID) {
-		const shopItem = await this.findOne({ where: { item_ID } });
+	value: async function getItem(item_ID, guildID) {
+		const shopItem = await this.findOne({ where: { item_ID, guildID } });
 		if (!shopItem) return;
 		return {
 			...shopItem.toJSON(),
@@ -441,4 +474,5 @@ module.exports = {
 	transferIura,
 	escrowOres,
 	releaseOres,
+	grantOres,
 };
