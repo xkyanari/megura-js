@@ -5,15 +5,30 @@ const { sequelize, Player, Item, Shop } = require('../src/db');
  * Equipping and unequipping items. Each change runs in one transaction with
  * the player's row locked, and only moves items the player actually has, so
  * stats can't be inflated with negative or oversized amounts.
+ *
+ * One copy of an item can be equipped at a time, in a slot for its category.
+ * Consumables aren't equipped: they are used up in battle (see functions/loot.js).
  */
 
-const MAX_EQUIPPED_KINDS = 5;
+const SLOT_LIMITS = { weapons: 1, armor: 3, miscellaneous: 1 };
+const MAX_EQUIPPED_KINDS = Object.values(SLOT_LIMITS).reduce((sum, n) => sum + n, 0);
 const DEFAULTS = { weapons: ['weapon', 'Basic Sword'], armor: ['armor', 'Basic Clothes'] };
+
+// How many items of this category the player has equipped.
+const slotUsed = async (accountID, category, transaction) => {
+	const equipped = await Item.findAll({ where: { accountID, equippedAmount: { [Op.gt]: 0 } }, transaction });
+	if (!equipped.length) return 0;
+	return Shop.count({
+		where: { guildID: null, category, itemName: equipped.map((item) => item.itemName) },
+		transaction,
+	});
+};
 
 /**
  * Equips (equip = true) or unequips `amount` of the shop item `itemID`.
- * Returns { ok: true, itemName } or { ok: false, reason } with reason
- * 'amount', 'not owned', 'level', 'limit' or 'not enough'.
+ * Equipping takes exactly one. Returns { ok: true, itemName } or
+ * { ok: false, reason } with reason 'amount', 'not owned', 'level',
+ * 'consumable', 'equipped', 'slot' or 'not enough'.
  */
 const changeEquipment = (accountID, itemID, amount, equip) => {
 	if (!Number.isSafeInteger(amount) || amount < 1) return Promise.resolve({ ok: false, reason: 'amount' });
@@ -30,11 +45,13 @@ const changeEquipment = (accountID, itemID, amount, equip) => {
 		if (!player || !item) return { ok: false, reason: 'not owned' };
 
 		if (equip) {
+			if (amount !== 1) return { ok: false, reason: 'amount' };
+			if (!SLOT_LIMITS[shopItem.category]) return { ok: false, reason: 'consumable' };
 			if (player.level < shopItem.level) return { ok: false, reason: 'level' };
+			if (item.equippedAmount > 0) return { ok: false, reason: 'equipped' };
 			if (item.quantity < amount) return { ok: false, reason: 'not enough' };
-			if (item.equippedAmount === 0) {
-				const kinds = await Item.count({ where: { accountID, equippedAmount: { [Op.gt]: 0 } }, transaction });
-				if (kinds >= MAX_EQUIPPED_KINDS) return { ok: false, reason: 'limit' };
+			if (await slotUsed(accountID, shopItem.category, transaction) >= SLOT_LIMITS[shopItem.category]) {
+				return { ok: false, reason: 'slot' };
 			}
 		}
 		else if (item.equippedAmount < amount) {
@@ -66,4 +83,4 @@ const changeEquipment = (accountID, itemID, amount, equip) => {
 	});
 };
 
-module.exports = { MAX_EQUIPPED_KINDS, changeEquipment };
+module.exports = { SLOT_LIMITS, MAX_EQUIPPED_KINDS, changeEquipment };

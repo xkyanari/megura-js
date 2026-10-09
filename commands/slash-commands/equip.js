@@ -1,12 +1,13 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { Player } = require('../../src/db');
-const { MAX_EQUIPPED_KINDS, changeEquipment } = require('../../functions/equipment');
+const { SLOT_LIMITS, changeEquipment } = require('../../functions/equipment');
 
 const REFUSALS = {
-	'amount': 'Please enter an amount of at least 1.',
 	'not owned': 'You don\'t own that item.',
 	'level': 'Your level is too low to equip this item.',
-	'limit': `You can equip up to ${MAX_EQUIPPED_KINDS} different items only.`,
+	'consumable': 'Consumables can\'t be equipped. They are used automatically when your health runs low in a fight.',
+	'equipped': 'You already have that item equipped.',
+	'slot': `Your slots are full (${SLOT_LIMITS.weapons} weapon, ${SLOT_LIMITS.armor} armor, ${SLOT_LIMITS.miscellaneous} accessory). Unequip one first.`,
 	'not enough': 'You do not have enough of that item to equip.',
 };
 
@@ -16,9 +17,6 @@ module.exports = {
 		.setDescription('Equip an item.')
 		.addStringOption((option) =>
 			option.setName('id').setDescription('Enter item ID.').setRequired(true),
-		)
-		.addIntegerOption((option) =>
-			option.setName('amount').setDescription('Enter amount.').setMinValue(1).setRequired(true),
 		),
 	cooldown: 3000,
 	async execute(interaction) {
@@ -29,7 +27,7 @@ module.exports = {
 			throw new Error('profile not found');
 		}
 
-		const result = await changeEquipment(player.accountID, options.getString('id'), options.getInteger('amount'), true);
+		const result = await changeEquipment(player.accountID, options.getString('id'), 1, true);
 		if (!result.ok) {
 			return interaction.reply({ content: REFUSALS[result.reason], flags: 64 });
 		}

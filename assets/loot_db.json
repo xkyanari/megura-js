@@ -1,7 +1,7 @@
 [
   {
     "monsterName": "Beelzebub",
-    "loot": ["Basic Sword", "Rotten Bandage", "Simple Rock"]
+    "loot": ["Healing Potion", "Rotten Bandage", "Simple Rock"]
   },
   {
     "monsterName": "Dead Knight",

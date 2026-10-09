@@ -128,7 +128,7 @@ describe('game logic', () => {
 		};
 		const tank = (name) => ({ playerName: name, level: 1, totalAttack: 1, totalDefense: 1e9, totalHealth: 100 });
 
-		// battles pause 2s between rounds: skip the waits
+		// battles pause between rounds: skip the waits
 		const timers = require('node:timers/promises');
 		const realWait = timers.setTimeout;
 		timers.setTimeout = async () => undefined;
@@ -139,7 +139,8 @@ describe('game logic', () => {
 		finally {
 			timers.setTimeout = realWait;
 		}
-		assert.ok(posted.some((p) => p === 'Both fighters are exhausted. The battle ends in a draw.'));
+		assert.equal(posted.length, 1, 'one battle message, edited each turn');
+		assert.match(lastEmbed.data.description, /Both fighters are exhausted\. The battle ends in a draw\./);
 		assert.ok(lastEmbed.data.description.length <= 4096);
 	});
 });

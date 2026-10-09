@@ -37,19 +37,19 @@ before(resetDb);
 after(closeAll);
 
 describe('duel payout', () => {
-	test('the winner takes 40% of the loser\'s wallet as it is at the end, rounded down', async () => {
+	test('the winner takes 15% of the loser\'s wallet as it is at the end, rounded down', async () => {
 		const winner = await createPlayer('W1', 500);
 		const loser = await createPlayer('L1', 1000);
 		// the loser spent most of their wallet during the battle
 		await Iura.update({ walletAmount: 333 }, { where: { accountID: loser.accountID } });
 
 		const amount = await D.settleDuel({ winner, loser, challengerWon: true });
-		assert.equal(amount, 133, 'floor(333 × 0.4), not 40% of the stale 1000');
-		assert.equal(await walletOf(loser), 200);
-		assert.equal(await walletOf(winner), 633);
+		assert.equal(amount, 49, 'floor(333 × 0.15), not 15% of the stale 1000');
+		assert.equal(await walletOf(loser), 284);
+		assert.equal(await walletOf(winner), 549);
 
 		await winner.reload();
-		assert.equal(winner.iuraEarned, 133);
+		assert.equal(winner.iuraEarned, 49);
 		assert.equal(winner.expGained, duel_expGained);
 		assert.equal(winner.duelKills, 1);
 	});
@@ -57,9 +57,9 @@ describe('duel payout', () => {
 	test('a challenger who loses pays, and gets no rewards; an empty wallet pays nothing', async () => {
 		const challenger = await createPlayer('C2', 250);
 		const target = await createPlayer('T2', 100);
-		assert.equal(await D.settleDuel({ winner: target, loser: challenger, challengerWon: false }), 100);
-		assert.equal(await walletOf(challenger), 150);
-		assert.equal(await walletOf(target), 200);
+		assert.equal(await D.settleDuel({ winner: target, loser: challenger, challengerWon: false }), 37);
+		assert.equal(await walletOf(challenger), 213);
+		assert.equal(await walletOf(target), 137);
 		await challenger.reload();
 		assert.equal(challenger.duelKills, 0);
 
@@ -77,9 +77,16 @@ describe('duel payout', () => {
 			D.settleDuel({ winner: a, loser, challengerWon: true }),
 			D.settleDuel({ winner: b, loser, challengerWon: true }),
 		]);
-		assert.deepEqual(amounts.sort((x, y) => x - y), [240, 400], '40% of 1000, then 40% of what was left');
-		assert.equal(await walletOf(loser), 360);
-		assert.equal((await walletOf(a)) + (await walletOf(b)), 640, 'no IURA created or lost');
+		assert.deepEqual(amounts.sort((x, y) => x - y), [127, 150], '15% of 1000, then 15% of what was left');
+		assert.equal(await walletOf(loser), 723);
+		assert.equal((await walletOf(a)) + (await walletOf(b)), 277, 'no IURA created or lost');
+	});
+
+	test('the payout is capped by the loser\'s level', async () => {
+		const winner = await createPlayer('W4', 0);
+		const loser = await createPlayer('L4', 10000, { level: 2 });
+		assert.equal(await D.settleDuel({ winner, loser, challengerWon: true }), 2 * D.MAX_PAYOUT_PER_LEVEL);
+		assert.equal(await walletOf(loser), 9000);
 	});
 });
 

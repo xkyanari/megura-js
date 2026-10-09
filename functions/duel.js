@@ -8,14 +8,16 @@ const levelcheck = require('./levelup');
 
 /**
  * Duels (/duel and the "Request for Duel" user command): the challenger fights
- * the target, and the winner takes 40% of the loser's wallet.
+ * the target, and the winner takes 15% of the loser's wallet, at most
+ * MAX_PAYOUT_PER_LEVEL × the loser's level.
  *
  * The payout is worked out when the battle ends, from the loser's wallet as it
  * is then (locked), and moved in one transaction, so it is always a whole
  * number and can never take the loser below zero.
  */
 
-const PAYOUT_SHARE = 0.4;
+const PAYOUT_SHARE = 0.15;
+const MAX_PAYOUT_PER_LEVEL = 500;
 const MIN_WALLET = 100;
 // How far apart in total health two players may be
 const MAX_HEALTH_GAP = 15000;
@@ -48,8 +50,8 @@ const duelRefusal = (challenger, target, targetUser) => {
 };
 
 /**
- * Pays the winner 40% of the loser's wallet, and gives the challenger their
- * duel rewards if they won. Returns the amount moved.
+ * Pays the winner PAYOUT_SHARE of the loser's wallet (capped by the loser's
+ * level), and gives the challenger their duel rewards if they won. Returns the amount moved.
  */
 const settleDuel = ({ winner, loser, challengerWon }) => sequelize.transaction(async (transaction) => {
 	// lock both wallets in account order, so two duels between the same pair settling at once can't deadlock
@@ -60,7 +62,8 @@ const settleDuel = ({ winner, loser, challengerWon }) => sequelize.transaction(a
 		lock: transaction.LOCK.UPDATE,
 	});
 	const wallet = wallets.find((w) => w.accountID === loser.accountID);
-	const amount = Math.floor(Math.max(wallet?.walletAmount ?? 0, 0) * PAYOUT_SHARE);
+	const cap = MAX_PAYOUT_PER_LEVEL * Math.max(loser.level ?? 1, 1);
+	const amount = Math.min(Math.floor(Math.max(wallet?.walletAmount ?? 0, 0) * PAYOUT_SHARE), cap);
 
 	if (amount > 0) {
 		await moveIura(loser.accountID, 'wallet', null, amount, transaction);
@@ -136,6 +139,7 @@ const runDuel = async (interaction, targetUser, { delay = wait } = {}) => {
 
 module.exports = {
 	PAYOUT_SHARE,
+	MAX_PAYOUT_PER_LEVEL,
 	MAX_HEALTH_GAP,
 	loadDuelists,
 	duelRefusal,
