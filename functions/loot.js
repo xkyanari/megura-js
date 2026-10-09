@@ -1,6 +1,7 @@
 const { Op } = require('sequelize');
 const { sequelize, Player, Item, Shop } = require('../src/db');
 const lootTable = require('../assets/loot_db.json');
+const CRAFTED = new Set(require('../assets/recipes.json').map((recipe) => recipe.item_ID));
 
 /**
  * Monster drops and consumables for /attack.
@@ -32,9 +33,11 @@ const dropPool = async (monsterName, level) => {
 		const items = await Shop.findAll({ where: { guildID: null, itemName: listed } });
 		if (items.length) return items;
 	}
-	return Shop.findAll({
+	const items = await Shop.findAll({
 		where: { guildID: null, category: FALLBACK_CATEGORIES, level: { [Op.lte]: level } },
 	});
+	// crafted items are only ever made
+	return items.filter((item) => !CRAFTED.has(item.item_ID));
 };
 
 /**

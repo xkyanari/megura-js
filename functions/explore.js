@@ -1,5 +1,6 @@
 const { sequelize, Player, Monster, Exploration, moveIura } = require('../src/db');
 const { rollLoot } = require('./loot');
+const { rollMaterial } = require('./crafting');
 const LOCATIONS = require('../assets/locations.json');
 
 /**
@@ -17,11 +18,12 @@ const SEARCH_COOLDOWN = 30 * 60 * 1000;
 
 // what a search can turn up, with how often
 const EVENTS = [
-	{ type: 'item', weight: 30 },
-	{ type: 'iura', weight: 25 },
-	{ type: 'lore', weight: 20 },
+	{ type: 'item', weight: 25 },
+	{ type: 'iura', weight: 20 },
+	{ type: 'material', weight: 20 },
+	{ type: 'lore', weight: 15 },
 	{ type: 'ambush', weight: 15 },
-	{ type: 'nothing', weight: 10 },
+	{ type: 'nothing', weight: 5 },
 ];
 
 const LORE = [
@@ -100,7 +102,7 @@ const monsterAt = async (location) => {
 
 /**
  * Searches the player's current location. Returns { location, type, ... }:
- * 'item' (with item), 'iura' (with amount), 'lore' (with text), 'ambush'
+ * 'item' (with item), 'iura' (with amount), 'material' (with item and amount), 'lore' (with text), 'ambush'
  * (the caller starts the fight) or 'nothing'. The cooldown is the caller's.
  */
 const search = async (player, { random = Math.random } = {}) => {
@@ -123,6 +125,11 @@ const search = async (player, { random = Math.random } = {}) => {
 		await player.addIura(amount);
 		await player.increment({ iuraEarned: amount });
 		return { location, type, amount };
+	}
+	if (type === 'material') {
+		// 1–3 materials of the tier the location opens at
+		const found = await rollMaterial(player, { level: location.unlockLevel, count: 1 + Math.floor(random() * 3), guaranteed: true, random });
+		return { location, type, ...found };
 	}
 	if (type === 'lore') return { location, type, text: LORE[Math.floor(random() * LORE.length)] };
 	return { location, type };

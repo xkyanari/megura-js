@@ -1,5 +1,6 @@
 const { notifyPurchase } = require('../../functions/webhook');
 const { Player, Shop } = require('../../src/db');
+const { isForSale } = require('../../functions/crafting');
 
 module.exports = {
 	data: {
@@ -23,6 +24,7 @@ module.exports = {
 		const shopItem = await Shop.findOne({ where: { itemName: selected, guildID: guild.id } })
 			?? await Shop.findOne({ where: { itemName: selected, guildID: null } });
 		if (!shopItem) return interaction.editReply('Item not found.');
+		if (!shopItem.guildID && !isForSale(shopItem)) return interaction.editReply('That item isn\'t sold: it can only be crafted or found.');
 
 		const { price, guildID } = shopItem;
 

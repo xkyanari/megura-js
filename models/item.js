@@ -24,6 +24,12 @@ module.exports = (sequelize, DataTypes) => {
 				defaultValue: 0,
 				allowNull: false,
 			},
+			// +0 to +5 (functions/upgrade.js), for every copy of this item the player owns
+			upgradeLevel: {
+				type: DataTypes.INTEGER,
+				defaultValue: 0,
+				allowNull: false,
+			},
 			createdAt: {
 				type: DataTypes.DATE,
 				allowNull: true,

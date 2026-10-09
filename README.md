@@ -64,6 +64,7 @@ Before running the bot, you will need the following:
 - [x] Brawls
 - [ ] Auctions (switched off. To bring them back, set `"enableAuctions": true` in `config.json` **and** `"hasAuction": true` for the tiers that should have them in `assets/features.json`, then run `node deploy.js`)
 - [x] Exploration mode (`/explore`)
+- [x] Gear upgrades, crafting and salvage (`/upgrade`, `/craft`, `/salvage`)
 - [x] Bosses: solo and world bosses (behind the `hasBosses` feature flag)
 
 All of these may not require having administrator role on the bot for security, but they are subject to change without prior notice.
@@ -178,6 +179,7 @@ docker compose run --rm bot node scripts/migrations/2026-10-gameplay.js
 docker compose run --rm bot node scripts/migrations/2026-10-health-curve.js
 docker compose run --rm bot node scripts/migrations/2026-10-remove-crypto.js
 docker compose run --rm bot node scripts/migrations/2026-10-order-sales.js
+docker compose run --rm bot node scripts/migrations/2026-10-crafting.js
 docker compose up -d
 ```
 
@@ -188,6 +190,7 @@ docker compose up -d
 | `2026-10-health-curve.js` | Moves players onto the new health curve, keeping health from gear. |
 | `2026-10-remove-crypto.js` | Drops the unused NFT link columns from `Player`, and moves special-shop items from the removed Whitelist, NFTs and Cryptocurrencies categories to Digital Items. |
 | `2026-10-order-sales.js` | Adds the price paid and the order date to special-shop orders, for `/sales`. **Run it before starting this version**: the bot reads those columns. |
+| `2026-10-crafting.js` | Adds the upgrade level to inventory items, and the materials and crafted items to the shop. **Run it before starting this version**: every inventory lookup reads that column. |
 
 **Vote rewards (top.gg and discordbotlist).** `/vote` pays 50 IURA per vote through a small webhook server inside the bot. It only starts when `VOTE_PORT` is set:
 
@@ -224,7 +227,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 
 ## Commands (work in progress)
 
-- `/attack`: Fight a random monster sized to your level. Wins pay IURA and EXP, sometimes drop an item, and consumables in your inventory are used automatically when your health runs low.
+- `/attack`: Fight a random monster sized to your level. Wins pay IURA and EXP, sometimes drop an item or a crafting material, and consumables in your inventory are used automatically when your health runs low.
 - `/auction`: Start, view, or manage auctions (switched off by default; see `enableAuctions`).
 - `/boss`: Fight a boss turn by turn, on your own (`challenge`) or as a channel (`spawn`, `autospawn` for moderators). Needs the `hasBosses` feature.
 - `/brawl`: Start or join a brawl challenge.
@@ -232,6 +235,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/changenick`: Updates player name.
 - `/checkprofile`: Check whether your player profile exists.
 - `/close`: Closes a portal prematurely.
+- `/craft`: `recipes` lists what can be crafted and what you have for it; `make` crafts an item from materials.
 - `/daily`: Do a random quest to gain IURA. Claiming within 48 hours keeps a streak going, worth up to +60%.
 - `/duel`: Initiate a duel against another player.
 - `/equip`: Equip an inventory item: one copy each, in 1 weapon, 3 armor and 1 accessory slot.
@@ -249,6 +253,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/requestduel`: Respond to a duel request.
 - `/reset`: Delete voyager profile.
 - `/sales`: (Moderators) Special shop sales for the last 7 or 30 days or all time, with an optional CSV export.
+- `/salvage`: Break unequipped gear into crafting materials.
 - `/sell`: Sell inventory items back to the shop for 40% of their price.
 - `/sendgift`: Send a gift to another player.
 - `/setup`: Setup server for moderation tools.
@@ -259,6 +264,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/support`: Shows support server information.
 - `/transfer`: Transfer IURA to another user.
 - `/unequip`: Unequip an item.
+- `/upgrade`: Upgrade a weapon, armor or accessory up to +5 (+10% of its stats per level). From +3 up a failed upgrade drops a level, unless you use a Ward Stone.
 - `/vote`: Shows voting information.
 
 ## Contributing

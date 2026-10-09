@@ -1,0 +1,172 @@
+[
+  {
+    "item_ID": "ward",
+    "level": 1,
+    "iura": 100,
+    "inputs": [
+      {
+        "item": "Arcane Dust",
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "item_ID": "stew",
+    "level": 5,
+    "iura": 50,
+    "inputs": [
+      {
+        "item": "Rough Hide",
+        "amount": 2
+      },
+      {
+        "item": "Arcane Dust",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "item_ID": "emberblade",
+    "level": 10,
+    "iura": 400,
+    "inputs": [
+      {
+        "item": "Iron Shard",
+        "amount": 12
+      },
+      {
+        "item": "Arcane Dust",
+        "amount": 3
+      }
+    ]
+  },
+  {
+    "item_ID": "hidevest",
+    "level": 10,
+    "iura": 400,
+    "inputs": [
+      {
+        "item": "Rough Hide",
+        "amount": 12
+      },
+      {
+        "item": "Arcane Dust",
+        "amount": 3
+      }
+    ]
+  },
+  {
+    "item_ID": "silversaber",
+    "level": 30,
+    "iura": 2000,
+    "inputs": [
+      {
+        "item": "Silver Ore",
+        "amount": 12
+      },
+      {
+        "item": "Iron Shard",
+        "amount": 10
+      },
+      {
+        "item": "Arcane Dust",
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "item_ID": "spiritrobe",
+    "level": 30,
+    "iura": 2000,
+    "inputs": [
+      {
+        "item": "Spirit Silk",
+        "amount": 12
+      },
+      {
+        "item": "Rough Hide",
+        "amount": 10
+      },
+      {
+        "item": "Arcane Dust",
+        "amount": 5
+      }
+    ]
+  },
+  {
+    "item_ID": "mythrilglaive",
+    "level": 50,
+    "iura": 9000,
+    "inputs": [
+      {
+        "item": "Mythril Chunk",
+        "amount": 12
+      },
+      {
+        "item": "Silver Ore",
+        "amount": 8
+      },
+      {
+        "item": "Arcane Dust",
+        "amount": 8
+      }
+    ]
+  },
+  {
+    "item_ID": "wyrmaegis",
+    "level": 50,
+    "iura": 9000,
+    "inputs": [
+      {
+        "item": "Wyrm Scale",
+        "amount": 12
+      },
+      {
+        "item": "Spirit Silk",
+        "amount": 8
+      },
+      {
+        "item": "Arcane Dust",
+        "amount": 8
+      }
+    ]
+  },
+  {
+    "item_ID": "starfall",
+    "level": 66,
+    "iura": 30000,
+    "inputs": [
+      {
+        "item": "Starmetal",
+        "amount": 12
+      },
+      {
+        "item": "Mythril Chunk",
+        "amount": 8
+      },
+      {
+        "item": "Arcane Dust",
+        "amount": 12
+      }
+    ]
+  },
+  {
+    "item_ID": "phoenixmantle",
+    "level": 66,
+    "iura": 30000,
+    "inputs": [
+      {
+        "item": "Phoenix Down",
+        "amount": 12
+      },
+      {
+        "item": "Wyrm Scale",
+        "amount": 8
+      },
+      {
+        "item": "Arcane Dust",
+        "amount": 12
+      }
+    ]
+  }
+]

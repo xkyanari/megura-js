@@ -68,7 +68,7 @@ module.exports = async (interaction) => {
 		}
 
 		currentEmbed.addFields({
-			name: item.itemName,
+			name: item.upgradeLevel > 0 ? `${item.itemName} +${item.upgradeLevel}` : item.itemName,
 			value: fieldValue,
 			inline: false,
 		});

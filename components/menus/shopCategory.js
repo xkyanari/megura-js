@@ -2,6 +2,7 @@ const { EmbedBuilder, StringSelectMenuBuilder } = require('discord.js');
 const { Shop } = require('../../src/db');
 const { footer } = require('../../src/vars');
 const buttonPages = require('../../functions/paginator');
+const { isForSale } = require('../../functions/crafting');
 
 module.exports = {
 	data: {
@@ -19,14 +20,15 @@ module.exports = {
 			'armor': '🛡️',
 			'consumables': '🍔',
 			'miscellaneous': '🔮',
+			'materials': '🪨',
 		};
 
-		const itemList = await Shop.findAll({
-			where: { category: selected },
+		const itemList = (await Shop.findAll({
+			where: { category: selected, guildID: null },
 			order: [
 				['level', 'ASC'],
 			],
-		});
+		})).filter(isForSale);
 
 		if (itemList.length === 0) return;
 

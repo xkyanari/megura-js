@@ -10,6 +10,7 @@ const { currentLocation, monsterAt } = require('./explore');
 const { simulateBattle } = require('./battle');
 const { expPoints, monsterStats } = require('../src/vars');
 const { rollLoot, loadConsumables } = require('./loot');
+const { rollMaterial } = require('./crafting');
 const { RIVAL_DAMAGE_BONUS, syncFaction, isRival, factionLabel, addFactionPoint } = require('./factions');
 const { recordProgress, completedLines } = require('./quests');
 const leveling = require('./level');
@@ -141,6 +142,7 @@ const executeAttack = async (interaction, { delay, ambush = false } = {}) => {
 			monsterKills: 1,
 		});
 		const loot = await rollLoot(player, monster.monsterName);
+		const material = await rollMaterial(player);
 		if (rival) await addFactionPoint(guild.id, faction, Date.now(), player.accountID);
 
 		const quests = [
@@ -153,6 +155,7 @@ const executeAttack = async (interaction, { delay, ambush = false } = {}) => {
 			`- \`${monsterObj.iuraDropped} IURA\``,
 			`- \`${monsterObj.expDropped} EXP\``,
 			loot && `- 🎁 \`${loot}\``,
+			material && `- 🪨 \`${material.item}\``,
 			rival && `- ⚔️ +1 for ${factionLabel(faction, guildRow)} this week (+${RIVAL_DAMAGE_BONUS * 100}% damage against rivals)`,
 			...completedLines(quests),
 		].filter(Boolean).join('\n');
