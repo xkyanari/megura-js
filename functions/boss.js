@@ -6,6 +6,8 @@ const { isFeatureEnabled } = require('../src/feature');
 const { hpBar } = require('./battle');
 const { rollLoot } = require('./loot');
 const leveling = require('./level');
+const { RIVAL_DAMAGE_BONUS, playerFaction, isRival, addFactionPoint } = require('./factions');
+const { recordProgress } = require('./quests');
 
 /**
  * Boss fights (behind the hasBosses feature flag), solo (/boss challenge) or
@@ -95,8 +97,11 @@ const shuffled = (list, random) => {
 // The fights running in this process, by BossFight id.
 const fights = new Map();
 
-const fighterFor = (player, mob) => {
+// `faction` is the player's ('Margaretha', 'Cerberon' or null): a boss of the
+// rival faction takes RIVAL_DAMAGE_BONUS more damage from them, as in /attack.
+const fighterFor = (player, mob, faction = null) => {
 	const stats = monsterStats(mob, player.level);
+	const rival = isRival(faction, mob.faction);
 	return {
 		discordID: player.discordID,
 		accountID: player.accountID,
@@ -104,8 +109,10 @@ const fighterFor = (player, mob) => {
 		level: player.level,
 		maxHealth: player.totalHealth,
 		health: player.totalHealth,
-		totalAttack: player.totalAttack,
+		totalAttack: rival ? Math.round(player.totalAttack * (1 + RIVAL_DAMAGE_BONUS)) : player.totalAttack,
 		totalDefense: player.totalDefense,
+		faction,
+		rival,
 		bossAttack: Math.round(stats.totalAttack * BOSS_ATTACK_MULTIPLIER),
 		bossDefense: stats.totalDefense,
 		soloHealth: stats.totalHealth * SOLO_HP_MULTIPLIER,
@@ -216,13 +223,24 @@ const payReward = async (fight, reward) => {
 	await player.increment({ iuraEarned: reward.iura, expGained: reward.exp });
 	const loot = reward.loot ? await rollLoot(player, fight.mob.monsterName, { guaranteed: true }) : null;
 
+	// a boss counts as a monster for quests, and a rival boss scores for the faction of those who fought it
+	const { fighter } = reward;
+	const scored = fighter.rival && fighter.actedTurns > 0;
+	if (scored) await addFactionPoint(fight.guildID, fighter.faction, Date.now(), player.accountID);
+	const quests = [
+		...await recordProgress(player.accountID, 'monsterWin'),
+		...(loot ? await recordProgress(player.accountID, 'loot') : []),
+		...(scored ? await recordProgress(player.accountID, 'rivalKill') : []),
+	];
+
 	let levelText = '';
 	await player.reload();
 	if (player.expGained >= expPoints(player.level)) {
 		const { level } = await leveling(player.guildID, player.discordID);
 		levelText = ` ⬆️ level ${level}!`;
 	}
-	return `${userMention(player.discordID)}: ${reward.iura} IURA, ${reward.exp} EXP${loot ? `, 🎁 ${loot}` : ''}${levelText}`;
+	const extras = [loot && `🎁 ${loot}`, scored && '⚔️ +1 faction point', quests.length && `📜 ${quests.length} quest(s) done`].filter(Boolean);
+	return `${userMention(player.discordID)}: ${reward.iura} IURA, ${reward.exp} EXP${extras.map((extra) => `, ${extra}`).join('')}${levelText}`;
 };
 
 // Pays the rewards. Returns a line per fighter paid.
@@ -361,7 +379,8 @@ const runBossFight = async ({ kind, guildID, channelID, player, intro, joinMs = 
 			return fight;
 		}
 
-		for (const p of players) fight.fighters.set(p.discordID, fighterFor(p, mob));
+		const guildRow = await Guild.findOne({ where: { guildID } });
+		for (const p of players) fight.fighters.set(p.discordID, fighterFor(p, mob, playerFaction(p, guildRow)));
 		fight.boss.maxHealth = bossHealthFor(kind, [...fight.fighters.values()]);
 		fight.boss.health = fight.boss.maxHealth;
 

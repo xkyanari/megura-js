@@ -32,6 +32,8 @@ You have between 8 and 15 seconds to choose, and the buttons are in a different 
 
 A world boss appears in a channel with a **Join the fight** button. Everyone who joins before the timer runs out fights it together, for up to 15 turns. The boss is tougher the more fighters join.
 
+A boss counts as a monster for your [quests](quests-and-factions.md). A boss of the rival faction takes your faction's +15% damage bonus, and every fighter who acted scores a faction point when it falls.
+
 When the boss falls, every fighter gets IURA and EXP. Fighters who dealt more damage get more. The item drop goes only to fighters who acted in at least half the turns they were standing.
 
 ### Setting Up (Moderators)

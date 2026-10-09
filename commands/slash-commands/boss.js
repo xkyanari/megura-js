@@ -3,6 +3,7 @@ const ms = require('ms');
 const redis = require('../../redis');
 const { Guild, Player } = require('../../src/db');
 const { validateFeature } = require('../../src/feature');
+const { syncFaction } = require('../../functions/factions');
 const {
 	SOLO_COOLDOWN,
 	MIN_AUTOSPAWN_HOURS,
@@ -68,6 +69,8 @@ module.exports = {
 		if (subcommand === 'challenge') {
 			const player = await Player.findOne({ where: { discordID: user.id, guildID: guild.id } });
 			if (!player) throw new Error('profile not found');
+			// the faction bonus follows the member's faction role, as in /attack
+			await syncFaction(player, guildCheck, interaction.member);
 			if (isInFight(guild.id, user.id)) {
 				return interaction.reply({ content: 'You are already in a boss fight.', flags: 64 });
 			}

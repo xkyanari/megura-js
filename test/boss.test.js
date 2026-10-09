@@ -118,7 +118,7 @@ describe('turns', () => {
 		const [guard, sleeper] = ['G2', 'I2'].map(fighter);
 		const fight = fightOf(guard, sleeper);
 		B.resolveTurn(fight, 'smash', new Map([['G2', 'guard']]), noCrit);
-		assert.equal(Math.round(2000 - guard.health) * 2, Math.round(2000 - sleeper.health));
+		assert.ok(Math.abs((2000 - guard.health) * 2 - (2000 - sleeper.health)) < 1e-6, 'half the hit');
 	});
 
 	test('every move is countered by a different action, and every telegraph is unique', () => {
@@ -319,5 +319,21 @@ describe('/boss', () => {
 		finally {
 			await redis.del(`boss-solo:${G}:CMD1`);
 		}
+	});
+});
+
+describe('quests and factions', () => {
+	test('a boss win counts for quests, and a rival boss scores for the fighter\'s faction', async () => {
+		const { FactionContribution, QuestProgress } = require('../src/db');
+		// mobs[0] belongs to Margaretha, so a Cerberon member fights a rival
+		const player = await makePlayer('QF1', { level: 3, totalHealth: 2350, totalAttack: 551, totalDefense: 520, faction: 'Cerberon' });
+		const io = scriptedIO({ strategies: { QF1: perfect } });
+		const fight = await B.runBossFight({ kind: 'solo', guildID: G, channelID: 'C1', player, io });
+
+		assert.equal(fight.boss.health, 0);
+		assert.equal(fight.fighters.get('QF1').rival, true);
+		assert.equal(await FactionContribution.sum('points', { where: { accountID: player.accountID, faction: 'Cerberon' } }), 1);
+		assert.ok(await QuestProgress.count({ where: { accountID: player.accountID } }) > 0, 'the win reached the quest tracker');
+		assert.match(io.shown.at(-1).embed.data.description, /\+1 faction point/);
 	});
 });
