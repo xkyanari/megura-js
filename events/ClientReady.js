@@ -14,6 +14,7 @@ const { processRaffleJob } = require('../functions/raffle');
 const { processTicketJob } = require('../functions/ticket');
 const { processPortalJob } = require('../functions/portal');
 const { processScheduledPost, syncScheduledPosts } = require('../functions/schedule');
+const { processAutoSpawn, syncAutoSpawns, closeInterruptedFights } = require('../functions/boss');
 const { Giveaway, Raffle } = require('../src/db');
 
 let Discord;
@@ -133,6 +134,14 @@ module.exports = {
 		client.scheduleQueue = scheduleQueue;
 		scheduleQueue.process((job) => processScheduledPost(client, scheduleQueue, job.data));
 		await syncScheduledPosts(scheduleQueue).catch((error) => console.error('Could not sync scheduled posts:', error));
+
+		// Boss fights (see functions/boss.js): fights cut off by a restart are closed,
+		// and every server with random spawns gets its next one scheduled
+		await closeInterruptedFights().catch((error) => console.error('Could not close interrupted boss fights:', error));
+		const bossQueue = new Queue('bossQueue', redisURL);
+		client.bossQueue = bossQueue;
+		bossQueue.process((job) => processAutoSpawn(client, bossQueue, job.data));
+		await syncAutoSpawns(bossQueue).catch((error) => console.error('Could not sync boss spawns:', error));
 
 		const auctionQueue = new Queue('auctionQueue', redisURL);
 		client.auctionQueue = auctionQueue;

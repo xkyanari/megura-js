@@ -37,3 +37,9 @@ test('auctions are enabled from Premium up', () => {
 		{ free: false, premium: true, enterprise: true, megura: true },
 	);
 });
+
+test('bosses stay off on every tier until the storyline turns them on', () => {
+	for (const [tier, flags] of Object.entries(example)) {
+		assert.equal(flags.hasBosses, false, `${tier} has hasBosses on`);
+	}
+});
