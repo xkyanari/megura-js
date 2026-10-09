@@ -47,7 +47,7 @@ Before running the bot, you will need the following:
 ## List of Discord bot features (work in progress)
 
 - [x] Verification with Captcha
-- [ ] Create and manage Giveaways
+- [x] Create and manage Giveaways
 - [ ] Create and manage Raffles
 - [x] Post announcements for orders, etc.
 - [x] Mini games (arena, etc.)

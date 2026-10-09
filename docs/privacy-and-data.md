@@ -13,6 +13,7 @@ Dahlia stores the data needed to operate server tools and game features:
 * Player stats, levels, experience, balances, inventory, shop purchases, and rewards
 * Battle, duel, brawl, and auction activity
 * Server setup settings such as log channels, CAPTCHA channels, verification roles, rules, shop channels, and faction roles
+* Giveaway records: the prize, the host's Discord user ID, and the Discord user IDs of the members who entered and won
 * Setup change logs: the Discord username and user ID of the member who changed a `/setup` setting, what changed (including channel and role names), and when
 * Timestamps related to gameplay, setup, and bot activity
 

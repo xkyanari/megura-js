@@ -6,8 +6,11 @@
 const { EmbedBuilder } = require('discord.js');
 const fs = require('fs').promises;
 
+// FEATURES_FILE lets the test suite point at features-example.json
+const featuresPath = () => process.env.FEATURES_FILE || 'assets/features.json';
+
 const getFeaturesFromFile = async () => {
-	const data = await fs.readFile('assets/features.json', 'utf8');
+	const data = await fs.readFile(featuresPath(), 'utf8');
 	const features = JSON.parse(data);
 	return features;
 };
