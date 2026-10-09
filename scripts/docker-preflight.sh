@@ -103,6 +103,27 @@ echo "Configuration"
 check_file config.json config-example.json
 check_file assets/features.json assets/features-example.json
 
+# New features ship with a flag in features-example.json; a flag missing from
+# features.json counts as "off", so the feature stays disabled on every tier.
+if [ -f assets/features.json ] && [ -r assets/features.json ]; then
+	missing=$(python3 - assets/features.json assets/features-example.json <<'PY' 2>/dev/null
+import json, sys
+current, example = (json.load(open(path)) for path in sys.argv[1:3])
+for tier, flags in example.items():
+    gaps = [flag for flag in flags if flag not in current.get(tier, {})]
+    if gaps:
+        print(f"{tier}: {', '.join(gaps)}")
+PY
+	)
+	if [ -n "$missing" ]; then
+		warn "assets/features.json is missing flags from features-example.json (treated as off):"
+		printf '%s\n' "$missing" | sed 's/^/        /'
+		fix "copy those keys from assets/features-example.json and set each to true or false"
+	else
+		ok "assets/features.json has every flag in features-example.json"
+	fi
+fi
+
 if [ -f config.json ] && json_get config.json token >/dev/null 2>&1; then
 	token=$(json_get config.json token)
 	env_token=$(grep -s '^DISCORD_TOKEN=.' .env)

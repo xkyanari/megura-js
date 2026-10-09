@@ -232,8 +232,6 @@ module.exports = {
 
 				const logsChannel = options.getChannel('channel');
 
-				await interaction.deferReply({ flags: 64 });
-
 				await guildCheck.update({ logsChannelID: logsChannel.id });
 				await interaction.editReply({
 					content: 'Audit Logs channel assigned.',
@@ -250,8 +248,6 @@ module.exports = {
 				await interaction.deferReply({ flags: 64 });
 
 				const modsChannel = options.getChannel('channel');
-
-				await interaction.deferReply({ flags: 64 });
 
 				const fieldsToUpdate = {
 					channelField: 'webhookChannelID',
@@ -302,8 +298,6 @@ module.exports = {
 				await interaction.deferReply({ flags: 64 });
 
 				const specialShop = options.getChannel('channel');
-
-				await interaction.deferReply({ flags: 64 });
 
 				const fieldsToUpdate = {
 					channelField: 'specialShopChannelID',

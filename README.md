@@ -142,11 +142,13 @@ docker compose version   # needs v2.24 or later
 
 **Rolling back:** `docker compose down`, then `pm2 start <app>`. pm2 still has the app until step 6.
 
+**After an update:** new features come with a flag in `assets/features-example.json`. Flags missing from your `assets/features.json` count as off, so that feature stays disabled on every tier. The pre-flight script lists any missing flags; copy them over and set each to `true` or `false`.
+
 **Everyday commands:**
 
 | Task | Command |
 |---|---|
-| Update after `git pull` | `docker compose up -d --build` |
+| Update after `git pull` | `bash scripts/docker-preflight.sh`, then `docker compose up -d --build`, then `docker compose run --rm bot node deploy.js` if commands changed |
 | Follow output | `docker compose logs -f` |
 | Register slash commands | `docker compose run --rm bot node deploy.js` |
 | Restart | `docker compose restart` |
