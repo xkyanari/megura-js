@@ -88,7 +88,7 @@ const simulateBrawl = async (interaction, channel, player1, player2) => {
 					}
 				});
 
-				collector.on('end', collected => {
+				collector.on('end', () => {
 					let resultMessage;
 					let roundWinner;
 

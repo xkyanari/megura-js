@@ -10,7 +10,7 @@ const {
 
 module.exports = {
 	name: Events.ChannelCreate,
-	async execute(channel) {
+	async execute() {
 		// console.log(channel);
 		// try {
 		// 	const inactivityPeriod = 10 * 60 * 1000; // 10 minutes in milliseconds
