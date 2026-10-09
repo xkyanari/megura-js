@@ -255,6 +255,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/shop`: Opens the Item Shop.
 - `/specialshop`: Opens the Special Shop.
 - `/start`: Initiate creating own character.
+- `/story`: (Moderators) Play a chapter of the storyline in a channel, stop it, or list the chapters this server has played.
 - `/support`: Shows support server information.
 - `/transfer`: Transfer IURA to another user.
 - `/unequip`: Unequip an item.
