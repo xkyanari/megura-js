@@ -31,6 +31,7 @@
   * [/roles](getting-started-with-dahlia/setting-up-dahlia/button-roles.md)
   * [/ticket](getting-started-with-dahlia/setting-up-dahlia/tickets.md)
   * [/form](getting-started-with-dahlia/setting-up-dahlia/forms.md)
+  * [/schedule](getting-started-with-dahlia/setting-up-dahlia/scheduling.md)
 * [🎮 Playing the Game](getting-started-with-dahlia/playing-the-game/README.md)
   * [/arena](getting-started-with-dahlia/playing-the-game/arena.md)
   * [/brawl](getting-started-with-dahlia/playing-the-game/brawl.md)
