@@ -65,137 +65,133 @@ module.exports = {
 		}
 
 		switch (subCommand) {
-			case 'start':
-				try {
-					const modeNames = {
-						classic: 'Battle Royale: Classic',
-						evolving: 'Battle Royale: Evolving Classic',
-						'evolving-deathmatch': 'Battle Royale: Evolving Deathmatch',
-						deathmatch: 'Battle Royale: Deathmatch',
-						wanted: 'Battle Royale: Most Wanted',
-						ffa: 'Battle Royale: Free For All',
-					};
-					const mode = interaction.options.getString('mode') || 'classic';
-					const timer = interaction.options.getString('timer') || '2';
-					const timerMilliseconds = parseInt(timer) * 60 * 1000;
+			case 'start': {
+				const modeNames = {
+					classic: 'Battle Royale: Classic',
+					evolving: 'Battle Royale: Evolving Classic',
+					'evolving-deathmatch': 'Battle Royale: Evolving Deathmatch',
+					deathmatch: 'Battle Royale: Deathmatch',
+					wanted: 'Battle Royale: Most Wanted',
+					ffa: 'Battle Royale: Free For All',
+				};
+				const mode = interaction.options.getString('mode') || 'classic';
+				const timer = interaction.options.getString('timer') || '2';
+				const timerMilliseconds = parseInt(timer) * 60 * 1000;
 
-					const baseStats = {
-						level: 1,
-						totalHealth: 2000,
-						totalAttack: 500,
-						totalDefense: 500,
-					};
+				const baseStats = {
+					level: 1,
+					totalHealth: 2000,
+					totalAttack: 500,
+					totalDefense: 500,
+				};
 
-					const embed1 = new EmbedBuilder()
-						.setColor(0xcd7f32)
-						.setTitle('THE ARENA GATES ARE OPEN!')
-						.setDescription(`**${modeNames[mode]}**\n\nThe crowd is roaring! React with ⚖️ to join the fray and prove your might!\n\nStarting in ${timer} minutes!`);
+				const embed1 = new EmbedBuilder()
+					.setColor(0xcd7f32)
+					.setTitle('THE ARENA GATES ARE OPEN!')
+					.setDescription(`**${modeNames[mode]}**\n\nThe crowd is roaring! React with ⚖️ to join the fray and prove your might!\n\nStarting in ${timer} minutes!`);
 
-					const message = await interaction.reply({ embeds: [embed1], fetchReply: true });
-					await message.react('⚖️');
+				const message = await interaction.reply({ embeds: [embed1], fetchReply: true });
+				await message.react('⚖️');
 
-					const players = await Player.findAll({ where: { guildID: interaction.guild.id } });
-					let playerObjects = players.map(player => ({
-						discordID: player.discordID,
-						playerName: player.playerName,
-						level: player.level,
-						totalHealth: player.totalHealth,
-						totalAttack: player.totalAttack,
-						totalDefense: player.totalDefense,
-						respawns: 0,
-					}));
+				const players = await Player.findAll({ where: { guildID: interaction.guild.id } });
+				let playerObjects = players.map(player => ({
+					discordID: player.discordID,
+					playerName: player.playerName,
+					level: player.level,
+					totalHealth: player.totalHealth,
+					totalAttack: player.totalAttack,
+					totalDefense: player.totalDefense,
+					respawns: 0,
+				}));
 
-					switch (mode) {
-						case 'ffa':
-						case 'wanted':
-						case 'classic':
-						case 'evolving':
-							playerObjects = playerObjects.map(player => ({
-								discordID: player.discordID,
-								playerName: player.playerName,
-								level: baseStats.level,
-								totalHealth: baseStats.totalHealth,
-								totalAttack: baseStats.totalAttack,
-								totalDefense: baseStats.totalDefense,
-								respawns: mode === 'evolving' ? 1 : 0,
-							}));
-							break;
-						case 'deathmatch':
-						case 'evolving-deathmatch':
-							playerObjects = playerObjects.map(player => ({
-								...player,
-								respawns: mode === 'evolving-deathmatch' ? 1 : 0,
-							}));
-							break;
+				switch (mode) {
+					case 'ffa':
+					case 'wanted':
+					case 'classic':
+					case 'evolving':
+						playerObjects = playerObjects.map(player => ({
+							discordID: player.discordID,
+							playerName: player.playerName,
+							level: baseStats.level,
+							totalHealth: baseStats.totalHealth,
+							totalAttack: baseStats.totalAttack,
+							totalDefense: baseStats.totalDefense,
+							respawns: mode === 'evolving' ? 1 : 0,
+						}));
+						break;
+					case 'deathmatch':
+					case 'evolving-deathmatch':
+						playerObjects = playerObjects.map(player => ({
+							...player,
+							respawns: mode === 'evolving-deathmatch' ? 1 : 0,
+						}));
+						break;
+				}
+
+				const collectedPlayers = [];
+				const filter = (reaction, user) => {
+					return playerObjects.some(player => player.discordID === user.id);
+				};
+
+				const collector = message.createReactionCollector({ filter, time: timerMilliseconds });
+
+				collector.on('collect', (reaction, user) => {
+					if (collectedPlayers.some(collectedPlayer => collectedPlayer.id === user.id)) {
+						console.log(`User ${user.id} has already joined the game.`);
+						return;
 					}
 
-					const collectedPlayers = [];
-					const filter = (reaction, user) => {
-						return playerObjects.some(player => player.discordID === user.id);
-					};
+					const player = playerObjects.find(player1 => player1.discordID === user.id);
+					if (!player) {
+						console.log(`User ${user.id} is not in the playerObjects.`);
+						return;
+					}
 
-					const collector = message.createReactionCollector({ filter, time: timerMilliseconds });
+					collectedPlayers.push({ user, ...player });
+					console.log(`User ${user.id} (${player.playerName}) has joined the game.`);
+				});
 
-					collector.on('collect', (reaction, user) => {
-						if (collectedPlayers.some(collectedPlayer => collectedPlayer.id === user.id)) {
-							console.log(`User ${user.id} has already joined the game.`);
-							return;
-						}
+				const reminder1 = setTimeout(() => {
+					const embed = new EmbedBuilder()
+						.setColor(0xcd7f32)
+						.setDescription(`Hurry up, voyagers! Only ${(timerMilliseconds / 1000) / 2} seconds left to join the battle!`);
+					interaction.channel.send({ embeds: [embed] });
+				}, timerMilliseconds / 2);
 
-						const player = playerObjects.find(player1 => player1.discordID === user.id);
-						if (!player) {
-							console.log(`User ${user.id} is not in the playerObjects.`);
-							return;
-						}
+				const reminder2 = setTimeout(() => {
+					const embed = new EmbedBuilder()
+						.setColor(0xcd7f32)
+						.setDescription(`Last chance, voyagers! You have ${(timerMilliseconds / 1000) / 4} seconds to step into the arena!`);
+					interaction.channel.send({ embeds: [embed] });
+				}, (timerMilliseconds / 4) * 3);
 
-						collectedPlayers.push({ user, ...player });
-						console.log(`User ${user.id} (${player.playerName}) has joined the game.`);
-					});
+				collector.on('end', () => {
+					clearTimeout(reminder1);
+					clearTimeout(reminder2);
 
-					const reminder1 = setTimeout(() => {
-						const embed = new EmbedBuilder()
-							.setColor(0xcd7f32)
-							.setDescription(`Hurry up, voyagers! Only ${(timerMilliseconds / 1000) / 2} seconds left to join the battle!`);
-						interaction.channel.send({ embeds: [embed] });
-					}, timerMilliseconds / 2);
+					const embed0 = new EmbedBuilder()
+						.setColor(0xcd7f32)
+						.setDescription('Looks like no one wanted to join. Closing...');
+					if (collectedPlayers.length === 0) return interaction.channel.send({ embeds: [embed0] });
 
-					const reminder2 = setTimeout(() => {
-						const embed = new EmbedBuilder()
-							.setColor(0xcd7f32)
-							.setDescription(`Last chance, voyagers! You have ${(timerMilliseconds / 1000) / 4} seconds to step into the arena!`);
-						interaction.channel.send({ embeds: [embed] });
-					}, (timerMilliseconds / 4) * 3);
+					const embed2 = new EmbedBuilder()
+						.setColor(0xcd7f32)
+						.setDescription(`Looks like no one wanted to accept ${collectedPlayers[0].playerName}'s challenge.`);
+					if (collectedPlayers.length < 2) return interaction.channel.send({ embeds: [embed2] });
 
-					collector.on('end', () => {
-						clearTimeout(reminder1);
-						clearTimeout(reminder2);
+					if (mode === 'wanted') {
+						wantedBattle(interaction, collectedPlayers);
+						return;
+					}
+					if (mode === 'ffa') {
+						ffaBattle(interaction, collectedPlayers);
+						return;
+					}
 
-						const embed0 = new EmbedBuilder()
-							.setColor(0xcd7f32)
-							.setDescription('Looks like no one wanted to join. Closing...');
-						if (collectedPlayers.length === 0) return interaction.channel.send({ embeds: [embed0] });
-
-						const embed2 = new EmbedBuilder()
-							.setColor(0xcd7f32)
-							.setDescription(`Looks like no one wanted to accept ${collectedPlayers[0].playerName}'s challenge.`);
-						if (collectedPlayers.length < 2) return interaction.channel.send({ embeds: [embed2] });
-
-						if (mode === 'wanted') {
-							wantedBattle(interaction, collectedPlayers);
-							return;
-						}
-						if (mode === 'ffa') {
-							ffaBattle(interaction, collectedPlayers);
-							return;
-						}
-
-						arenaBattle(interaction, collectedPlayers);
-					});
-				}
-				catch (error) {
-					console.log(error);
-				}
+					arenaBattle(interaction, collectedPlayers);
+				});
 				break;
+			}
 
 			case 'rules': {
 				const basicRules = '**Game Rules:**\n1. React with ⚖️ to join the event and become a contender in the arena.\n2. After gathering participants, a 10-second preparation phase will occur before the duels begin.\n3. Participants will engage in duels until only one player remains.\n4. The player with higher attack damage (without critical hits) wins the duel.\n5. The player who loses a duel is eliminated from the event.';
@@ -213,23 +209,18 @@ module.exports = {
 				break;
 			}
 
-			case 'boss':
-				try {
-					const show = interaction.options.getBoolean('show');
-					if (show) {
-						guildCheck.arenaBoss = true;
-						await interaction.reply({ content: 'Arena Boss is turned ON', flags: 64 });
-					}
-					else {
-						guildCheck.arenaBoss = false;
-						await interaction.reply({ content: 'Arena Boss is turned OFF', flags: 64 });
-					}
-					return guildCheck.save();
+			case 'boss': {
+				const show = interaction.options.getBoolean('show');
+				if (show) {
+					guildCheck.arenaBoss = true;
+					await interaction.reply({ content: 'Arena Boss is turned ON', flags: 64 });
 				}
-				catch (error) {
-					console.error(error);
+				else {
+					guildCheck.arenaBoss = false;
+					await interaction.reply({ content: 'Arena Boss is turned OFF', flags: 64 });
 				}
-				break;
+				return guildCheck.save();
+			}
 		}
 	},
 };

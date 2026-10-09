@@ -110,4 +110,9 @@ for (const folder of componentFolders) {
 	}
 }
 
+// Log errors from promises nothing awaits (timers, collectors) instead of letting Node exit the bot.
+process.on('unhandledRejection', (error) => {
+	console.error('Unhandled promise rejection:', error);
+});
+
 client.login(token);

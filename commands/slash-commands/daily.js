@@ -18,34 +18,29 @@ module.exports = {
 			throw new Error('profile not found');
 		}
 
-		try {
-			const quest = await Quest.findAll({
-				order: sequelize.random(),
-				limit: 1,
+		const quest = await Quest.findAll({
+			order: sequelize.random(),
+			limit: 1,
+		});
+
+		const embed = new EmbedBuilder()
+			.setColor(0xcd7f32)
+			.setAuthor({ name: `${interaction.user.tag}` })
+			.setTitle('**DAILY QUEST**')
+			.setThumbnail(
+				`${member.displayAvatarURL({ extension: 'png', size: 512 })}`,
+			)
+			.setFooter({ text: 'This bot was made by megura.xyz.' })
+			.addFields({
+				name: `__**${quest[0]['questName']}**__`,
+				value: `${quest[0]['questDescription']}\n\n✨**Reward:**✨\n- ${quest[0]['questReward']} IURA`,
+				inline: false,
 			});
 
-			const embed = new EmbedBuilder()
-				.setColor(0xcd7f32)
-				.setAuthor({ name: `${interaction.user.tag}` })
-				.setTitle('**DAILY QUEST**')
-				.setThumbnail(
-					`${member.displayAvatarURL({ extension: 'png', size: 512 })}`,
-				)
-				.setFooter({ text: 'This bot was made by megura.xyz.' })
-				.addFields({
-					name: `__**${quest[0]['questName']}**__`,
-					value: `${quest[0]['questDescription']}\n\n✨**Reward:**✨\n- ${quest[0]['questReward']} IURA`,
-					inline: false,
-				});
-
-			await interaction.reply({ embeds: [embed] });
-			await Iura.increment(
-				{ walletAmount: quest[0]['questReward'] },
-				{ where: { accountID: player.iura.accountID } },
-			);
-		}
-		catch (error) {
-			console.log(error);
-		}
+		await interaction.reply({ embeds: [embed] });
+		await Iura.increment(
+			{ walletAmount: quest[0]['questReward'] },
+			{ where: { accountID: player.iura.accountID } },
+		);
 	},
 };

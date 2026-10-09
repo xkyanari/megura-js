@@ -127,76 +127,50 @@ module.exports = {
 			case 'browse':
 				await specialshop(interaction);
 				break;
-			case 'additem':
-				try {
-					await interaction.deferReply();
-					await Shop.addItem(item, price, stock, itemID, category, interaction.guild.id);
-					return await interaction.editReply({ content: `Item \`${item}\` added to the Special Shop.` });
+			case 'additem': {
+				await interaction.deferReply();
+				await Shop.addItem(item, price, stock, itemID, category, interaction.guild.id);
+				return await interaction.editReply({ content: `Item \`${item}\` added to the Special Shop.` });
+			}
+			case 'removeitem': {
+				await interaction.deferReply();
+				const getItem = await Shop.getItem(itemID);
 
-				}
-				catch (error) {
-					console.log(error);
-				}
-				break;
-			case 'removeitem':
-				try {
-					await interaction.deferReply();
-					const getItem = await Shop.getItem(itemID);
+				if (!getItem) return await interaction.editReply({ content: 'Item not found.' });
 
-					if (!getItem) return await interaction.editReply({ content: 'Item not found.' });
+				await Shop.removeItem(itemID);
+				return await interaction.editReply({ content: `Item \`${getItem.itemName}\` removed from the Special Shop.` });
+			}
+			case 'setprice': {
+				await interaction.deferReply();
+				const getItem = await Shop.getItem(itemID);
 
-					await Shop.removeItem(itemID);
-					return await interaction.editReply({ content: `Item \`${getItem.itemName}\` removed from the Special Shop.` });
-				}
-				catch (error) {
-					console.error(error);
-				}
-				break;
-			case 'setprice':
-				try {
-					await interaction.deferReply();
-					const getItem = await Shop.getItem(itemID);
+				if (!getItem) return await interaction.editReply({ content: 'Item not found.' });
 
-					if (!getItem) return await interaction.editReply({ content: 'Item not found.' });
+				await Shop.updateItem({ item_ID: itemID, price });
+				return await interaction.editReply({ content: `Item \`${getItem.itemName}\` updated. New price set is \`${price}\` ${oreEmoji}` });
+			}
+			case 'setstock': {
+				await interaction.deferReply();
+				const getItem = await Shop.getItem(itemID);
 
-					await Shop.updateItem({ item_ID: itemID, price });
-					return await interaction.editReply({ content: `Item \`${getItem.itemName}\` updated. New price set is \`${price}\` ${oreEmoji}` });
-				}
-				catch (error) {
-					console.error(error);
-				}
-				break;
-			case 'setstock':
-				try {
-					await interaction.deferReply();
-					const getItem = await Shop.getItem(itemID);
+				if (!getItem) return await interaction.editReply({ content: 'Item not found.' });
 
-					if (!getItem) return await interaction.editReply({ content: 'Item not found.' });
+				await Shop.updateItem({ item_ID: itemID, stock });
+				return await interaction.editReply({ content: `Item \`${getItem.itemName}\` updated. New stock set is \`${stock}\`.` });
+			}
 
-					await Shop.updateItem({ item_ID: itemID, stock });
-					return await interaction.editReply({ content: `Item \`${getItem.itemName}\` updated. New stock set is \`${stock}\`.` });
+			case 'transfer': {
+				await interaction.deferReply();
+				const user = await Player.findOne({ where: { discordID: recipient.id, guildID: interaction.guild.id } });
+				if (!user) {
+					throw new Error('profile not found');
 				}
-				catch (error) {
-					console.error(error);
-				}
-				break;
 
-			case 'transfer':
-				try {
-					await interaction.deferReply();
-					const user = await Player.findOne({ where: { discordID: recipient.id, guildID: interaction.guild.id } });
-					if (!user) {
-						throw new Error('profile not found');
-					}
-
-					await guild.decrement({ walletAmount: amount });
-					await user.increment({ oresEarned: amount });
-					return await interaction.editReply({ content: `\`${amount}\` ${oreEmoji} has been transferred to ${userMention(user.discordID)}.` });
-				}
-				catch (error) {
-					console.error(error);
-				}
-				break;
+				await guild.decrement({ walletAmount: amount });
+				await user.increment({ oresEarned: amount });
+				return await interaction.editReply({ content: `\`${amount}\` ${oreEmoji} has been transferred to ${userMention(user.discordID)}.` });
+			}
 		}
 
 	},
