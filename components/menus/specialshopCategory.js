@@ -2,6 +2,8 @@ const { EmbedBuilder, StringSelectMenuBuilder, ActionRowBuilder } = require('dis
 const { Shop } = require('../../src/db');
 const { footer } = require('../../src/vars');
 
+const MAX_SHOWN = 25;
+
 module.exports = {
 	data: {
 		name: 'specialshopCategory',
@@ -23,13 +25,16 @@ module.exports = {
 
 		if (itemList.length === 0) return;
 
+		// Discord allows 25 embed fields and 25 menu options
+		const shown = itemList.slice(0, MAX_SHOWN);
+
 		const embed = new EmbedBuilder()
 			.setColor(0xcd7f32)
 			.setTitle(`${oreEmoji} **SPECIAL SHOP:** ${oreEmoji}`)
 			.setFooter(footer);
 
 		const itemOptions = [];
-		itemList.forEach((item) => {
+		shown.forEach((item) => {
 			const itemStats = [];
 			if (item.totalHealth > 0) {
 				itemStats.push(`Total Health: ${item.totalHealth}\n`);
@@ -53,6 +58,10 @@ module.exports = {
 				inline: false,
 			});
 		});
+
+		if (itemList.length > shown.length) {
+			embed.setDescription(`Showing the first ${shown.length} of ${itemList.length} items in this category.`);
+		}
 
 		const select1 = new StringSelectMenuBuilder()
 			.setCustomId('getItem')

@@ -62,7 +62,7 @@ Before running the bot, you will need the following:
 - [ ] Sales tracking
 - [x] Slash-command RPG profile and inventory system
 - [x] Brawls
-- [ ] Auctions (switched off; set `"enableAuctions": true` in `config.json` to bring them back)
+- [ ] Auctions (switched off. To bring them back, set `"enableAuctions": true` in `config.json` **and** `"hasAuction": true` for the tiers that should have them in `assets/features.json`, then run `node deploy.js`)
 - [ ] Exploration mode
 - [ ] World bosses
 
