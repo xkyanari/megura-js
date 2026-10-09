@@ -1,36 +1,48 @@
 const { PermissionFlagsBits, ChannelType } = require('discord.js');
-const { Brawl, Player } = require('../../src/db');
+const { Player } = require('../../src/db');
 const { simulateBrawl } = require('../../functions/brawl');
-const { isTestnet } = require('../../src/vars');
+const { acceptBrawl, settleBrawl, BRAWL_SETTLE_TIMEOUT } = require('../../functions/brawlWager');
+
+const rejections = {
+	'not open': 'This challenge is no longer open.',
+	'taken': 'Someone else already accepted this challenge.',
+	'self': 'You cannot challenge yourself!',
+	'insufficient funds': 'You do not have enough ores to accept the challenge!',
+};
 
 module.exports = {
 	data: {
 		name: 'brawl-accept',
 	},
 	async execute(interaction) {
+		const listingId = interaction.message.embeds[0].data.footer.text.split(' ')[2];
+		const guildID = interaction.guild.id;
+
+		const acceptor = await Player.findOne({ where: { discordID: interaction.member.id, guildID } });
+
+		if (!acceptor) {
+			throw new Error('profile not found');
+		}
+
+		const result = await acceptBrawl(listingId, interaction.member.id, guildID);
+		if (!result.ok) {
+			return interaction.reply({ content: rejections[result.reason], flags: 64 });
+		}
+
+		const challenger = result.brawl;
+
+		// Safety net: if the brawl never finishes (crash, restart), refund both stakes as a draw.
 		try {
-			const listingId = interaction.message.embeds[0].data.footer.text.split(' ')[2];
+			await interaction.client.brawlQueue.add(
+				{ type: 'settle', listingId, guildID },
+				{ delay: BRAWL_SETTLE_TIMEOUT, removeOnComplete: true },
+			);
+		}
+		catch (error) {
+			console.error('Could not queue brawl settle timeout:', error);
+		}
 
-			const challenger = await Brawl.findOne({ where: { listingId: listingId } });
-
-			if (interaction.member.id === challenger.challengerId) return interaction.reply({ content: 'You cannot challenge yourself!', flags: 64 });
-
-			const acceptor = await Player.findOne({ where: { discordID: interaction.member.id, guildID: interaction.guild.id } });
-
-			if (!acceptor) {
-				throw new Error('profile not found');
-			}
-
-			if (!isTestnet) {
-				if (acceptor.oresEarned < challenger.wager) return interaction.reply({ content: 'You do not have enough ores to accept the challenge!', flags: 64 });
-				const originalWager = challenger.wager;
-				challenger.wager += challenger.wager;
-				acceptor.oresEarned -= originalWager;
-			}
-
-			challenger.acceptorId = interaction.member.id;
-			await challenger.save();
-
+		try {
 			const brawl_channel = await interaction.guild.channels.create({
 				name: `brawl-${listingId}`,
 				type: ChannelType.GuildText,
@@ -69,7 +81,9 @@ module.exports = {
 			await simulateBrawl(interaction, brawl_channel, challenger.challengerId, interaction.member.id);
 		}
 		catch (error) {
-			console.error(error);
+			// e.g. missing permission to create the channel: call it off and refund both
+			await settleBrawl(listingId, guildID, null);
+			throw error;
 		}
 	},
 };

@@ -1,5 +1,5 @@
 const { ComponentType, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, userMention } = require('discord.js');
-const { Brawl, Guild, Player } = require('../src/db');
+const { settleBrawl } = require('./brawlWager');
 const { brawlStatus } = require('./webhook');
 const wait = require('node:timers/promises').setTimeout;
 
@@ -29,11 +29,10 @@ const getWinner = (player1, player1Move, player2, player2Move) => {
 const simulateBrawl = async (interaction, channel, player1, player2) => {
 	let player1Wins = 0;
 	let player2Wins = 0;
+	const listingId = channel.name.split('-')[1];
 
 	try {
 		const brawl_channel = interaction.client.channels.cache.get(channel.id);
-		const listingId = brawl_channel.name.split('-')[1];
-		const guild = await Guild.findOne({ where: { guildID: interaction.guild.id } });
 
 		const introductionMessage = `# Welcome to the Brawl simulation!\n\n**${userMention(player1)} is challenging ${userMention(player2)} to a fierce battle.**\n\n- The game consists of 5 rounds where you and your opponent will face off in an intense battle.\n- Each round, you will have 30 seconds to select your move.\n- The available moves are Range, Melee, Block, and Dash. Choose wisely to outwit your opponent and emerge victorious!\n- Your first move will be final and can't be changed.\n- The first player to win 3 rounds will be declared the overall winner.\n## Hints for each attack:\n- Long Range: Strong against Short Range and Block, Weak against Dash Attack.\n- Short Range: Strong against Block and Dash Attack, Weak against Long Range.\n- Block: Strong against Dash Attack, Weak against Short Range and Long Range.\n- Dash Attack: Strong against Long Range, Weak against Short Range and Block.\n\nLet the brawl begin!`;
 
@@ -154,6 +153,9 @@ const simulateBrawl = async (interaction, channel, player1, player2) => {
 			winner = player2;
 		}
 
+		// pay out before anything else can fail
+		await settleBrawl(listingId, interaction.guild.id, winner ?? null);
+
 		await brawlStatus(interaction.guild.id, player1, player2, 'Completed', player1Wins, player2Wins, listingId);
 
 		if (winner) {
@@ -169,31 +171,6 @@ const simulateBrawl = async (interaction, channel, player1, player2) => {
 			await brawl_channel.send({ embeds: [embed] });
 		}
 
-		await Brawl.findOne({ where: { listingId: listingId } }).then(async (brawl) => {
-			brawl.status = 'completed';
-			brawl.outcome = winner === player1 ? 'challenger_win' : winner === player2 ? 'acceptor_win' : 'draw';
-			guild.walletAmount -= brawl.wager;
-
-			if (winner) {
-				const winningPlayer = await Player.findOne({ where: { discordID: winner, guildID: interaction.guild.id } });
-				winningPlayer.walletAmount += brawl.wager * 2;
-				await winningPlayer.save();
-			}
-			else {
-				const player1Instance = await Player.findOne({ where: { discordID: player1, guildID: interaction.guild.id } });
-				const player2Instance = await Player.findOne({ where: { discordID: player2, guildID: interaction.guild.id } });
-
-				player1Instance.walletAmount += brawl.wager;
-				player2Instance.walletAmount += brawl.wager;
-
-				await player1Instance.save();
-				await player2Instance.save();
-			}
-
-			await brawl.save();
-			await guild.save();
-		});
-
 		setTimeout(async () => {
 			if (brawl_channel) brawl_channel.delete().catch(console.error);
 			return;
@@ -201,6 +178,8 @@ const simulateBrawl = async (interaction, channel, player1, player2) => {
 	}
 	catch (error) {
 		console.error(error);
+		// the brawl couldn't finish: refund both stakes (no-op if it was already settled)
+		await settleBrawl(listingId, interaction.guild.id, null).catch(console.error);
 	}
 };
 

@@ -96,6 +96,35 @@ async function transferIura(fromAccountID, toAccountID, amount) {
 	});
 }
 
+// Moves a player's ores into the guild wallet (e.g. a brawl stake).
+// Throws 'insufficient funds' without changing anything if the player can't cover it.
+async function escrowOres(discordID, guildID, amount, transaction) {
+	assertAmount(amount);
+
+	const [affected] = await Player.update(
+		{ oresEarned: sequelize.literal(`\`oresEarned\` - ${amount}`) },
+		{ where: { discordID, guildID, oresEarned: { [Op.gte]: amount } }, transaction },
+	);
+	if (!affected) throw new Error('insufficient funds');
+
+	await Guild.increment({ walletAmount: amount }, { where: { guildID }, transaction });
+}
+
+// Pays ores from the guild wallet back to a player (e.g. a brawl payout or refund).
+// If the player no longer has a profile, the ores stay in the guild wallet.
+async function releaseOres(discordID, guildID, amount, transaction) {
+	assertAmount(amount);
+
+	const [affected] = await Player.update(
+		{ oresEarned: sequelize.literal(`\`oresEarned\` + ${amount}`) },
+		{ where: { discordID, guildID }, transaction },
+	);
+	if (!affected) return false;
+
+	await Guild.decrement({ walletAmount: amount }, { where: { guildID }, transaction });
+	return true;
+}
+
 // for staking
 Reflect.defineProperty(Player.prototype, 'stake', {
 	value: async function stake() {
@@ -383,4 +412,6 @@ module.exports = {
 	AuctionItem,
 	Brawl,
 	transferIura,
+	escrowOres,
+	releaseOres,
 };

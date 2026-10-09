@@ -7,6 +7,7 @@ const { endAuction } = require('../functions/endAuction');
 const { dahliaName, dahliaAvatar } = require('../src/vars');
 const { redisURL } = require('../redis');
 const { cleanupOldLogs } = require('../functions/logs');
+const { processBrawlJob } = require('../functions/brawlWager');
 
 let Discord;
 try {
@@ -103,6 +104,23 @@ module.exports = {
 			catch (error) {
 				console.error(`Failed to delete channel ${channelId}`);
 				done(error);
+			}
+		});
+
+		// Brawl expiry and settle timeouts (see functions/brawlWager.js)
+		const brawlQueue = new Queue('brawlQueue', redisURL);
+		client.brawlQueue = brawlQueue;
+
+		brawlQueue.process(async (job) => {
+			const expired = await processBrawlJob(job.data);
+			const { channelId, messageId } = job.data;
+
+			// remove the listing that nobody accepted
+			if (expired && channelId && messageId) {
+				const channel = await client.channels.fetch(channelId).catch(() => null);
+				await channel?.messages.delete(messageId).catch((err) => {
+					if (err.code !== 10008) console.error('Failed to delete brawl listing:', err);
+				});
 			}
 		});
 
