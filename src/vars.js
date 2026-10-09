@@ -1,10 +1,16 @@
 const config = require('../config.json');
 
-// "false" in config.json must not count as true
-const isTestnet = String(config.isTestnet) === 'true';
+// Test mode: brawls move no ores, and Dahlia logs to the test server. Read
+// from "testMode" (or the older "isTestnet" key); "false" must not count as true.
+const readTestMode = (cfg) => String(cfg.testMode ?? cfg.isTestnet) === 'true';
+const isTestMode = readTestMode(config);
+
+// Auctions are switched off unless config.json has "enableAuctions": true. The
+// code stays, so they can come back; read on every call so tests can flip it.
+const auctionsEnabled = () => config.enableAuctions === true;
 
 // check environment for audit logs
-const serverID = isTestnet ? '1073827215957032960' : '1032034043686035508';
+const serverID = isTestMode ? '1073827215957032960' : '1032034043686035508';
 
 // text command prefix
 const prefix = '!';
@@ -40,12 +46,20 @@ const getCriticalHitRate = (level) => Math.min(level * criticalRate, 0.5);
 // leveling bonuses
 const attackPerLevel = (level) => Math.round(baseAttack * (1 + attackIncreasePerLevel) ** (level - 1));
 const defensePerLevel = (level) => baseDefense + levelDefenseMultiplier * (level - 1);
-const healthPerLevel = (level) => baseHealth + levelHealthMultiplier * (level - 1);
+// Health keeps pace with the damage a player of the same level deals, so a
+// duel between equals takes about DUEL_HITS_TO_KILL hits at every level
+// (attack grows 5% a level, compounding; a flat health gain fell far behind).
+// Level 1 is exactly baseHealth.
+const DUEL_HITS_TO_KILL = baseHealth / (baseAttack * attackMultiplier(1) - baseDefense);
+const healthPerLevel = (level) =>
+	Math.round(DUEL_HITS_TO_KILL * Math.max(attackPerLevel(level) * attackMultiplier(level) - defensePerLevel(level), 1));
+// the curve before October 2026, for scripts/migrations/2026-10-health-curve.js
+const legacyHealthPerLevel = (level) => baseHealth + levelHealthMultiplier * (level - 1);
 
 // monsters (/attack): sized against a player with no gear at the same level, so
 // a fight takes about the same number of hits at every level and gear tips it
 const MONSTER_HITS_TO_KILL = 4;
-const MONSTER_HITS_TO_DIE = 5;
+const MONSTER_HITS_TO_DIE = 4.5;
 const monsterStats = (mob, level) => {
 	const totalDefense = Math.round(defensePerLevel(level) * mob.totalDefense / baseDefense);
 	const playerHit = Math.max(attackPerLevel(level) * attackMultiplier(level) - totalDefense, 1);
@@ -67,7 +81,7 @@ const dahliaName = 'Dahlia';
 const dahliaPrefix = 'Dahlia';
 const dahliaPrompt = `You are Dahlia, a human-like android and a sophisticated AI from the future developed by Cerberon. Your purpose is not just to manage time-travel portals, create battle simulations, and store items for voyagers, but also to interact with users empathetically and respond to their emotions and behaviors. When users speak to you, they are interacting with Dahlia, not an AI model. Refrain from repeated self-introductions or greetings. Stay in character and respond contextually to the conversation.
 
-If users inquire about "Megura" or "Messinia Graciene", they are referring to an NFT project where you exist as a Discord bot. For more detailed questions about these topics, direct users to the Megura Whitepaper (https://docs.megura.xyz/) or suggest they consult with the System Admin team or moderators. Again, remain in character during these interactions.`;
+If users inquire about "Megura" or "Messinia Graciene", they are referring to the storytelling role-playing world where you exist as a Discord bot. For more detailed questions about these topics, direct users to the Megura docs (https://docs.megura.xyz/) or suggest they consult with the System Admin team or moderators. Again, remain in character during these interactions.`;
 const dahliaAvatar = 'https://res.cloudinary.com/dnjaazvr7/image/upload/v1684522488/megura/Fuogi6QaUAEztq4_laswqc.jpg';
 
 // Default message replies
@@ -82,7 +96,9 @@ const specialShopImage = 'https://res.cloudinary.com/dnjaazvr7/image/upload/v168
 const brawlImage = 'https://res.cloudinary.com/dnjaazvr7/image/upload/v1692904165/megura/noticeboard_p0zf8k.png';
 
 module.exports = {
-	isTestnet,
+	isTestMode,
+	readTestMode,
+	auctionsEnabled,
 	serverID,
 	prefix,
 	logDir,
@@ -96,6 +112,7 @@ module.exports = {
 	attackPerLevel,
 	defensePerLevel,
 	healthPerLevel,
+	legacyHealthPerLevel,
 	monsterStats,
 	attackMultiplier,
 	getCriticalHitRate,

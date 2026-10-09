@@ -1,6 +1,6 @@
 # Setup Command
 
-Dahlia is a versatile bot for Discord servers. While it is primarily a storytelling bot, she can also help with server management, including setup logs, verification with Captcha, whitelist shops, and roles.
+Dahlia is a versatile bot for Discord servers. While it is primarily a storytelling bot, she can also help with server management, including setup logs, verification with Captcha, a special shop, and roles.
 
 However, Dahlia does not scan servers for permissions and privileges by default, as she does not require the administrator role. Dahlia also does not require Discord's privileged Message Content, Server Members, or Presence gateway intents. That means she uses slash commands and explicit interactions instead of reading normal channel conversations, member list updates, or presence activity.
 
@@ -23,7 +23,7 @@ Please note that Dahlia is still in beta version and improves over time. If you 
 6. (Optional) Assign factions - `/setup factions <margaretha_role> <cerberon_role>`: Assign factions for the Margaretha and Cerberon "sub-guild" per community server. Users with no factions will be assigned as "Wanderer".
 
 
-7. Create a whitelist shop - `/setup shop <channel_name>`: This is for those who want to have their own whitelist shop for holders in exchange for tokens. Available for Enterprise accounts only.
+7. Create a special shop - `/setup shop <channel_name>`: This is for servers that want their own shop of rewards, such as roles or event items, that members buy with ores. Available for Enterprise accounts only.
 
 If you no longer want to use Dahlia's moderation tools, you can simply run `/setup disable`. This deletes all your information from the database.
 

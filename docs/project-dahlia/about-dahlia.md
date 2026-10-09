@@ -25,7 +25,7 @@ Project DAHLIA is an important aspect of the game's lore and history, providing 
 
 Dahlia is a highly sophisticated bot that runs on Discord, offering a range of utilities and functions for players of this text-based RPG. Players interact with Dahlia through slash commands, buttons, select menus, and other explicit Discord interactions. While Dahlia offers many utilities, her primary function is to serve as a storyteller for the game, providing players with an immersive and engaging experience.
 
-Players can participate through Discord without linking an external collection. By using Dahlia's commands, they can progress through the game, uncover its mysteries, and engage with other members of the community.
+Players need nothing but Discord to take part. By using Dahlia's commands, they can progress through the game, uncover its mysteries, and engage with other members of the community.
 
 Dahlia does not require Discord's privileged Message Content, Server Members, or Presence gateway intents. This means she does not scan normal channel conversations, presence/activity status, or the full server member list.
 
@@ -44,7 +44,6 @@ Dahlia does not require Discord's privileged Message Content, Server Members, or
 * Creating, modifying, deleting sub-guilds (channels)
 * Scheduling events
 * Ticketing system
-* Whitelisting
 * Sales tracking
 
 All of these may not require having administrator role on the bot for security, but they are subject to change without prior notice.

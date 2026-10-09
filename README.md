@@ -39,7 +39,7 @@ Before running the bot, you will need the following:
 
 - **Node.js 18.17 or newer**: Discord.js v14 and its REST dependencies require a modern Node.js runtime. You can download and install Node.js from the official website at https://nodejs.org.
 - **Discord Bot Token**: You will need a Discord bot token to authenticate your bot with the Discord API. You can obtain a token by creating a new bot application on the Discord Developer Portal at https://discord.com/developers/applications.
-- **MySQL 8.0 database**: Dahlia stores guild settings, player profiles, inventory, wallet data, auctions, brawls, and other gameplay state in MySQL through Sequelize.
+- **MySQL 8.0 database**: Dahlia stores guild settings, player profiles, inventory, IURA balances, brawls, and other gameplay state in MySQL through Sequelize.
 - **Redis**: Required for cooldown/rate tracking, Bull queues, and temporary CAPTCHA state.
 - **Cloudinary credentials**: Required for uploading temporary CAPTCHA images.
 - **OpenAI API Key (optional)**: The package is still present for future AI features, but open channel AI chat is currently disabled while the bot avoids Message Content intent.
@@ -59,11 +59,11 @@ Before running the bot, you will need the following:
 - [x] Creating and closing private channels
 - [x] Scheduling events
 - [x] Ticketing system
-- [ ] Whitelisting
-- [ ] Sales tracking
+- [x] Sales tracking for the special shop (`/sales`)
 - [x] Slash-command RPG profile and inventory system
-- [x] Auctions and brawls
-- [ ] Exploration mode
+- [x] Brawls
+- [ ] Auctions (switched off. To bring them back, set `"enableAuctions": true` in `config.json` **and** `"hasAuction": true` for the tiers that should have them in `assets/features.json`, then run `node deploy.js`)
+- [x] Exploration mode (`/explore`)
 - [x] Bosses: solo and world bosses (behind the `hasBosses` feature flag)
 
 All of these may not require having administrator role on the bot for security, but they are subject to change without prior notice.
@@ -116,7 +116,7 @@ docker compose version   # needs v2.24 or later
    - `config.json` and `assets/features.json` (present, valid, readable by the container's uid 1000);
    - the Discord token;
    - MySQL and Redis reachable;
-   - `isTestnet`;
+   - `testMode` (the older `isTestnet` key still works);
    - swap and disk space;
    - whether pm2 is still running the bot.
 3. **Build while the old bot keeps running:**
@@ -168,18 +168,26 @@ docker compose version   # needs v2.24 or later
 - **Check which database you run** with `mysqld --version`. On Debian 12, `mysql-server` installs MariaDB 10.11, which is already light and needs no tuning. On MySQL 8, add `performance_schema = OFF` and `innodb_buffer_pool_size = 128M` under `[mysqld]`, then restart MySQL.
 - **Clean up old images** after updates with `docker image prune -f`.
 
-**Database migrations.** The bot creates new tables by itself but never changes existing ones, so a few updates ship a one-off SQL script in `scripts/migrations/`. Run each once, in date order, with the bot stopped and after a backup:
+**Database migrations.** The bot creates new tables by itself but never changes existing ones, so a few updates ship a one-off script in `scripts/migrations/`. Run each once, in date order, with the bot stopped and after a backup. The `.js` scripts take `--dry-run` to show what they would change, and remember that they have run:
 
 ```sh
 docker compose down
 mysqldump -u <user> -p <database> > backup-$(date +%F).sql
 mysql -u <user> -p <database> < scripts/migrations/2026-10-auction-bigint.sql
+docker compose run --rm bot node scripts/migrations/2026-10-gameplay.js
+docker compose run --rm bot node scripts/migrations/2026-10-health-curve.js
+docker compose run --rm bot node scripts/migrations/2026-10-remove-crypto.js
+docker compose run --rm bot node scripts/migrations/2026-10-order-sales.js
 docker compose up -d
 ```
 
 | Script | Why |
 |---|---|
-| `2026-10-auction-bigint.sql` | Auction and bid amounts are stored as whole satoshis (`BIGINT`) instead of `FLOAT`, which rounded amounts above about 0.17 coin. |
+| `2026-10-auction-bigint.sql` | Auction and bid amounts are stored as whole numbers (`BIGINT`) instead of `FLOAT`, which rounded large amounts. |
+| `2026-10-gameplay.js` | Adds the daily-streak columns and new shop items, and unequips stacked or over-limit gear. |
+| `2026-10-health-curve.js` | Moves players onto the new health curve, keeping health from gear. |
+| `2026-10-remove-crypto.js` | Drops the unused NFT link columns from `Player`, and moves special-shop items from the removed Whitelist, NFTs and Cryptocurrencies categories to Digital Items. |
+| `2026-10-order-sales.js` | Adds the price paid and the order date to special-shop orders, for `/sales`. **Run it before starting this version**: the bot reads those columns. |
 
 **Vote rewards (top.gg and discordbotlist).** `/vote` pays 50 IURA per vote through a small webhook server inside the bot. It only starts when `VOTE_PORT` is set:
 
@@ -217,7 +225,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 ## Commands (work in progress)
 
 - `/attack`: Fight a random monster sized to your level. Wins pay IURA and EXP, sometimes drop an item, and consumables in your inventory are used automatically when your health runs low.
-- `/auction`: Start, view, or manage auction activity.
+- `/auction`: Start, view, or manage auctions (switched off by default; see `enableAuctions`).
 - `/boss`: Fight a boss turn by turn, on your own (`challenge`) or as a channel (`spawn`, `autospawn` for moderators). Needs the `hasBosses` feature.
 - `/brawl`: Start or join a brawl challenge.
 - `/buy`: Lets player to buy items in bulk.
@@ -227,6 +235,8 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/daily`: Do a random quest to gain IURA. Claiming within 48 hours keeps a streak going, worth up to +60%.
 - `/duel`: Initiate a duel against another player.
 - `/equip`: Equip an inventory item: one copy each, in 1 weapon, 3 armor and 1 accessory slot.
+- `/explore`: `map` shows the places of Eldelvain, `travel` moves you to one you have unlocked (monsters for `/attack` then come from there), and `search` looks around every 30 minutes.
+- `/factions`: `join` picks your faction; `standings` shows this week's faction points and last season's result; `setup` (moderators) sets where weekly season results are posted and an optional champion role.
 - `/info`: Shows the list of commands.
 - `/inventory`: Opens your inventory.
 - `/invite`: Shows the bot invite link.
@@ -234,9 +244,12 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/open <name of channel>`: Creates a private channel, auto-closes in 10 minutes.
 - `/privacy`: Shows the privacy notice.
 - `/profile`: Show profile of a user (blank for self).
+- `/quests`: See your daily and weekly quest objectives and their rewards.
 - `/ranks`: Show leaderboards.
 - `/requestduel`: Respond to a duel request.
 - `/reset`: Delete voyager profile.
+- `/sales`: (Moderators) Special shop sales for the last 7 or 30 days or all time, with an optional CSV export.
+- `/sell`: Sell inventory items back to the shop for 40% of their price.
 - `/sendgift`: Send a gift to another player.
 - `/setup`: Setup server for moderation tools.
 - `/shop`: Opens the Item Shop.

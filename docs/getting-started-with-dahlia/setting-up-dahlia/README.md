@@ -1,6 +1,6 @@
 # 🛠 Setting up Dahlia
 
-Dahlia is a versatile bot for Discord servers. While it is primarily a storytelling bot, she can also help with server management, including setup logs, verification with Captcha, whitelist shops, and roles.
+Dahlia is a versatile bot for Discord servers. While it is primarily a storytelling bot, she can also help with server management, including setup logs, verification with Captcha, a special shop, and roles.
 
 However, Dahlia does not scan servers for permissions and privileges by default, as she does not require the administrator role. Dahlia also does not require Discord's privileged Message Content, Server Members, or Presence gateway intents. That means she uses slash commands and explicit interactions instead of reading normal channel conversations, member list updates, or presence activity.
 

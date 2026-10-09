@@ -4,7 +4,7 @@
 
 * **Wallet**: what you spend, send and receive.
 * **Bank**: savings, moved in and out of your wallet.
-* **Stake**: IURA set aside from your bank.
+* **Savings**: IURA set aside from your bank.
 
 The **/iura** command shows and moves your balances. Every reply is visible only to you.
 
@@ -15,7 +15,7 @@ The **/iura** command shows and moves your balances. Every reply is visible only
 /iura balance view:Bank
 ```
 
-`view:Wallet` (the default) shows your wallet. `view:Bank` shows your bank and staked amounts.
+`view:Wallet` (the default) shows your wallet. `view:Bank` shows your bank and savings.
 
 ### Moving IURA
 
@@ -23,13 +23,13 @@ The **/iura** command shows and moves your balances. Every reply is visible only
 | --- | --- |
 | `/iura wallet deposit:<amount>` | Wallet → Bank |
 | `/iura wallet withdraw:<amount>` | Bank → Wallet |
-| `/iura bank stake:<amount>` | Bank → Stake |
-| `/iura bank unstake:<amount>` | Stake → Bank |
+| `/iura bank save:<amount>` | Bank → Savings |
+| `/iura bank take:<amount>` | Savings → Bank |
 
 Amounts must be whole numbers of at least 1. You can't move more than the source balance holds; if you try, nothing moves and Dahlia tells you so.
 
 {% hint style="info" %}
-Staked IURA is set aside but doesn't earn rewards yet. Staking rewards are planned for a future update.
+Savings are set aside from your bank but don't earn interest yet.
 {% endhint %}
 
 ### Naming Your Wallet and Bank

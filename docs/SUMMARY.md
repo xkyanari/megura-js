@@ -17,11 +17,6 @@
 * [🔏 Privacy Policy](privacy-policy.md)
 * [📜 Terms of Service](terms-of-service.md)
 
-## Tokenomics
-
-* [🪙 $IURA](tokenomics/usdiura.md)
-* [🏛 Burning Ivy](tokenomics/burning-ivy.md)
-
 ## Getting Started with Dahlia
 
 * [🛠 Setting up Dahlia](getting-started-with-dahlia/setting-up-dahlia/README.md)
@@ -32,17 +27,19 @@
   * [/ticket](getting-started-with-dahlia/setting-up-dahlia/tickets.md)
   * [/form](getting-started-with-dahlia/setting-up-dahlia/forms.md)
   * [/schedule](getting-started-with-dahlia/setting-up-dahlia/scheduling.md)
+  * [/sales](getting-started-with-dahlia/setting-up-dahlia/sales.md)
 * [🎮 Playing the Game](getting-started-with-dahlia/playing-the-game/README.md)
   * [/arena](getting-started-with-dahlia/playing-the-game/arena.md)
   * [/brawl](getting-started-with-dahlia/playing-the-game/brawl.md)
   * [/boss](getting-started-with-dahlia/playing-the-game/bosses.md)
+  * [/quests, /factions and /sell](getting-started-with-dahlia/playing-the-game/quests-and-factions.md)
+  * [/explore](getting-started-with-dahlia/playing-the-game/exploration.md)
   * [/specialshop](getting-started-with-dahlia/playing-the-game/specialshop.md)
   * [/iura](getting-started-with-dahlia/playing-the-game/iura.md)
 * [💬 Chatting with Dahlia](getting-started-with-dahlia/chatting-with-dahlia.md)
 
 ## Use Cases
 
-* [👥 For Investors](use-cases/for-investors.md)
 * [🧵 For Projects](use-cases/for-projects.md)
 * [🎨 For Designers](use-cases/for-designers.md)
 * [🖥 For Developers](use-cases/for-developers.md)

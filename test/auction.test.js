@@ -1,5 +1,8 @@
 const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 const Queue = require('bull');
 const { Collection } = require('discord.js');
 const redis = require('../redis');
@@ -25,7 +28,7 @@ const balanceOk = true;
 bids.checkBalance = async () => balanceOk;
 
 const makeAuction = async ({ guildID = G, hours = 1, price = 1000, messageID } = {}) => {
-	const item = await AuctionItem.create({ itemName: 'Rare NFT', quantity: 1, description: 'No description provided' });
+	const item = await AuctionItem.create({ itemName: 'Rare Item', quantity: 1, description: 'No description provided' });
 	return Auction.create({
 		userID: 'SELLER', guildID, itemId: item.id, startDateTime: new Date(),
 		endDateTime: new Date(Date.now() + hours * 3600 * 1000),
@@ -46,13 +49,25 @@ const clickOn = (auction, userId, guildID = G) => ({
 	user: { id: userId },
 });
 
+// auctions are off on every tier in features-example.json; these tests still
+// cover the (switched-off) code, with Premium and up as before
+const exampleFeatures = process.env.FEATURES_FILE;
+const featuresFile = path.join(os.tmpdir(), `features-auction-${process.pid}.json`);
+
 before(async () => {
+	const features = JSON.parse(fs.readFileSync(exampleFeatures, 'utf8'));
+	for (const tier of ['premium', 'enterprise', 'megura']) features[tier].hasAuction = true;
+	fs.writeFileSync(featuresFile, JSON.stringify(features));
+	process.env.FEATURES_FILE = featuresFile;
+
 	await resetDb();
 	await Guild.create({ guildID: G, subscription: 'premium' });
 	await Guild.create({ guildID: 'GA2', subscription: 'premium' });
 	await Guild.create({ guildID: 'GAFREE', subscription: 'free' });
 });
 after(async () => {
+	process.env.FEATURES_FILE = exampleFeatures;
+	fs.rmSync(featuresFile, { force: true });
 	await queue.obliterate({ force: true });
 	await queue.close();
 	await closeAll();

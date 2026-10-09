@@ -16,6 +16,7 @@ const { processPortalJob } = require('../functions/portal');
 const { processScheduledPost, syncScheduledPosts } = require('../functions/schedule');
 const { processAutoSpawn, syncAutoSpawns, closeInterruptedFights } = require('../functions/boss');
 const { Giveaway, Raffle } = require('../src/db');
+const { runSeasonJob, SEASON_CRON } = require('../functions/factionSeason');
 
 let Discord;
 try {
@@ -142,6 +143,15 @@ module.exports = {
 		client.bossQueue = bossQueue;
 		bossQueue.process((job) => processAutoSpawn(client, bossQueue, job.data));
 		await syncAutoSpawns(bossQueue).catch((error) => console.error('Could not sync boss spawns:', error));
+
+		// Faction seasons (see functions/factionSeason.js): every hour, and once at
+		// startup. Each week is settled once; announcements and roles that failed are retried
+		const factionSeasonQueue = new Queue('factionSeasonQueue', redisURL);
+		client.factionSeasonQueue = factionSeasonQueue;
+		factionSeasonQueue.process(() => runSeasonJob(client));
+		await factionSeasonQueue.add({}, { jobId: 'faction-season', repeat: { cron: SEASON_CRON, tz: 'Etc/UTC' }, removeOnComplete: true })
+			.catch((error) => console.error('Could not schedule faction seasons:', error));
+		await runSeasonJob(client).catch((error) => console.error('Could not settle the faction season:', error));
 
 		const auctionQueue = new Queue('auctionQueue', redisURL);
 		client.auctionQueue = auctionQueue;

@@ -133,8 +133,10 @@ if [ -f config.json ] && json_get config.json token >/dev/null 2>&1; then
 		fail "no Discord token in config.json or .env"
 		fix "echo 'DISCORD_TOKEN=...' > .env && chmod 600 .env"
 	fi
-	if [ "$(json_get config.json isTestnet)" = "True" ] || [ "$(json_get config.json isTestnet)" = "true" ]; then
-		warn "isTestnet is true in config.json; production should use false"
+	test_mode="$(json_get config.json testMode)"
+	[ -n "$test_mode" ] || test_mode="$(json_get config.json isTestnet)"
+	if [ "$test_mode" = "True" ] || [ "$test_mode" = "true" ]; then
+		warn "testMode is true in config.json; production should use false"
 	fi
 	for key in clientId mysql_dbname mysql_dbuser; do
 		[ -n "$(json_get config.json "$key")" ] || fail "config.json: $key is empty"

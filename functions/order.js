@@ -55,7 +55,7 @@ const handleOrderButton = async (interaction, to) => {
 			else note = '\nThe buyer no longer has a profile, so the item wasn\'t added to an inventory.';
 		}
 		if (to === 'cancelled') {
-			const refunded = await Shop.returnOres(order.itemName, 1, order.discordID, interaction.guild.id);
+			const refunded = await Shop.returnOres(order.itemName, 1, order.discordID, interaction.guild.id, order.price);
 			if (!refunded) note = '\nThe buyer no longer has a profile, so no ores were refunded.';
 		}
 	}

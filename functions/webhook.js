@@ -1,5 +1,5 @@
 const { EmbedBuilder, WebhookClient, userMention, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { Shop, Order, Guild, Auction } = require('../src/db');
+const { Guild, Auction } = require('../src/db');
 const { dahliaAvatar, dahliaName } = require('../src/vars');
 
 // Errors (e.g. missing Manage Webhooks) propagate so the command's caller,
@@ -35,7 +35,9 @@ const changeChannel = async (interaction, guildID, channelID, fieldsToUpdate) =>
 };
 
 // sending notification to the mod channel
-const notifyPurchase = async (guildID, discordID, itemName) => {
+// Posts a special-shop order in the staff channel, with buttons to update it.
+// The order itself is created by Shop.buyItem; this only links the message to it.
+const notifyPurchase = async (guildID, discordID, itemName, order) => {
 	try {
 		const guild = await Guild.findOne({ where: { guildID } });
 		if (!guild) {
@@ -45,48 +47,38 @@ const notifyPurchase = async (guildID, discordID, itemName) => {
 
 		const webhookClient = new WebhookClient({ id: guild.webhookId, token: guild.webhookToken });
 
-		const item = await Shop.findOne({ where: { itemName } });
-		if (item) {
-			const embed = new EmbedBuilder()
-				.setTitle('Item Purchased')
-				.setColor(0xcd7f32)
-				.setDescription(`Request from: ${userMention(discordID)}\nItem Name: ${itemName}\nQuantity: 1`);
+		const embed = new EmbedBuilder()
+			.setTitle('Item Purchased')
+			.setColor(0xcd7f32)
+			.setDescription(`Request from: ${userMention(discordID)}\nItem Name: ${itemName}\nQuantity: 1${order?.price ? `\nPaid: ${order.price} ores` : ''}`);
 
-			const button = new ActionRowBuilder().addComponents(
-				new ButtonBuilder()
-					.setCustomId('completed')
-					.setEmoji('✅')
-					.setLabel('Completed')
-					.setStyle(ButtonStyle.Success),
-				new ButtonBuilder()
-					.setCustomId('processing')
-					.setEmoji('🔄')
-					.setLabel('Processing')
-					.setStyle(ButtonStyle.Primary),
-				new ButtonBuilder()
-					.setCustomId('cancelled')
-					.setEmoji('❎')
-					.setLabel('Cancelled')
-					.setStyle(ButtonStyle.Danger),
-			);
+		const button = new ActionRowBuilder().addComponents(
+			new ButtonBuilder()
+				.setCustomId('completed')
+				.setEmoji('✅')
+				.setLabel('Completed')
+				.setStyle(ButtonStyle.Success),
+			new ButtonBuilder()
+				.setCustomId('processing')
+				.setEmoji('🔄')
+				.setLabel('Processing')
+				.setStyle(ButtonStyle.Primary),
+			new ButtonBuilder()
+				.setCustomId('cancelled')
+				.setEmoji('❎')
+				.setLabel('Cancelled')
+				.setStyle(ButtonStyle.Danger),
+		);
 
-			const message = await webhookClient.send({
-				content: `${userMention(discordID)} just purchased an item!`,
-				username: dahliaName,
-				avatarURL: dahliaAvatar,
-				embeds: [embed],
-				components: [button],
-			});
+		const message = await webhookClient.send({
+			content: `${userMention(discordID)} just purchased an item!`,
+			username: dahliaName,
+			avatarURL: dahliaAvatar,
+			embeds: [embed],
+			components: [button],
+		});
 
-			await Order.create({
-				guildID,
-				discordID,
-				item_ID: item.item_ID,
-				itemName: itemName,
-				status: 'pending',
-				messageID: message.id,
-			});
-		}
+		await order?.update({ messageID: message.id });
 	}
 	catch (error) {
 		console.error(error);

@@ -1,14 +1,14 @@
 const { sequelize, Brawl, escrowOres, releaseOres } = require('../src/db');
-const { isTestnet } = require('../src/vars');
+const { isTestMode } = require('../src/vars');
 
 /**
  * Brawl wagers are escrowed: each player's stake moves from their ores into the
  * guild wallet when they commit, and the pot (2 x wager) is paid out exactly once.
  * Every step locks the brawl row and checks its state, so double clicks, late
- * timers and retries are no-ops. On testnet no ores move.
+ * timers and retries are no-ops. In test mode no ores move.
  */
 
-const escrow = !isTestnet;
+const escrow = !isTestMode;
 
 // Escrows the challenger's stake and creates the listing.
 // Throws 'duplicate listing' if the id was ever used before, since every lookup is by listingId alone.

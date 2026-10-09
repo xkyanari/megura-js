@@ -23,7 +23,7 @@ module.exports = {
 		}
 
 		const balanceBank = numFormat(player.iura?.bankAmount ?? null);
-		const balanceStaked = numFormat(player.iura?.stakedAmount ?? null);
+		const balanceSavings = numFormat(player.iura?.stakedAmount ?? null);
 		const embed = new EmbedBuilder()
 			.setAuthor({ name: `${interaction.user.tag}` })
 			.setTitle('Bank Balance')
@@ -31,7 +31,7 @@ module.exports = {
 				`${member.displayAvatarURL({ extension: 'png', size: 512 })}`,
 			)
 			.setDescription(
-				`🏦 **Bank:** $${balanceBank} IURA\n💵 **Staked:** $${balanceStaked} IURA`,
+				`🏦 **Bank:** $${balanceBank} IURA\n💵 **Savings:** $${balanceSavings} IURA`,
 			);
 		await interaction.reply({ embeds: [embed] }).catch(console.error);
 	},

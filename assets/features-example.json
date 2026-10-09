@@ -1,6 +1,6 @@
 {
   "free": {
-    "stakingRate": "",
+    "savingsRate": "",
     "buyGlobal": "",
     "hasRoles": "",
     "transferIura": "",
@@ -15,14 +15,14 @@
     "hasBosses": false
   },
   "premium": {
-    "stakingRate": "",
+    "savingsRate": "",
     "buyGlobal": "",
     "hasRoles": "",
     "ownEvents": "",
     "transferIura": "",
     "sellGlobal": "",
     "iuraOnly": "",
-    "hasAuction": true,
+    "hasAuction": false,
     "hasGiveaways": true,
     "hasRaffles": true,
     "hasScheduling": false,
@@ -32,7 +32,7 @@
     "hasBosses": false
   },
   "enterprise": {
-    "stakingRate": "",
+    "savingsRate": "",
     "buyGlobal": "",
     "hasRoles": "",
     "ownDahlia": "",
@@ -46,7 +46,7 @@
     "sellGlobal": "",
     "iuraOnly": "",
     "hasArena": "",
-    "hasAuction": true,
+    "hasAuction": false,
     "hasGiveaways": true,
     "hasRaffles": true,
     "hasScheduling": true,
@@ -56,7 +56,7 @@
     "hasBosses": false
   },
   "megura": {
-    "stakingRate": "",
+    "savingsRate": "",
     "buyGlobal": "",
     "hasRoles": "",
     "ownDahlia": "",
@@ -70,7 +70,7 @@
     "sellGlobal": "",
     "iuraOnly": "",
     "hasArena": "",
-    "hasAuction": true,
+    "hasAuction": false,
     "hasGiveaways": true,
     "hasRaffles": true,
     "hasScheduling": true,

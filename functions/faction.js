@@ -42,7 +42,7 @@ module.exports = async (interaction) => {
 						{
 							type: 2,
 							custom_id: 'margaretha',
-							label: `${guildCheck.cerberonName}`,
+							label: `${guildCheck.margarethaName}`,
 							style: 1,
 						},
 					],
