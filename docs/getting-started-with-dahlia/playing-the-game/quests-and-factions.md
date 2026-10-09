@@ -15,12 +15,12 @@ Quests complete on their own as you play. The reward (IURA and EXP, bigger at hi
 
 ### Factions
 
-Every monster belongs to **Margaretha** or **Cerberon**. Once you join a faction (ask your server's admins how; they set it up with `/setup factions`):
+Every monster belongs to **Margaretha** or **Cerberon**. Join one with `/factions join`, or get its role from your server's admins (they set the faction roles up with `/setup factions`; your faction is whichever of those roles you hold). As a member:
 
 * You deal **+15% damage** to monsters of the rival faction. The fight title shows when you meet one.
 * Every rival monster you defeat scores **1 point** for your faction.
 
-`/factions` shows this week's standings and last week's, with your server's names for each faction. Weeks start on Monday (UTC).
+`/factions standings` shows this week's standings and last week's, with your server's names for each faction. Weeks start on Monday (UTC).
 
 ### Selling Items
 

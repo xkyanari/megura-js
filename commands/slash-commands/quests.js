@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
-const { Player } = require('../../src/db');
+const { Player, Guild } = require('../../src/db');
+const { syncFaction } = require('../../functions/factions');
 const { footer } = require('../../src/vars');
 const { questBoard } = require('../../functions/quests');
 const { nextDayStart, nextWeekStart } = require('../../functions/period');
@@ -25,6 +26,8 @@ module.exports = {
 			throw new Error('profile not found');
 		}
 
+		// faction quests depend on the member's faction role (only matters on the day's first look)
+		await syncFaction(player, await Guild.findOne({ where: { guildID: guild.id } }), member);
 		const board = await questBoard(player);
 		const section = (period) => board.filter((quest) => quest.period === period).map(questLine).join('\n\n') || 'Nothing this time.';
 		const resets = (time) => `<t:${Math.floor(time / 1000)}:R>`;

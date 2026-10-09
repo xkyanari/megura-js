@@ -226,7 +226,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/daily`: Do a random quest to gain IURA. Claiming within 48 hours keeps a streak going, worth up to +60%.
 - `/duel`: Initiate a duel against another player.
 - `/equip`: Equip an inventory item: one copy each, in 1 weapon, 3 armor and 1 accessory slot.
-- `/factions`: See this week's faction standings (points from defeating the rival faction's monsters).
+- `/factions`: `join` picks your faction; `standings` shows this week's faction points (from defeating the rival faction's monsters).
 - `/info`: Shows the list of commands.
 - `/inventory`: Opens your inventory.
 - `/invite`: Shows the bot invite link.

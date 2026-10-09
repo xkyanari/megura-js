@@ -1,5 +1,6 @@
 const { Op } = require('sequelize');
 const { FactionScore } = require('../src/db');
+const { wanderer } = require('../src/vars');
 const { weekKey, previousWeekKey } = require('./period');
 
 /**
@@ -24,6 +25,25 @@ const playerFaction = (player, guild) => {
 	return FACTIONS.find((faction) => faction.toLowerCase() === name) ?? null;
 };
 
+// Whether the member has the role (discord.js member, or the raw role-ID list).
+const hasRole = (member, roleID) => Boolean(roleID) && (member.roles?.cache?.has?.(roleID) ?? (Array.isArray(member.roles) && member.roles.includes(roleID)));
+
+/**
+ * Keeps the player's stored faction in step with the faction roles set up with
+ * /setup factions: holding a role (picked with /factions join, or given by an
+ * admin) is what makes a member of a faction, and losing it makes them a
+ * Wanderer again. Without the member's roles (or the setup) nothing changes.
+ * Returns the player's faction, as playerFaction does.
+ */
+const syncFaction = async (player, guild, member) => {
+	if (!member?.roles || !guild?.margarethaID || !guild?.cerberonID) return playerFaction(player, guild);
+	let name = wanderer;
+	if (hasRole(member, guild.margarethaID)) name = guild.margarethaName || 'Margaretha';
+	else if (hasRole(member, guild.cerberonID)) name = guild.cerberonName || 'Cerberon';
+	if (player.faction !== name) await player.update({ faction: name });
+	return playerFaction(player, guild);
+};
+
 const isRival = (faction, monsterFaction) =>
 	Boolean(faction && FACTIONS.includes(monsterFaction) && faction !== monsterFaction);
 
@@ -46,4 +66,4 @@ const standings = async (guildID, now = Date.now()) => {
 	return { thisWeek: table(keys.thisWeek), lastWeek: table(keys.lastWeek) };
 };
 
-module.exports = { FACTIONS, RIVAL_DAMAGE_BONUS, playerFaction, isRival, factionLabel, addFactionPoint, standings };
+module.exports = { FACTIONS, RIVAL_DAMAGE_BONUS, playerFaction, syncFaction, isRival, factionLabel, addFactionPoint, standings };
