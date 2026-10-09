@@ -16,6 +16,7 @@ const OBJECTIVES = {
 	rivalKills: { event: 'rivalKill', text: (n) => `Defeat ${n} monster${n === 1 ? '' : 's'} of the rival faction`, needsFaction: true },
 	lootFound: { event: 'loot', text: (n) => `Find ${n} item${n === 1 ? '' : 's'} on monsters` },
 	duelWins: { event: 'duelWin', text: (n) => `Win ${n} duel${n === 1 ? '' : 's'} you started` },
+	searches: { event: 'search', text: (n) => `Search ${n} time${n === 1 ? '' : 's'} with /explore` },
 };
 
 // reward IURA and EXP are per player level
@@ -24,6 +25,7 @@ const DAILY_POOL = [
 	{ objective: 'rivalKills', target: 2, iura: 40, exp: 120 },
 	{ objective: 'lootFound', target: 1, iura: 25, exp: 80 },
 	{ objective: 'duelWins', target: 1, iura: 40, exp: 100 },
+	{ objective: 'searches', target: 3, iura: 20, exp: 60 },
 ];
 const WEEKLY_POOL = [
 	{ objective: 'monsterWins', target: 25, iura: 300, exp: 1000 },
@@ -62,7 +64,7 @@ const hasFactionFor = async (player, transaction) =>
 const rewardFor = (quest, level) => ({ iura: quest.iura * Math.max(level, 1), exp: quest.exp * Math.max(level, 1) });
 
 /**
- * Counts `amount` of `event` ('monsterWin', 'rivalKill', 'loot' or 'duelWin') toward the player's objectives, and pays any it completes.
+ * Counts `amount` of `event` ('monsterWin', 'rivalKill', 'loot', 'duelWin' or 'search') toward the player's objectives, and pays any it completes.
  * Returns the completed quests with their rewards: [{ text, iura, exp }].
  */
 const recordProgress = (accountID, event, { amount = 1, now = Date.now() } = {}) => {

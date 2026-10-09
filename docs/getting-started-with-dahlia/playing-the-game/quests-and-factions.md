@@ -8,6 +8,7 @@
 * Find items on monsters
 * Win duels you start with `/duel`
 * Defeat monsters of the rival faction (only if you've joined a faction)
+* Search with `/explore`
 
 Quests complete on their own as you play. The reward (IURA and EXP, bigger at higher levels) is paid the moment a quest is done, and the fight or duel result tells you when that happens. New daily quests arrive at midnight UTC, and new weekly quests every Monday at midnight UTC.
 
@@ -20,7 +21,17 @@ Every monster belongs to **Margaretha** or **Cerberon**. Once you join a faction
 * You deal **+15% damage** to monsters of the rival faction. The fight title shows when you meet one.
 * Every rival monster you defeat scores **1 point** for your faction.
 
-`/factions` shows this week's standings and last week's, with your server's names for each faction. Weeks start on Monday (UTC).
+`/factions standings` shows this week's and last week's standings with your server's names for each faction, how many points you have scored this week, and last season's result. Weeks start on Monday (UTC).
+
+### Faction Seasons
+
+Every Monday at 00:05 UTC, last week is settled:
+
+* The faction with more points **wins the week**. A tie, or a week nobody scored in, has no winner.
+* Every member who scored at least one point for the winning side is paid IURA: **100 × their level**, for the week's top scorer, and at least half of that for everyone else, depending on how many points they scored.
+* If the server has a **champion role**, it moves to this week's winners and is taken back from last week's.
+
+Moderators set up the announcements with `/factions setup channel:<#channel> role:<@role>`. The role is optional. To give it out, Dahlia needs the **Manage Roles** permission, and her role must be above the champion role.
 
 ### Selling Items
 

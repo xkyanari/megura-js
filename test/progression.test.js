@@ -142,12 +142,13 @@ describe('quests', () => {
 
 	test('progress pays a completed quest once, scaled by level', async () => {
 		const player = await makePlayer('Q1', { level: 4 });
-		const quest = Q.questsFor(player.accountID, { now: NOW }).find((q) => q.objective === 'monsterWins');
-		assert.ok(quest, 'without a faction, every non-faction daily is assigned, monster wins included');
+		// whichever daily the player has (the pool is bigger than the daily count)
+		const quest = Q.questsFor(player.accountID, { now: NOW }).find((q) => q.period === 'daily');
+		const { event } = Q.OBJECTIVES[quest.objective];
 
 		const completed = [];
 		for (let i = 0; i < quest.target + 2; i++) {
-			completed.push(...await Q.recordProgress(player.accountID, 'monsterWin', { now: NOW }));
+			completed.push(...await Q.recordProgress(player.accountID, event, { now: NOW }));
 		}
 		const daily = completed.filter((c) => c.period === quest.period && c.text === quest.text);
 		assert.equal(daily.length, 1);
@@ -155,14 +156,14 @@ describe('quests', () => {
 		assert.equal(await walletOf(player), completed.reduce((sum, c) => sum + c.iura, 0));
 
 		const board = await Q.questBoard(await player.reload(), { now: NOW });
-		const row = board.find((q) => q.periodKey === quest.periodKey && q.objective === 'monsterWins');
+		const row = board.find((q) => q.periodKey === quest.periodKey && q.objective === quest.objective);
 		assert.deepEqual([row.progress, row.completed], [quest.target, true]);
 		assert.deepEqual(await Q.recordProgress(player.accountID, 'rivalKill', { now: NOW }), [], 'no faction, no faction quests');
 	});
 
 	test('a new day starts fresh', async () => {
 		const player = await makePlayer('Q2');
-		await Q.recordProgress(player.accountID, 'monsterWin', { now: NOW });
+		for (const { event } of Object.values(Q.OBJECTIVES)) await Q.recordProgress(player.accountID, event, { now: NOW });
 		const tomorrow = await Q.questBoard(player, { now: NOW + DAY });
 		assert.ok(tomorrow.filter((q) => q.period === 'daily').every((q) => q.progress === 0));
 		assert.equal(await QuestProgress.count({ where: { accountID: player.accountID } }) > 0, true);

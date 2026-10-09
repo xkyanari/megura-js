@@ -29,8 +29,8 @@ module.exports = {
 		try {
 			if (guildID) {
 				// guild items are paid in ores and fulfilled by the server team
-				await Shop.buyItem(selected, 1, member.id, guild.id);
-				await notifyPurchase(guild.id, member.id, selected);
+				const order = await Shop.buyItem(selected, 1, member.id, guild.id);
+				await notifyPurchase(guild.id, member.id, selected, order);
 				return await interaction.editReply(`\`${selected}\` has been purchased.\nThe team has been notified for your purchase and will update you once it's complete.`);
 			}
 

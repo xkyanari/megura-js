@@ -44,6 +44,10 @@ const ScheduledPost = require('../models/scheduledPost')(sequelize, Sequelize.Da
 const AuctionClosure = require('../models/auctionClosure')(sequelize, Sequelize.DataTypes);
 const QuestProgress = require('../models/questProgress')(sequelize, Sequelize.DataTypes);
 const FactionScore = require('../models/factionScore')(sequelize, Sequelize.DataTypes);
+const Exploration = require('../models/exploration')(sequelize, Sequelize.DataTypes);
+const FactionContribution = require('../models/factionContribution')(sequelize, Sequelize.DataTypes);
+const FactionSeason = require('../models/factionSeason')(sequelize, Sequelize.DataTypes);
+const FactionConfig = require('../models/factionConfig')(sequelize, Sequelize.DataTypes);
 
 Player.hasOne(Iura, {
 	as: 'iura',
@@ -275,7 +279,8 @@ Reflect.defineProperty(Shop, 'updateItem', {
 	},
 });
 
-// buy a guild item from the Shop, paid in ores
+// buy a guild item from the Shop, paid in ores; returns the Order it creates
+// (one per purchase, with the ores paid), so every sale is recorded
 Reflect.defineProperty(Shop, 'buyItem', {
 	value: async function buyItem(item, quantity, discordID, guildID) {
 		assertAmount(quantity);
@@ -301,14 +306,23 @@ Reflect.defineProperty(Shop, 'buyItem', {
 
 			await Guild.increment({ walletAmount: cost }, { where: { guildID }, transaction });
 			await shopItem.decrement({ quantity }, { transaction });
+			return Order.create({
+				guildID,
+				discordID,
+				item_ID: shopItem.item_ID,
+				itemName: shopItem.itemName,
+				status: 'pending',
+				price: cost,
+			}, { transaction });
 		});
 	},
 });
 
 // refund the ores to the player; returns the amount refunded
-// (0 if the player no longer has a profile, in which case the ores stay in the guild wallet)
+// (0 if the player no longer has a profile, in which case the ores stay in the guild wallet).
+// `paid` is what the order cost, when known; otherwise the item's current price is refunded.
 Reflect.defineProperty(Shop, 'returnOres', {
-	value: async function returnOres(item, quantity, discordID, guildID) {
+	value: async function returnOres(item, quantity, discordID, guildID, paid = null) {
 		assertAmount(quantity);
 
 		return sequelize.transaction(async (transaction) => {
@@ -319,7 +333,7 @@ Reflect.defineProperty(Shop, 'returnOres', {
 			});
 			if (!shopItem) throw new Error('item not found');
 
-			const oreReturned = shopItem.price * quantity;
+			const oreReturned = paid ?? shopItem.price * quantity;
 			assertAmount(oreReturned);
 
 			const refunded = await releaseOres(discordID, guildID, oreReturned, transaction);
@@ -476,6 +490,10 @@ module.exports = {
 	AuctionClosure,
 	QuestProgress,
 	FactionScore,
+	Exploration,
+	FactionContribution,
+	FactionSeason,
+	FactionConfig,
 	moveIura,
 	transferIura,
 	escrowOres,

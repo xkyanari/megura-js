@@ -15,6 +15,7 @@ const { processTicketJob } = require('../functions/ticket');
 const { processPortalJob } = require('../functions/portal');
 const { processScheduledPost, syncScheduledPosts } = require('../functions/schedule');
 const { Giveaway, Raffle } = require('../src/db');
+const { runSeasonJob, SEASON_CRON } = require('../functions/factionSeason');
 
 let Discord;
 try {
@@ -133,6 +134,15 @@ module.exports = {
 		client.scheduleQueue = scheduleQueue;
 		scheduleQueue.process((job) => processScheduledPost(client, scheduleQueue, job.data));
 		await syncScheduledPosts(scheduleQueue).catch((error) => console.error('Could not sync scheduled posts:', error));
+
+		// Faction seasons (see functions/factionSeason.js): settled every Monday,
+		// and once at startup in case the bot was down when the week turned
+		const factionSeasonQueue = new Queue('factionSeasonQueue', redisURL);
+		client.factionSeasonQueue = factionSeasonQueue;
+		factionSeasonQueue.process(() => runSeasonJob(client));
+		await factionSeasonQueue.add({}, { jobId: 'faction-season', repeat: { cron: SEASON_CRON, tz: 'Etc/UTC' }, removeOnComplete: true })
+			.catch((error) => console.error('Could not schedule faction seasons:', error));
+		await runSeasonJob(client).catch((error) => console.error('Could not settle the faction season:', error));
 
 		const auctionQueue = new Queue('auctionQueue', redisURL);
 		client.auctionQueue = auctionQueue;
