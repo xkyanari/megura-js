@@ -22,6 +22,11 @@ services:
     env_file:
       - path: .env
         required: false
+    # Sized for a 2 GB server shared with MySQL and Redis: if memory runs away,
+    # Node exits (and restarts) before the kernel starts killing other processes.
+    environment:
+      NODE_OPTIONS: --max-old-space-size=384
+    mem_limit: 768m
     volumes:
       - ./config.json:/app/config.json:ro
       - ./assets/features.json:/app/assets/features.json:ro
