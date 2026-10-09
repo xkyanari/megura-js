@@ -2,7 +2,7 @@
 
 ![Project DAHLIA banner](https://res.cloudinary.com/dnjaazvr7/image/upload/v1684522493/megura/dahlia-twitter_yae5go.png)
 
-Dahlia is a Discord.js v14 bot for Project DAHLIA, a text-based Discord RPG with server utility features. Users interact with Dahlia through slash commands, buttons, menus, and modals.
+5. Copy `assets/features-example.json` to `assets/features.json` and adjust which features each plan gets.
 
 Dahlia is designed to run without Discord's privileged Message Content, Server Members, or Presence gateway intents. Open channel AI chat and legacy text commands are disabled.
 
@@ -76,8 +76,8 @@ To install and run the project, follow these steps:
 2. Navigate to the project directory in your terminal
 3. Install dependencies using `npm install`
 4. Rename `config-example.json` to `config.json` and update the values for Discord, MySQL, Redis, Cloudinary, and other services you enable.
-5. Rename `assets/features-example.json` to `src/feature.js` if you are using the feature toggle file.
-6. Update the database host/settings in `src/db.js` or your local equivalent.
+5. Copy `assets/features-example.json` to `assets/features.json` and adjust which features each plan gets.
+6. Database settings (`mysql_host`, `mysql_dbname`, `mysql_dbuser`, `mysql_dbpass`, `mysql_port`) are read from `config.json`; `src/db.js` itself needs no changes.
 7. (Optional) Chapters can be uploaded in `chapters/`. Otherwise, the bot will simply load the placeholder stories found in `samples/`.
 
 ## Running with Docker
@@ -180,6 +180,13 @@ docker compose up -d
 | Script | Why |
 |---|---|
 | `2026-10-auction-bigint.sql` | Auction and bid amounts are stored as whole satoshis (`BIGINT`) instead of `FLOAT`, which rounded amounts above about 0.17 coin. |
+
+**Vote rewards (top.gg and discordbotlist).** `/vote` pays 50 IURA per vote through a small webhook server inside the bot. It only starts when `VOTE_PORT` is set:
+
+1. Add `VOTE_PORT=8080` to `.env` (any free port), and put the shared secrets in `config.json` as `topWebhookSecret` and `dblWebhookSecret`.
+2. Restart with `docker compose up -d`. The log shows `Vote webhook server listening on port 8080`.
+3. Make the port reachable. The container uses the host's network, so it's open on the server itself: allow it in the firewall, or better, put it behind a reverse proxy with HTTPS (then also set `TRUST_PROXY=1` in `.env`).
+4. In each site's webhook settings, use `https://<your-domain>/top/upvote` (top.gg) or `https://<your-domain>/dbl/upvote` (discordbotlist), with the same secret as the Authorization value.
 
 ## Running tests
 

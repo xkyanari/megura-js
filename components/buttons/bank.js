@@ -22,8 +22,8 @@ module.exports = {
 			);
 		}
 
-		const balanceBank = numFormat(player.iura.bankAmount);
-		const balanceStaked = numFormat(player.iura.stakedAmount);
+		const balanceBank = numFormat(player.iura?.bankAmount ?? null);
+		const balanceStaked = numFormat(player.iura?.stakedAmount ?? null);
 		const embed = new EmbedBuilder()
 			.setAuthor({ name: `${interaction.user.tag}` })
 			.setTitle('Bank Balance')

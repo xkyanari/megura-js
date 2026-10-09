@@ -22,7 +22,7 @@ module.exports = {
 			);
 		}
 
-		const balanceWallet = numFormat(player.iura.walletAmount);
+		const balanceWallet = numFormat(player.iura?.walletAmount ?? null);
 		const embed = new EmbedBuilder()
 			.setAuthor({ name: `${interaction.user.tag}` })
 			.setTitle('Wallet Balance')

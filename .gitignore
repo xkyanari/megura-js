@@ -19,7 +19,6 @@
 *.rdb
 
 # Config files
-/src/db.js
 config.json
 pm2.config.js
 

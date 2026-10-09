@@ -1,5 +1,5 @@
 const { Guild } = require('../../src/db');
-const { deleteImage } = require('../../functions/upload');
+const { discardImage } = require('../../functions/captcha');
 const redis = require('../../redis');
 
 module.exports = {
@@ -9,7 +9,8 @@ module.exports = {
 	async execute(interaction) {
 		const [, token] = interaction.customId.split(':');
 		const captchaCode = interaction.fields.getTextInputValue('captchaCode').trim();
-		const captchaData = await redis.get(`captcha:${token}`);
+		// one answer per captcha: taking it out of Redis means a wrong guess can't be retried
+		const captchaData = await redis.getdel(`captcha:${token}`);
 
 		if (!captchaData) {
 			return interaction.reply({
@@ -21,15 +22,19 @@ module.exports = {
 		const { text, flag, guildID, userID } = JSON.parse(captchaData);
 
 		if (interaction.guild.id !== guildID || interaction.member.id !== userID) {
+			// not this member's to answer: put it back for its owner
+			await redis.set(`captcha:${token}`, captchaData, 'KEEPTTL');
 			return interaction.reply({
 				content: 'This CAPTCHA was created for a different user or server.',
 				flags: 64,
 			});
 		}
 
+		await discardImage(flag);
+
 		if (captchaCode.toLowerCase() !== text.toLowerCase()) {
 			return interaction.reply({
-				content: 'The captcha code you entered is incorrect. Please try again.',
+				content: 'The captcha code you entered is incorrect. Please click Verify to get a new one.',
 				flags: 64,
 			});
 		}
@@ -54,8 +59,6 @@ module.exports = {
 		}
 
 		await interaction.member.roles.add(addRole);
-		if (flag) await deleteImage(flag);
-		await redis.del(`captcha:${token}`);
 
 		await interaction.reply({
 			content: 'You have been successfully verified!',

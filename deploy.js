@@ -19,7 +19,8 @@ const slashCommandFiles = fs
 for (const file of slashCommandFiles) {
 	const command = require(`./commands/slash-commands/${file}`);
 	if ('data' in command) {
-		commands.push(command.data.toJSON());
+		// server-only unless the command says it works in DMs
+		commands.push({ ...command.data.toJSON(), dm_permission: Boolean(command.dm) });
 	}
 	else {
 		console.log(

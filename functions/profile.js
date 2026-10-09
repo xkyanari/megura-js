@@ -73,7 +73,7 @@ module.exports = async (interaction, member) => {
 			{ name: '💠 Armor', value: `${player.armor}`, inline: false },
 			{
 				name: '💰 Iura',
-				value: `$${numFormat(player.iura.walletAmount)}`,
+				value: `$${numFormat(player.iura?.walletAmount ?? null)}`,
 				inline: true,
 			},
 		)

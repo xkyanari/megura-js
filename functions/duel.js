@@ -52,11 +52,14 @@ const duelRefusal = (challenger, target, targetUser) => {
  * duel rewards if they won. Returns the amount moved.
  */
 const settleDuel = ({ winner, loser, challengerWon }) => sequelize.transaction(async (transaction) => {
-	const wallet = await Iura.findOne({
-		where: { accountID: loser.accountID },
+	// lock both wallets in account order, so two duels between the same pair settling at once can't deadlock
+	const wallets = await Iura.findAll({
+		where: { accountID: [winner.accountID, loser.accountID] },
+		order: [['accountID', 'ASC']],
 		transaction,
 		lock: transaction.LOCK.UPDATE,
 	});
+	const wallet = wallets.find((w) => w.accountID === loser.accountID);
 	const amount = Math.floor(Math.max(wallet?.walletAmount ?? 0, 0) * PAYOUT_SHARE);
 
 	if (amount > 0) {

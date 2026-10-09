@@ -60,6 +60,9 @@ module.exports = {
 	async execute(interaction) {
 		const subCommand = interaction.options.getSubcommand();
 		const guildCheck = await Guild.findOne({ where: { guildID: interaction.guild.id } });
+		if (!guildCheck) {
+			throw new Error('guild not found');
+		}
 		if (!await validateFeature(interaction, guildCheck.subscription, 'hasArena')) {
 			return;
 		}

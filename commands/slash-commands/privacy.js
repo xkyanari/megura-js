@@ -5,6 +5,8 @@ module.exports = {
 		.setName('privacy')
 		.setDescription('Show how Dahlia uses Discord data.'),
 	cooldown: 3000,
+	// works in DMs too (everything else is server-only)
+	dm: true,
 	async execute(interaction) {
 		const embed = new EmbedBuilder()
 			.setTitle('Privacy Notice')

@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
 					return token ? decrypt(token) : null;
 				},
 				set(value) {
-					this.setDataValue('accessToken', encrypt(value));
+					this.setDataValue('accessToken', value ? encrypt(value) : null);
 				},
 			},
 			refreshToken: {
@@ -49,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
 					return token ? decrypt(token) : null;
 				},
 				set(value) {
-					this.setDataValue('refreshToken', encrypt(value));
+					this.setDataValue('refreshToken', value ? encrypt(value) : null);
 				},
 			},
 			expiresIn: DataTypes.TEXT,

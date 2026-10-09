@@ -18,17 +18,23 @@ const isAuthorized = (header, secret) => {
 // Express server
 const app = express();
 
+// Behind a reverse proxy (nginx, Cloudflare), set TRUST_PROXY to the number of
+// proxies in front so rate limits see the visitor's address, not the proxy's.
+const trustProxy = Number(process.env.TRUST_PROXY);
+if (Number.isInteger(trustProxy) && trustProxy > 0) app.set('trust proxy', trustProxy);
+
+// Only the public page is rate limited: top.gg and DBL send every vote from a
+// handful of addresses, and those routes already require the shared secret.
 const limiter = rateLimit({
 	windowMs: 60 * 60 * 1000,
 	max: 25,
 });
 
-app.use(express.json());
-app.use(limiter);
+app.use(express.json({ limit: '10kb' }));
 
 app.set('view engine', 'ejs');
 
-app.get('/', (req, res) => {
+app.get('/', limiter, (req, res) => {
 	res.render('index');
 });
 
@@ -67,4 +73,12 @@ app.post('/top/upvote', async (req, res) => {
 	}
 });
 
+// Starts the vote webhook server if VOTE_PORT is set. Returns the server, or null.
+const startVoteServer = (port = process.env.VOTE_PORT) => {
+	const portNumber = Number(port);
+	if (!Number.isInteger(portNumber) || portNumber <= 0) return null;
+	return app.listen(portNumber, () => console.log(`Vote webhook server listening on port ${portNumber}`));
+};
+
 module.exports = app;
+module.exports.startVoteServer = startVoteServer;

@@ -142,7 +142,7 @@ const executeAttack = async (interaction) => {
 
 		await Iura.increment(
 			{ walletAmount: monsterObj.iuraDropped },
-			{ where: { accountID: player.iura.accountID } },
+			{ where: { accountID: player.accountID } },
 		);
 		await player.increment({
 			iuraEarned: monsterObj.iuraDropped,
@@ -160,8 +160,10 @@ const executeAttack = async (interaction) => {
 		});
 	}
 
-	if (playerObj.expGained > expPoints(playerObj.level)) {
-		const levelUp = await leveling(playerObj.guildID, playerObj.discordID);
+	// check the EXP as it is now, after this battle's reward
+	await player.reload();
+	if (player.expGained >= expPoints(player.level)) {
+		const levelUp = await leveling(player.guildID, player.discordID);
 		await levelcheck(interaction, levelUp.level);
 	}
 };

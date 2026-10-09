@@ -23,6 +23,10 @@ module.exports = {
 		const margaretha = interaction.guild.roles.cache.get(guild.margarethaID);
 		const cerberon = interaction.guild.roles.cache.get(guild.cerberonID);
 
+		if (!margaretha || !cerberon) {
+			return interaction.reply({ content: 'The faction roles no longer exist. Please ask a server admin to set them up again with `/setup factions`.', flags: 64 });
+		}
+
 		const embed = new EmbedBuilder();
 
 		if (member.roles.cache.some((role) => role.name === margaretha.name)) {

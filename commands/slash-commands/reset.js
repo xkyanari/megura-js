@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { Player, Iura, Item } = require('../../src/db');
+const { sequelize, Player, Iura, Item } = require('../../src/db');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -17,17 +17,16 @@ module.exports = {
 		const member = interaction.options.getUser('player');
 		const { guild } = interaction;
 
-		const player = await Player.findOne({
-			where: { discordID: member.id, guildID: guild.id },
-			include: 'iura',
-		});
+		// every profile this member has here (older bugs could create two)
+		const players = await Player.findAll({ where: { discordID: member.id, guildID: guild.id } });
 
-		if (player) {
-			await Promise.all([
-				Item.destroy({ where: { accountID: player.iura.accountID } }),
-				Iura.destroy({ where: { accountID: player.iura.accountID } }),
-				Player.destroy({ where: { discordID: member.id, guildID: guild.id } }),
-			]);
+		if (players.length) {
+			const accountID = players.map((player) => player.accountID);
+			await sequelize.transaction(async (transaction) => {
+				await Item.destroy({ where: { accountID }, transaction });
+				await Iura.destroy({ where: { accountID }, transaction });
+				await Player.destroy({ where: { accountID }, transaction });
+			});
 			return await interaction.reply({
 				content: `\`${member.tag}\` profile has been removed.`,
 			});
