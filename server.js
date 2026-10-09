@@ -1,13 +1,19 @@
+const crypto = require('node:crypto');
 const express = require('express');
 const {
-	port,
 	dblWebhookSecret,
 	topWebhookSecret,
 } = require('./config.json');
 const rateLimit = require('express-rate-limit');
-const bodyParser = require('body-parser');
-const cors = require('cors');
 const { voteWebhook } = require('./functions/vote');
+
+// Constant-time comparison so the secret can't be guessed byte by byte
+const isAuthorized = (header, secret) => {
+	if (!header || !secret) return false;
+	const a = Buffer.from(header);
+	const b = Buffer.from(secret);
+	return a.length === b.length && crypto.timingSafeEqual(a, b);
+};
 
 // Express server
 const app = express();
@@ -17,15 +23,8 @@ const limiter = rateLimit({
 	max: 25,
 });
 
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(limiter);
-app.use(
-	cors(),
-	// for production to limit the request
-	// cors({
-	//     origin: "http://localhost:3000", // Replace with your frontend origin
-	// })
-);
 
 app.set('view engine', 'ejs');
 
@@ -33,32 +32,24 @@ app.get('/', (req, res) => {
 	res.render('index');
 });
 
-app.get('/connect', (req, res) => {
-	res.render('wallet');
-});
-
 app.post('/dbl/upvote', async (req, res) => {
-	if (
-		req.headers.authorization !== dblWebhookSecret ||
-    req.headers.referer !== 'discordbotlist.com'
-	) {
+	if (!isAuthorized(req.headers.authorization, dblWebhookSecret)) {
 		console.log('Unauthorized request');
 		return res.sendStatus(403);
 	}
 
-	const { id } = req.body;
-
-	await voteWebhook(id);
-
-	return res.sendStatus(200);
+	try {
+		await voteWebhook(req.body.id);
+		return res.sendStatus(200);
+	}
+	catch (error) {
+		console.error(error);
+		return res.sendStatus(500);
+	}
 });
 
 app.post('/top/upvote', async (req, res) => {
-	console.log('Referer: ', req.headers.referer);
-	if (
-		req.headers.authorization !== topWebhookSecret ||
-    req.headers.referer !== 'top.gg'
-	) {
+	if (!isAuthorized(req.headers.authorization, topWebhookSecret)) {
 		console.log('Unauthorized request');
 		return res.sendStatus(403);
 	}
@@ -66,9 +57,14 @@ app.post('/top/upvote', async (req, res) => {
 	const { user, isWeekend } = req.body;
 	const votes = isWeekend ? 2 : 1;
 
-	await voteWebhook(user, votes);
-
-	return res.sendStatus(200);
+	try {
+		await voteWebhook(user, votes);
+		return res.sendStatus(200);
+	}
+	catch (error) {
+		console.error(error);
+		return res.sendStatus(500);
+	}
 });
 
 module.exports = app;

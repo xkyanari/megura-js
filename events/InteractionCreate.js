@@ -11,254 +11,196 @@ const redis = require('../redis');
 const MAX_CONSECUTIVE_COMMANDS = 10;
 const TOLERANCE = 1000;
 
+// Replies, edits the deferred reply, or follows up, depending on what the interaction has already done.
+const safeReply = async (interaction, payload) => {
+	try {
+		if (interaction.deferred && !interaction.replied) {
+			return await interaction.editReply(payload);
+		}
+		if (interaction.replied) {
+			return await interaction.followUp({ ...payload, flags: 64 });
+		}
+		return await interaction.reply({ ...payload, flags: 64 });
+	}
+	catch (error) {
+		console.error('Failed to send error reply:', error);
+	}
+};
+
+const errorReply = (interaction, name, error) => {
+	if (error.message === 'profile not found') {
+		return safeReply(interaction, { content: checkProfile, embeds: [] });
+	}
+
+	if (error.message === 'guild not found') {
+		return safeReply(interaction, { content: 'Please register the guild first.', embeds: [] });
+	}
+
+	if (error instanceof DiscordAPIError && error.code === 50013) {
+		const embed = new EmbedBuilder()
+			.setColor('Red')
+			.setDescription(`
+				I do not have the required permissions to execute this command.
+				Please check the permissions and try again.
+			`);
+		return safeReply(interaction, { content: '', embeds: [embed] });
+	}
+
+	console.error(error);
+	const embed = new EmbedBuilder().setColor('Red').setDescription(`
+		Error executing \`${name}\`
+		Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
+	return safeReply(interaction, { content: '', embeds: [embed] });
+};
+
+// Flags users whose last MAX_CONSECUTIVE_COMMANDS commands came at near-constant intervals.
+const isAutomated = async (counterKey) => {
+	const counter = (await redis.lrange(counterKey, 0, -1)).map(Number);
+	if (counter.length < MAX_CONSECUTIVE_COMMANDS) return false;
+
+	const intervals = counter.slice(1).map((time, i) => time - counter[i]);
+	const average = intervals.reduce((sum, interval) => sum + interval, 0) / intervals.length;
+
+	return intervals.every((interval) => Math.abs(interval - average) <= TOLERANCE);
+};
+
+const logUsage = (interaction, kind, name) => {
+	logger.log({
+		level: 'info',
+		message: `User: ${interaction.user.id}, ${kind}: ${name}, Time: ${new Date().toISOString()}`,
+	});
+};
+
+const handleCommand = async (interaction) => {
+	const command = interaction.client.commands.get(interaction.commandName);
+
+	if (!command) {
+		console.error(`No command matching \`${interaction.commandName}\` was found.`);
+		return;
+	}
+
+	const interactionScope = interaction.guildId ?? 'dm';
+	const counterKey = `counter:${interaction.user.id}:${interactionScope}`;
+
+	if (await isAutomated(counterKey)) {
+		logger.log({
+			level: 'info',
+			message: `User: ${interaction.user.id}, Command: ${command.data.name}, with consistent intervals.`,
+		});
+
+		return interaction.reply({
+			content: 'You\'re doing that too frequently. Please wait a moment before trying again.',
+			flags: 64,
+		});
+	}
+
+	await redis.rpush(counterKey, Date.now());
+	await redis.ltrim(counterKey, -MAX_CONSECUTIVE_COMMANDS, -1);
+	await redis.expire(counterKey, 30);
+
+	const cooldownKey = `${interaction.user.id}:${interactionScope}:${interaction.commandName}`;
+	const existingCooldown = await redis.get(cooldownKey);
+	if (existingCooldown) {
+		const remainingTime = existingCooldown - Date.now();
+		return interaction.reply({
+			content: `You are on cooldown for another ${ms(Math.max(remainingTime, 0))}`,
+			flags: 64,
+		});
+	}
+
+	logUsage(interaction, 'Command', command.data.name);
+
+	// set before running so the same command can't run twice at once
+	await redis.set(cooldownKey, Date.now() + command.cooldown, 'PX', command.cooldown);
+
+	try {
+		await command.execute(interaction);
+	}
+	catch (error) {
+		// don't make users wait out a cooldown for a command that failed
+		await redis.del(cooldownKey);
+		await errorReply(interaction, interaction.commandName, error);
+	}
+};
+
+const handleComponent = async (interaction, collection, kind) => {
+	const { client, customId } = interaction;
+	const component = collection.get(customId) || collection.get(customId.split(':')[0]);
+	if (!component) {
+		console.error(`There is no code for the ${kind} \`${customId}\`.`);
+		return;
+	}
+
+	const interactionScope = interaction.guildId ?? 'dm';
+	const cooldownKey = `${customId}:${interaction.user.id}:${interactionScope}`;
+	const cooldown = component.data.cooldown;
+
+	if (cooldown && client.cooldown.has(cooldownKey)) {
+		const timer = ms(Math.max(client.cooldown.get(cooldownKey) - Date.now(), 0));
+		return interaction.reply({
+			content: `You are on cooldown for another ${timer}.`,
+			flags: 64,
+		});
+	}
+
+	logUsage(interaction, kind, customId);
+
+	if (cooldown) {
+		client.cooldown.set(cooldownKey, Date.now() + cooldown);
+		setTimeout(() => client.cooldown.delete(cooldownKey), cooldown);
+	}
+
+	try {
+		await component.execute(interaction);
+	}
+	catch (error) {
+		client.cooldown.delete(cooldownKey);
+		await errorReply(interaction, customId, error);
+	}
+};
+
+const handleAutocomplete = async (interaction) => {
+	const command = interaction.client.commands.get(interaction.commandName);
+
+	if (!command?.autocomplete) {
+		console.error(`No autocomplete for \`${interaction.commandName}\` was found.`);
+		return;
+	}
+
+	try {
+		await command.autocomplete(interaction);
+	}
+	catch (error) {
+		// autocomplete interactions can't show an error message
+		console.error(error);
+	}
+};
+
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
-		const { client } = interaction;
-		if (interaction.isChatInputCommand()) {
-			const command = client.commands.get(interaction.commandName);
+		const { buttons, menus, modals } = interaction.client;
 
-			if (!command) {
-				console.error(
-					`No command matching \`${interaction.commandName}\` was found.`,
-				);
-				return;
+		try {
+			if (interaction.isChatInputCommand() || interaction.isUserContextMenuCommand()) {
+				return await handleCommand(interaction);
 			}
-
-			const interactionScope = interaction.guildId ?? 'dm';
-			const counterKey = `counter:${interaction.user.id}:${interactionScope}`;
-
-			let counter = await redis.lrange(counterKey, 0, -1);
-			counter = counter ? counter.map(Number) : [];
-
-			let checker = false;
-			let averageInterval = 0;
-
-			for (let i = 1; i < counter.length; i++) {
-				const interval = counter[i] - counter[i - 1];
-				averageInterval += interval;
+			if (interaction.isButton()) {
+				return await handleComponent(interaction, buttons, 'Button');
 			}
-			averageInterval /= (counter.length - 1);
-
-			for (let i = 1; i < counter.length; i++) {
-				const interval = counter[i] - counter[i - 1];
-				if (Math.abs(interval - averageInterval) <= TOLERANCE) {
-					checker = true;
-				}
-				else {
-					checker = false;
-					break;
-				}
+			if (interaction.isStringSelectMenu()) {
+				return await handleComponent(interaction, menus, 'Menu');
 			}
-
-			if (checker && counter.length >= MAX_CONSECUTIVE_COMMANDS) {
-				logger.log({
-					level: 'info',
-					message: `User: ${interaction.user.id}, Command: ${command.data.name}, with consistent intervals.`,
-				});
-
-				return interaction.reply({
-					content: 'You\'re doing that too frequently. Please wait a moment before trying again.',
-					flags: 64,
-				});
+			if (interaction.isModalSubmit()) {
+				return await handleComponent(interaction, modals, 'Modal');
 			}
-
-			await redis.rpush(counterKey, Date.now());
-			await redis.ltrim(counterKey, -MAX_CONSECUTIVE_COMMANDS, -1);
-			await redis.expire(counterKey, 30);
-
-			const cooldownData = `${interaction.user.id}:${interactionScope}:${interaction.commandName}`;
-			const existingCooldown = await redis.get(cooldownData);
-			if (existingCooldown) {
-				const remainingTime = existingCooldown - Date.now();
-				const timer = ms(remainingTime > 0 ? remainingTime : 0);
-				return interaction.reply({
-					content: `You are on cooldown for another ${timer}`,
-					flags: 64,
-				});
-			}
-
-			try {
-				logger.log({
-					level: 'info',
-					message: `User: ${interaction.user.id}, Command: ${command.data.name}, Time: ${new Date().toISOString()}`,
-				});
-
-				await redis.set(cooldownData, Date.now() + command.cooldown, 'PX', command.cooldown);
-				await command.execute(interaction);
-				client.cooldown.set(cooldownData, Date.now() + command.cooldown);
-				setTimeout(
-					() => client.cooldown.delete(cooldownData),
-					command.cooldown,
-				);
-			}
-			catch (error) {
-				if (error.message === 'profile not found') {
-					return interaction.reply({
-						content: checkProfile,
-						flags: 64,
-					});
-				}
-
-				if (error.message === 'guild not found') {
-					return interaction.reply({
-						content: 'Please register the guild first.',
-						flags: 64,
-					});
-				}
-
-				if (error instanceof DiscordAPIError && error.code === 50013) {
-					const embed = new EmbedBuilder()
-						.setColor('Red')
-						.setDescription(`
-							I do not have the required permissions to execute this command.
-							Please check the permissions and try again.
-						`);
-
-					await interaction.reply({ embeds: [embed], flags: 64 });
-					client.cooldown.delete(cooldownData);
-					return;
-				}
-
-				const embed = new EmbedBuilder().setColor('Red').setDescription(`
-                            Error executing \`${interaction.commandName}\`
-                            Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
-
-				console.log(error);
-				await interaction.reply({ embeds: [embed], flags: 64 });
-				client.cooldown.delete(cooldownData);
+			if (interaction.isAutocomplete()) {
+				return await handleAutocomplete(interaction);
 			}
 		}
-		if (interaction.isButton()) {
-			const { buttons } = interaction.client;
-			const { customId } = interaction;
-			const button = buttons.get(customId) || buttons.get(customId.split(':')[0]);
-			if (!button) return new Error('There is no code for this button.');
-
-			const interactionScope = interaction.guildId ?? 'dm';
-			const cooldownData = `${customId}:${interaction.user.id}:${interactionScope}`;
-
-			if (client.cooldown.has(cooldownData)) {
-				const timer = ms(client.cooldown.get(cooldownData) - Date.now());
-				return interaction.reply({
-					content: `You are on cooldown for another ${timer}.`,
-					flags: 64,
-				});
-			}
-
-			try {
-				logger.log({
-					level: 'info',
-					message: `User: ${interaction.user.id}, Button: ${customId}, Time: ${new Date().toISOString()}`,
-				});
-
-				if (button.data.cooldown) {
-					client.cooldown.set(cooldownData, Date.now() + button.data.cooldown);
-					setTimeout(() => client.cooldown.delete(cooldownData), button.data.cooldown);
-				}
-				await button.execute(interaction);
-			}
-			catch (error) {
-				const embed = new EmbedBuilder().setColor('Red').setDescription(`
-                            Error executing \`${interaction.customId}\`
-                            Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
-
-				console.log(error);
-				await interaction.reply({ embeds: [embed], flags: 64 });
-				client.cooldown.delete(cooldownData);
-			}
-		}
-		if (interaction.isStringSelectMenu()) {
-			const { menus } = interaction.client;
-			const { customId } = interaction;
-			const menu = menus.get(customId);
-			if (!menu) return new Error('There is no code for this menu.');
-
-			try {
-				logger.log({
-					level: 'info',
-					message: `User: ${interaction.user.id}, Menu: ${customId}, Time: ${new Date().toISOString()}`,
-				});
-				await menu.execute(interaction);
-			}
-			catch (error) {
-				console.error(error);
-				const embed = new EmbedBuilder().setColor('Red').setDescription(`
-                            Error executing \`${interaction.customId}\`
-                            Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
-				await interaction.reply({ embeds: [embed], flags: 64 });
-			}
-		}
-		if (interaction.isModalSubmit()) {
-			const { modals } = interaction.client;
-			const { customId } = interaction;
-			const modal = modals.get(customId) || modals.get(customId.split(':')[0]);
-			if (!modal) return new Error('There is no code for this modal.');
-
-			try {
-				logger.log({
-					level: 'info',
-					message: `User: ${interaction.user.id}, Modal: ${customId}, Time: ${new Date().toISOString()}`,
-				});
-				await modal.execute(interaction);
-			}
-			catch (error) {
-				console.error(error);
-				const embed = new EmbedBuilder().setColor('Red').setDescription(`
-                            Error executing \`${interaction.customId}\`
-                            Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
-				await interaction.reply({ embeds: [embed], flags: 64 });
-			}
-		}
-		if (interaction.isUserContextMenuCommand()) {
-			const contextCommand = client.commands.get(interaction.commandName);
-
-			if (!contextCommand) {
-				console.error(
-					`No command matching \`${interaction.commandName}\` was found.`,
-				);
-				return;
-			}
-
-			try {
-				logger.log({
-					level: 'info',
-					message: `User: ${interaction.user.id}, Command: ${interaction.commandName}, Time: ${new Date().toISOString()}`,
-				});
-				await contextCommand.execute(interaction);
-			}
-			catch (error) {
-				console.error(error);
-				const embed = new EmbedBuilder().setColor('Red').setDescription(`
-                            Error executing \`${interaction.commandName}\`
-                            Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
-				await interaction.reply({ embeds: [embed], flags: 64 });
-			}
-		}
-		if (interaction.isAutocomplete()) {
-			const autoCommand = client.commands.get(interaction.commandName);
-
-			if (!autoCommand) {
-				console.error(
-					`No command matching \`${interaction.commandName}\` was found.`,
-				);
-				return;
-			}
-
-			try {
-				logger.log({
-					level: 'info',
-					message: `User: ${interaction.user.id}, AutoCommand: ${interaction.commandName}, Time: ${new Date().toISOString()}`,
-				});
-				await autoCommand.autocomplete(interaction);
-			}
-			catch (error) {
-				console.error(error);
-				const embed = new EmbedBuilder().setColor('Red').setDescription(`
-                            Error executing \`${interaction.commandName}\`
-                            Please join our [Support Server](https://discord.gg/X9eEW6yuhq) to report this. Thanks!`);
-				await interaction.reply({ embeds: [embed], flags: 64 });
-			}
+		catch (error) {
+			// e.g. Redis is down; never let this become an unhandled rejection
+			console.error(error);
 		}
 	},
 };

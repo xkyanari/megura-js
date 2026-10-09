@@ -1,7 +1,7 @@
 const { PermissionFlagsBits, ChannelType } = require('discord.js');
 const { Brawl, Player } = require('../../src/db');
 const { simulateBrawl } = require('../../functions/brawl');
-const { isTestnet } = require('../../config.json');
+const { isTestnet } = require('../../src/vars');
 
 module.exports = {
 	data: {

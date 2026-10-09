@@ -1,5 +1,4 @@
 const { WebhookClient, ActionRowBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, userMention } = require('discord.js');
-const { OptimisticLockError } = require('sequelize');
 const { placeBid } = require('./placeBid');
 const { User, Auction, Guild } = require('../src/db');
 const { dahliaAvatar, dahliaName } = require('../src/vars');
@@ -82,13 +81,6 @@ const executeBid = async (interaction, bidAmount) => {
 
 	}
 	catch (error) {
-		if (error instanceof OptimisticLockError) {
-			return await interaction.editReply({
-				content: 'Your bid was unsuccessful because you were outbid. Please try again.',
-				flags: 64,
-			});
-		}
-
 		if (error.message === 'Insufficient funds') {
 			return await interaction.editReply({ content: 'You do not have enough funds to place this bid.', flags: 64 });
 		}

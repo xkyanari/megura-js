@@ -1,4 +1,7 @@
-const { isTestnet } = require('../config.json');
+const config = require('../config.json');
+
+// "false" in config.json must not count as true
+const isTestnet = String(config.isTestnet) === 'true';
 
 // check environment for audit logs
 const serverID = isTestnet ? '1073827215957032960' : '1032034043686035508';
@@ -59,6 +62,7 @@ const specialShopImage = 'https://res.cloudinary.com/dnjaazvr7/image/upload/v168
 const brawlImage = 'https://res.cloudinary.com/dnjaazvr7/image/upload/v1692904165/megura/noticeboard_p0zf8k.png';
 
 module.exports = {
+	isTestnet,
 	serverID,
 	prefix,
 	logDir,

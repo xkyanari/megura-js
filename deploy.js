@@ -1,7 +1,14 @@
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs');
-const { clientId, guildId, token } = require('./config.json');
+const config = require('./config.json');
+
+const token = process.env.DISCORD_TOKEN || config.token;
+const clientId = process.env.DISCORD_CLIENT_ID || config.clientId;
+const guildId = process.env.DISCORD_GUILD_ID || config.guildId;
+
+// `node deploy.js --guild` registers commands to guildId only (instant, for testing)
+const guildOnly = process.argv.includes('--guild');
 
 const commands = [];
 const slashCommandFiles = fs
@@ -30,11 +37,9 @@ const rest = new REST({ version: '9' }).setToken(token);
 		);
 
 		await rest.put(
-			// For guild commands
-			// Routes.applicationGuildCommands(clientId, guildId),
-
-			// For global commands
-			Routes.applicationCommands(clientId),
+			guildOnly
+				? Routes.applicationGuildCommands(clientId, guildId)
+				: Routes.applicationCommands(clientId),
 			{ body: commands },
 		);
 

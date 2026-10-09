@@ -1,7 +1,7 @@
 const { EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, userMention } = require('discord.js');
 const { Brawl, Player, Guild } = require('../../src/db');
 const { generateId } = require('../../functions/generateId');
-const { isTestnet } = require('../../config.json');
+const { isTestnet } = require('../../src/vars');
 
 module.exports = {
 	data: {

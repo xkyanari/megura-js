@@ -9,6 +9,7 @@ module.exports = {
 	async execute(interaction) {
 		try {
 			const shop = await Order.findOne({ where: { messageID: interaction.message.id, guildID: interaction.guild.id } });
+			if (!shop) return await interaction.reply({ content: 'Order not found.', flags: 64 });
 			if (shop.status === 'cancelled') return await interaction.reply('This order is already marked as cancelled.');
 
 			await Shop.returnOres(shop.itemName, 1, shop.discordID, interaction.guild.id);

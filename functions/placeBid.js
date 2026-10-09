@@ -7,7 +7,7 @@ const checkBalance = async (address, amount) => {
 
 	let response;
 	try {
-		response = await axios.get(apiURL);
+		response = await axios.get(apiURL, { timeout: 10000 });
 	}
 	catch (error) {
 		console.error('Error fetching balance from BlockCypher API:', error);
@@ -17,7 +17,7 @@ const checkBalance = async (address, amount) => {
 	if (response.data && response.data.balance) {
 		const balance = response.data.balance;
 
-		if (amount < balance) {
+		if (amount <= balance) {
 			return true;
 		}
 		else {
@@ -38,11 +38,16 @@ const placeBid = async (interaction, user, amount) => {
 		// start a new transaction
 		transaction = await sequelize.transaction();
 
-		// fetch the auction
+		// fetch and lock the auction so concurrent bids are applied one at a time
 		const auction = await Auction.findOne({
 			where: { messageID: interaction.message.id },
 			transaction,
+			lock: transaction.LOCK.UPDATE,
 		});
+
+		if (!auction) {
+			throw new Error('Auction not found');
+		}
 
 		// check if the auction is still ongoing
 		if (auction.endDateTime > new Date()) {

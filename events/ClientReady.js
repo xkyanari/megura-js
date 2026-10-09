@@ -4,7 +4,8 @@ const { sequelize, Auction, Guild } = require('../src/db');
 const Queue = require('bull');
 // const app = require('../server');
 const { endAuction } = require('../functions/endAuction');
-const { dahliaName, dahliaAvatar } = require('../config.json');
+const { dahliaName, dahliaAvatar } = require('../src/vars');
+const { redisURL } = require('../redis');
 const { cleanupOldLogs } = require('../functions/logs');
 
 let Discord;
@@ -29,7 +30,7 @@ module.exports = {
 		client.user.setPresence({
 			activities: [
 				{
-					name: '\/start | \/info',
+					name: '/start | /info',
 					type: ActivityType.Listening,
 				},
 			],
@@ -58,7 +59,7 @@ module.exports = {
 		// 	console.log(`Express server is running on http://localhost:${port}`);
 		// });
 
-		const deleteChannelQueue = new Queue('deleteChannel', 'redis://127.0.0.1:6379');
+		const deleteChannelQueue = new Queue('deleteChannel', redisURL);
 		client.deleteChannelQueue = deleteChannelQueue;
 
 		deleteChannelQueue.process(async (job, done) => {
@@ -105,7 +106,7 @@ module.exports = {
 			}
 		});
 
-		const auctionQueue = new Queue('auctionQueue', 'redis://127.0.0.1:6379');
+		const auctionQueue = new Queue('auctionQueue', redisURL);
 		client.auctionQueue = auctionQueue;
 
 		auctionQueue.process(async (job, done) => {
