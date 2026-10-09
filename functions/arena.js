@@ -299,16 +299,16 @@ const wantedBattle = async (interaction, players) => {
 				.setDescription(filledMessage);
 			await interaction.channel.send({ embeds: [embed] });
 
+			// the winner goes back in; once they're the only one left, they've won
+			players.push(duelResult.winner);
 			if (players.length === 1) {
 				const embed0 = new EmbedBuilder()
 					.setColor(0xcd7f32)
 					.setTitle('Victory!')
-					.setDescription(`${duelResult.winner.playerName} is the last one standing!`);
+					.setDescription(`${players[0].playerName} is the last one standing!`);
 				await interaction.channel.send({ embeds: [embed0] });
 				break;
 			}
-
-			players.push(duelResult.winner);
 
 			await wait(8000);
 		}
