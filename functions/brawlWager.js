@@ -11,8 +11,12 @@ const { isTestnet } = require('../src/vars');
 const escrow = !isTestnet;
 
 // Escrows the challenger's stake and creates the listing.
+// Throws 'duplicate listing' if the id was ever used before, since every lookup is by listingId alone.
 const openBrawl = async ({ listingId, challengerId, guildID, wager }) => {
 	return sequelize.transaction(async (transaction) => {
+		if (await Brawl.count({ where: { listingId }, transaction })) {
+			throw new Error('duplicate listing');
+		}
 		if (escrow) await escrowOres(challengerId, guildID, wager, transaction);
 		await Brawl.create({ listingId, challengerId, wager, status: 'pending' }, { transaction });
 	});

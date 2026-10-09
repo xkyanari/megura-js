@@ -26,15 +26,12 @@ module.exports = {
 			throw new Error('profile not found');
 		}
 
-		const listingId = await generateId(5);
-
 		const embed = new EmbedBuilder()
 			.setTitle('⚔️ Brawl Challenge Open ⚔️')
 			.setColor(0xcd7f32)
 			.setDescription(`**Challenger:** ${userMention(challengerId)}\nWager: ${wager} ${oreEmoji}\nStatus: Pending`)
 			.setTimestamp()
-			.setThumbnail(`${interaction.member.displayAvatarURL({ extension: 'png', size: 512 })}`)
-			.setFooter({ text: `Listing ID: ${listingId}` });
+			.setThumbnail(`${interaction.member.displayAvatarURL({ extension: 'png', size: 512 })}`);
 
 		const button = new ActionRowBuilder().addComponents(
 			new ButtonBuilder()
@@ -44,15 +41,23 @@ module.exports = {
 				.setStyle(ButtonStyle.Primary),
 		);
 
-		try {
-			await openBrawl({ listingId, challengerId, guildID, wager });
-		}
-		catch (error) {
-			if (error.message === 'insufficient funds') {
-				return await interaction.reply({ content: `You do not have enough ${oreEmoji} to wager.`, flags: 64 });
+		// listing ids are short and random, so retry on the rare collision
+		let listingId;
+		for (let attempt = 1; !listingId; attempt++) {
+			const candidate = await generateId(5);
+			try {
+				await openBrawl({ listingId: candidate, challengerId, guildID, wager });
+				listingId = candidate;
 			}
-			throw error;
+			catch (error) {
+				if (error.message === 'insufficient funds') {
+					return await interaction.reply({ content: `You do not have enough ${oreEmoji} to wager.`, flags: 64 });
+				}
+				if (error.message !== 'duplicate listing' || attempt >= 5) throw error;
+			}
 		}
+
+		embed.setFooter({ text: `Listing ID: ${listingId}` });
 
 		let message;
 		try {

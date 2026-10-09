@@ -255,7 +255,8 @@ Reflect.defineProperty(Shop, 'buyItem', {
 	},
 });
 
-// refund the ores to the player
+// refund the ores to the player; returns the amount refunded
+// (0 if the player no longer has a profile, in which case the ores stay in the guild wallet)
 Reflect.defineProperty(Shop, 'returnOres', {
 	value: async function returnOres(item, quantity, discordID, guildID) {
 		assertAmount(quantity);
@@ -270,11 +271,10 @@ Reflect.defineProperty(Shop, 'returnOres', {
 
 			const oreReturned = shopItem.price * quantity;
 
-			await Player.increment({ oresEarned: oreReturned }, { where: { discordID, guildID }, transaction });
-			await Guild.decrement({ walletAmount: oreReturned }, { where: { guildID }, transaction });
+			const refunded = await releaseOres(discordID, guildID, oreReturned, transaction);
 			await shopItem.increment({ quantity }, { transaction });
 
-			return oreReturned;
+			return refunded ? oreReturned : 0;
 		});
 	},
 });
