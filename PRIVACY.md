@@ -12,6 +12,7 @@ Dahlia may process:
 - Game profile, inventory, shop, auction, brawl, wallet, and server configuration records stored in the bot database.
 - Gameplay data such as player names, profile stats, level/experience, inventory, shop purchases, wallet/game balances, battle/duel/brawl results, auction activity, and related timestamps.
 - Server log metadata, such as guild IDs, channel IDs, role IDs, and event timestamps.
+- Setup change logs: the Discord username and user ID of the member who changed a `/setup` setting, what changed (including channel and role names), and when.
 
 ## Message Content
 

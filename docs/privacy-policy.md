@@ -33,6 +33,7 @@ Dahlia stores data needed to operate its features, including:
 * Battle, duel, brawl, and arena activity
 * Auction records, bids, auction items, and related timestamps
 * Server setup settings such as configured channels, roles, rules, verification settings, shop settings, and feature toggles
+* Setup change logs: the Discord username and user ID of the member who changed a `/setup` setting, what changed (including channel and role names), and when
 * Wallet or account records when a feature explicitly asks a user to register that information
 
 ## Message content

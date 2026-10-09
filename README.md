@@ -51,7 +51,7 @@ Before running the bot, you will need the following:
 - [ ] Create and manage Raffles
 - [x] Post announcements for orders, etc.
 - [x] Mini games (arena, etc.)
-- [ ] View server setup logs
+- [x] View server setup logs
 - [ ] Create and manage Reaction roles
 - [ ] Create and manage Forms
 - [ ] Send Auto Messages/webhooks

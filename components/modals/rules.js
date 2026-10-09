@@ -1,5 +1,6 @@
 const { EmbedBuilder } = require('discord.js');
 const { Guild } = require('../../src/db');
+const { logSetupChange } = require('../../functions/logs');
 
 module.exports = {
 	data: {
@@ -41,5 +42,8 @@ module.exports = {
 			embeds: [embed],
 			flags: 64,
 		});
+		await logSetupChange(interaction, 'updated the server rules', [
+			{ name: 'Length', value: `${(intro + rules + closing).length} characters` },
+		]);
 	},
 };
