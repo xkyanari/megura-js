@@ -1,6 +1,6 @@
 /**
  * Shared brawl escrow checks, run by brawl-escrow.test.js (real ores move)
- * and brawl-testnet.test.js (no ores move). `moves` is 1 or 0 accordingly.
+ * and brawl-test-mode.test.js (no ores move). `moves` is 1 or 0 accordingly.
  */
 
 const { test, before, after } = require('node:test');

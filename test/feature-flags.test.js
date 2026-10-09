@@ -31,9 +31,11 @@ for (const flag of checkedFlags) {
 	});
 }
 
-test('auctions are enabled from Premium up', () => {
+// Bitcoin auctions are switched off (see auctionsEnabled in src/vars.js);
+// this used to check they were on from Premium up.
+test('auctions are off on every tier', () => {
 	assert.deepEqual(
 		Object.fromEntries(Object.entries(example).map(([tier, flags]) => [tier, flags.hasAuction])),
-		{ free: false, premium: true, enterprise: true, megura: true },
+		{ free: false, premium: false, enterprise: false, megura: false },
 	);
 });

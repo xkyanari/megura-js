@@ -41,13 +41,13 @@ test('wallet deposit moves wallet -> bank', async () => {
 	assert.deepEqual(await balances(), [40, 60, 0]);
 });
 
-test('bank stake moves bank -> stake', async () => {
-	await run('bank', { stake: 50 });
+test('bank save moves bank -> savings', async () => {
+	await run('bank', { save: 50 });
 	assert.deepEqual(await balances(), [40, 10, 50]);
 });
 
-test('bank unstake moves stake -> bank', async () => {
-	await run('bank', { unstake: 20 });
+test('bank take moves savings -> bank', async () => {
+	await run('bank', { take: 20 });
 	assert.deepEqual(await balances(), [40, 30, 30]);
 });
 

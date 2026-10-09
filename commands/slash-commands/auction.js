@@ -5,8 +5,11 @@ const { endAuction } = require('../../functions/endAuction');
 const { changeChannel } = require('../../functions/webhook');
 const { Guild } = require('../../src/db');
 const { announceAuctionEnd } = require('../../functions/auctionMessage');
+const { auctionsEnabled } = require('../../src/vars');
 
 module.exports = {
+	// off unless config.json enables auctions (see src/vars.js)
+	isEnabled: auctionsEnabled,
 	data: new SlashCommandBuilder()
 		.setName('auction')
 		.setDescription('Manage auctions.')

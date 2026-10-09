@@ -1,40 +1,39 @@
 ---
 description: >-
-  To create a fun and engaging blockchain gaming experience that is accessible,
-  innovative, and fosters creativity and collaboration within the blockchain
-  ecosystem.
+  A fun and engaging role-playing game that is easy to join, rewards regular
+  play and brings Discord communities together.
 ---
 
 # ✨ Our Features
 
 Citizens of Eldelvain will be welcomed with plenty of gaming features.
 
-## Gamified staking
+## Earn as you play
 
-Players can earn tokens by participating in various game modes, events, and giveaways. These activities provide a fun and engaging way for players to earn rewards while also promoting participation in the game's community.
+Players earn IURA, the in-game currency, from monster fights, quests, duels, events and giveaways. IURA buys gear and items in the shop and can be kept in a bank or set aside in savings.
 
-## Daily, weekly and monthly quests&#x20;
+## Daily and weekly quests
 
-The game offers daily, weekly, and monthly quests for players to complete, providing an optional but highly recommended way to improve their characters. By finishing these quests, players can earn tokens, in-game items, bonus stats, experience (EXP), and other rewards.
+Every voyager gets new daily and weekly quests, such as winning monster fights, finding items or defeating the rival faction's monsters. Rewards are paid as soon as a quest is done and grow with the player's level.
 
 ## Raids and server-wide bosses
 
-Later in the game, players will have the opportunity to team up with other Citizens and take on challenging raids and server-wide bosses. These epic battles offer opportunities to earn rewards and gain new experiences forming lasting bonds with other members of the game's community.
+Later in the game, players will be able to team up with other Citizens against challenging bosses. These battles reward teamwork and quick thinking.
 
-## Faction Wars and Player versus Player (PvP)
+## Factions and Player versus Player (PvP)
 
-There'll be two factions that will be introduced: Margaretha and Cerberon. Guilds can participate in faction wars to earn bonuses such as experience points (EXP) and IURA. These wars provide a competitive and challenging way for players to engage with the game's community and progress through the game. By competing in faction wars, players can learn new strategies and tactics, and form lasting alliances with other members of their guild.
+Two factions, Margaretha and Cerberon, compete in every server. Members deal extra damage to the rival faction's monsters and score points for their side in the weekly standings. Players can also challenge each other in duels, brawls and arena events.
 
 ## Leaderboard
 
-Leaderboards showcase the top-ranked players across Eldelvain and other worlds, adding an extra level of competition to the game. It is an important aspect of the game's design, providing players with a sense of accomplishment and recognition for their achievements in the game.
+Leaderboards show the top players in each server, adding a friendly layer of competition and recognition.
 
 ## Player versus Environment (PvE)
 
-For players who prefer not to engage in player-versus-player (PVP) modes, the game offers equal opportunities for equipment and rewards regardless of their NFT collection. The game strives to maintain balance across all collections, ensuring that all players can progress through the game and earn rewards at their own pace. This approach promotes inclusivity and fairness, while also allowing players to focus on the aspects of the game that they enjoy most.
+Players who prefer not to fight other players can progress just as well against monsters. Monsters are matched to each player's level, gear helps without making fights automatic, and wins drop items along the way.
 
 ## Customized bot personality
 
-Dahlia's personality and storytelling style can be tailored through explicit bot interactions such as slash commands, buttons, menus, and modals. Open channel AI chat is currently disabled so Dahlia can operate without reading normal server messages.
+Dahlia's personality and storytelling style can be tailored through explicit bot interactions such as slash commands, buttons, menus and modals. Open channel AI chat is currently disabled so Dahlia can operate without reading normal server messages.
 
-Overall, the game's commitment to balance and fairness is a key aspect of its design, providing players with a fun and engaging gaming experience that caters to all play styles.
+Overall, the game's commitment to balance and fairness is a key aspect of its design, providing players with a fun and engaging experience that caters to all play styles.

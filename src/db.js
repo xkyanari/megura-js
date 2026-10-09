@@ -163,7 +163,7 @@ async function grantOres(discordID, guildID, amount) {
 	});
 }
 
-// for staking
+// savings (the 'stake' balance)
 Reflect.defineProperty(Player.prototype, 'stake', {
 	value: async function stake() {
 		return Iura.findAll({ where: { guildID: this.guildID } });

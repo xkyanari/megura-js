@@ -16,20 +16,11 @@ module.exports = async (interaction) => {
 		.setPlaceholder('Choose an item category.')
 		.addOptions(
 			new StringSelectMenuOptionBuilder()
-				.setLabel('Whitelist')
-				.setValue('whitelist'),
-			new StringSelectMenuOptionBuilder()
 				.setLabel('Event Items')
 				.setValue('events'),
 			new StringSelectMenuOptionBuilder()
 				.setLabel('Digital Items')
 				.setValue('digital'),
-			new StringSelectMenuOptionBuilder()
-				.setLabel('NFTs')
-				.setValue('nfts'),
-			new StringSelectMenuOptionBuilder()
-				.setLabel('Cryptocurrencies')
-				.setValue('crypto'),
 		);
 
 	const row = new ActionRowBuilder()

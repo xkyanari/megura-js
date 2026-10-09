@@ -1,6 +1,6 @@
 {
     "port": "",
-    "website_testnet": "",
+    "website_test": "",
     "website": "",
     "mysql_dbname": "",
     "mysql_dbuser": "",
@@ -20,5 +20,6 @@
     "dblApiKey": "",
     "dblWebhookSecret": "",
     "topWebhookSecret": "",
-    "isTestnet": true
+    "testMode": true,
+    "enableAuctions": false
 }

@@ -1,4 +1,4 @@
-require('./config').isTestnet = false;
+require('./config').testMode = false;
 
 const { test, before, after } = require('node:test');
 const assert = require('node:assert');

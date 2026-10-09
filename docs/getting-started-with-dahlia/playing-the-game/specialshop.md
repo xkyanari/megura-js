@@ -1,6 +1,6 @@
 # /specialshop
 
-The **special shop** is each server's own store. Admins stock it with real-world or community rewards (whitelist spots, event items, digital items, NFTs, crypto), and voyagers buy them with **ores**. The server team then fulfils each order by hand.
+The **special shop** is each server's own store. Admins stock it with community rewards (event items, digital items such as roles or perks), and voyagers buy them with **ores**. The server team then fulfils each order by hand.
 
 ### Setting Up (Admins)
 
@@ -14,7 +14,7 @@ The **special shop** is each server's own store. Admins stock it with real-world
    ```javascript
    /specialshop additem item:<name> price:<ores> stock:<amount> category:<category> itemid:<id>
    ```
-   * `category`: Whitelist, Event Items, Digital Items, NFTs or Cryptocurrencies.
+   * `category`: Event Items or Digital Items.
    * `itemid`: a short unique ID with no spaces, used by the other commands.
 3. Post the shop so voyagers can browse it:
    ```javascript
