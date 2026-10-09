@@ -178,13 +178,26 @@ describe('salvage', () => {
 		assert.deepEqual([left.quantity, left.upgradeLevel], [0, 0]);
 	});
 
+	test('nothing salvages into more than it costs, so buy, salvage, sell can\'t make IURA', async () => {
+		const { sellPrice } = require('../functions/sell');
+		const priceOf = (name) => items.find((item) => item.itemName === name).price;
+		for (const item of items) {
+			if (!['weapons', 'armor', 'miscellaneous'].includes(item.category) || item.price < C.MIN_SALVAGE_PRICE) continue;
+			const resale = C.salvageYield(item).reduce((sum, g) => sum + sellPrice(priceOf(g.item)) * g.amount, 0);
+			assert.ok(resale < item.price, `${item.itemName}: salvage resells for ${resale}, costs ${item.price}`);
+		}
+		const player = await makePlayer('S3');
+		await give(player, 'Simple Rock', 1);
+		assert.equal((await C.salvageItem(player.accountID, 'rock')).reason, 'not salvageable');
+	});
+
 	test('only unequipped gear', async () => {
 		const player = await makePlayer('S2');
 		await give(player, 'Healing Potion', 1);
 		assert.equal((await C.salvageItem(player.accountID, 'hpotion')).reason, 'not salvageable');
-		await give(player, 'Talkative Blade', 1);
-		await changeEquipment(player.accountID, 'sword', 1, true);
-		assert.equal((await C.salvageItem(player.accountID, 'sword')).reason, 'not enough');
+		await give(player, shopItem('hammer').itemName, 1);
+		await changeEquipment(player.accountID, 'hammer', 1, true);
+		assert.equal((await C.salvageItem(player.accountID, 'hammer')).reason, 'not enough');
 	});
 });
 

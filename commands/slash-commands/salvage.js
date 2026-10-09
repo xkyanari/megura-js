@@ -1,12 +1,12 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { Op } = require('sequelize');
 const { Player, Item, Shop } = require('../../src/db');
-const { salvageItem } = require('../../functions/crafting');
+const { salvageItem, MIN_SALVAGE_PRICE } = require('../../functions/crafting');
 
 const REFUSALS = {
 	'amount': 'Please enter an amount of at least 1.',
 	'not found': 'There is no such item.',
-	'not salvageable': 'Only weapons, armor and accessories can be salvaged.',
+	'not salvageable': `Only weapons, armor and accessories worth at least ${MIN_SALVAGE_PRICE} IURA can be salvaged.`,
 	'not enough': 'You don\'t have that many. Equipped items have to be unequipped first.',
 };
 
@@ -42,6 +42,7 @@ module.exports = {
 			? await Shop.findAll({ where: { guildID: null, category: ['weapons', 'armor', 'miscellaneous'], itemName: [...quantities.keys()] } })
 			: [];
 		await interaction.respond(shopItems
+			.filter((s) => s.price >= MIN_SALVAGE_PRICE)
 			.filter((s) => s.item_ID.toLowerCase().startsWith(focused) || s.itemName.toLowerCase().includes(focused))
 			.slice(0, 25)
 			.map((s) => ({ name: `${s.itemName} ×${quantities.get(s.itemName)}`.slice(0, 100), value: s.item_ID })));

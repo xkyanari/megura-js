@@ -27,6 +27,8 @@ const DROP_FROM = 3;
 const UPGRADE_CATEGORIES = ['weapons', 'armor', 'miscellaneous'];
 const MATERIAL_DROP_CHANCE = 0.25;
 const MAX_SALVAGE_PER_COPY = 5;
+// cheaper gear can't be salvaged: its materials would sell for more than it costs
+const MIN_SALVAGE_PRICE = 100;
 
 const CRAFTED = new Set(recipes.map((recipe) => recipe.item_ID));
 const FOR_SALE = new Set(materials.forSale);
@@ -180,7 +182,7 @@ const salvageItem = (accountID, itemID, amount = 1) => {
 		await Player.findByPk(accountID, { transaction, lock: transaction.LOCK.UPDATE });
 		const shopItem = await Shop.findOne({ where: { item_ID: itemID, guildID: null }, transaction });
 		if (!shopItem) return { ok: false, reason: 'not found' };
-		if (!UPGRADE_CATEGORIES.includes(shopItem.category)) return { ok: false, reason: 'not salvageable' };
+		if (!UPGRADE_CATEGORIES.includes(shopItem.category) || shopItem.price < MIN_SALVAGE_PRICE) return { ok: false, reason: 'not salvageable' };
 		const item = await Item.findOne({ where: { accountID, itemName: shopItem.itemName }, transaction, lock: transaction.LOCK.UPDATE });
 		if (!item || item.quantity < amount) return { ok: false, reason: 'not enough' };
 
@@ -222,6 +224,7 @@ module.exports = {
 	UPGRADE_CHANCE,
 	DROP_FROM,
 	MATERIAL_DROP_CHANCE,
+	MIN_SALVAGE_PRICE,
 	recipes,
 	materials,
 	isForSale,

@@ -60,9 +60,11 @@ Each recipe needs a minimum level. Crafted items are a little stronger than shop
 
 ### Salvage
 
-`/salvage id:<item> amount:<n>` breaks unequipped weapons, armor or accessories into materials. Each copy gives:
+`/salvage id:<item> amount:<n>` breaks unequipped weapons, armor or accessories worth at least 100 IURA into materials. Each copy gives:
 
 * its tier's material: 1, plus 1 for every 1,000 IURA the item costs, up to 5
 * 1 Arcane Dust
 
 Salvaging your last copy of an upgraded item also returns 1 extra material per upgrade level.
+
+After the bot is updated, the server owner runs `scripts/migrations/2026-10-crafting.js` once (see the README) before starting it.

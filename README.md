@@ -179,6 +179,7 @@ docker compose run --rm bot node scripts/migrations/2026-10-gameplay.js
 docker compose run --rm bot node scripts/migrations/2026-10-health-curve.js
 docker compose run --rm bot node scripts/migrations/2026-10-remove-crypto.js
 docker compose run --rm bot node scripts/migrations/2026-10-order-sales.js
+docker compose run --rm bot node scripts/migrations/2026-10-crafting.js
 docker compose up -d
 ```
 
@@ -189,6 +190,7 @@ docker compose up -d
 | `2026-10-health-curve.js` | Moves players onto the new health curve, keeping health from gear. |
 | `2026-10-remove-crypto.js` | Drops the unused NFT link columns from `Player`, and moves special-shop items from the removed Whitelist, NFTs and Cryptocurrencies categories to Digital Items. |
 | `2026-10-order-sales.js` | Adds the price paid and the order date to special-shop orders, for `/sales`. **Run it before starting this version**: the bot reads those columns. |
+| `2026-10-crafting.js` | Adds the upgrade level to inventory items, and the materials and crafted items to the shop. **Run it before starting this version**: every inventory lookup reads that column. |
 
 **Vote rewards (top.gg and discordbotlist).** `/vote` pays 50 IURA per vote through a small webhook server inside the bot. It only starts when `VOTE_PORT` is set:
 
