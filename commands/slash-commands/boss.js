@@ -9,7 +9,8 @@ const {
 	MIN_AUTOSPAWN_HOURS,
 	MAX_AUTOSPAWN_HOURS,
 	isInFight,
-	hasGroupFightIn,
+	reserveChannel,
+	releaseChannel,
 	runBossFight,
 	channelIO,
 	configureAutoSpawn,
@@ -108,10 +109,17 @@ module.exports = {
 		}
 
 		if (subcommand === 'spawn') {
-			if (hasGroupFightIn(interaction.channelId)) {
+			// taken before replying, so a second spawn (or an autospawn) at the same moment is refused
+			if (!reserveChannel(interaction.channelId)) {
 				return interaction.reply({ content: 'A world boss is already fighting in this channel.', flags: 64 });
 			}
-			await interaction.reply({ content: 'The boss is on its way…', flags: 64 });
+			try {
+				await interaction.reply({ content: 'The boss is on its way…', flags: 64 });
+			}
+			catch (error) {
+				releaseChannel(interaction.channelId);
+				throw error;
+			}
 			// the fight outlives this command: errors go to the log, not the (finished) reply
 			runBossFight({
 				kind: 'group',

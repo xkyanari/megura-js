@@ -6,7 +6,7 @@ const { isFeatureEnabled } = require('../src/feature');
 const { hpBar } = require('./battle');
 const { rollLoot } = require('./loot');
 const leveling = require('./level');
-const { RIVAL_DAMAGE_BONUS, playerFaction, isRival, addFactionPoint } = require('./factions');
+const { RIVAL_DAMAGE_BONUS, playerFaction, syncFaction, isRival, addFactionPoint } = require('./factions');
 const { recordProgress } = require('./quests');
 
 /**
@@ -306,30 +306,48 @@ const recordChoice = (fightId, turn, userId, action) => {
 	return { ok: true, action };
 };
 
+const isInFight = (guildID, userId) =>
+	[...fights.values()].some((fight) => fight.guildID === guildID && (fight.fighters.has(userId) || fight.joining.has(userId)));
+
 /**
- * Adds a member to a group boss while it is gathering fighters.
+ * Adds a member to a group boss while it is gathering fighters. With the
+ * member (their roles), their stored faction is brought in step first.
  * Returns { ok: true, count } or { ok: false, reason }.
  */
-const joinFight = async (fightId, userId) => {
+const joinFight = async (fightId, userId, member = null) => {
 	const fight = fights.get(Number(fightId));
 	if (!fight || fight.kind !== 'group' || fight.phase !== 'joining') return { ok: false, reason: 'closed' };
 	if (fight.joining.has(userId)) return { ok: false, reason: 'joined' };
+	// one fight at a time per server, as /boss challenge enforces
+	if (isInFight(fight.guildID, userId)) return { ok: false, reason: 'busy' };
 	if (fight.joining.size >= MAX_PARTICIPANTS) return { ok: false, reason: 'full' };
 	const player = await Player.findOne({ where: { discordID: userId, guildID: fight.guildID } });
 	if (!player) return { ok: false, reason: 'no profile' };
-	// checked again: another click may have joined while the profile loaded
+	await syncFaction(player, await Guild.findOne({ where: { guildID: fight.guildID } }), member);
+	// checked again: another click (or fight) may have taken them while the profile loaded
 	if (fight.phase !== 'joining' || fight.joining.has(userId) || fight.joining.size >= MAX_PARTICIPANTS) {
 		return { ok: false, reason: fight.joining.has(userId) ? 'joined' : 'closed' };
 	}
+	if (isInFight(fight.guildID, userId)) return { ok: false, reason: 'busy' };
 	fight.joining.set(userId, player);
 	return { ok: true, count: fight.joining.size };
 };
 
-const isInFight = (guildID, userId) =>
-	[...fights.values()].some((fight) => fight.guildID === guildID && (fight.fighters.has(userId) || fight.joining.has(userId)));
+// Channels with a world boss starting or running. Reserved before anything is
+// awaited, so two spawns at once can't both start a fight in one channel.
+const reservedChannels = new Set();
 
 const hasGroupFightIn = (channelID) =>
-	[...fights.values()].some((fight) => fight.kind === 'group' && fight.channelID === channelID);
+	reservedChannels.has(channelID) || [...fights.values()].some((fight) => fight.kind === 'group' && fight.channelID === channelID);
+
+// Takes the channel for a world boss: false if one is already there.
+const reserveChannel = (channelID) => {
+	if (hasGroupFightIn(channelID)) return false;
+	reservedChannels.add(channelID);
+	return true;
+};
+
+const releaseChannel = (channelID) => reservedChannels.delete(channelID);
 
 /**
  * Runs a boss fight from start to finish.
@@ -338,7 +356,20 @@ const hasGroupFightIn = (channelID) =>
  * io.show(embed, components) shows the fight (one message, edited),
  * io.wait(ms) waits (tests use it to click). Returns the finished fight.
  */
-const runBossFight = async ({ kind, guildID, channelID, player, intro, joinMs = 60000, io, random = randomFloat }) => {
+const runBossFight = async (options) => {
+	// a group fight takes the channel itself unless the caller reserved it already
+	if (options.kind === 'group' && !reservedChannels.has(options.channelID) && !reserveChannel(options.channelID)) {
+		throw new Error('a world boss is already in this channel');
+	}
+	try {
+		return await runFight(options);
+	}
+	finally {
+		if (options.kind === 'group') releaseChannel(options.channelID);
+	}
+};
+
+const runFight = async ({ kind, guildID, channelID, player, intro, joinMs = 60000, io, random = randomFloat }) => {
 	const [mob] = await Monster.findAll({ order: sequelize.random(), limit: 1 });
 	if (!mob) throw new Error('no monsters configured');
 
@@ -482,9 +513,12 @@ const processAutoSpawn = async (client, queue, { guildID }) => {
 
 	const guild = await Guild.findOne({ where: { guildID } });
 	if (!guild || !await isFeatureEnabled(guild.subscription, 'hasBosses')) return false;
-	if (hasGroupFightIn(config.channelID)) return false;
+	if (!reserveChannel(config.channelID)) return false;
 	const channel = await client.channels.fetch(config.channelID).catch(() => null);
-	if (!channel) return false;
+	if (!channel) {
+		releaseChannel(config.channelID);
+		return false;
+	}
 
 	// the fight runs on its own: the job only starts it
 	runBossFight({ kind: 'group', guildID, channelID: channel.id, io: channelIO(channel) })
@@ -517,6 +551,8 @@ module.exports = {
 	joinFight,
 	isInFight,
 	hasGroupFightIn,
+	reserveChannel,
+	releaseChannel,
 	runBossFight,
 	channelIO,
 	closeInterruptedFights,

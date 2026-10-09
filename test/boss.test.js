@@ -225,6 +225,40 @@ describe('group fights', () => {
 		assert.equal(await B.joinFight(fight.id, 'GRP3').then((r) => r.reason), 'closed');
 	});
 
+	test('a fighter already in another boss fight can\'t join; joining brings the faction in step with the member\'s roles', async () => {
+		await makePlayer('BUSY1');
+		const syncing = await makePlayer('SYNC1');
+		await Guild.update({ margarethaID: 'RM', cerberonID: 'RC' }, { where: { guildID: G } });
+		// a solo fight elsewhere in the server
+		B.fights.set(-1, { id: -1, kind: 'solo', guildID: G, channelID: 'ELSE', fighters: new Map([['BUSY1', {}]]), joining: new Map() });
+		const joins = [];
+		try {
+			const io = scriptedIO({
+				beforeFight: async (fightId) => {
+					joins.push(await B.joinFight(fightId, 'BUSY1'));
+					joins.push(await B.joinFight(fightId, 'SYNC1', { id: 'SYNC1', roles: ['RC'] }));
+				},
+			});
+			await B.runBossFight({ kind: 'group', guildID: G, channelID: 'CBUSY', io });
+		}
+		finally {
+			B.fights.delete(-1);
+			await Guild.update({ margarethaID: null, cerberonID: null }, { where: { guildID: G } });
+		}
+		assert.deepEqual(joins.map((r) => r.ok ? r.count : r.reason), ['busy', 1]);
+		assert.equal((await syncing.reload()).faction, 'Cerberon');
+	});
+
+	test('a channel is reserved before a world boss starts, and freed when it ends', async () => {
+		assert.equal(B.reserveChannel('CR'), true);
+		assert.equal(B.reserveChannel('CR'), false, 'a second spawn at the same moment is refused');
+		assert.equal(B.hasGroupFightIn('CR'), true);
+		// the caller's reservation is used by the fight, and freed when it ends
+		const fight = await B.runBossFight({ kind: 'group', guildID: G, channelID: 'CR', io: scriptedIO() });
+		assert.equal(fight.fighters.size, 0);
+		assert.equal(B.hasGroupFightIn('CR'), false, 'freed when the fight ends');
+	});
+
 	test('a boss nobody joins leaves', async () => {
 		const io = scriptedIO();
 		const fight = await B.runBossFight({ kind: 'group', guildID: G, channelID: 'CG2', io });
@@ -308,6 +342,16 @@ describe('/boss', () => {
 		assert.match((await run({ subcommand: 'autospawn', integers: { hours: 3 } })).content, /Moderate Members/);
 		assert.match((await run({ subcommand: 'autospawn', mod: true, integers: { hours: 3 } })).content, /about every 3 hour/);
 		assert.match((await run({ subcommand: 'autospawn', mod: true, integers: { hours: 0 } })).content, /no longer appear/);
+	});
+
+	test('a spawn is refused while the channel is taken, even before that fight has started', async () => {
+		assert.equal(B.reserveChannel('CC'), true);
+		try {
+			assert.match((await run({ subcommand: 'spawn', mod: true })).content, /already fighting in this channel/);
+		}
+		finally {
+			B.releaseChannel('CC');
+		}
 	});
 
 	test('a solo challenge is refused while recovering', async () => {
