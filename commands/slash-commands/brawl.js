@@ -42,63 +42,55 @@ module.exports = {
 		const subCommand = options.getSubcommand();
 
 		switch (subCommand) {
-			case 'start':
-				try {
-					const embed = new EmbedBuilder()
-						.setColor(0xcd7f32)
-						.setTitle('⚔️ **BRAWL:** ⚔️')
-						.setDescription('Challenge voyagers for a brawl here!')
-						.setImage(brawlImage)
-						.setFooter(footer);
+			case 'start': {
+				const embed = new EmbedBuilder()
+					.setColor(0xcd7f32)
+					.setTitle('⚔️ **BRAWL:** ⚔️')
+					.setDescription('Challenge voyagers for a brawl here!')
+					.setImage(brawlImage)
+					.setFooter(footer);
 
-					const button = new ButtonBuilder()
-						.setCustomId('brawl-start')
-						.setLabel('Start a Brawl')
-						.setStyle(ButtonStyle.Primary);
+				const button = new ButtonBuilder()
+					.setCustomId('brawl-start')
+					.setLabel('Start a Brawl')
+					.setStyle(ButtonStyle.Primary);
 
-					const row = new ActionRowBuilder()
-						.addComponents(button);
+				const row = new ActionRowBuilder()
+					.addComponents(button);
 
-					await interaction.reply({
-						embeds: [embed],
-						components: [row],
+				await interaction.reply({
+					embeds: [embed],
+					components: [row],
+				});
+				break;
+			}
+
+			case 'channel': {
+				if (!guildCheck) {
+					throw new Error('guild not found');
+				}
+
+				await interaction.deferReply({ flags: 64 });
+
+				const channel = options.getChannel('channel');
+
+				const fieldsToUpdate = {
+					channelField: 'brawlChannelID',
+					webhookIDField: 'brawlwebhookId',
+					webhookTokenField: 'brawlwebhookToken',
+					webhookName: 'brawlChannel',
+					webhookReason: 'For posting brawl outcomes',
+				};
+				const brawlChannel = await changeChannel(interaction, interaction.guild.id, channel.id, fieldsToUpdate);
+
+				if (brawlChannel) {
+					return await interaction.editReply({
+						content: 'Brawl channel assigned.',
+						flags: 64,
 					});
 				}
-				catch (error) {
-					console.error(error);
-				}
 				break;
-
-			case 'channel':
-				try {
-					if (!guildCheck) {
-						throw new Error('guild not found');
-					}
-
-					await interaction.deferReply({ flags: 64 });
-
-					const channel = options.getChannel('channel');
-
-					const fieldsToUpdate = {
-						channelField: 'brawlChannelID',
-						webhookIDField: 'brawlwebhookId',
-						webhookTokenField: 'brawlwebhookToken',
-						webhookName: 'brawlChannel',
-						webhookReason: 'For posting brawl outcomes',
-					};
-					const brawlChannel = await changeChannel(interaction, interaction.guild.id, channel.id, fieldsToUpdate);
-
-					if (brawlChannel) {
-						return await interaction.editReply({
-							content: 'Brawl channel assigned.',
-							flags: 64,
-						});
-					}
-				}
-				catch (error) {
-					console.error(error);
-				}
-				break;
+			}
 		}
 	},
 };

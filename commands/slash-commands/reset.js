@@ -17,30 +17,24 @@ module.exports = {
 		const member = interaction.options.getUser('player');
 		const { guild } = interaction;
 
-		try {
-			const player = await Player.findOne({
-				where: { discordID: member.id, guildID: guild.id },
-				include: 'iura',
+		const player = await Player.findOne({
+			where: { discordID: member.id, guildID: guild.id },
+			include: 'iura',
+		});
+
+		if (player) {
+			await Promise.all([
+				Item.destroy({ where: { accountID: player.iura.accountID } }),
+				Iura.destroy({ where: { accountID: player.iura.accountID } }),
+				Player.destroy({ where: { discordID: member.id, guildID: guild.id } }),
+			]);
+			return await interaction.reply({
+				content: `\`${member.tag}\` profile has been removed.`,
 			});
-
-			if (player) {
-				await Promise.all([
-					Item.destroy({ where: { accountID: player.iura.accountID } }),
-					Iura.destroy({ where: { accountID: player.iura.accountID } }),
-					Player.destroy({ where: { discordID: member.id, guildID: guild.id } }),
-				]);
-				return await interaction.reply({
-					content: `\`${member.tag}\` profile has been removed.`,
-				});
-			}
-
-			await interaction.reply({
-				content: `\`${member.tag}\` is not found in the database.`,
-			});
-
 		}
-		catch (error) {
-			console.error(error);
-		}
+
+		await interaction.reply({
+			content: `\`${member.tag}\` is not found in the database.`,
+		});
 	},
 };

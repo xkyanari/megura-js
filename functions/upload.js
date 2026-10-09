@@ -9,20 +9,15 @@ cloudinary.config({
 });
 
 const uploadImage = async (imageBuffer, flag) => {
-	try {
-		const base64Image = `data:image/png;base64,${imageBuffer.toString(
-			'base64',
-		)}`;
+	const base64Image = `data:image/png;base64,${imageBuffer.toString(
+		'base64',
+	)}`;
 
-		const response = await cloudinary.uploader.upload(base64Image, {
-			public_id: flag,
-		});
+	const response = await cloudinary.uploader.upload(base64Image, {
+		public_id: flag,
+	});
 
-		return response.secure_url;
-	}
-	catch (error) {
-		console.error('Error:', error);
-	}
+	return response.secure_url;
 };
 
 const deleteImage = async (flag) => {

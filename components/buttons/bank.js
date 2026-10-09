@@ -22,22 +22,17 @@ module.exports = {
 			);
 		}
 
-		try {
-			const balanceBank = numFormat(player.iura.bankAmount);
-			const balanceStaked = numFormat(player.iura.stakedAmount);
-			const embed = new EmbedBuilder()
-				.setAuthor({ name: `${interaction.user.tag}` })
-				.setTitle('Bank Balance')
-				.setThumbnail(
-					`${member.displayAvatarURL({ extension: 'png', size: 512 })}`,
-				)
-				.setDescription(
-					`🏦 **Bank:** $${balanceBank} IURA\n💵 **Staked:** $${balanceStaked} IURA`,
-				);
-			await interaction.reply({ embeds: [embed] }).catch(console.error);
-		}
-		catch (error) {
-			console.log(error);
-		}
+		const balanceBank = numFormat(player.iura.bankAmount);
+		const balanceStaked = numFormat(player.iura.stakedAmount);
+		const embed = new EmbedBuilder()
+			.setAuthor({ name: `${interaction.user.tag}` })
+			.setTitle('Bank Balance')
+			.setThumbnail(
+				`${member.displayAvatarURL({ extension: 'png', size: 512 })}`,
+			)
+			.setDescription(
+				`🏦 **Bank:** $${balanceBank} IURA\n💵 **Staked:** $${balanceStaked} IURA`,
+			);
+		await interaction.reply({ embeds: [embed] }).catch(console.error);
 	},
 };

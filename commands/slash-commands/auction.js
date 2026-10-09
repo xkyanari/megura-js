@@ -114,108 +114,100 @@ module.exports = {
 				break;
 			}
 
-			case 'end':
+			case 'end': {
 				// this command only updates the auction end time and gets the highest bidder
-				try {
-					await interaction.deferReply();
-					if (!guildCheck) {
-						throw new Error('guild not found');
-					}
-					if (!await validateFeature(interaction, guildCheck.subscription, 'hasAuction')) {
-						return;
-					}
-
-					const id = options.getInteger('auctionid');
-					const end = await endAuction(id);
-
-					if (end) {
-						// remove the job from the queue
-						const jobs = await interaction.client.auctionQueue.getJobs(['waiting', 'delayed']);
-						const job = jobs.find(job1 => job1.data.auctionId === id);
-
-						if (job) await job.remove();
-
-						const auction = await Auction.findByPk(id);
-						const item = await auction.getAuctionItem();
-						const { auctionwebhookId, auctionwebhookToken } = await Guild.findOne({ where: { guildId: interaction.guild.id } });
-						const webhookClient = new WebhookClient({ id: auctionwebhookId, token: auctionwebhookToken });
-
-						const newEmbed = new EmbedBuilder()
-							.setTitle(`Auction: ${item.itemName}`)
-							.setColor(0xcd7f32)
-							.addFields(
-								{ name: 'Quantity:', value: `${item.quantity}`, inline: true },
-								{ name: 'Starting Price:', value: `${auction.startPrice / 100000000} 🪙`, inline: true },
-								{ name: 'Highest Bid:', value: `${auction.currentPrice / 100000000} 🪙`, inline: true },
-								{ name: 'Auctioneer:', value: `${userMention(auction.userID)}`, inline: true },
-							)
-							.setFooter({ text: `Auction ID: ${auction.id}` });
-
-						if (auction.attachmentURL) {
-							newEmbed.setImage(auction.attachmentURL);
-						}
-
-						if (item.description !== 'No description provided') {
-							newEmbed.setDescription(item.description);
-						}
-
-						if (auction.winnerId) {
-							const discordID = auction.winnerId.split('-');
-							const winningID = discordID[0];
-							newEmbed.addFields(
-								{ name: 'Winner:', value: `${userMention(winningID)}`, inline: true },
-							);
-						}
-
-						const message = await webhookClient.editMessage(auction.messageID, {
-							content: '**The Auction is now CLOSED!**',
-							username: dahliaName,
-							avatarURL: dahliaAvatar,
-							embeds: [newEmbed],
-							components: [],
-						});
-
-						if (message) return await interaction.editReply({ content: 'Auction ended successfully.', flags: 64 });
-					}
-					else {
-						await interaction.editReply({ content: 'Failed to end auction due to an error.' });
-					}
+				await interaction.deferReply();
+				if (!guildCheck) {
+					throw new Error('guild not found');
 				}
-				catch (error) {
-					console.error(error);
+				if (!await validateFeature(interaction, guildCheck.subscription, 'hasAuction')) {
+					return;
+				}
+
+				const id = options.getInteger('auctionid');
+				const end = await endAuction(id);
+
+				if (end) {
+					// remove the job from the queue
+					const jobs = await interaction.client.auctionQueue.getJobs(['waiting', 'delayed']);
+					const job = jobs.find(job1 => job1.data.auctionId === id);
+
+					if (job) await job.remove();
+
+					const auction = await Auction.findByPk(id);
+					const item = await auction.getAuctionItem();
+					const { auctionwebhookId, auctionwebhookToken } = await Guild.findOne({ where: { guildId: interaction.guild.id } });
+					const webhookClient = new WebhookClient({ id: auctionwebhookId, token: auctionwebhookToken });
+
+					const newEmbed = new EmbedBuilder()
+						.setTitle(`Auction: ${item.itemName}`)
+						.setColor(0xcd7f32)
+						.addFields(
+							{ name: 'Quantity:', value: `${item.quantity}`, inline: true },
+							{ name: 'Starting Price:', value: `${auction.startPrice / 100000000} 🪙`, inline: true },
+							{ name: 'Highest Bid:', value: `${auction.currentPrice / 100000000} 🪙`, inline: true },
+							{ name: 'Auctioneer:', value: `${userMention(auction.userID)}`, inline: true },
+						)
+						.setFooter({ text: `Auction ID: ${auction.id}` });
+
+					if (auction.attachmentURL) {
+						newEmbed.setImage(auction.attachmentURL);
+					}
+
+					if (item.description !== 'No description provided') {
+						newEmbed.setDescription(item.description);
+					}
+
+					if (auction.winnerId) {
+						const discordID = auction.winnerId.split('-');
+						const winningID = discordID[0];
+						newEmbed.addFields(
+							{ name: 'Winner:', value: `${userMention(winningID)}`, inline: true },
+						);
+					}
+
+					const message = await webhookClient.editMessage(auction.messageID, {
+						content: '**The Auction is now CLOSED!**',
+						username: dahliaName,
+						avatarURL: dahliaAvatar,
+						embeds: [newEmbed],
+						components: [],
+					});
+
+					if (message) return await interaction.editReply({ content: 'Auction ended successfully.', flags: 64 });
+				}
+				else {
+					await interaction.editReply({ content: 'Failed to end auction due to an error.' });
 				}
 				break;
-			case 'settings':
-				try {
-					if (!guildCheck) {
-						throw new Error('guild not found');
-					}
-					if (!await validateFeature(interaction, guildCheck.subscription, 'hasAuction')) {
-						return;
-					}
-					await interaction.deferReply();
-					const channel = options.getChannel('channelid');
-
-					const fieldsToUpdate = {
-						channelField: 'auctionChannelID',
-						webhookIDField: 'auctionwebhookId',
-						webhookTokenField: 'auctionwebhookToken',
-						webhookName: 'auctionChannel',
-						webhookReason: 'For announcements related to auctions',
-					};
-					const updateChannel = await changeChannel(interaction, interaction.guild.id, channel.id, fieldsToUpdate);
-
-					if (updateChannel) {
-						return await interaction.editReply({
-							content: `Auction Channel has been set to ${channelMention(channel.id)}.\n`,
-							flags: 64,
-						});
-					}
+			}
+			case 'settings': {
+				if (!guildCheck) {
+					throw new Error('guild not found');
 				}
-				catch (error) {
-					console.error(error);
+				if (!await validateFeature(interaction, guildCheck.subscription, 'hasAuction')) {
+					return;
+				}
+				await interaction.deferReply();
+				const channel = options.getChannel('channelid');
+
+				const fieldsToUpdate = {
+					channelField: 'auctionChannelID',
+					webhookIDField: 'auctionwebhookId',
+					webhookTokenField: 'auctionwebhookToken',
+					webhookName: 'auctionChannel',
+					webhookReason: 'For announcements related to auctions',
+				};
+				const updateChannel = await changeChannel(interaction, interaction.guild.id, channel.id, fieldsToUpdate);
+
+				if (updateChannel) {
+					return await interaction.editReply({
+						content: `Auction Channel has been set to ${channelMention(channel.id)}.\n`,
+						flags: 64,
+					});
 				}
 				break;
+			}
 		}
 	},
 };

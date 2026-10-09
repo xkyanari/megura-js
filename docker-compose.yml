@@ -1,0 +1,36 @@
+# Runs the bot in Docker in place of pm2. MySQL and Redis stay on the host.
+#
+#   docker compose up -d --build          start (and rebuild after pulling new code)
+#   docker compose logs -f                follow the bot's output
+#   docker compose run --rm bot node deploy.js    register slash commands
+#   docker compose down                   stop
+#
+# See the "Running with Docker" section of README.md.
+
+services:
+  bot:
+    build: .
+    image: megura-bot
+    container_name: megura-bot
+    # start on boot and after crashes, like pm2
+    restart: unless-stopped
+    # forward SIGTERM to node so `docker compose down` stops the bot cleanly
+    init: true
+    # share the host's network so 127.0.0.1 in config.json still reaches the
+    # MySQL and Redis already running on this server (the bot opens no ports)
+    network_mode: host
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./config.json:/app/config.json:ro
+      - ./assets/features.json:/app/assets/features.json:ro
+      - megura-logs:/app/logs
+    logging:
+      driver: json-file
+      options:
+        max-size: 20m
+        max-file: "5"
+
+volumes:
+  megura-logs:

@@ -17,36 +17,31 @@ module.exports = {
 		const id = options.getString('id');
 		const amount = options.getInteger('amount');
 
-		try {
-			const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id } });
+		const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id } });
 
-			const item = await player.getItem(id);
-
-			if (!player) {
-				throw new Error('profile not found');
-			}
-
-			if (!item) {
-				return interaction.reply({
-					content: 'You don\'t own that item.',
-					flags: 64,
-				});
-			}
-
-			if (!item.equippedAmount === 0) {
-				return interaction.reply({
-					content: `You already have \`${item.itemName}\` unequipped.`,
-					flags: 64,
-				});
-			}
-
-			await player.updateStats(item.itemName, false, amount);
-			await player.updateItem(id, false);
-
-			await interaction.reply(`You unequipped \`${item.itemName}\`.`);
+		if (!player) {
+			throw new Error('profile not found');
 		}
-		catch (error) {
-			console.error(error);
+
+		const item = await player.getItem(id);
+
+		if (!item) {
+			return interaction.reply({
+				content: 'You don\'t own that item.',
+				flags: 64,
+			});
 		}
+
+		if (!item.equippedAmount === 0) {
+			return interaction.reply({
+				content: `You already have \`${item.itemName}\` unequipped.`,
+				flags: 64,
+			});
+		}
+
+		await player.updateStats(item.itemName, false, amount);
+		await player.updateItem(id, false);
+
+		await interaction.reply(`You unequipped \`${item.itemName}\`.`);
 	},
 };
