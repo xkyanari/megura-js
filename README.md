@@ -53,7 +53,7 @@ Before running the bot, you will need the following:
 - [x] Mini games (arena, etc.)
 - [x] View server setup logs
 - [x] Create and manage Reaction roles (button roles)
-- [ ] Create and manage Forms
+- [x] Create and manage Forms
 - [ ] Send Auto Messages/webhooks
 - [x] Storytelling
 - [x] Creating and closing private channels
