@@ -3,6 +3,7 @@ const { ACTIONS, joinFight, recordChoice } = require('../../functions/boss');
 const JOIN_REFUSALS = {
 	'closed': 'This fight is no longer taking fighters.',
 	'joined': 'You have already joined.',
+	'busy': 'You are already in another boss fight.',
 	'full': 'This fight is full.',
 	'no profile': 'You need a profile first. Type /start to create one.',
 };
@@ -23,7 +24,7 @@ module.exports = {
 		const [, fightId, turnOrJoin, action] = interaction.customId.split(':');
 
 		if (turnOrJoin === 'join') {
-			const result = await joinFight(fightId, interaction.user.id);
+			const result = await joinFight(fightId, interaction.user.id, interaction.member);
 			return interaction.reply({
 				content: result.ok ? `⚔️ You joined the fight! ${result.count} fighter(s) so far.` : JOIN_REFUSALS[result.reason],
 				flags: 64,
