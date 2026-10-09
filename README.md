@@ -16,6 +16,7 @@ Dahlia is designed to run without Discord's privileged Message Content, Server M
 - [Pre-requisites](#pre-requisites)
 - [List of Discord bot features (work in progress)](#list-of-discord-bot-features-work-in-progress)
 - [Installation](#installation)
+- [Running tests](#running-tests)
 - [Discord intents](#discord-intents)
 - [Commands](#commands-work-in-progress)
 - [Contributing](#contributing)
@@ -77,6 +78,17 @@ To install and run the project, follow these steps:
 5. Rename `assets/features-example.json` to `src/feature.js` if you are using the feature toggle file.
 6. Update the database host/settings in `src/db.js` or your local equivalent.
 7. (Optional) Chapters can be uploaded in `chapters/`. Otherwise, the bot will simply load the placeholder stories found in `samples/`.
+
+## Running tests
+
+The integration tests cover the IURA, shop, order and brawl money paths and the interaction handler. They run against a real MySQL database and Redis, and they **drop and recreate every table**, so use a separate database. The name must contain `test`, or the suite refuses to run.
+
+```sh
+mysql -e "CREATE DATABASE megura_test; GRANT ALL ON megura_test.* TO 'megura'@'127.0.0.1' IDENTIFIED BY 'megura';"
+npm run test:integration
+```
+
+The tests never read `config.json`; they use `test/config.js`. Override the defaults with `TEST_MYSQL_DB`, `TEST_MYSQL_USER`, `TEST_MYSQL_PASS`, `TEST_MYSQL_HOST`, `TEST_MYSQL_PORT` and `TEST_REDIS_URL` (default `redis://127.0.0.1:6379/15`; the suite flushes this Redis database).
 
 ## Discord intents
 
