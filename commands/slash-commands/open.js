@@ -3,9 +3,22 @@ const {
 	EmbedBuilder,
 	PermissionFlagsBits,
 	ChannelType,
+	channelMention,
 } = require('discord.js');
 const { Player, Guild } = require('../../src/db');
 const { validateFeature } = require('../../src/feature');
+const { portalJobId, portalJobOptions, findPortalJob } = require('../../functions/portal');
+
+// How long a portal stays open, in minutes.
+const PORTAL_MINUTES = 15;
+
+const PORTAL_PERMISSIONS = [
+	PermissionFlagsBits.ViewChannel,
+	PermissionFlagsBits.ManageChannels,
+	PermissionFlagsBits.SendMessages,
+	PermissionFlagsBits.ReadMessageHistory,
+	PermissionFlagsBits.UseApplicationCommands,
+];
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -15,99 +28,72 @@ module.exports = {
 			option
 				.setName('channel')
 				.setDescription('Enter name of channel')
+				.setMaxLength(100)
 				.setRequired(true),
 		),
 	cooldown: 900000,
 	async execute(interaction) {
-		const channel_name = interaction.options.getString('channel');
-		const { member, guild } = interaction;
-
-		const player = await Player.findOne({
-			where: { discordID: member.id, guildID: guild.id },
-		});
+		const channelName = interaction.options.getString('channel');
+		const { member, guild, client } = interaction;
+		const queue = client.deleteChannelQueue;
 
 		const guildCheck = await Guild.findOne({ where: { guildID: guild.id } });
+		if (!guildCheck) {
+			throw new Error('guild not found');
+		}
 		if (!await validateFeature(interaction, guildCheck.subscription, 'hasRoles')) {
 			return;
 		}
 
+		const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id } });
 		if (!player) {
 			throw new Error('profile not found');
 		}
 
-		if (!guildCheck) {
-			throw new Error('guild not found');
+		await interaction.deferReply({ flags: 64 });
+
+		const busy = 'You already have a portal open. Please wait for it to close, or use `/close` to close it now.';
+		if (await findPortalJob(queue, guild.id, member.id)) {
+			return interaction.editReply(busy);
 		}
 
-		await interaction.deferReply({ flags: 64 });
-		// if (
-		// 	!member.roles.cache.some(
-		// 		(role) => role.name === guildCheck.margarethaName || role.name === guildCheck.cerberonName,
-		// 	)
-		// ) {
-		// 	return interaction.editReply(
-		// 		'You don\'t seem to have a proper faction yet. Please choose your faction then `/start` again.',
-		// 	);
-		// }
-
-		const guild_name = await guild.channels.create({
-			name: channel_name,
+		const portal = await guild.channels.create({
+			name: channelName,
 			type: ChannelType.GuildText,
 			permissionOverwrites: [
-				{
-					id: guild.id, // Everyone else except for admins
-					deny: [PermissionFlagsBits.ViewChannel],
-				},
-				{
-					id: member.id, // The user
-					allow: [
-						PermissionFlagsBits.ViewChannel,
-						PermissionFlagsBits.ManageChannels,
-						PermissionFlagsBits.SendMessages,
-						PermissionFlagsBits.ReadMessageHistory,
-						PermissionFlagsBits.UseApplicationCommands,
-					],
-				},
-				{
-					id: interaction.client.user.id, // The bot
-					allow: [
-						PermissionFlagsBits.ViewChannel,
-						PermissionFlagsBits.ManageChannels,
-						PermissionFlagsBits.SendMessages,
-						PermissionFlagsBits.ReadMessageHistory,
-						PermissionFlagsBits.UseApplicationCommands,
-					],
-				},
+				// everyone else except admins
+				{ id: guild.id, deny: [PermissionFlagsBits.ViewChannel] },
+				{ id: member.id, allow: PORTAL_PERMISSIONS },
+				{ id: client.user.id, allow: PORTAL_PERMISSIONS },
 			],
 		});
 
-		const time = 15;
-
-		const jobs = await interaction.client.deleteChannelQueue.getJobs(['waiting', 'delayed']);
-
-		const hasExistingJob = jobs.some(job => job.data.userId === member.id);
-
-		if (hasExistingJob) {
-			return await interaction.reply({ content: 'You already have a portal waiting to be deleted. Please wait for it to be deleted before creating a new one or use `/close` to close the existing one manually.', flags: 64 });
+		try {
+			await queue.add({
+				channelId: portal.id,
+				guildId: guild.id,
+				userId: member.id,
+				replyChannelId: interaction.channel.id,
+			}, portalJobOptions(guild.id, member.id, PORTAL_MINUTES * 60000));
+		}
+		catch (error) {
+			await portal.delete().catch(() => null);
+			throw error;
 		}
 
-		await interaction.client.deleteChannelQueue.add({
-			channelId: guild_name.id,
-			guildId: guild.id,
-			userId: member.id,
-			replyChannelId: interaction.channel.id,
-		}, { delay: time * 60000, attempts: 3 });
+		// a simultaneous /open got there first: Bull kept its job (same ID), so drop our channel
+		const job = await queue.getJob(portalJobId(guild.id, member.id));
+		if (job?.data.channelId !== portal.id) {
+			await portal.delete().catch(() => null);
+			return interaction.editReply(busy);
+		}
 
 		const embed = new EmbedBuilder()
 			.setColor(0xcd7f32)
 			.setTitle('Success!')
 			.setDescription(
-				`Portal: **${guild_name}** has been opened.\n\nPlease note that the portal gets closed after \`${time}\` minute/s! Just create another one whenever.\n\nIf you want to close the channel pre-maturely, you can run the \`/close\` command.\n\nSafe travels!`,
+				`Portal: **${channelMention(portal.id)}** has been opened.\n\nPlease note that the portal gets closed after \`${PORTAL_MINUTES}\` minute/s! Just create another one whenever.\n\nIf you want to close the channel pre-maturely, you can run the \`/close\` command.\n\nSafe travels!`,
 			);
-		await interaction.editReply({
-			content: `${member}`,
-			embeds: [embed],
-			flags: 64,
-		});
+		await interaction.editReply({ content: `${member}`, embeds: [embed] });
 	},
 };

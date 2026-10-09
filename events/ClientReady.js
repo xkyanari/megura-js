@@ -11,6 +11,7 @@ const { processBrawlJob } = require('../functions/brawlWager');
 const { processGiveawayJob } = require('../functions/giveaway');
 const { processRaffleJob } = require('../functions/raffle');
 const { processTicketJob } = require('../functions/ticket');
+const { processPortalJob } = require('../functions/portal');
 const { processScheduledPost, syncScheduledPosts } = require('../functions/schedule');
 const { Giveaway, Raffle } = require('../src/db');
 
@@ -68,49 +69,7 @@ module.exports = {
 		const deleteChannelQueue = new Queue('deleteChannel', redisURL);
 		client.deleteChannelQueue = deleteChannelQueue;
 
-		deleteChannelQueue.process(async (job, done) => {
-			const { channelId, guildId, userId, replyChannelId } = job.data;
-
-			const guild = client.guilds.cache.get(guildId);
-
-			if (!guild) {
-				console.error('Guild not found');
-				return done(new Error('guild not found'));
-			}
-
-			const channel = guild.channels.cache.get(channelId);
-
-			if (!channel) {
-				console.error('Channel not found');
-				return done(new Error('Channel not found'));
-			}
-
-			try {
-				await channel.delete();
-				console.log(`Deleted channel ${channelId}`);
-				const replyChannel = guild.channels.cache.get(replyChannelId);
-
-				const embed = new EmbedBuilder()
-					.setColor(0x6e8b3d)
-					.setTitle('Times Up!')
-					.setDescription(
-						'Your portal has been closed. Thanks for using our services!\n\nThis message will be deleted in `10` seconds.',
-					);
-
-				if (replyChannel) {
-					const message = await replyChannel.send({ content: `${userMention(userId)}`, embeds: [embed] });
-
-					setTimeout(async () => {
-						await message.delete();
-					}, 10000);
-				}
-				done();
-			}
-			catch (error) {
-				console.error(`Failed to delete channel ${channelId}`);
-				done(error);
-			}
-		});
+		deleteChannelQueue.process((job) => processPortalJob(client, job.data));
 
 		// Brawl expiry and settle timeouts (see functions/brawlWager.js)
 		const brawlQueue = new Queue('brawlQueue', redisURL);

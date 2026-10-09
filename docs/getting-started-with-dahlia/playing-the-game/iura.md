@@ -44,7 +44,7 @@ Names are up to 20 characters and must be unique; Dahlia tells you if a name is 
 ### Earning IURA
 
 * **Daily quest**: `/daily`, once every 24 hours.
-* **Duels**: the winner of a `/duel` takes a share of the loser's wallet.
+* **Duels**: the winner of a `/duel` takes 40% of the loser's wallet (rounded down), worked out when the battle ends.
 * **Voting** for Dahlia on top.gg or Discord Bot List: 50 IURA per vote, doubled on weekends.
 * **Gifts** from other voyagers, see below.
 
