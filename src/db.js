@@ -36,6 +36,8 @@ const Giveaway = require('../models/giveaway')(sequelize, Sequelize.DataTypes);
 const GiveawayEntry = require('../models/giveawayEntry')(sequelize, Sequelize.DataTypes);
 const RolePanel = require('../models/rolePanel')(sequelize, Sequelize.DataTypes);
 const RolePanelRole = require('../models/rolePanelRole')(sequelize, Sequelize.DataTypes);
+const TicketConfig = require('../models/ticketConfig')(sequelize, Sequelize.DataTypes);
+const Ticket = require('../models/ticket')(sequelize, Sequelize.DataTypes);
 
 Player.hasOne(Iura, {
 	as: 'iura',
@@ -426,6 +428,8 @@ module.exports = {
 	RaffleTicket,
 	RolePanel,
 	RolePanelRole,
+	TicketConfig,
+	Ticket,
 	moveIura,
 	transferIura,
 	escrowOres,

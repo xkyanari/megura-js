@@ -58,7 +58,7 @@ Before running the bot, you will need the following:
 - [x] Storytelling
 - [x] Creating and closing private channels
 - [ ] Scheduling events
-- [ ] Ticketing system
+- [x] Ticketing system
 - [ ] Whitelisting
 - [ ] Sales tracking
 - [x] Slash-command RPG profile and inventory system
