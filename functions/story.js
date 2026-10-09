@@ -70,28 +70,49 @@ const parseChapter = (content) => content
 		return { text: block };
 	});
 
-// Playbacks running in this process, by channel ID: { stopped }.
+// Playbacks running in this process, by channel ID: { stopped, stopping }.
 const playing = new Map();
 
 const isPlaying = (channelID) => playing.has(channelID);
 
-// Stops the playback in the channel. Returns false if nothing was playing.
+/**
+ * Takes the channel for a playback, before anything is awaited, so two
+ * plays at once can't both start. Returns the playback, or null if one is
+ * already there. playChapter uses it, and frees the channel when it ends.
+ */
+const reserveChapter = (channelID) => {
+	if (playing.has(channelID)) return null;
+	let stop;
+	const playback = { stopped: false, stopping: new Promise((resolve) => { stop = resolve; }) };
+	playback.stop = () => {
+		playback.stopped = true;
+		stop();
+	};
+	playing.set(channelID, playback);
+	return playback;
+};
+
+// Frees a reservation that never started playing.
+const releaseChapter = (channelID, playback) => {
+	if (playing.get(channelID) === playback) playing.delete(channelID);
+};
+
+// Stops the playback in the channel, cutting short any pause. False if nothing was playing.
 const stopChapter = (channelID) => {
 	const playback = playing.get(channelID);
 	if (!playback) return false;
-	playback.stopped = true;
+	playback.stop();
 	return true;
 };
 
 /**
  * Plays a listed chapter in the channel, one paragraph at a time. onBoss() is
  * awaited at a [boss] line (the caller decides whether bosses are allowed).
- * Resolves to 'finished', 'stopped' or 'busy' (already playing there).
+ * `playback` is a reservation from reserveChapter; without one the channel is
+ * reserved here. Resolves to 'finished', 'stopped' or 'busy' (already playing there).
  */
-const playChapter = async (channel, chapter, { sleep = require('node:timers/promises').setTimeout, onBoss = async () => undefined } = {}) => {
-	if (playing.has(channel.id)) return 'busy';
-	const playback = { stopped: false };
-	playing.set(channel.id, playback);
+const playChapter = async (channel, chapter, { sleep = require('node:timers/promises').setTimeout, onBoss = async () => undefined, playback = reserveChapter(channel.id) } = {}) => {
+	if (!playback || playing.get(channel.id) !== playback) return 'busy';
 	try {
 		const steps = parseChapter(fs.readFileSync(chapter.file, 'utf8'));
 		let pause = 0;
@@ -106,7 +127,8 @@ const playChapter = async (channel, chapter, { sleep = require('node:timers/prom
 				continue;
 			}
 			for (const piece of splitMessage(step.text)) await channel.send(piece);
-			await sleep(pause);
+			// a stop ends the pause at once
+			await Promise.race([sleep(pause), playback.stopping]);
 		}
 		return playback.stopped ? 'stopped' : 'finished';
 	}
@@ -131,6 +153,8 @@ module.exports = {
 	parseChapter,
 	splitMessage,
 	isPlaying,
+	reserveChapter,
+	releaseChapter,
 	stopChapter,
 	playChapter,
 	recordPlayed,

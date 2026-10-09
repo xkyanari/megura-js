@@ -71,16 +71,15 @@ describe('playing', () => {
 		assert.equal(S.isPlaying('C1'), false);
 	});
 
-	test('one chapter per channel, and stop ends it after the current paragraph', async () => {
+	test('one chapter per channel, and stop ends it at once, even mid-pause', async () => {
 		const channel = fakeChannel('C2');
-		let release;
 		const playback = S.playChapter(channel, S.chapterNamed('Chapter-001', options), {
-			sleep: () => new Promise((resolve) => { release = resolve; }),
+			// a pause that never ends on its own
+			sleep: () => new Promise(() => undefined),
 		});
 		await new Promise((resolve) => setImmediate(resolve));
 		assert.equal(await S.playChapter(channel, S.chapterNamed('Chapter-002', options)), 'busy');
 		assert.equal(S.stopChapter('C2'), true);
-		release();
 		assert.equal(await playback, 'stopped');
 		assert.deepEqual(channel.sent, ['First.']);
 		assert.equal(S.stopChapter('C2'), false, 'nothing left to stop');
@@ -127,6 +126,27 @@ describe('/story', () => {
 		for (const chapter of ['../config.json', '../../config', 'Nope']) {
 			assert.match((await run('play', { chapter })).content, /no such chapter/);
 		}
+	});
+
+	test('two plays at once: the channel is taken before the first reply, so the second is refused', async () => {
+		const [chapter] = S.listChapters();
+		const replies = [];
+		const play = (delay) => storyCommand.execute({
+			guild: { id: 'GS' },
+			user: { id: 'MOD' },
+			channelId: 'C10',
+			channel: fakeChannel('C10'),
+			options: { getSubcommand: () => 'play', getString: () => chapter.name, getChannel: () => null },
+			reply: async (payload) => {
+				await new Promise((resolve) => setTimeout(resolve, delay));
+				replies.push(payload.content);
+			},
+		});
+		await Promise.all([play(20), play(0)]);
+		assert.equal(replies.length, 2);
+		assert.match(replies[0], /already playing/);
+		assert.match(replies[1], /Playing/);
+		assert.equal(S.stopChapter('C10'), true);
 	});
 
 	test('stop with nothing playing says so', async () => {

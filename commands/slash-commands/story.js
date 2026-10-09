@@ -3,13 +3,13 @@ const { Guild } = require('../../src/db');
 const { footer } = require('../../src/vars');
 const { isFeatureEnabled } = require('../../src/feature');
 const S = require('../../functions/story');
-const { runBossFight, channelIO, hasGroupFightIn } = require('../../functions/boss');
+const { runBossFight, channelIO, reserveChannel } = require('../../functions/boss');
 
 // A [boss] line summons a world boss where the chapter is playing, if the server has bosses.
 const bossFor = (guildID, channel) => async () => {
 	const guild = await Guild.findOne({ where: { guildID } });
-	if (!guild || !await isFeatureEnabled(guild.subscription, 'hasBosses') || hasGroupFightIn(channel.id)) return;
-	// the story waits for the fight to end
+	if (!guild || !await isFeatureEnabled(guild.subscription, 'hasBosses') || !reserveChannel(channel.id)) return;
+	// the story waits for the fight to end (which frees the channel)
 	await runBossFight({ kind: 'group', guildID, channelID: channel.id, io: channelIO(channel) })
 		.catch((error) => console.error(`Story boss in ${guildID} failed:`, error));
 };
@@ -58,7 +58,7 @@ module.exports = {
 
 		if (subcommand === 'stop') {
 			return interaction.reply({
-				content: S.stopChapter(interaction.channelId) ? 'The story stops after this paragraph.' : 'No chapter is playing in this channel.',
+				content: S.stopChapter(interaction.channelId) ? 'The story stops now.' : 'No chapter is playing in this channel.',
 				flags: 64,
 			});
 		}
@@ -69,13 +69,21 @@ module.exports = {
 			return interaction.reply({ content: 'There is no such chapter. Pick one from the list.', flags: 64 });
 		}
 		const channel = options.getChannel('channel') ?? interaction.channel;
-		if (S.isPlaying(channel.id)) {
+		// taken before replying, so a second play at the same moment is refused
+		const playback = S.reserveChapter(channel.id);
+		if (!playback) {
 			return interaction.reply({ content: `A chapter is already playing in ${channelMention(channel.id)}.`, flags: 64 });
 		}
 
-		await interaction.reply({ content: `▶️ Playing **${chapter.name}** in ${channelMention(channel.id)}. Use \`/story stop\` there to stop it.`, flags: 64 });
+		try {
+			await interaction.reply({ content: `▶️ Playing **${chapter.name}** in ${channelMention(channel.id)}. Use \`/story stop\` there to stop it.`, flags: 64 });
+		}
+		catch (error) {
+			S.releaseChapter(channel.id, playback);
+			throw error;
+		}
 		// the chapter outlives this command: errors go to the log, not the (finished) reply
-		S.playChapter(channel, chapter, { onBoss: bossFor(guild.id, channel) })
+		S.playChapter(channel, chapter, { onBoss: bossFor(guild.id, channel), playback })
 			.then((result) => (result === 'finished' ? S.recordPlayed(guild.id, chapter, interaction.user.id) : null))
 			.catch((error) => console.error(`Playing ${chapter.name} in ${guild.id} failed:`, error));
 	},
