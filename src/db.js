@@ -44,6 +44,7 @@ const ScheduledPost = require('../models/scheduledPost')(sequelize, Sequelize.Da
 const AuctionClosure = require('../models/auctionClosure')(sequelize, Sequelize.DataTypes);
 const BossFight = require('../models/bossFight')(sequelize, Sequelize.DataTypes);
 const BossConfig = require('../models/bossConfig')(sequelize, Sequelize.DataTypes);
+const StoryProgress = require('../models/storyProgress')(sequelize, Sequelize.DataTypes);
 const QuestProgress = require('../models/questProgress')(sequelize, Sequelize.DataTypes);
 const FactionScore = require('../models/factionScore')(sequelize, Sequelize.DataTypes);
 const Exploration = require('../models/exploration')(sequelize, Sequelize.DataTypes);
@@ -492,6 +493,7 @@ module.exports = {
 	AuctionClosure,
 	BossFight,
 	BossConfig,
+	StoryProgress,
 	QuestProgress,
 	FactionScore,
 	Exploration,
