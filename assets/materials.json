@@ -1,0 +1,31 @@
+{
+  "tiers": [
+    {
+      "minLevel": 1,
+      "metal": "Iron Shard",
+      "hide": "Rough Hide"
+    },
+    {
+      "minLevel": 20,
+      "metal": "Silver Ore",
+      "hide": "Spirit Silk"
+    },
+    {
+      "minLevel": 40,
+      "metal": "Mythril Chunk",
+      "hide": "Wyrm Scale"
+    },
+    {
+      "minLevel": 60,
+      "metal": "Starmetal",
+      "hide": "Phoenix Down"
+    }
+  ],
+  "dust": "Arcane Dust",
+  "ward": "Ward Stone",
+  "forSale": [
+    "Iron Shard",
+    "Rough Hide",
+    "Arcane Dust"
+  ]
+}

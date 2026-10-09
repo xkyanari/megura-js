@@ -59,7 +59,7 @@ describe('travel', () => {
 });
 
 describe('search', () => {
-	// EVENTS weights are item 30, iura 25, lore 20, ambush 15, nothing 10 (of 100)
+	// EVENTS weights are item 25, iura 20, material 20, lore 15, ambush 15, nothing 5 (of 100)
 	test('each kind of find', async () => {
 		const player = await makePlayer('S1', { level: 4 });
 		const item = await E.search(player, { random: sequence(0.1, 0, 0) });
@@ -70,10 +70,15 @@ describe('search', () => {
 		assert.deepEqual([iura.type, iura.amount], ['iura', 10 * 4]);
 		assert.equal(await walletOf(player), 40);
 
-		assert.equal((await E.search(player, { random: sequence(0.6, 0) })).type, 'lore');
+		// 0.55 picks a material; 0.9 gives three; 0.5 picks the tier's hide
+		const material = await E.search(player, { random: sequence(0.55, 0.9, 0.5) });
+		assert.deepEqual([material.type, material.item, material.amount], ['material', 'Rough Hide', 3]);
+		assert.equal((await Item.findOne({ where: { accountID: player.accountID, itemName: 'Rough Hide' } })).quantity, 3);
+
+		assert.equal((await E.search(player, { random: sequence(0.7, 0) })).type, 'lore');
 		assert.equal((await E.search(player, { random: sequence(0.8) })).type, 'ambush');
-		assert.equal((await E.search(player, { random: sequence(0.95) })).type, 'nothing');
-		assert.equal((await Exploration.findByPk(player.accountID)).searches, 5);
+		assert.equal((await E.search(player, { random: sequence(0.96) })).type, 'nothing');
+		assert.equal((await Exploration.findByPk(player.accountID)).searches, 6);
 	});
 
 	test('an item find always gives an item, whatever the monster drop chance would say', async () => {

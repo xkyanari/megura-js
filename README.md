@@ -64,6 +64,7 @@ Before running the bot, you will need the following:
 - [x] Brawls
 - [ ] Auctions (switched off. To bring them back, set `"enableAuctions": true` in `config.json` **and** `"hasAuction": true` for the tiers that should have them in `assets/features.json`, then run `node deploy.js`)
 - [x] Exploration mode (`/explore`)
+- [x] Gear upgrades, crafting and salvage (`/upgrade`, `/craft`, `/salvage`)
 - [ ] World bosses
 
 All of these may not require having administrator role on the bot for security, but they are subject to change without prior notice.
@@ -224,13 +225,14 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 
 ## Commands (work in progress)
 
-- `/attack`: Fight a random monster sized to your level. Wins pay IURA and EXP, sometimes drop an item, and consumables in your inventory are used automatically when your health runs low.
+- `/attack`: Fight a random monster sized to your level. Wins pay IURA and EXP, sometimes drop an item or a crafting material, and consumables in your inventory are used automatically when your health runs low.
 - `/auction`: Start, view, or manage auctions (switched off by default; see `enableAuctions`).
 - `/brawl`: Start or join a brawl challenge.
 - `/buy`: Lets player to buy items in bulk.
 - `/changenick`: Updates player name.
 - `/checkprofile`: Check whether your player profile exists.
 - `/close`: Closes a portal prematurely.
+- `/craft`: `recipes` lists what can be crafted and what you have for it; `make` crafts an item from materials.
 - `/daily`: Do a random quest to gain IURA. Claiming within 48 hours keeps a streak going, worth up to +60%.
 - `/duel`: Initiate a duel against another player.
 - `/equip`: Equip an inventory item: one copy each, in 1 weapon, 3 armor and 1 accessory slot.
@@ -248,6 +250,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/requestduel`: Respond to a duel request.
 - `/reset`: Delete voyager profile.
 - `/sales`: (Moderators) Special shop sales for the last 7 or 30 days or all time, with an optional CSV export.
+- `/salvage`: Break unequipped gear into crafting materials.
 - `/sell`: Sell inventory items back to the shop for 40% of their price.
 - `/sendgift`: Send a gift to another player.
 - `/setup`: Setup server for moderation tools.
@@ -257,6 +260,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/support`: Shows support server information.
 - `/transfer`: Transfer IURA to another user.
 - `/unequip`: Unequip an item.
+- `/upgrade`: Upgrade a weapon, armor or accessory up to +5 (+10% of its stats per level). From +3 up a failed upgrade drops a level, unless you use a Ward Stone.
 - `/vote`: Shows voting information.
 
 ## Contributing

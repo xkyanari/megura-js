@@ -33,6 +33,7 @@
   * [/brawl](getting-started-with-dahlia/playing-the-game/brawl.md)
   * [/quests, /factions and /sell](getting-started-with-dahlia/playing-the-game/quests-and-factions.md)
   * [/explore](getting-started-with-dahlia/playing-the-game/exploration.md)
+  * [/upgrade, /craft and /salvage](getting-started-with-dahlia/playing-the-game/crafting.md)
   * [/specialshop](getting-started-with-dahlia/playing-the-game/specialshop.md)
   * [/iura](getting-started-with-dahlia/playing-the-game/iura.md)
 * [💬 Chatting with Dahlia](getting-started-with-dahlia/chatting-with-dahlia.md)

@@ -31,7 +31,9 @@ const sellItem = (accountID, itemID, amount) => {
 		if (!item || item.quantity < amount) return { ok: false, reason: 'not enough' };
 
 		const total = sellPrice(shopItem.price) * amount;
-		await item.update({ quantity: item.quantity - amount }, { transaction });
+		const quantity = item.quantity - amount;
+		// the last copy sold: its upgrade (functions/crafting.js) goes with it
+		await item.update({ quantity, ...(quantity + item.equippedAmount === 0 ? { upgradeLevel: 0 } : {}) }, { transaction });
 		await moveIura(accountID, null, 'wallet', total, transaction);
 		await Player.increment({ iuraEarned: total, itemsTraded: amount }, { where: { accountID }, transaction });
 		return { ok: true, itemName: shopItem.itemName, total };

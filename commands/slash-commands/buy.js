@@ -1,10 +1,11 @@
 const { SlashCommandBuilder } = require('discord.js');
 const { Player, Shop } = require('../../src/db');
+const { isForSale } = require('../../functions/crafting');
 const fs = require('fs');
 const path = require('node:path');
 
 const itemsData = fs.readFileSync(path.join(__dirname, '../../assets/item_db.json'));
-const itemsJson = JSON.parse(itemsData);
+const itemsJson = JSON.parse(itemsData).filter(isForSale);
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -48,6 +49,9 @@ module.exports = {
 		const shopItem = await Shop.findOne({ where: { item_ID: id, guildID: null } });
 		if (!shopItem) {
 			return interaction.reply({ content: 'Item not found.', flags: 64 });
+		}
+		if (!isForSale(shopItem)) {
+			return interaction.reply({ content: 'That item isn\'t sold: it can only be crafted or found.', flags: 64 });
 		}
 
 		const { price, itemName } = shopItem;

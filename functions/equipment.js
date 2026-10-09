@@ -13,6 +13,18 @@ const { sequelize, Player, Item, Shop } = require('../src/db');
 const SLOT_LIMITS = { weapons: 1, armor: 3, miscellaneous: 1 };
 const MAX_EQUIPPED_KINDS = Object.values(SLOT_LIMITS).reduce((sum, n) => sum + n, 0);
 const DEFAULTS = { weapons: ['weapon', 'Basic Sword'], armor: ['armor', 'Basic Clothes'] };
+// each upgrade level adds this share of the item's base stats
+const UPGRADE_STEP = 0.1;
+
+// An item's stats at an upgrade level: { totalHealth, totalAttack, totalDefense }.
+const statsFor = (shopItem, upgradeLevel = 0) => {
+	const scale = (value) => Math.round((value ?? 0) * (1 + UPGRADE_STEP * upgradeLevel));
+	return {
+		totalHealth: scale(shopItem.totalHealth),
+		totalAttack: scale(shopItem.totalAttack),
+		totalDefense: scale(shopItem.totalDefense),
+	};
+};
 
 // How many items of this category the player has equipped.
 const slotUsed = async (accountID, category, transaction) => {
@@ -66,10 +78,11 @@ const changeEquipment = (accountID, itemID, amount, equip) => {
 			equipped: equippedAmount > 0,
 		}, { transaction });
 
+		const itemStats = statsFor(shopItem, item.upgradeLevel);
 		const stats = {
-			totalHealth: player.totalHealth + sign * shopItem.totalHealth * amount,
-			totalAttack: player.totalAttack + sign * shopItem.totalAttack * amount,
-			totalDefense: player.totalDefense + sign * shopItem.totalDefense * amount,
+			totalHealth: player.totalHealth + sign * itemStats.totalHealth * amount,
+			totalAttack: player.totalAttack + sign * itemStats.totalAttack * amount,
+			totalDefense: player.totalDefense + sign * itemStats.totalDefense * amount,
 		};
 		const slot = DEFAULTS[shopItem.category];
 		if (slot) {
@@ -83,4 +96,4 @@ const changeEquipment = (accountID, itemID, amount, equip) => {
 	});
 };
 
-module.exports = { SLOT_LIMITS, MAX_EQUIPPED_KINDS, changeEquipment };
+module.exports = { SLOT_LIMITS, MAX_EQUIPPED_KINDS, UPGRADE_STEP, statsFor, changeEquipment };

@@ -103,6 +103,7 @@ module.exports = {
 			const text = {
 				item: `You dig through the rubble and find **${found.item}**! 🎁`,
 				iura: `You find a pouch someone left behind: **${found.amount} IURA**. 💰`,
+				material: `You gather **${found.amount} × ${found.item}**, good for crafting and upgrades. 🪨`,
 				lore: `📜 ${found.text}`,
 				nothing: 'You search carefully, but find nothing this time.',
 			}[found.type];

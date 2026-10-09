@@ -25,6 +25,9 @@ module.exports = async (interaction) => {
 			new StringSelectMenuOptionBuilder()
 				.setLabel('Miscellaneous Items')
 				.setValue('miscellaneous'),
+			new StringSelectMenuOptionBuilder()
+				.setLabel('Materials')
+				.setValue('materials'),
 		);
 
 	const row = new ActionRowBuilder()
