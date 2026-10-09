@@ -64,7 +64,7 @@ Before running the bot, you will need the following:
 - [x] Brawls
 - [ ] Auctions (switched off. To bring them back, set `"enableAuctions": true` in `config.json` **and** `"hasAuction": true` for the tiers that should have them in `assets/features.json`, then run `node deploy.js`)
 - [x] Exploration mode (`/explore`)
-- [ ] World bosses
+- [x] Bosses: solo and world bosses (behind the `hasBosses` feature flag)
 
 All of these may not require having administrator role on the bot for security, but they are subject to change without prior notice.
 
@@ -226,6 +226,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 
 - `/attack`: Fight a random monster sized to your level. Wins pay IURA and EXP, sometimes drop an item, and consumables in your inventory are used automatically when your health runs low.
 - `/auction`: Start, view, or manage auctions (switched off by default; see `enableAuctions`).
+- `/boss`: Fight a boss turn by turn, on your own (`challenge`) or as a channel (`spawn`, `autospawn` for moderators). Needs the `hasBosses` feature.
 - `/brawl`: Start or join a brawl challenge.
 - `/buy`: Lets player to buy items in bulk.
 - `/changenick`: Updates player name.

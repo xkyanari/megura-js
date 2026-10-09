@@ -15,6 +15,12 @@ const getFeaturesFromFile = async () => {
 	return features;
 };
 
+// Whether a subscription tier has a feature, for code with no interaction to reply to.
+const isFeatureEnabled = async (version, featureName) => {
+	const features = await getFeaturesFromFile();
+	return !!features[version]?.[featureName];
+};
+
 const validateFeature = async (interaction, version, featureName) => {
 	const features = await getFeaturesFromFile();
 
@@ -39,4 +45,5 @@ const validateFeature = async (interaction, version, featureName) => {
 
 module.exports = {
 	validateFeature,
+	isFeatureEnabled,
 };

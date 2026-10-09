@@ -31,6 +31,7 @@
 * [🎮 Playing the Game](getting-started-with-dahlia/playing-the-game/README.md)
   * [/arena](getting-started-with-dahlia/playing-the-game/arena.md)
   * [/brawl](getting-started-with-dahlia/playing-the-game/brawl.md)
+  * [/boss](getting-started-with-dahlia/playing-the-game/bosses.md)
   * [/quests, /factions and /sell](getting-started-with-dahlia/playing-the-game/quests-and-factions.md)
   * [/explore](getting-started-with-dahlia/playing-the-game/exploration.md)
   * [/specialshop](getting-started-with-dahlia/playing-the-game/specialshop.md)
