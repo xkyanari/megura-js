@@ -135,8 +135,8 @@ module.exports = {
 		scheduleQueue.process((job) => processScheduledPost(client, scheduleQueue, job.data));
 		await syncScheduledPosts(scheduleQueue).catch((error) => console.error('Could not sync scheduled posts:', error));
 
-		// Faction seasons (see functions/factionSeason.js): settled every Monday,
-		// and once at startup in case the bot was down when the week turned
+		// Faction seasons (see functions/factionSeason.js): every hour, and once at
+		// startup. Each week is settled once; announcements and roles that failed are retried
 		const factionSeasonQueue = new Queue('factionSeasonQueue', redisURL);
 		client.factionSeasonQueue = factionSeasonQueue;
 		factionSeasonQueue.process(() => runSeasonJob(client));

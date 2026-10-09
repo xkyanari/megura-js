@@ -1,3 +1,4 @@
+const { Op } = require('sequelize');
 const { EmbedBuilder, userMention } = require('discord.js');
 const { sequelize, Player, Guild, FactionScore, FactionContribution, FactionSeason, FactionConfig, moveIura } = require('../src/db');
 const { FACTIONS, factionLabel } = require('./factions');
@@ -10,20 +11,25 @@ const { previousWeekKey } = require('./period');
  * scaled by level and by their points against the week's top scorer. Each week
  * is settled once (FactionSeason row), so a retried or repeated job can't pay
  * twice. If the server set a champion role, it moves to the new winners.
+ *
+ * The job runs every hour: settling is done once per week, and the Discord
+ * side (announcement, role changes) is retried until it goes through.
  */
 
 const SEASON_IURA_PER_LEVEL = 100;
-const SEASON_CRON = '5 0 * * 1';
+const SEASON_CRON = '5 * * * *';
+
+// Discord errors for things that are gone for good (no point retrying)
+const UNKNOWN = { channel: 10003, guild: 10004, member: 10007, role: 10011 };
 
 const rewardFor = (level, points, topPoints) =>
 	Math.max(Math.round(SEASON_IURA_PER_LEVEL * Math.max(level, 1) * (0.5 + 0.5 * points / topPoints)), 1);
 
 /**
  * Settles one server's week. Returns null if it was already settled, else
- * { guildID, weekKey, winner, scores, rewards: [{ discordID, points, iura }], previousIDs }.
+ * { guildID, weekKey, winner, scores, rewards: [{ discordID, points, iura }] }.
  */
 const settleSeason = (guildID, weekKey) => sequelize.transaction(async (transaction) => {
-	const previous = await FactionSeason.findOne({ where: { guildID }, order: [['id', 'DESC']], transaction });
 	const settled = await FactionSeason.findOne({ where: { guildID, weekKey }, transaction, lock: transaction.LOCK.UPDATE });
 	if (settled) return null;
 
@@ -56,20 +62,29 @@ const settleSeason = (guildID, weekKey) => sequelize.transaction(async (transact
 		winner,
 		scores,
 		rewardedIDs: rewards.map((reward) => reward.discordID),
+		rewards,
 	}, { transaction });
-	return { guildID, weekKey, winner, scores, rewards, previousIDs: previous?.rewardedIDs ?? [] };
+	return { guildID, weekKey, winner, scores, rewards };
 });
 
-// Moves the champion role from last season's winners to this season's. Members who left are skipped.
+// Moves the champion role from last season's winners to this season's. Members
+// who left, and a deleted role, are skipped; any other failure is thrown, so
+// the delivery is retried.
 const moveChampionRole = async (guild, roleID, previousIDs, newIDs) => {
-	const role = await guild.roles.fetch(roleID).catch(() => null);
+	const role = await guild.roles.fetch(roleID).catch((error) => {
+		if (error.code === UNKNOWN.role) return null;
+		throw error;
+	});
 	if (!role) return false;
-	const member = (id) => guild.members.fetch(id).catch(() => null);
+	const member = (id) => guild.members.fetch(id).catch((error) => {
+		if (error.code === UNKNOWN.member) return null;
+		throw error;
+	});
 	for (const id of previousIDs.filter((previousID) => !newIDs.includes(previousID))) {
-		await (await member(id))?.roles.remove(role).catch(() => null);
+		await (await member(id))?.roles.remove(role);
 	}
 	for (const id of newIDs) {
-		await (await member(id))?.roles.add(role).catch(() => null);
+		await (await member(id))?.roles.add(role);
 	}
 	return true;
 };
@@ -90,32 +105,56 @@ const seasonEmbed = (result, guildRow) => {
 };
 
 /**
- * Settles last week for every server with faction scores, then announces it
- * and moves champion roles where the server set them up. Safe to run again.
+ * Announces a settled season and moves the champion role, where the server set
+ * them up, then marks it delivered. Throws on a failure worth retrying.
+ */
+const deliverSeason = async (client, season) => {
+	const config = await FactionConfig.findByPk(season.guildID);
+	const guild = config && await client.guilds.fetch(season.guildID).catch((error) => {
+		if (error.code === UNKNOWN.guild) return null;
+		throw error;
+	});
+	if (guild) {
+		if (config.roleID) {
+			const previous = await FactionSeason.findOne({
+				where: { guildID: season.guildID, id: { [Op.lt]: season.id } },
+				order: [['id', 'DESC']],
+			});
+			await moveChampionRole(guild, config.roleID, previous?.rewardedIDs ?? [], season.rewardedIDs);
+		}
+		if (config.channelID) {
+			const channel = await client.channels.fetch(config.channelID).catch((error) => {
+				if (error.code === UNKNOWN.channel) return null;
+				throw error;
+			});
+			const guildRow = await Guild.findOne({ where: { guildID: season.guildID } });
+			await channel?.send({ embeds: [seasonEmbed(season, guildRow)] });
+		}
+	}
+	await season.update({ delivered: true });
+};
+
+/**
+ * Settles last week for every server with faction scores or a season channel
+ * (so champions lose the role after a week nobody scored in), then delivers
+ * every season not delivered yet. Safe to run again.
  */
 const runSeasonJob = async (client, now = Date.now()) => {
 	const weekKey = previousWeekKey(now);
-	const guildIDs = (await FactionScore.findAll({ where: { weekKey }, attributes: ['guildID'], group: ['guildID'] })).map((row) => row.guildID);
+	const scored = await FactionScore.findAll({ where: { weekKey }, attributes: ['guildID'], group: ['guildID'] });
+	const configured = await FactionConfig.findAll({ attributes: ['guildID'] });
+	const guildIDs = [...new Set([...scored, ...configured].map((row) => row.guildID))];
+
 	const results = [];
 	for (const guildID of guildIDs) {
-		try {
-			const result = await settleSeason(guildID, weekKey);
-			if (!result) continue;
-			results.push(result);
-
-			const config = await FactionConfig.findByPk(guildID);
-			const guild = config && await client.guilds.fetch(guildID).catch(() => null);
-			if (!guild) continue;
-			if (config.roleID) await moveChampionRole(guild, config.roleID, result.previousIDs, result.rewards.map((r) => r.discordID));
-			if (config.channelID) {
-				const channel = await client.channels.fetch(config.channelID).catch(() => null);
-				const guildRow = await Guild.findOne({ where: { guildID } });
-				await channel?.send({ embeds: [seasonEmbed(result, guildRow)] }).catch(() => null);
-			}
-		}
-		catch (error) {
-			console.error(`Faction season for ${guildID} failed:`, error);
-		}
+		const result = await settleSeason(guildID, weekKey).catch((error) => {
+			console.error(`Settling the faction season for ${guildID} failed:`, error);
+			return null;
+		});
+		if (result) results.push(result);
+	}
+	for (const season of await FactionSeason.findAll({ where: { delivered: false }, order: [['id', 'ASC']] })) {
+		await deliverSeason(client, season).catch((error) => console.error(`Faction season for ${season.guildID} not delivered yet:`, error));
 	}
 	return results;
 };
@@ -123,4 +162,4 @@ const runSeasonJob = async (client, now = Date.now()) => {
 // The last settled season in a server, or null.
 const lastSeason = (guildID) => FactionSeason.findOne({ where: { guildID }, order: [['id', 'DESC']] });
 
-module.exports = { SEASON_IURA_PER_LEVEL, SEASON_CRON, rewardFor, settleSeason, moveChampionRole, seasonEmbed, runSeasonJob, lastSeason };
+module.exports = { SEASON_IURA_PER_LEVEL, SEASON_CRON, rewardFor, settleSeason, moveChampionRole, seasonEmbed, deliverSeason, runSeasonJob, lastSeason };

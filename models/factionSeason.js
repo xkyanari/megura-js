@@ -29,6 +29,18 @@ module.exports = (sequelize, DataTypes) => {
 				allowNull: false,
 				defaultValue: [],
 			},
+			// [{ discordID, points, iura }], for the announcement
+			rewards: {
+				type: DataTypes.JSON,
+				allowNull: false,
+				defaultValue: [],
+			},
+			// whether the announcement and role changes went through (retried until they do)
+			delivered: {
+				type: DataTypes.BOOLEAN,
+				allowNull: false,
+				defaultValue: false,
+			},
 		},
 		{
 			freezeTableName: true,

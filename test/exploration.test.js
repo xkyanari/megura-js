@@ -76,6 +76,15 @@ describe('search', () => {
 		assert.equal((await Exploration.findByPk(player.accountID)).searches, 5);
 	});
 
+	test('an item find always gives an item, whatever the monster drop chance would say', async () => {
+		const player = await makePlayer('S3');
+		// 0.1 picks the item event; 0.9 would miss a 30% drop roll if one were made
+		for (let i = 0; i < 5; i++) {
+			const found = await E.search(player, { random: sequence(0.1, 0.9, 0.9) });
+			assert.equal(found.type, 'item');
+		}
+	});
+
 	test('a player who never travelled searches the first location', async () => {
 		const player = await makePlayer('S2');
 		const found = await E.search(player, { random: sequence(0.95) });
