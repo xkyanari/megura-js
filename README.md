@@ -90,6 +90,17 @@ To install and run the project, follow these steps:
 
 The log files from `logs/` live in the `megura-logs` Docker volume, and console output goes to `docker compose logs`.
 
+**Installing Docker:** use Docker's own packages (Docker Engine with the Compose v2 plugin). Debian 12's `docker.io` and `docker-compose` packages are too old for this `docker-compose.yml`. On Debian:
+
+```sh
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | sudo tee /etc/apt/sources.list.d/docker.list
+sudo apt update && sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo systemctl enable --now docker
+docker compose version   # needs v2.24 or later
+```
+
 **Switching from pm2:**
 
 ```sh
@@ -112,6 +123,19 @@ Once the bot is running in Docker, `pm2 delete <app>` and `pm2 save` stop pm2 fr
 | Restart | `docker compose restart` |
 | Stop | `docker compose down` |
 | Read the log files | `docker compose exec bot ls logs` |
+| Free disk after updates | `docker image prune -f` |
+
+**Small servers (around 2 GB of RAM):** the bot itself uses about 200–350 MB, and `docker-compose.yml` caps it at 768 MB. Peaks are what run a small box out of memory, for example a `docker compose build` while MySQL and other tools are running. A few settings help:
+
+- **Add swap** so a peak doesn't trigger the out-of-memory killer:
+  ```sh
+  sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile
+  sudo mkswap /swapfile && sudo swapon /swapfile
+  echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+  echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-swappiness.conf && sudo sysctl --system
+  ```
+- **Check which database you run** with `mysqld --version`. On Debian 12, `mysql-server` installs MariaDB 10.11, which is already light and needs no tuning. On MySQL 8, add `performance_schema = OFF` and `innodb_buffer_pool_size = 128M` under `[mysqld]`, then restart MySQL.
+- **Clean up old images** after updates with `docker image prune -f`.
 
 ## Running tests
 

@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, Collection } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, Options } = require('discord.js');
 const config = require('./config.json');
 
 const token = process.env.DISCORD_TOKEN || config.token;
@@ -18,7 +18,15 @@ const client = new Client({
 		GatewayIntentBits.DirectMessageTyping,
 		GatewayIntentBits.DirectMessageReactions,
 	],
-	// sweepers: Options.DefaultSweeperSettings,
+	// Keep memory bounded: every hour, drop cached messages older than 30 minutes.
+	// The longest reaction collector (arena, 7 minutes) is well inside that window.
+	sweepers: {
+		...Options.DefaultSweeperSettings,
+		messages: {
+			interval: 3600,
+			lifetime: 1800,
+		},
+	},
 });
 
 logs(client, { debug: false });
