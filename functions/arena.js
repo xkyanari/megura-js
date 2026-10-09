@@ -1,29 +1,27 @@
 const { EmbedBuilder, userMention } = require('discord.js');
-const { attackMultiplier } = require('../src/vars');
-const { getDamage } = require('./battle');
+const { getDamage, simulateBattle } = require('./battle');
 const battleUp = require('../functions/battleup');
 const { Monster, sequelize, Guild, Player } = require('../src/db');
 const { duelMessages } = require('../assets/responses');
 const wait = require('node:timers/promises').setTimeout;
 
-const duelPlayer = async (interaction, player1, player2) => {
-	const damage1 = Math.round(getDamage(player1, player2, attackMultiplier(player1.level)).finalDamage);
-	const damage2 = Math.round(getDamage(player2, player1, attackMultiplier(player2.level)).finalDamage);
+const noop = async () => undefined;
 
-	let winner, loser;
+/**
+ * Fights two arena players out in full, silently (the arena shows its own
+ * card and line for each duel): a coin flip decides who strikes first, and a
+ * draw is settled with another coin flip. The stronger player usually wins,
+ * but not always.
+ */
+const fightOut = async (player1, player2, random = Math.random) => {
+	const [first, second] = random() < 0.5 ? [player1, player2] : [player2, player1];
+	const winner = await simulateBattle(null, first, second, { render: noop, delay: noop })
+		|| (random() < 0.5 ? player1 : player2);
+	return { winner, loser: winner === player1 ? player2 : player1 };
+};
 
-	if (damage1 > damage2) {
-		winner = player1;
-		loser = player2;
-	}
-	else if (damage2 > damage1) {
-		winner = player2;
-		loser = player1;
-	}
-	else {
-		winner = Math.random() < 0.5 ? player1 : player2;
-		loser = winner === player1 ? player2 : player1;
-	}
+const duelPlayer = async (interaction, player1, player2, { random = Math.random } = {}) => {
+	const { winner, loser } = await fightOut(player1, player2, random);
 
 	await battleUp(interaction, winner, loser);
 
@@ -375,4 +373,5 @@ module.exports = {
 	wantedBattle,
 	ffaBattle,
 	duelPlayer,
+	fightOut,
 };

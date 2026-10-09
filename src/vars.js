@@ -40,12 +40,20 @@ const getCriticalHitRate = (level) => Math.min(level * criticalRate, 0.5);
 // leveling bonuses
 const attackPerLevel = (level) => Math.round(baseAttack * (1 + attackIncreasePerLevel) ** (level - 1));
 const defensePerLevel = (level) => baseDefense + levelDefenseMultiplier * (level - 1);
-const healthPerLevel = (level) => baseHealth + levelHealthMultiplier * (level - 1);
+// Health keeps pace with the damage a player of the same level deals, so a
+// duel between equals takes about DUEL_HITS_TO_KILL hits at every level
+// (attack grows 5% a level, compounding; a flat health gain fell far behind).
+// Level 1 is exactly baseHealth.
+const DUEL_HITS_TO_KILL = baseHealth / (baseAttack * attackMultiplier(1) - baseDefense);
+const healthPerLevel = (level) =>
+	Math.round(DUEL_HITS_TO_KILL * Math.max(attackPerLevel(level) * attackMultiplier(level) - defensePerLevel(level), 1));
+// the curve before October 2026, for scripts/migrations/2026-10-health-curve.js
+const legacyHealthPerLevel = (level) => baseHealth + levelHealthMultiplier * (level - 1);
 
 // monsters (/attack): sized against a player with no gear at the same level, so
 // a fight takes about the same number of hits at every level and gear tips it
 const MONSTER_HITS_TO_KILL = 4;
-const MONSTER_HITS_TO_DIE = 5;
+const MONSTER_HITS_TO_DIE = 4.5;
 const monsterStats = (mob, level) => {
 	const totalDefense = Math.round(defensePerLevel(level) * mob.totalDefense / baseDefense);
 	const playerHit = Math.max(attackPerLevel(level) * attackMultiplier(level) - totalDefense, 1);
@@ -96,6 +104,7 @@ module.exports = {
 	attackPerLevel,
 	defensePerLevel,
 	healthPerLevel,
+	legacyHealthPerLevel,
 	monsterStats,
 	attackMultiplier,
 	getCriticalHitRate,

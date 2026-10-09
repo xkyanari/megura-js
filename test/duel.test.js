@@ -104,7 +104,7 @@ test('reciprocal duels settling at once don\'t deadlock', async () => {
 describe('duel checks', () => {
 	test('refuses missing profiles, rank gaps and thin wallets', async () => {
 		await createPlayer('ME', 500);
-		await createPlayer('RICH', 500, { totalHealth: 1000 + D.MAX_HEALTH_GAP });
+		await createPlayer('RICH', 500, { level: 2 + D.MAX_LEVEL_GAP });
 		await createPlayer('POOR', 99);
 		await createPlayer('OK', 100);
 		const load = async (a, b) => Object.values(await D.loadDuelists(GUILD, a, b));

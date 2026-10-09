@@ -1,6 +1,7 @@
 const { test, describe, before, after } = require('node:test');
 const assert = require('node:assert');
-const { Player, Iura, Item, Shop, Monster } = require('../src/db');
+const { Player, Iura, Item, Shop, Monster, QuestProgress } = require('../src/db');
+const { questsFor } = require('../functions/quests');
 const { rollLoot, loadConsumables, consumeItem } = require('../functions/loot');
 const { claimDaily, streakReward } = require('../functions/daily');
 const { simulateBattle } = require('../functions/battle');
@@ -135,6 +136,10 @@ describe('/attack', () => {
 		await Monster.create(mobs[0]);
 		// strong enough to win every time; level 3 so one win doesn't level up
 		const player = await makePlayer('ATK1', { level: 3, totalAttack: 100000 });
+		// quests pay too (test/progression.test.js): mark today's done, so only the fight pays here
+		await QuestProgress.bulkCreate(questsFor(player.accountID, { hasFaction: true }).map((quest) => ({
+			accountID: player.accountID, periodKey: quest.periodKey, objective: quest.objective, progress: quest.target, completed: true,
+		})));
 		const rec = recorder();
 		const sent = [];
 		const interaction = {

@@ -4,6 +4,7 @@ const { sequelize, Player, Iura, moveIura } = require('../src/db');
 const { expPoints, duel_expGained } = require('../src/vars');
 const { simulateBattle } = require('./battle');
 const leveling = require('./level');
+const { recordProgress, completedLines } = require('./quests');
 const levelcheck = require('./levelup');
 
 /**
@@ -19,8 +20,8 @@ const levelcheck = require('./levelup');
 const PAYOUT_SHARE = 0.15;
 const MAX_PAYOUT_PER_LEVEL = 500;
 const MIN_WALLET = 100;
-// How far apart in total health two players may be
-const MAX_HEALTH_GAP = 15000;
+// How many levels apart two players may be
+const MAX_LEVEL_GAP = 10;
 
 // The two players' profiles in this server, with their wallets.
 const loadDuelists = async (guildID, challengerId, targetId) => {
@@ -37,7 +38,7 @@ const loadDuelists = async (guildID, challengerId, targetId) => {
 // Why these two can't duel, or null if they can. Profiles must already be loaded.
 const duelRefusal = (challenger, target, targetUser) => {
 	if (!target) return `${targetUser.tag ?? targetUser.username} does not have a voyager profile yet.`;
-	if (Math.abs(target.totalHealth - challenger.totalHealth) >= MAX_HEALTH_GAP) {
+	if (Math.abs(target.level - challenger.level) > MAX_LEVEL_GAP) {
 		return 'Your rank is inappropriate to fight this player.';
 	}
 	if (!challenger.iura || challenger.iura.walletAmount < MIN_WALLET) {
@@ -96,7 +97,7 @@ const checkLevelUp = async (interaction, challenger) => {
 const SELF_DUEL = 'There is a saying that goes:```“The attempt to force human beings to despise themselves is what I call hell.” ― Andre Malraux```Sorry, I cannot allow that.';
 
 // Runs a whole duel between the member who used the command and `targetUser`.
-const runDuel = async (interaction, targetUser, { delay = wait } = {}) => {
+const runDuel = async (interaction, targetUser, { delay = wait, random = Math.random } = {}) => {
 	const { user, guild, client } = interaction;
 
 	if (user.id === targetUser.id) return interaction.reply(SELF_DUEL);
@@ -116,7 +117,9 @@ const runDuel = async (interaction, targetUser, { delay = wait } = {}) => {
 	await interaction.channel.send({ embeds: [new EmbedBuilder().setColor(0xcd7f32).setDescription('Starting in 10 seconds...')] });
 	await delay(10000);
 
-	const winner = await simulateBattle(interaction, challenger, target);
+	// a coin flip decides who strikes first: striking first wins most even fights
+	const [first, second] = random() < 0.5 ? [challenger, target] : [target, challenger];
+	const winner = await simulateBattle(interaction, first, second);
 	if (winner !== challenger && winner !== target) return;
 
 	const challengerWon = winner === challenger;
@@ -126,10 +129,12 @@ const runDuel = async (interaction, targetUser, { delay = wait } = {}) => {
 		challengerWon,
 	});
 
+	const quests = challengerWon ? completedLines(await recordProgress(challenger.accountID, 'duelWin')) : [];
+
 	await interaction.channel.send('The battle has concluded.');
 	await interaction.followUp({
 		content: challengerWon
-			? `🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${amount} IURA\`\n- \`${duel_expGained} EXP\`\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`
+			? `🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${amount} IURA\`\n- \`${duel_expGained} EXP\`${quests.map((line) => `\n${line}`).join('')}\n\n> “The supreme art of war is to subdue the enemy without fighting.”\n> ― Sun Tzu, The Art of War`
 			: `👎 **YOU LOST!** You lost the following from the battle: \n\n- \`${amount} IURA\`\n\n> “It's not whether you get knocked down; it's whether you get up.”\n> ― Vince Lombardi`,
 		components: [profileButtons()],
 	});
@@ -140,7 +145,7 @@ const runDuel = async (interaction, targetUser, { delay = wait } = {}) => {
 module.exports = {
 	PAYOUT_SHARE,
 	MAX_PAYOUT_PER_LEVEL,
-	MAX_HEALTH_GAP,
+	MAX_LEVEL_GAP,
 	loadDuelists,
 	duelRefusal,
 	settleDuel,
