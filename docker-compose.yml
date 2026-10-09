@@ -17,7 +17,8 @@ services:
     # forward SIGTERM to node so `docker compose down` stops the bot cleanly
     init: true
     # share the host's network so 127.0.0.1 in config.json still reaches the
-    # MySQL and Redis already running on this server (the bot opens no ports)
+    # MySQL and Redis already running on this server. The bot opens no ports,
+    # except the vote webhook server when VOTE_PORT is set in .env.
     network_mode: host
     env_file:
       - path: .env

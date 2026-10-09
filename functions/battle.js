@@ -1,6 +1,12 @@
 const { EmbedBuilder } = require('discord.js');
 const { attackMultiplier, getCriticalHitRate } = require('../src/vars');
 
+// A battle where neither side can hurt the other would never end.
+const MAX_ROUNDS = 50;
+// Discord embeds hold 4096 characters; show the latest lines.
+const MAX_LOG_LINES = 25;
+const logText = (lines) => lines.slice(-MAX_LOG_LINES).join('\n').slice(-4000);
+
 const getDamage = (player1, player2, criticalHitMultiplier) => {
 	const damage =
 		player1.totalAttack * criticalHitMultiplier - player2.totalDefense;
@@ -31,7 +37,7 @@ const attack = async (interaction, player1, player2, criticalHitRate, existingBa
 	const embed = new EmbedBuilder()
 		.setColor(0xcd7f32)
 		.setTitle('Battle Logs')
-		.setDescription(existingBattleLogs.join('\n'));
+		.setDescription(logText(existingBattleLogs));
 
 	if (!message) {
 		message = await interaction.channel.send({ embeds: [embed] });
@@ -42,7 +48,7 @@ const attack = async (interaction, player1, player2, criticalHitRate, existingBa
 
 	if (Math.max(0, Math.round(remainingHealth)) === 0) {
 		existingBattleLogs.push(`\`${player2.playerName}\` dodged the final attack and gave up.`);
-		embed.setDescription(existingBattleLogs.join('\n'));
+		embed.setDescription(logText(existingBattleLogs));
 		await message.edit({ embeds: [embed] });
 	}
 
@@ -76,7 +82,14 @@ const simulateBattle = async (interaction, player1, player2) => {
 	}
 	await wait(2000);
 
+	let rounds = 0;
 	while (remainingHealthA > 0 && remainingHealthB > 0) {
+		if (++rounds > MAX_ROUNDS) {
+			// neither side is getting anywhere: call it a draw (no winner)
+			await interaction.channel.send('Both fighters are exhausted. The battle ends in a draw.');
+			break;
+		}
+
 		const attackResultB = await attack(
 			interaction,
 			playerB,

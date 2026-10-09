@@ -2,7 +2,7 @@ const { Events, ActivityType } = require('discord.js');
 const { sequelize } = require('../src/db');
 // const { port } = require('../config.json');
 const Queue = require('bull');
-// const app = require('../server');
+const { startVoteServer } = require('../server');
 const { endAuction, runningAuctions } = require('../functions/endAuction');
 const { scheduleAuctionEnd } = require('../functions/startAuction');
 const { announceAuctionEnd } = require('../functions/auctionMessage');
@@ -58,14 +58,19 @@ module.exports = {
 			},
 		};
 
-		await sequelize.sync(sync.default);
+		try {
+			await sequelize.sync(sync.default);
+		}
+		catch (error) {
+			// without the database nothing works: exit so Docker (or pm2) restarts the bot
+			console.error('Could not connect to the database:', error);
+			process.exit(1);
+		}
 		console.log('Database connection successful.');
+		startVoteServer();
 		await cleanupOldLogs();
 		setInterval(cleanupOldLogs, 24 * 60 * 60 * 1000);
 
-		// app.listen(port, () => {
-		// 	console.log(`Express server is running on http://localhost:${port}`);
-		// });
 
 		const deleteChannelQueue = new Queue('deleteChannel', redisURL);
 		client.deleteChannelQueue = deleteChannelQueue;

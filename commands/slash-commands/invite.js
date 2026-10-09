@@ -5,6 +5,8 @@ module.exports = {
 		.setName('invite')
 		.setDescription('Add Dahlia to your server!'),
 	cooldown: 3000,
+	// works in DMs too (everything else is server-only)
+	dm: true,
 	async execute(interaction) {
 
 		const embed = new EmbedBuilder()

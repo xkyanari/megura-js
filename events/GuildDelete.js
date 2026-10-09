@@ -1,21 +1,17 @@
 const { Events, EmbedBuilder } = require('discord.js');
-const { Guild } = require('../src/db');
 const sendLogs = require('../functions/logs');
 const { serverID } = require('../src/vars');
 
 /**
- * This event is fired when the bot joins a server.
+ * This event is fired when the bot leaves (or is removed from) a server.
  */
 
 module.exports = {
 	name: Events.GuildDelete,
 	async execute(guild) {
 		try {
-			const guildCheck = await Guild.findOne({ where: { guildID: guild.id } });
-			if (guildCheck) {
-				Guild.destroy({ where: { guildID: guild.id } });
-			}
-
+			// Keep the server's settings (plan, wallet, channels): if the bot is
+			// invited back, everything is as it was.
 			const embed = new EmbedBuilder().setTitle('Guild Left.').setColor('Red')
 				.setDescription(`
 					> **Guild Name** : ${guild.name}

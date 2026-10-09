@@ -14,7 +14,7 @@ module.exports = {
 			include: 'iura',
 		});
 
-		if (!player) {
+		if (!player?.iura) {
 			throw new Error('profile not found');
 		}
 
@@ -22,6 +22,10 @@ module.exports = {
 			order: sequelize.random(),
 			limit: 1,
 		});
+		if (!quest.length) {
+			// the handler clears the cooldown, so they can try again once quests exist
+			throw new Error('no daily quests configured');
+		}
 
 		const embed = new EmbedBuilder()
 			.setColor(0xcd7f32)
@@ -40,7 +44,7 @@ module.exports = {
 		await interaction.reply({ embeds: [embed] });
 		await Iura.increment(
 			{ walletAmount: quest[0]['questReward'] },
-			{ where: { accountID: player.iura.accountID } },
+			{ where: { accountID: player.accountID } },
 		);
 	},
 };

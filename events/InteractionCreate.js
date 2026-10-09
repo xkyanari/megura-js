@@ -79,6 +79,11 @@ const handleCommand = async (interaction) => {
 		return;
 	}
 
+	// commands registered before DMs were turned off can still arrive from a DM
+	if (!interaction.guildId && !command.dm) {
+		return interaction.reply({ content: 'Please use this command in a server.', flags: 64 });
+	}
+
 	const interactionScope = interaction.guildId ?? 'dm';
 	const counterKey = `counter:${interaction.user.id}:${interactionScope}`;
 

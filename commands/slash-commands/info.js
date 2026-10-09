@@ -5,6 +5,8 @@ module.exports = {
 		.setName('info')
 		.setDescription('List of Commands'),
 	cooldown: 3000,
+	// works in DMs too (everything else is server-only)
+	dm: true,
 	async execute(interaction) {
 
 		const embed = new EmbedBuilder()

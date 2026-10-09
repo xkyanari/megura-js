@@ -267,8 +267,6 @@ const wantedBattle = async (interaction, players) => {
 
 		await wait(8000);
 
-		players.push(wantedPlayer);
-
 		while (players.length > 1) {
 			const player1 = players.shift();
 			let player2Index;
