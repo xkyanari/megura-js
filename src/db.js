@@ -38,6 +38,8 @@ const RolePanel = require('../models/rolePanel')(sequelize, Sequelize.DataTypes)
 const RolePanelRole = require('../models/rolePanelRole')(sequelize, Sequelize.DataTypes);
 const TicketConfig = require('../models/ticketConfig')(sequelize, Sequelize.DataTypes);
 const Ticket = require('../models/ticket')(sequelize, Sequelize.DataTypes);
+const Form = require('../models/form')(sequelize, Sequelize.DataTypes);
+const FormField = require('../models/formField')(sequelize, Sequelize.DataTypes);
 
 Player.hasOne(Iura, {
 	as: 'iura',
@@ -58,6 +60,7 @@ Auction.belongsTo(AuctionItem, { foreignKey: 'itemId' });
 Giveaway.hasMany(GiveawayEntry, { as: 'entries', foreignKey: 'giveawayId', onDelete: 'CASCADE' });
 Raffle.hasMany(RaffleTicket, { as: 'tickets', foreignKey: 'raffleId', onDelete: 'CASCADE' });
 RolePanel.hasMany(RolePanelRole, { as: 'roles', foreignKey: 'panelId', onDelete: 'CASCADE' });
+Form.hasMany(FormField, { as: 'fields', foreignKey: 'formId', onDelete: 'CASCADE' });
 
 // Atomic balance helpers -----------------
 
@@ -430,6 +433,8 @@ module.exports = {
 	RolePanelRole,
 	TicketConfig,
 	Ticket,
+	Form,
+	FormField,
 	moveIura,
 	transferIura,
 	escrowOres,

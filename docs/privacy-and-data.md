@@ -16,6 +16,7 @@ Dahlia stores the data needed to operate server tools and game features:
 * Giveaway records: the prize, the host's Discord user ID, and the Discord user IDs of the members who entered and won
 * Raffle records: the prize, the host's Discord user ID, and for each member who bought tickets their Discord user ID, ticket count, and the winners
 * Ticket records: the Discord user ID of the member who opened each ticket and of who closed it, the ticket channel's ID, and when it was opened and closed. Dahlia does not store the messages sent in ticket channels
+* Form submissions: answers are posted to the server's chosen channel with the member's username and user ID; Dahlia stores the form's questions but not the answers
 * Setup change logs: the Discord username and user ID of the member who changed a `/setup` setting, what changed (including channel and role names), and when
 * Timestamps related to gameplay, setup, and bot activity
 
