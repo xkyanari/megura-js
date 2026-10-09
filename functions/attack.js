@@ -10,7 +10,7 @@ const { currentLocation, monsterAt } = require('./explore');
 const { simulateBattle } = require('./battle');
 const { expPoints, monsterStats } = require('../src/vars');
 const { rollLoot, loadConsumables } = require('./loot');
-const { RIVAL_DAMAGE_BONUS, playerFaction, isRival, factionLabel, addFactionPoint } = require('./factions');
+const { RIVAL_DAMAGE_BONUS, syncFaction, isRival, factionLabel, addFactionPoint } = require('./factions');
 const { recordProgress, completedLines } = require('./quests');
 const leveling = require('./level');
 const levelcheck = require('./levelup');
@@ -96,7 +96,7 @@ const executeAttack = async (interaction, { delay, ambush = false } = {}) => {
 	}
 
 	const guildRow = await Guild.findOne({ where: { guildID: guild.id } });
-	const faction = playerFaction(player, guildRow);
+	const faction = await syncFaction(player, guildRow, member);
 	const rival = isRival(faction, monster.faction);
 
 	const playerObj = {

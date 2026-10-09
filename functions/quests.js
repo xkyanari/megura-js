@@ -64,7 +64,41 @@ const hasFactionFor = async (player, transaction) =>
 const rewardFor = (quest, level) => ({ iura: quest.iura * Math.max(level, 1), exp: quest.exp * Math.max(level, 1) });
 
 /**
- * Counts `amount` of `event` ('monsterWin', 'rivalKill', 'loot', 'duelWin' or 'search') toward the player's objectives, and pays any it completes.
+ * The player's objectives for the current day and week, each with its
+ * progress row. The set is picked once per period and saved (one
+ * QuestProgress row per objective), so joining or leaving a faction later in
+ * the period doesn't swap quests or open extra ones.
+ */
+const assignedQuests = async (player, now, transaction) => {
+	let hasFaction;
+	const periods = questsFor(player.accountID, { now, hasFaction: true })
+		.reduce((keys, quest) => keys.set(quest.periodKey, quest.period), new Map());
+	const quests = [];
+	for (const [periodKey, period] of periods) {
+		const pool = period === 'daily' ? DAILY_POOL : WEEKLY_POOL;
+		let rows = await QuestProgress.findAll({ where: { accountID: player.accountID, periodKey }, order: [['id', 'ASC']], transaction });
+		if (!rows.length) {
+			hasFaction ??= await hasFactionFor(player, transaction);
+			const picks = questsFor(player.accountID, { hasFaction, now }).filter((quest) => quest.periodKey === periodKey);
+			await QuestProgress.bulkCreate(
+				picks.map((quest) => ({ accountID: player.accountID, periodKey, objective: quest.objective, progress: 0 })),
+				{ ignoreDuplicates: true, transaction },
+			);
+			rows = await QuestProgress.findAll({ where: { accountID: player.accountID, periodKey }, order: [['id', 'ASC']], transaction });
+		}
+		for (const row of rows) {
+			const quest = pool.find((entry) => entry.objective === row.objective);
+			// an objective since removed from the pool
+			if (!quest) continue;
+			quests.push({ ...quest, period, periodKey, text: OBJECTIVES[quest.objective].text(quest.target), row });
+		}
+	}
+	return quests;
+};
+
+/**
+ * Counts `amount` of `event` ('monsterWin', 'rivalKill', 'loot', 'duelWin' or 'search')
+ * toward the player's objectives, and pays any it completes.
  * Returns the completed quests with their rewards: [{ text, iura, exp }].
  */
 const recordProgress = (accountID, event, { amount = 1, now = Date.now() } = {}) => {
@@ -73,13 +107,11 @@ const recordProgress = (accountID, event, { amount = 1, now = Date.now() } = {})
 	return sequelize.transaction(async (transaction) => {
 		const player = await Player.findByPk(accountID, { transaction, lock: transaction.LOCK.UPDATE });
 		if (!player) return [];
-		const hasFaction = await hasFactionFor(player, transaction);
-		const quests = questsFor(accountID, { hasFaction, now }).filter((quest) => OBJECTIVES[quest.objective].event === event);
+		const quests = (await assignedQuests(player, now, transaction)).filter((quest) => OBJECTIVES[quest.objective].event === event);
 
 		const completed = [];
 		for (const quest of quests) {
-			const where = { accountID, periodKey: quest.periodKey, objective: quest.objective };
-			const [row] = await QuestProgress.findOrCreate({ where, defaults: { ...where, progress: 0 }, transaction });
+			const { row } = quest;
 			if (row.completed) continue;
 
 			const progress = Math.min(row.progress + amount, quest.target);
@@ -97,16 +129,13 @@ const recordProgress = (accountID, event, { amount = 1, now = Date.now() } = {})
 };
 
 // The player's objectives with their progress, for /quests.
-const questBoard = async (player, { now = Date.now() } = {}) => {
-	const quests = questsFor(player.accountID, { hasFaction: await hasFactionFor(player), now });
-	const rows = await QuestProgress.findAll({
-		where: { accountID: player.accountID, periodKey: [...new Set(quests.map((quest) => quest.periodKey))] },
-	});
-	return quests.map((quest) => {
-		const row = rows.find((r) => r.periodKey === quest.periodKey && r.objective === quest.objective);
-		return { ...quest, ...rewardFor(quest, player.level), progress: row?.progress ?? 0, completed: row?.completed ?? false };
-	});
-};
+const questBoard = async (player, { now = Date.now() } = {}) =>
+	(await assignedQuests(player, now)).map(({ row, ...quest }) => ({
+		...quest,
+		...rewardFor(quest, player.level),
+		progress: row.progress,
+		completed: row.completed,
+	}));
 
 // One line per completed quest, for result messages.
 const completedLines = (completed) =>

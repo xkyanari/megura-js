@@ -1,8 +1,9 @@
 const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits, channelMention, roleMention } = require('discord.js');
 const { Player, Guild, FactionConfig } = require('../../src/db');
 const { footer } = require('../../src/vars');
-const { FACTIONS, RIVAL_DAMAGE_BONUS, playerFaction, factionLabel, pointsThisWeek, standings } = require('../../functions/factions');
+const { FACTIONS, RIVAL_DAMAGE_BONUS, syncFaction, factionLabel, pointsThisWeek, standings } = require('../../functions/factions');
 const { lastSeason } = require('../../functions/factionSeason');
+const chooseFaction = require('../../functions/faction');
 const { nextWeekStart } = require('../../functions/period');
 
 const table = (scores, guild) => {
@@ -17,13 +18,13 @@ const showStandings = async (interaction) => {
 	const { member, guild } = interaction;
 	const guildRow = await Guild.findOne({ where: { guildID: guild.id } });
 	const player = await Player.findOne({ where: { discordID: member.id, guildID: guild.id } });
-	const faction = player && playerFaction(player, guildRow);
+	const faction = player && await syncFaction(player, guildRow, member);
 	const { thisWeek, lastWeek } = await standings(guild.id);
 	const season = await lastSeason(guild.id);
 
 	const yours = faction
 		? `You fight for **${factionLabel(faction, guildRow)}**: you deal +${RIVAL_DAMAGE_BONUS * 100}% damage to the rival faction's monsters, and each one you defeat scores a point. You have scored **${await pointsThisWeek(guild.id, player.accountID)}** this week.`
-		: 'You haven\'t joined a faction yet. Members deal more damage to the rival faction\'s monsters and score points for their side.';
+		: 'You haven\'t joined a faction yet: pick one with `/factions join`. Members deal more damage to the rival faction\'s monsters and score points for their side.';
 	const lastResult = season
 		? (season.winner ? `👑 **${factionLabel(season.winner, guildRow)}** won, and ${season.rewardedIDs.length} member(s) were rewarded.` : 'No winner.')
 		: 'No season has ended yet.';
@@ -61,9 +62,12 @@ const setup = async (interaction) => {
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('factions')
-		.setDescription('Faction standings and seasons.')
+		.setDescription('Factions: pick a side, standings and seasons.')
 		.addSubcommand((subcommand) =>
 			subcommand.setName('standings').setDescription('See how the factions stand this week.'),
+		)
+		.addSubcommand((subcommand) =>
+			subcommand.setName('join').setDescription('Choose your faction.'),
 		)
 		.addSubcommand((subcommand) =>
 			subcommand
@@ -78,7 +82,10 @@ module.exports = {
 		),
 	cooldown: 3000,
 	async execute(interaction) {
-		if (interaction.options.getSubcommand() === 'setup') return setup(interaction);
+		const subcommand = interaction.options.getSubcommand();
+		// shows the faction buttons (components/buttons/margaretha.js and cerberon.js)
+		if (subcommand === 'join') return chooseFaction(interaction);
+		if (subcommand === 'setup') return setup(interaction);
 		return showStandings(interaction);
 	},
 };

@@ -107,3 +107,22 @@ test('the migration drops the NFT columns and moves old shop categories, once', 
 	await migrate({ log: (line) => again.push(line) });
 	assert.match(again.join('\n'), /already been applied/);
 });
+
+test('a shop category with more than 25 items still opens, showing the first 25', async () => {
+	const category = require('../components/menus/specialshopCategory');
+	await Shop.bulkCreate(Array.from({ length: 30 }, (_, i) => ({
+		itemName: `Perk ${i}`, item_ID: `perk${i}`, category: 'digital', price: 1, quantity: 1, guildID: 'BIG',
+	})));
+	const rec = recorder();
+	await category.execute({
+		values: ['digital'],
+		guild: { id: 'BIG' },
+		client: { emojis: { cache: { get: () => null } } },
+		deferUpdate: async () => undefined,
+		followUp: async (payload) => rec.push('followUp', payload),
+	});
+	const [, payload] = rec.calls.at(-1);
+	assert.equal(payload.embeds[0].data.fields.length, 25);
+	assert.equal(payload.components[0].components[0].options.length, 25);
+	assert.match(payload.embeds[0].data.description, /first 25 of 30/);
+});

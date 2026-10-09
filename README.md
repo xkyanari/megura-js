@@ -62,7 +62,7 @@ Before running the bot, you will need the following:
 - [x] Sales tracking for the special shop (`/sales`)
 - [x] Slash-command RPG profile and inventory system
 - [x] Brawls
-- [ ] Auctions (switched off; set `"enableAuctions": true` in `config.json` to bring them back)
+- [ ] Auctions (switched off. To bring them back, set `"enableAuctions": true` in `config.json` **and** `"hasAuction": true` for the tiers that should have them in `assets/features.json`, then run `node deploy.js`)
 - [x] Exploration mode (`/explore`)
 - [ ] World bosses
 
@@ -235,7 +235,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/duel`: Initiate a duel against another player.
 - `/equip`: Equip an inventory item: one copy each, in 1 weapon, 3 armor and 1 accessory slot.
 - `/explore`: `map` shows the places of Eldelvain, `travel` moves you to one you have unlocked (monsters for `/attack` then come from there), and `search` looks around every 30 minutes.
-- `/factions`: `standings` shows this week's faction points and last season's result; `setup` (moderators) sets where weekly season results are posted and an optional champion role.
+- `/factions`: `join` picks your faction; `standings` shows this week's faction points and last season's result; `setup` (moderators) sets where weekly season results are posted and an optional champion role.
 - `/info`: Shows the list of commands.
 - `/inventory`: Opens your inventory.
 - `/invite`: Shows the bot invite link.
