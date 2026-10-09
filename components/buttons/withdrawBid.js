@@ -1,6 +1,7 @@
 const { withdrawBid } = require('../../functions/withdrawBid');
 const { refreshOpenAuction } = require('../../functions/auctionMessage');
 const { User } = require('../../src/db');
+const { auctionsEnabled } = require('../../src/vars');
 
 const REFUSALS = {
 	'Auction not found': 'This auction no longer exists.',
@@ -9,6 +10,8 @@ const REFUSALS = {
 };
 
 module.exports = {
+	// off unless config.json enables auctions (see src/vars.js)
+	isEnabled: auctionsEnabled,
 	data: {
 		name: 'withdrawBid',
 	},

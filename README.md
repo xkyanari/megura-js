@@ -39,7 +39,7 @@ Before running the bot, you will need the following:
 
 - **Node.js 18.17 or newer**: Discord.js v14 and its REST dependencies require a modern Node.js runtime. You can download and install Node.js from the official website at https://nodejs.org.
 - **Discord Bot Token**: You will need a Discord bot token to authenticate your bot with the Discord API. You can obtain a token by creating a new bot application on the Discord Developer Portal at https://discord.com/developers/applications.
-- **MySQL 8.0 database**: Dahlia stores guild settings, player profiles, inventory, wallet data, auctions, brawls, and other gameplay state in MySQL through Sequelize.
+- **MySQL 8.0 database**: Dahlia stores guild settings, player profiles, inventory, IURA balances, brawls, and other gameplay state in MySQL through Sequelize.
 - **Redis**: Required for cooldown/rate tracking, Bull queues, and temporary CAPTCHA state.
 - **Cloudinary credentials**: Required for uploading temporary CAPTCHA images.
 - **OpenAI API Key (optional)**: The package is still present for future AI features, but open channel AI chat is currently disabled while the bot avoids Message Content intent.
@@ -59,10 +59,10 @@ Before running the bot, you will need the following:
 - [x] Creating and closing private channels
 - [x] Scheduling events
 - [x] Ticketing system
-- [ ] Whitelisting
 - [ ] Sales tracking
 - [x] Slash-command RPG profile and inventory system
-- [x] Auctions and brawls
+- [x] Brawls
+- [ ] Auctions (switched off. To bring them back, set `"enableAuctions": true` in `config.json` **and** `"hasAuction": true` for the tiers that should have them in `assets/features.json`, then run `node deploy.js`)
 - [ ] Exploration mode
 - [ ] World bosses
 
@@ -116,7 +116,7 @@ docker compose version   # needs v2.24 or later
    - `config.json` and `assets/features.json` (present, valid, readable by the container's uid 1000);
    - the Discord token;
    - MySQL and Redis reachable;
-   - `isTestnet`;
+   - `testMode` (the older `isTestnet` key still works);
    - swap and disk space;
    - whether pm2 is still running the bot.
 3. **Build while the old bot keeps running:**
@@ -168,18 +168,24 @@ docker compose version   # needs v2.24 or later
 - **Check which database you run** with `mysqld --version`. On Debian 12, `mysql-server` installs MariaDB 10.11, which is already light and needs no tuning. On MySQL 8, add `performance_schema = OFF` and `innodb_buffer_pool_size = 128M` under `[mysqld]`, then restart MySQL.
 - **Clean up old images** after updates with `docker image prune -f`.
 
-**Database migrations.** The bot creates new tables by itself but never changes existing ones, so a few updates ship a one-off SQL script in `scripts/migrations/`. Run each once, in date order, with the bot stopped and after a backup:
+**Database migrations.** The bot creates new tables by itself but never changes existing ones, so a few updates ship a one-off script in `scripts/migrations/`. Run each once, in date order, with the bot stopped and after a backup. The `.js` scripts take `--dry-run` to show what they would change, and remember that they have run:
 
 ```sh
 docker compose down
 mysqldump -u <user> -p <database> > backup-$(date +%F).sql
 mysql -u <user> -p <database> < scripts/migrations/2026-10-auction-bigint.sql
+docker compose run --rm bot node scripts/migrations/2026-10-gameplay.js
+docker compose run --rm bot node scripts/migrations/2026-10-health-curve.js
+docker compose run --rm bot node scripts/migrations/2026-10-remove-crypto.js
 docker compose up -d
 ```
 
 | Script | Why |
 |---|---|
-| `2026-10-auction-bigint.sql` | Auction and bid amounts are stored as whole satoshis (`BIGINT`) instead of `FLOAT`, which rounded amounts above about 0.17 coin. |
+| `2026-10-auction-bigint.sql` | Auction and bid amounts are stored as whole numbers (`BIGINT`) instead of `FLOAT`, which rounded large amounts. |
+| `2026-10-gameplay.js` | Adds the daily-streak columns and new shop items, and unequips stacked or over-limit gear. |
+| `2026-10-health-curve.js` | Moves players onto the new health curve, keeping health from gear. |
+| `2026-10-remove-crypto.js` | Drops the unused NFT link columns from `Player`, and moves special-shop items from the removed Whitelist, NFTs and Cryptocurrencies categories to Digital Items. |
 
 **Vote rewards (top.gg and discordbotlist).** `/vote` pays 50 IURA per vote through a small webhook server inside the bot. It only starts when `VOTE_PORT` is set:
 
@@ -217,7 +223,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 ## Commands (work in progress)
 
 - `/attack`: Fight a random monster sized to your level. Wins pay IURA and EXP, sometimes drop an item, and consumables in your inventory are used automatically when your health runs low.
-- `/auction`: Start, view, or manage auction activity.
+- `/auction`: Start, view, or manage auctions (switched off by default; see `enableAuctions`).
 - `/brawl`: Start or join a brawl challenge.
 - `/buy`: Lets player to buy items in bulk.
 - `/changenick`: Updates player name.

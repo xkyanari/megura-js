@@ -29,7 +29,7 @@ before(async () => {
 	await resetDb();
 	await sequelize.query('DROP TABLE IF EXISTS `_migrations`');
 	await Shop.bulkCreate(items);
-	await Shop.create({ itemName: 'VIP pass', item_ID: 'vip', category: 'whitelist', price: 500, quantity: 5, guildID: G });
+	await Shop.create({ itemName: 'VIP pass', item_ID: 'vip', category: 'digital', price: 500, quantity: 5, guildID: G });
 	await Guild.create({ guildID: G, margarethaName: 'Dawnguard', cerberonName: 'Ironmind' });
 });
 after(closeAll);

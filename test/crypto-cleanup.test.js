@@ -1,0 +1,128 @@
+const { test, describe, before, after } = require('node:test');
+const assert = require('node:assert');
+const { Collection } = require('discord.js');
+const config = require('./config');
+const { sequelize, Shop } = require('../src/db');
+const { readTestMode } = require('../src/vars');
+const handler = require('../events/InteractionCreate');
+const auctionCommand = require('../commands/slash-commands/auction');
+const placeBid = require('../components/buttons/placeBid1');
+const { collectCommands } = require('../deploy');
+const { migrate, PLAYER_COLUMNS } = require('../scripts/migrations/2026-10-remove-crypto');
+const { resetDb, closeAll, recorder } = require('./helpers');
+
+// Runs `fn` with auctions switched off, as in production.
+const withoutAuctions = async (fn) => {
+	config.enableAuctions = false;
+	try {
+		await fn();
+	}
+	finally {
+		config.enableAuctions = true;
+	}
+};
+
+const interaction = ({ command, button }) => {
+	const rec = recorder();
+	return {
+		rec,
+		user: { id: 'U1' },
+		member: { id: 'U1' },
+		guildId: 'G1',
+		guild: { id: 'G1' },
+		commandName: command?.data.name,
+		customId: button?.data.name,
+		client: {
+			commands: new Collection(command ? [[command.data.name, command]] : []),
+			buttons: new Collection(button ? [[button.data.name, button]] : []),
+			cooldown: new Collection(),
+		},
+		isChatInputCommand: () => Boolean(command),
+		isUserContextMenuCommand: () => false,
+		isButton: () => Boolean(button),
+		isStringSelectMenu: () => false,
+		isModalSubmit: () => false,
+		isAutocomplete: () => false,
+		reply: async (payload) => rec.push('reply', payload),
+	};
+};
+
+before(async () => {
+	await resetDb();
+	await sequelize.query('DROP TABLE IF EXISTS `_migrations`');
+});
+after(closeAll);
+
+describe('auctions are switched off', () => {
+	test('/auction and auction buttons answer that the feature is unavailable', async () => {
+		await withoutAuctions(async () => {
+			for (const target of [{ command: auctionCommand }, { button: placeBid }]) {
+				const i = interaction(target);
+				await handler.execute(i);
+				assert.deepEqual(i.rec.calls, [['reply', { content: 'This feature is currently unavailable.', flags: 64 }]]);
+			}
+		});
+	});
+
+	test('/auction isn\'t registered with Discord while switched off', async () => {
+		await withoutAuctions(async () => {
+			const names = collectCommands().map((command) => command.name);
+			assert.ok(!names.includes('auction'));
+			assert.ok(names.includes('attack'));
+		});
+		assert.ok(collectCommands().some((command) => command.name === 'auction'), 'back once enabled');
+	});
+});
+
+test('test mode reads testMode, or the older isTestnet key', () => {
+	assert.equal(readTestMode({ testMode: true }), true);
+	assert.equal(readTestMode({ testMode: 'true' }), true);
+	assert.equal(readTestMode({ isTestnet: true }), true);
+	assert.equal(readTestMode({ testMode: false, isTestnet: true }), false, 'the new key wins');
+	assert.equal(readTestMode({ testMode: 'false' }), false);
+	assert.equal(readTestMode({}), false);
+});
+
+test('the migration drops the NFT columns and moves old shop categories, once', async () => {
+	const queryInterface = sequelize.getQueryInterface();
+	// an existing database still has the old columns
+	await queryInterface.addColumn('Player', 'linked', { type: 'BOOLEAN', defaultValue: 0 });
+	for (const column of ['walletAddress', 'contractAddress']) await queryInterface.addColumn('Player', column, { type: 'TEXT' });
+	await queryInterface.addColumn('Player', 'tokenID', { type: 'INTEGER' });
+	await Shop.bulkCreate(['whitelist', 'nfts', 'crypto', 'events'].map((category, i) => ({
+		itemName: `Item ${i}`, item_ID: `item${i}`, category, price: 10, quantity: 1, guildID: 'G1',
+	})));
+
+	const logs = [];
+	await migrate({ dryRun: true, log: (line) => logs.push(line) });
+	assert.match(logs.join('\n'), /Move 3 shop item/);
+	assert.ok(PLAYER_COLUMNS.every((column) => column in (sequelize.models.Player.rawAttributes ?? {}) === false));
+
+	await migrate({ log: () => undefined });
+	const columns = Object.keys(await queryInterface.describeTable('Player'));
+	for (const column of PLAYER_COLUMNS) assert.ok(!columns.includes(column), `${column} dropped`);
+	assert.deepEqual((await Shop.findAll({ where: { guildID: 'G1' }, order: [['item_ID', 'ASC']] })).map((s) => s.category), ['digital', 'digital', 'digital', 'events']);
+
+	const again = [];
+	await migrate({ log: (line) => again.push(line) });
+	assert.match(again.join('\n'), /already been applied/);
+});
+
+test('a shop category with more than 25 items still opens, showing the first 25', async () => {
+	const category = require('../components/menus/specialshopCategory');
+	await Shop.bulkCreate(Array.from({ length: 30 }, (_, i) => ({
+		itemName: `Perk ${i}`, item_ID: `perk${i}`, category: 'digital', price: 1, quantity: 1, guildID: 'BIG',
+	})));
+	const rec = recorder();
+	await category.execute({
+		values: ['digital'],
+		guild: { id: 'BIG' },
+		client: { emojis: { cache: { get: () => null } } },
+		deferUpdate: async () => undefined,
+		followUp: async (payload) => rec.push('followUp', payload),
+	});
+	const [, payload] = rec.calls.at(-1);
+	assert.equal(payload.embeds[0].data.fields.length, 25);
+	assert.equal(payload.components[0].components[0].options.length, 25);
+	assert.match(payload.embeds[0].data.description, /first 25 of 30/);
+});

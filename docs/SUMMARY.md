@@ -17,11 +17,6 @@
 * [🔏 Privacy Policy](privacy-policy.md)
 * [📜 Terms of Service](terms-of-service.md)
 
-## Tokenomics
-
-* [🪙 $IURA](tokenomics/usdiura.md)
-* [🏛 Burning Ivy](tokenomics/burning-ivy.md)
-
 ## Getting Started with Dahlia
 
 * [🛠 Setting up Dahlia](getting-started-with-dahlia/setting-up-dahlia/README.md)
@@ -42,7 +37,6 @@
 
 ## Use Cases
 
-* [👥 For Investors](use-cases/for-investors.md)
 * [🧵 For Projects](use-cases/for-projects.md)
 * [🎨 For Designers](use-cases/for-designers.md)
 * [🖥 For Developers](use-cases/for-developers.md)

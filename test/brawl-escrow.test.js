@@ -1,5 +1,5 @@
 // Mainnet behaviour: stakes are escrowed in the guild wallet.
-require('./config').isTestnet = false;
+require('./config').testMode = false;
 
 const { test } = require('node:test');
 const assert = require('node:assert');

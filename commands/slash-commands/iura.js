@@ -55,7 +55,7 @@ module.exports = {
 		.addSubcommand((subcommand) =>
 			subcommand
 				.setName('bank')
-				.setDescription('Manage your bank or stake/unstake funds.')
+				.setDescription('Manage your bank and savings.')
 				.addStringOption((option) =>
 					option
 						.setName('name')
@@ -65,16 +65,16 @@ module.exports = {
 				)
 				.addIntegerOption((option) =>
 					option
-						.setName('stake')
+						.setName('save')
 						.setMinValue(1)
-						.setDescription('Stake your funds in the bank.')
+						.setDescription('Move IURA from your bank into savings.')
 						.setRequired(false),
 				)
 				.addIntegerOption((option) =>
 					option
-						.setName('unstake')
+						.setName('take')
 						.setMinValue(1)
-						.setDescription('Unstake funds from the bank.')
+						.setDescription('Move IURA from savings back to your bank.')
 						.setRequired(false),
 				),
 		)
@@ -118,8 +118,8 @@ module.exports = {
 			const wallet_deposit = interaction.options.getInteger('deposit');
 			const wallet_withdraw = interaction.options.getInteger('withdraw');
 			const bank_name = interaction.options.getString('name');
-			const bank_deposit = interaction.options.getInteger('stake');
-			const bank_withdraw = interaction.options.getInteger('unstake');
+			const bank_deposit = interaction.options.getInteger('save');
+			const bank_withdraw = interaction.options.getInteger('take');
 			const check_balance = interaction.options.getString('view') ?? 'wallet';
 
 			const subCommand = interaction.options.getSubcommand();
@@ -191,7 +191,7 @@ module.exports = {
 						);
 					}
 					else if (bank_deposit) {
-						// bank ----> stake
+						// bank ----> savings
 						if (bank_deposit > balance.bankAmount) {
 							return interaction.editReply({
 								content: 'You do not have sufficient balance!',
@@ -201,16 +201,16 @@ module.exports = {
 						await player.deposit(bank_deposit, 'bank');
 
 						const embed1 = new EmbedBuilder()
-							.setTitle('Staked.')
+							.setTitle('Saved.')
 							.setDescription(
 								`**$${numFormat(
 									bank_deposit,
-								)} IURA** has been added to your Stake account.`,
+								)} IURA** has been added to your savings.`,
 							);
 						await interaction.editReply({ embeds: [embed1] });
 					}
 					else if (bank_withdraw) {
-						// stake ----> bank
+						// savings ----> bank
 						if (bank_withdraw > balance.stakedAmount) {
 							return interaction.editReply({
 								content: 'You do not have sufficient balance!',
@@ -224,7 +224,7 @@ module.exports = {
 							.setDescription(
 								`**$${numFormat(
 									bank_withdraw,
-								)} IURA** has been removed from your Stake account.`,
+								)} IURA** has been moved from your savings to your bank.`,
 							);
 						await interaction.editReply({ embeds: [embed1] });
 					}
@@ -232,7 +232,7 @@ module.exports = {
 						const embed1 = new EmbedBuilder()
 							.setTitle('Error!')
 							.setDescription(
-								'Please stake and unstake from your bank balance only. Thanks!',
+								'Please move IURA between your bank and savings only. Thanks!',
 							);
 						await interaction.editReply({ embeds: [embed1] });
 					}
@@ -253,7 +253,7 @@ module.exports = {
 							.setDescription(
 								`🏦 **Bank:** $${numFormat(
 									balance.bankAmount,
-								)} IURA\n💵 **Staked:** $${numFormat(balance.stakedAmount)} IURA`,
+								)} IURA\n💵 **Savings:** $${numFormat(balance.stakedAmount)} IURA`,
 							);
 						await interaction.editReply({ embeds: [embed2] });
 					}

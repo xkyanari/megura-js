@@ -64,5 +64,5 @@ The private channel is deleted a few seconds after the result is announced, and 
 Every payout happens exactly once, even if the bot restarts in the middle of a brawl. Expiry and refunds are scheduled in a way that survives restarts.
 
 {% hint style="info" %}
-On test servers (testnet), brawls work the same way but no ores are taken or paid out.
+In test mode, brawls work the same way but no ores are taken or paid out.
 {% endhint %}

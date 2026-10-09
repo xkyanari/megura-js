@@ -1,6 +1,7 @@
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs');
+const path = require('node:path');
 const config = require('./config.json');
 
 const token = process.env.DISCORD_TOKEN || config.token;
@@ -10,28 +11,26 @@ const guildId = process.env.DISCORD_GUILD_ID || config.guildId;
 // `node deploy.js --guild` registers commands to guildId only (instant, for testing)
 const guildOnly = process.argv.includes('--guild');
 
-const commands = [];
-const slashCommandFiles = fs
-	.readdirSync('./commands/slash-commands')
-	.filter((file) => file.endsWith('.js'));
-
-// For slash commands
-for (const file of slashCommandFiles) {
-	const command = require(`./commands/slash-commands/${file}`);
-	if ('data' in command) {
+// The commands to register: every slash command that is switched on.
+const collectCommands = () => fs
+	.readdirSync(path.join(__dirname, 'commands', 'slash-commands'))
+	.filter((file) => file.endsWith('.js'))
+	.flatMap((file) => {
+		const command = require(`./commands/slash-commands/${file}`);
+		if (!('data' in command)) {
+			console.log(`[WARNING] The slash command at ${file} is missing a required "data" property.`);
+			return [];
+		}
+		// switched-off features (e.g. auctions) aren't registered, so they disappear from Discord
+		if (command.isEnabled && !command.isEnabled()) return [];
 		// server-only unless the command says it works in DMs
-		commands.push({ ...command.data.toJSON(), dm_permission: Boolean(command.dm) });
-	}
-	else {
-		console.log(
-			`[WARNING] The slash command at ${file} is missing a required "data" property.`,
-		);
-	}
-}
+		return [{ ...command.data.toJSON(), dm_permission: Boolean(command.dm) }];
+	});
 
-const rest = new REST({ version: '9' }).setToken(token);
+const deploy = async () => {
+	const commands = collectCommands();
+	const rest = new REST({ version: '9' }).setToken(token);
 
-(async () => {
 	try {
 		console.log(
 			`Started refreshing ${commands.length} application (/) commands.`,
@@ -78,4 +77,8 @@ const rest = new REST({ version: '9' }).setToken(token);
 		console.error(error);
 		process.exitCode = 1;
 	}
-})();
+};
+
+if (require.main === module) deploy();
+
+module.exports = { collectCommands };

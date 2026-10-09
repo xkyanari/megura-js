@@ -36,11 +36,8 @@ module.exports = {
 						.setDescription('Enter the item ID. No spaces.')
 						.setRequired(true)
 						.addChoices(
-							{ name: 'Whitelist', value: 'whitelist' },
 							{ name: 'Event Items', value: 'events' },
 							{ name: 'Digital Items', value: 'digital' },
-							{ name: 'NFTs', value: 'nfts' },
-							{ name: 'Cryptocurrencies', value: 'crypto' },
 						),
 				)
 				.addStringOption(option =>

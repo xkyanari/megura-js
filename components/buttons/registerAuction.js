@@ -1,10 +1,12 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { User } = require('../../src/db');
-const { website, website_testnet } = require('../../config.json');
-const { isTestnet } = require('../../src/vars');
+const { website, website_test, website_testnet } = require('../../config.json');
+const { isTestMode, auctionsEnabled } = require('../../src/vars');
 const { generateId } = require('../../functions/generateId');
 
 module.exports = {
+	// off unless config.json enables auctions (see src/vars.js)
+	isEnabled: auctionsEnabled,
 	data: {
 		name: 'registerAuction',
 		cooldown: 3000,
@@ -14,7 +16,7 @@ module.exports = {
 		const user = await User.findOne({ where: { userGuildId: `${interaction.member.id}-${interaction.guild.id}` } });
 
 		const registrationID = await generateId(10);
-		const auctionURL = isTestnet ? `${website_testnet}/connect` : `${website}/connect`;
+		const auctionURL = isTestMode ? `${website_test ?? website_testnet}/connect` : `${website}/connect`;
 		const url = `${auctionURL}?id=${registrationID}`;
 
 		if (user) {

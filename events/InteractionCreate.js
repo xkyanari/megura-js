@@ -71,12 +71,18 @@ const logUsage = (interaction, kind, name) => {
 	});
 };
 
+const UNAVAILABLE = 'This feature is currently unavailable.';
+
 const handleCommand = async (interaction) => {
 	const command = interaction.client.commands.get(interaction.commandName);
 
 	if (!command) {
 		console.error(`No command matching \`${interaction.commandName}\` was found.`);
 		return;
+	}
+
+	if (command.isEnabled && !command.isEnabled()) {
+		return interaction.reply({ content: UNAVAILABLE, flags: 64 });
 	}
 
 	// commands registered before DMs were turned off can still arrive from a DM
@@ -134,6 +140,11 @@ const handleComponent = async (interaction, collection, kind) => {
 	if (!component) {
 		console.error(`There is no code for the ${kind} \`${customId}\`.`);
 		return;
+	}
+
+	// e.g. an auction button still showing in a channel after auctions were switched off
+	if (component.isEnabled && !component.isEnabled()) {
+		return interaction.reply({ content: UNAVAILABLE, flags: 64 });
 	}
 
 	const interactionScope = interaction.guildId ?? 'dm';
