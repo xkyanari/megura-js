@@ -30,6 +30,8 @@ const Auction = require('../models/auction')(sequelize, Sequelize.DataTypes);
 const User = require('../models/user')(sequelize, Sequelize.DataTypes);
 const Bid = require('../models/bid')(sequelize, Sequelize.DataTypes);
 const AuctionItem = require('../models/auctionItem')(sequelize, Sequelize.DataTypes);
+const Raffle = require('../models/raffle')(sequelize, Sequelize.DataTypes);
+const RaffleTicket = require('../models/raffleTicket')(sequelize, Sequelize.DataTypes);
 const Giveaway = require('../models/giveaway')(sequelize, Sequelize.DataTypes);
 const GiveawayEntry = require('../models/giveawayEntry')(sequelize, Sequelize.DataTypes);
 
@@ -50,6 +52,7 @@ User.hasMany(Auction, { as: 'WonAuctions', foreignKey: 'winnerId' });
 AuctionItem.hasOne(Auction, { foreignKey: 'itemId' });
 Auction.belongsTo(AuctionItem, { foreignKey: 'itemId' });
 Giveaway.hasMany(GiveawayEntry, { as: 'entries', foreignKey: 'giveawayId', onDelete: 'CASCADE' });
+Raffle.hasMany(RaffleTicket, { as: 'tickets', foreignKey: 'raffleId', onDelete: 'CASCADE' });
 
 // Atomic balance helpers -----------------
 
@@ -416,6 +419,9 @@ module.exports = {
 	Brawl,
 	Giveaway,
 	GiveawayEntry,
+	Raffle,
+	RaffleTicket,
+	moveIura,
 	transferIura,
 	escrowOres,
 	releaseOres,

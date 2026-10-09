@@ -13,6 +13,7 @@ Dahlia may process:
 - Gameplay data such as player names, profile stats, level/experience, inventory, shop purchases, wallet/game balances, battle/duel/brawl results, auction activity, and related timestamps.
 - Server log metadata, such as guild IDs, channel IDs, role IDs, and event timestamps.
 - Giveaway records: the prize, the host's Discord user ID, and the Discord user IDs of the members who entered and won.
+- Raffle records: the prize, the host's Discord user ID, and for each member who bought tickets their Discord user ID, ticket count, and the winners.
 - Setup change logs: the Discord username and user ID of the member who changed a `/setup` setting, what changed (including channel and role names), and when.
 
 ## Message Content
