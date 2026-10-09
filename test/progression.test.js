@@ -215,3 +215,41 @@ describe('factions', () => {
 		assert.ok(await QuestProgress.count({ where: { accountID: player.accountID } }) >= 1);
 	});
 });
+
+describe('review fixes', () => {
+	const NOW = Date.UTC(2026, 9, 9, 12);
+	const memberWith = (...roleIDs) => ({ roles: { cache: new Map(roleIDs.map((id) => [id, {}])) } });
+
+	test('faction membership follows the faction roles set up with /setup factions', async () => {
+		await Guild.create({ guildID: 'GR', margarethaID: 'RM', margarethaName: 'Dawnguard', cerberonID: 'RC', cerberonName: 'Ironmind' });
+		const guild = await Guild.findOne({ where: { guildID: 'GR' } });
+		const player = await Player.create({ discordID: 'R1', guildID: 'GR', playerName: 'R1', faction: 'Wanderer' });
+
+		assert.equal(await F.syncFaction(player, guild, memberWith('RC')), 'Cerberon', 'a role given by an admin counts');
+		assert.equal((await player.reload()).faction, 'Ironmind');
+		assert.equal(await F.syncFaction(player, guild, memberWith('RM')), 'Margaretha');
+		assert.equal(await F.syncFaction(player, guild, memberWith()), null, 'losing the role makes a Wanderer again');
+		assert.equal((await player.reload()).faction, 'Wanderer');
+
+		// without the member's roles, or before /setup factions, the stored faction stands
+		await player.update({ faction: 'Ironmind' });
+		assert.equal(await F.syncFaction(player, guild, { id: 'R1' }), 'Cerberon');
+		assert.equal(await F.syncFaction(player, { margarethaName: 'Dawnguard', cerberonName: 'Ironmind' }, memberWith()), 'Cerberon');
+	});
+
+	test('a day\'s quests stay the same after joining a faction', async () => {
+		await Guild.create({ guildID: 'GQS', margarethaID: 'RM', margarethaName: 'Dawnguard', cerberonID: 'RC', cerberonName: 'Ironmind' });
+		const player = await Player.create({ discordID: 'QS', guildID: 'GQS', playerName: 'QS', faction: 'Wanderer' });
+		await Iura.create({ accountID: player.accountID, walletAmount: 0, walletName: 'wQS', bankName: 'bQS' });
+
+		const assigned = (await Q.questBoard(player, { now: NOW })).map((q) => `${q.periodKey}/${q.objective}`);
+		await player.update({ faction: 'Ironmind' });
+		const afterJoining = (await Q.questBoard(await player.reload(), { now: NOW })).map((q) => `${q.periodKey}/${q.objective}`);
+		assert.deepEqual(afterJoining, assigned);
+		assert.equal(assigned.filter((key) => key.startsWith('d:')).length, Q.DAILY_COUNT);
+		assert.deepEqual(await Q.recordProgress(player.accountID, 'rivalKill', { now: NOW }), [], 'no faction quest appears mid-day');
+
+		const tomorrow = await Q.questBoard(player, { now: NOW + DAY });
+		assert.equal(tomorrow.filter((q) => q.period === 'daily').length, Q.DAILY_COUNT);
+	});
+});
