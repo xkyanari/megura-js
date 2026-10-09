@@ -40,6 +40,7 @@ const TicketConfig = require('../models/ticketConfig')(sequelize, Sequelize.Data
 const Ticket = require('../models/ticket')(sequelize, Sequelize.DataTypes);
 const Form = require('../models/form')(sequelize, Sequelize.DataTypes);
 const FormField = require('../models/formField')(sequelize, Sequelize.DataTypes);
+const ScheduledPost = require('../models/scheduledPost')(sequelize, Sequelize.DataTypes);
 
 Player.hasOne(Iura, {
 	as: 'iura',
@@ -435,6 +436,7 @@ module.exports = {
 	Ticket,
 	Form,
 	FormField,
+	ScheduledPost,
 	moveIura,
 	transferIura,
 	escrowOres,

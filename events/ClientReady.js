@@ -11,6 +11,7 @@ const { processBrawlJob } = require('../functions/brawlWager');
 const { processGiveawayJob } = require('../functions/giveaway');
 const { processRaffleJob } = require('../functions/raffle');
 const { processTicketJob } = require('../functions/ticket');
+const { processScheduledPost, syncScheduledPosts } = require('../functions/schedule');
 const { Giveaway, Raffle } = require('../src/db');
 
 let Discord;
@@ -160,6 +161,13 @@ module.exports = {
 		const ticketQueue = new Queue('ticketQueue', redisURL);
 		client.ticketQueue = ticketQueue;
 		ticketQueue.process((job) => processTicketJob(client, job.data));
+
+		// Scheduled posts (see functions/schedule.js): repeatable jobs, matched
+		// to the ScheduledPost table at every start
+		const scheduleQueue = new Queue('scheduleQueue', redisURL);
+		client.scheduleQueue = scheduleQueue;
+		scheduleQueue.process((job) => processScheduledPost(client, scheduleQueue, job.data));
+		await syncScheduledPosts(scheduleQueue).catch((error) => console.error('Could not sync scheduled posts:', error));
 
 		const auctionQueue = new Queue('auctionQueue', redisURL);
 		client.auctionQueue = auctionQueue;

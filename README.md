@@ -54,10 +54,10 @@ Before running the bot, you will need the following:
 - [x] View server setup logs
 - [x] Create and manage Reaction roles (button roles)
 - [x] Create and manage Forms
-- [ ] Send Auto Messages/webhooks
+- [x] Send Auto Messages/webhooks
 - [x] Storytelling
 - [x] Creating and closing private channels
-- [ ] Scheduling events
+- [x] Scheduling events
 - [x] Ticketing system
 - [ ] Whitelisting
 - [ ] Sales tracking
