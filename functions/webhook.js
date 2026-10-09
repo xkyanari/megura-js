@@ -127,7 +127,7 @@ const auctionStatus = async (guildID, discordID, item, auction) => {
 		if (!guild) {
 			throw new Error('guild not found');
 		}
-		if (!guild.auctionChannelID || (!guild.auctionwebhookId && !guild.auctionwebhookToken)) return;
+		if (!guild.auctionChannelID || !guild.auctionwebhookId || !guild.auctionwebhookToken) return;
 
 		const webhookClient = new WebhookClient({ id: guild.auctionwebhookId, token: guild.auctionwebhookToken });
 

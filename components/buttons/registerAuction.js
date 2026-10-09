@@ -48,9 +48,9 @@ module.exports = {
 		});
 
 		setTimeout(() => {
-			User.findOne({ where: { discordID: interaction.member.id } })
+			User.findOne({ where: { userGuildId: `${interaction.member.id}-${interaction.guild.id}` } })
 				.then((user1) => {
-					if (user1.walletAddress !== null) {
+					if (user1?.walletAddress) {
 						return interaction.followUp({
 							content: 'You\'re now connected!',
 							flags: 64,

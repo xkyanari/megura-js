@@ -1,10 +1,11 @@
-const { Events, ActivityType, EmbedBuilder, userMention, WebhookClient } = require('discord.js');
-const { sequelize, Auction, Guild } = require('../src/db');
+const { Events, ActivityType } = require('discord.js');
+const { sequelize } = require('../src/db');
 // const { port } = require('../config.json');
 const Queue = require('bull');
 // const app = require('../server');
-const { endAuction } = require('../functions/endAuction');
-const { dahliaName, dahliaAvatar } = require('../src/vars');
+const { endAuction, runningAuctions } = require('../functions/endAuction');
+const { scheduleAuctionEnd } = require('../functions/startAuction');
+const { announceAuctionEnd } = require('../functions/auctionMessage');
 const { redisURL } = require('../redis');
 const { cleanupOldLogs } = require('../functions/logs');
 const { processBrawlJob } = require('../functions/brawlWager');
@@ -131,74 +132,18 @@ module.exports = {
 		const auctionQueue = new Queue('auctionQueue', redisURL);
 		client.auctionQueue = auctionQueue;
 
-		auctionQueue.process(async (job, done) => {
-			const { auctionId, guildId } = job.data;
-
-			const auction = await Auction.findByPk(auctionId);
-
-			if (!auction) {
-				console.error('Auction not found');
-				return done(new Error('Auction not found'));
-			}
-
-			try {
-				await endAuction(auctionId);
-
-				// Fetch auction item
-				const item = await auction.getAuctionItem();
-
-				// Get auction webhook details
-				const { auctionwebhookId, auctionwebhookToken } = await Guild.findOne({ where: { guildId: guildId } });
-
-				// Initiate the webhook client
-				const webhookClient = new WebhookClient({ id: auctionwebhookId, token: auctionwebhookToken });
-
-				// Create a new embed message
-				const newEmbed = new EmbedBuilder()
-					.setTitle(`Auction: ${item.itemName}`)
-					.setColor(0xcd7f32)
-					.addFields(
-						{ name: 'Quantity:', value: `${item.quantity}`, inline: true },
-						{ name: 'Starting Price:', value: `${auction.startPrice / 100000000}🪙`, inline: true },
-						{ name: 'Highest Bid:', value: `${auction.currentPrice / 100000000}🪙`, inline: true },
-						{ name: 'Auctioneer:', value: `${userMention(auction.userID)}`, inline: true },
-					)
-					.setFooter({ text: `Auction ID: ${auction.id}` });
-
-				// Add auction image
-				if (auction.attachmentURL) {
-					newEmbed.setImage(auction.attachmentURL);
-				}
-
-				// Add item description
-				if (item.description !== 'No description provided') {
-					newEmbed.setDescription(item.description);
-				}
-
-				// Add auction winner
-				if (auction.winnerId) {
-					const discordID = auction.winnerId.split('-');
-					const winningID = discordID[0];
-					newEmbed.addFields(
-						{ name: 'Winner:', value: `${userMention(winningID)}`, inline: true },
-					);
-				}
-
-				// Update the message
-				await webhookClient.editMessage(auction.messageID, {
-					content: '**The Auction is now CLOSED!**',
-					username: dahliaName,
-					avatarURL: dahliaAvatar,
-					embeds: [newEmbed],
-					components: [],
-				});
-
-				done();
-			}
-			catch (error) {
-				console.error(`Failed to end auction ${auctionId}`);
-				done(error);
-			}
+		// a plain async processor: a thrown error fails the job, so it is retried
+		auctionQueue.process(async (job) => {
+			const auction = await endAuction(job.data.auctionId);
+			if (!auction) return false;
+			await announceAuctionEnd(auction);
+			return true;
 		});
+
+		// make sure every running auction has its end scheduled
+		for (const auction of await runningAuctions()) {
+			await scheduleAuctionEnd(auctionQueue, auction)
+				.catch((error) => console.error(`Could not schedule auction ${auction.id}:`, error));
+		}
 	},
 };

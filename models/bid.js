@@ -21,7 +21,8 @@ module.exports = (sequelize, DataTypes) => {
 					key: 'userGuildId',
 				},
 			},
-			bidAmount: DataTypes.FLOAT,
+			// satoshis: BIGINT, since FLOAT rounds amounts above about 0.17 coin
+			bidAmount: DataTypes.BIGINT,
 			bidDateTime: DataTypes.DATE,
 		},
 		{

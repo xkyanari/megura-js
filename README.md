@@ -168,6 +168,19 @@ docker compose version   # needs v2.24 or later
 - **Check which database you run** with `mysqld --version`. On Debian 12, `mysql-server` installs MariaDB 10.11, which is already light and needs no tuning. On MySQL 8, add `performance_schema = OFF` and `innodb_buffer_pool_size = 128M` under `[mysqld]`, then restart MySQL.
 - **Clean up old images** after updates with `docker image prune -f`.
 
+**Database migrations.** The bot creates new tables by itself but never changes existing ones, so a few updates ship a one-off SQL script in `scripts/migrations/`. Run each once, in date order, with the bot stopped and after a backup:
+
+```sh
+docker compose down
+mysqldump -u <user> -p <database> > backup-$(date +%F).sql
+mysql -u <user> -p <database> < scripts/migrations/2026-10-auction-bigint.sql
+docker compose up -d
+```
+
+| Script | Why |
+|---|---|
+| `2026-10-auction-bigint.sql` | Auction and bid amounts are stored as whole satoshis (`BIGINT`) instead of `FLOAT`, which rounded amounts above about 0.17 coin. |
+
 ## Running tests
 
 The integration tests cover the IURA, shop, order and brawl money paths and the interaction handler. They run against a real MySQL database and Redis, and they **drop and recreate every table**, so use a separate database. The name must contain `test`, or the suite refuses to run.

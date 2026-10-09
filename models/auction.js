@@ -18,9 +18,12 @@ module.exports = (sequelize, DataTypes) => {
 			},
 			startDateTime: DataTypes.DATE,
 			endDateTime: DataTypes.DATE,
-			startPrice: DataTypes.FLOAT,
-			currentPrice: DataTypes.FLOAT,
-			increment: DataTypes.FLOAT,
+			// satoshis: BIGINT, since FLOAT rounds amounts above about 0.17 coin
+			startPrice: DataTypes.BIGINT,
+			// satoshis: BIGINT, since FLOAT rounds amounts above about 0.17 coin
+			currentPrice: DataTypes.BIGINT,
+			// satoshis: BIGINT, since FLOAT rounds amounts above about 0.17 coin
+			increment: DataTypes.BIGINT,
 			winnerId: {
 				type: DataTypes.STRING,
 				references: {

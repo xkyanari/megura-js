@@ -31,82 +31,49 @@ const checkBalance = async (address, amount) => {
 	}
 };
 
-const placeBid = async (interaction, user, amount) => {
-	let transaction;
-
-	try {
-		// start a new transaction
-		transaction = await sequelize.transaction();
-
-		// fetch and lock the auction so concurrent bids are applied one at a time
-		const auction = await Auction.findOne({
-			where: { messageID: interaction.message.id },
-			transaction,
-			lock: transaction.LOCK.UPDATE,
-		});
-
-		if (!auction) {
-			throw new Error('Auction not found');
-		}
-
-		// check if the auction is still ongoing
-		if (auction.endDateTime > new Date()) {
-			// find the highest bid
-			const highestBid = await Bid.findOne({
-				where: { auctionId: auction.id },
-				order: [['bidAmount', 'DESC']],
-				transaction,
-			});
-
-			// calculate the bid amount
-			const bidAmount = highestBid
-				? highestBid.bidAmount + amount
-				: auction.startPrice + amount;
-
-			// add utxo check from here
-			// const utxos = await getUtxos(user.walletAddress, user.publicKey, bidAmount.toFixed(2));
-
-			const balance = await checkBalance(user.walletAddress, bidAmount);
-			// const balance = true;
-
-			if (balance) {
-				console.log(`Auction ID: ${auction.id}, User ID: ${interaction.user.id}, Bid Amount: ${bidAmount}`);
-
-				// place the new bid
-				const newBid = await Bid.create({
-					auctionId: auction.id,
-					userId: `${interaction.member.id}-${interaction.guild.id}`,
-					bidAmount: bidAmount,
-					bidDateTime: new Date(),
-				}, { transaction });
-
-				// update the current price in the auction
-				auction.currentPrice = bidAmount;
-
-				// increment the version
-				auction.version += 1;
-
-				await auction.save({ transaction });
-
-				// commit the transaction
-				await transaction.commit();
-
-				return newBid;
-			}
-			else {
-				throw new Error('Insufficient funds');
-			}
-		}
-		else {
-			throw new Error('The auction has already ended.');
-		}
-	}
-	catch (err) {
-		// if something goes wrong, rollback the transaction
-		if (transaction) await transaction.rollback();
-
-		throw err; // Throw the error instead of logging it
-	}
+// The next bid on `auction`: the highest bid (or the start price) plus `amount`.
+const nextBidAmount = async (auction, amount, transaction) => {
+	const highestBid = await Bid.findOne({
+		where: { auctionId: auction.id },
+		order: [['bidAmount', 'DESC']],
+		transaction,
+	});
+	return Number(highestBid ? highestBid.bidAmount : auction.startPrice) + amount;
 };
 
-module.exports = { placeBid };
+const isOpen = (auction) => auction.endDateTime > new Date();
+
+const placeBid = async (interaction, user, amount) => {
+	// check the wallet first, outside the lock: the balance lookup can take seconds
+	const preview = await Auction.findOne({ where: { messageID: interaction.message.id, guildID: interaction.guild.id } });
+	if (!preview) throw new Error('Auction not found');
+	if (!isOpen(preview)) throw new Error('The auction has already ended.');
+
+	const expected = await nextBidAmount(preview, amount);
+	if (!await module.exports.checkBalance(user.walletAddress, expected)) throw new Error('Insufficient funds');
+
+	return sequelize.transaction(async (transaction) => {
+		// lock the auction so concurrent bids (and ending it) are applied one at a time
+		const auction = await Auction.findByPk(preview.id, { transaction, lock: transaction.LOCK.UPDATE });
+		if (!isOpen(auction)) throw new Error('The auction has already ended.');
+
+		const bidAmount = await nextBidAmount(auction, amount, transaction);
+		// someone outbid us while the balance was checked: the checked amount no longer applies
+		if (bidAmount !== expected) throw new Error('The price changed.');
+
+		console.log(`Auction ID: ${auction.id}, User ID: ${interaction.user.id}, Bid Amount: ${bidAmount}`);
+		const newBid = await Bid.create({
+			auctionId: auction.id,
+			userId: `${interaction.member.id}-${interaction.guild.id}`,
+			bidAmount,
+			bidDateTime: new Date(),
+		}, { transaction });
+
+		auction.currentPrice = bidAmount;
+		auction.version += 1;
+		await auction.save({ transaction });
+		return newBid;
+	});
+};
+
+module.exports = { placeBid, checkBalance };
