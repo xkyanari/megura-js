@@ -10,6 +10,7 @@ const { cleanupOldLogs } = require('../functions/logs');
 const { processBrawlJob } = require('../functions/brawlWager');
 const { processGiveawayJob } = require('../functions/giveaway');
 const { processRaffleJob } = require('../functions/raffle');
+const { processTicketJob } = require('../functions/ticket');
 const { Giveaway, Raffle } = require('../src/db');
 
 let Discord;
@@ -154,6 +155,11 @@ module.exports = {
 				{ jobId: `raffle-${raffle.id}`, delay: Math.max(0, raffle.endsAt - Date.now()), removeOnComplete: true },
 			).catch((error) => console.error(`Could not schedule raffle ${raffle.id}:`, error));
 		}
+
+		// Deleting closed ticket channels (see functions/ticket.js)
+		const ticketQueue = new Queue('ticketQueue', redisURL);
+		client.ticketQueue = ticketQueue;
+		ticketQueue.process((job) => processTicketJob(client, job.data));
 
 		const auctionQueue = new Queue('auctionQueue', redisURL);
 		client.auctionQueue = auctionQueue;
