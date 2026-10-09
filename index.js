@@ -115,4 +115,8 @@ process.on('unhandledRejection', (error) => {
 	console.error('Unhandled promise rejection:', error);
 });
 
-client.login(token);
+// If the bot can't log in, exit so Docker (or pm2) restarts it instead of idling offline.
+client.login(token).catch((error) => {
+	console.error('Failed to log in to Discord:', error);
+	process.exit(1);
+});

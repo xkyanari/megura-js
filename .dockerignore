@@ -1,0 +1,22 @@
+# secrets and local config: mounted at runtime instead
+config.json
+.env
+assets/features.json
+pm2.config.js
+
+# local state
+node_modules
+logs
+*.sqlite
+*.db
+*.sql
+*.rdb
+
+# not needed in the image
+.git
+.github
+.devcontainer
+test
+Dockerfile
+docker-compose.yml
+.dockerignore

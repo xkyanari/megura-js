@@ -16,6 +16,7 @@ Dahlia is designed to run without Discord's privileged Message Content, Server M
 - [Pre-requisites](#pre-requisites)
 - [List of Discord bot features (work in progress)](#list-of-discord-bot-features-work-in-progress)
 - [Installation](#installation)
+- [Running with Docker](#running-with-docker)
 - [Running tests](#running-tests)
 - [Discord intents](#discord-intents)
 - [Commands](#commands-work-in-progress)
@@ -78,6 +79,39 @@ To install and run the project, follow these steps:
 5. Rename `assets/features-example.json` to `src/feature.js` if you are using the feature toggle file.
 6. Update the database host/settings in `src/db.js` or your local equivalent.
 7. (Optional) Chapters can be uploaded in `chapters/`. Otherwise, the bot will simply load the placeholder stories found in `samples/`.
+
+## Running with Docker
+
+`docker-compose.yml` runs the bot in a container and replaces pm2. MySQL and Redis keep running on the host. The container shares the host's network (`network_mode: host`), so the `127.0.0.1` addresses in `config.json` keep working and nothing about MySQL or Redis needs to change. The bot opens no ports.
+
+**What the container needs on the host:**
+- `config.json` and `assets/features.json` next to `docker-compose.yml`. They are mounted read-only and never copied into the image.
+- Optionally, a `.env` file with `DISCORD_TOKEN=...`. It takes precedence over `token` in `config.json`.
+
+The log files from `logs/` live in the `megura-logs` Docker volume, and console output goes to `docker compose logs`.
+
+**Switching from pm2:**
+
+```sh
+git pull
+docker compose build
+pm2 stop <app>        # your pm2 app name, see `pm2 list`
+docker compose up -d
+docker compose logs -f   # wait for "You're now connected as ..."
+```
+
+Once the bot is running in Docker, `pm2 delete <app>` and `pm2 save` stop pm2 from starting it again at boot. Docker restarts the container after crashes and reboots (`restart: unless-stopped`), provided the Docker service is enabled (`sudo systemctl enable docker`).
+
+**Everyday commands:**
+
+| Task | Command |
+|---|---|
+| Update after `git pull` | `docker compose up -d --build` |
+| Follow output | `docker compose logs -f` |
+| Register slash commands | `docker compose run --rm bot node deploy.js` |
+| Restart | `docker compose restart` |
+| Stop | `docker compose down` |
+| Read the log files | `docker compose exec bot ls logs` |
 
 ## Running tests
 
