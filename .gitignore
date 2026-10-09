@@ -14,6 +14,8 @@
 *.sqlite
 *.db
 *.sql
+# ...except the one-off schema migrations, which ship with the code
+!scripts/migrations/*.sql
 *.rdb
 
 # Config files
