@@ -108,21 +108,59 @@ test('the migration drops the NFT columns and moves old shop categories, once', 
 	assert.match(again.join('\n'), /already been applied/);
 });
 
-test('a shop category with more than 25 items still opens, showing the first 25', async () => {
+// replaces the earlier 25-item cap: categories now page 10 items at a time, like the global shop
+test('a 30-item special-shop category pages 10 / 10 / 10, with select options for each page', async () => {
+	const { EventEmitter } = require('node:events');
 	const category = require('../components/menus/specialshopCategory');
 	await Shop.bulkCreate(Array.from({ length: 30 }, (_, i) => ({
-		itemName: `Perk ${i}`, item_ID: `perk${i}`, category: 'digital', price: 1, quantity: 1, guildID: 'BIG',
+		itemName: `Perk ${i}`, item_ID: `perk${i}`, category: 'digital', price: 1, quantity: 1, level: i, guildID: 'BIG',
 	})));
 	const rec = recorder();
+	const collector = Object.assign(new EventEmitter(), { resetTimer: () => undefined });
+	const message = {
+		createMessageComponentCollector: () => collector,
+		edit: async (payload) => rec.push('edit', payload),
+	};
 	await category.execute({
 		values: ['digital'],
 		guild: { id: 'BIG' },
+		user: { id: 'U1' },
 		client: { emojis: { cache: { get: () => null } } },
-		deferUpdate: async () => undefined,
-		followUp: async (payload) => rec.push('followUp', payload),
+		deferReply: async (options) => rec.push('deferReply', options),
+		editReply: async (payload) => {
+			rec.push('editReply', payload);
+			return message;
+		},
 	});
-	const [, payload] = rec.calls.at(-1);
-	assert.equal(payload.embeds[0].data.fields.length, 25);
-	assert.equal(payload.components[0].components[0].options.length, 25);
-	assert.match(payload.embeds[0].data.description, /first 25 of 30/);
+	assert.equal(rec.calls[0][1].flags, 64);
+	const check = (payload, page) => {
+		const embed = payload.embeds[0].data;
+		const options = payload.components[0].components[0].options.map((o) => o.data.label);
+		assert.equal(embed.fields.length, 10);
+		assert.match(embed.description, new RegExp(`Page ${page} of 3`));
+		assert.deepEqual(options, embed.fields.map((f) => f.name.replace(/__\*\*(.*)\*\*__/, '$1')));
+		assert.equal(options[0], `Perk ${(page - 1) * 10}`);
+	};
+	check(rec.calls.at(-1)[1], 1);
+
+	for (const page of [2, 3]) {
+		const done = new Promise((resolve) => {
+			message.edit = async (payload) => resolve(payload);
+		});
+		collector.emit('collect', { user: { id: 'U1' }, customId: 'next', deferUpdate: async () => undefined });
+		check(await done, page);
+	}
+});
+
+test('an empty special-shop category says so', async () => {
+	const category = require('../components/menus/specialshopCategory');
+	const rec = recorder();
+	await category.execute({
+		values: ['events'],
+		guild: { id: 'EMPTY' },
+		client: { emojis: { cache: { get: () => null } } },
+		deferReply: async () => undefined,
+		editReply: async (payload) => rec.push('editReply', payload),
+	});
+	assert.equal(rec.calls.at(-1)[1], 'Nothing in this category yet.');
 });

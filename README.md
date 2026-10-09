@@ -65,7 +65,7 @@ Before running the bot, you will need the following:
 - [ ] Auctions (switched off. To bring them back, set `"enableAuctions": true` in `config.json` **and** `"hasAuction": true` for the tiers that should have them in `assets/features.json`, then run `node deploy.js`)
 - [x] Exploration mode (`/explore`)
 - [x] Gear upgrades, crafting and salvage (`/upgrade`, `/craft`, `/salvage`)
-- [ ] World bosses
+- [x] Bosses: solo and world bosses (behind the `hasBosses` feature flag)
 
 All of these may not require having administrator role on the bot for security, but they are subject to change without prior notice.
 
@@ -229,6 +229,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 
 - `/attack`: Fight a random monster sized to your level. Wins pay IURA and EXP, sometimes drop an item or a crafting material, and consumables in your inventory are used automatically when your health runs low.
 - `/auction`: Start, view, or manage auctions (switched off by default; see `enableAuctions`).
+- `/boss`: Fight a boss turn by turn, on your own (`challenge`) or as a channel (`spawn`, `autospawn` for moderators). Needs the `hasBosses` feature.
 - `/brawl`: Start or join a brawl challenge.
 - `/buy`: Lets player to buy items in bulk.
 - `/changenick`: Updates player name.
@@ -246,9 +247,9 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/iura`: Check your wallet or bank.
 - `/open <name of channel>`: Creates a private channel, auto-closes in 10 minutes.
 - `/privacy`: Shows the privacy notice.
-- `/profile`: Show profile of a user (blank for self).
+- `/profile`: Show profile of a user (blank for self): stats, faction, where they're exploring, and this week's quests, discoveries and faction points.
 - `/quests`: See your daily and weekly quest objectives and their rewards.
-- `/ranks`: Show leaderboards.
+- `/rankings`: Server leaderboards: duel wins, level, monster kills, top earners, quests finished this week, places discovered, and faction points this week.
 - `/requestduel`: Respond to a duel request.
 - `/reset`: Delete voyager profile.
 - `/sales`: (Moderators) Special shop sales for the last 7 or 30 days or all time, with an optional CSV export.
@@ -259,6 +260,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/shop`: Opens the Item Shop.
 - `/specialshop`: Opens the Special Shop.
 - `/start`: Initiate creating own character.
+- `/story`: (Moderators) Play a chapter of the storyline in a channel, stop it, or list the chapters this server has played.
 - `/support`: Shows support server information.
 - `/transfer`: Transfer IURA to another user.
 - `/unequip`: Unequip an item.
