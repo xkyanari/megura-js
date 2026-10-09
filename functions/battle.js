@@ -3,9 +3,13 @@ const { attackMultiplier, getCriticalHitRate } = require('../src/vars');
 
 // A battle where neither side can hurt the other would never end.
 const MAX_ROUNDS = 50;
-// Discord embeds hold 4096 characters; show the latest lines.
-const MAX_LOG_LINES = 25;
-const logText = (lines) => lines.slice(-MAX_LOG_LINES).join('\n').slice(-4000);
+// How many of the latest log lines the battle embed shows.
+const MAX_LOG_LINES = 8;
+const TURN_DELAY = 1500;
+// Consumables are used when health drops below this share, at most MAX_CONSUMABLES times a battle.
+const CONSUMABLE_THRESHOLD = 0.35;
+const MAX_CONSUMABLES = 2;
+const HP_BAR_LENGTH = 10;
 
 const getDamage = (player1, player2, criticalHitMultiplier) => {
 	const damage =
@@ -17,121 +21,131 @@ const getDamage = (player1, player2, criticalHitMultiplier) => {
 	return { finalDamage, remainingHealth };
 };
 
-const attack = async (interaction, player1, player2, criticalHitRate, existingBattleLogs = [], message) => {
-	const isCriticalHit = Math.random() < criticalHitRate;
-	const finalAttackMultiplier = isCriticalHit ?
-		attackMultiplier(player1.level) * 2 :
-		attackMultiplier(player1.level);
-	const { finalDamage, remainingHealth } = getDamage(
-		player1,
-		player2,
-		finalAttackMultiplier,
-	);
-
-	const messageText = `\`${player1.playerName}\` attacks \`${player2.playerName}\` for ${Math.round(
-		finalDamage,
-	)} damage${isCriticalHit ? ' (critical hit)!' : ''}. \`${player2.playerName}\` has **${Math.max(0, Math.round(remainingHealth))}** health remaining.`;
-
-	existingBattleLogs.push(messageText);
-
-	const embed = new EmbedBuilder()
-		.setColor(0xcd7f32)
-		.setTitle('Battle Logs')
-		.setDescription(logText(existingBattleLogs));
-
-	if (!message) {
-		message = await interaction.channel.send({ embeds: [embed] });
-	}
-	else {
-		await message.edit({ embeds: [embed] });
-	}
-
-	if (Math.max(0, Math.round(remainingHealth)) === 0) {
-		existingBattleLogs.push(`\`${player2.playerName}\` dodged the final attack and gave up.`);
-		embed.setDescription(logText(existingBattleLogs));
-		await message.edit({ embeds: [embed] });
-	}
-
-	player2.totalHealth = remainingHealth;
-
-	return { remainingHealth, battleLogs: existingBattleLogs, message };
+const hpBar = (current, max) => {
+	const ratio = max > 0 ? Math.min(Math.max(current / max, 0), 1) : 0;
+	const filled = Math.round(ratio * HP_BAR_LENGTH);
+	return `${'▰'.repeat(filled)}${'▱'.repeat(HP_BAR_LENGTH - filled)}`;
 };
 
-const simulateBattle = async (interaction, player1, player2) => {
-	const wait = require('node:timers/promises').setTimeout;
-	const playerA = player1;
-	const playerB = player2;
+const hpLine = (fighter) =>
+	`**${fighter.playerName}** (Lv ${fighter.level})\n${hpBar(fighter.totalHealth, fighter.maxHealth)} ${Math.max(0, Math.round(fighter.totalHealth))}/${Math.round(fighter.maxHealth)} HP`;
 
-	const criticalHitRateA = getCriticalHitRate(playerA.level);
-	const criticalHitRateB = getCriticalHitRate(playerB.level);
+const battleEmbed = (a, b, logs, { title = 'Battle', thumbnail } = {}) => {
+	const embed = new EmbedBuilder()
+		.setColor(0xcd7f32)
+		.setTitle(title)
+		.setDescription(`${hpLine(a)}\n\n${hpLine(b)}\n\n${logs.slice(-MAX_LOG_LINES).join('\n')}`.slice(0, 4000));
+	if (thumbnail) embed.setThumbnail(thumbnail);
+	return embed;
+};
 
-	let remainingHealthA = playerA.totalHealth;
-	let remainingHealthB = playerB.totalHealth;
-
-	let winner = '';
-	let battleLogs = [];
+// The first time, posts the battle in the channel; after that, edits that message.
+const channelRenderer = (interaction) => {
 	let message;
+	return async (embed) => {
+		if (!message) message = await interaction.channel.send({ embeds: [embed] });
+		else await message.edit({ embeds: [embed] });
+	};
+};
 
-	const firstAttackResult = await attack(interaction, playerA, playerB, criticalHitRateA, battleLogs, message);
-	remainingHealthB = firstAttackResult.remainingHealth;
-	battleLogs = firstAttackResult.battleLogs;
-	message = firstAttackResult.message;
-	if (remainingHealthB <= 0) {
-		winner = playerA;
-		return winner;
+const toFighter = (player) => ({
+	playerName: player.playerName,
+	level: player.level,
+	totalHealth: player.totalHealth,
+	maxHealth: player.totalHealth,
+	totalAttack: player.totalAttack,
+	totalDefense: player.totalDefense,
+});
+
+const strike = (attacker, defender, logs) => {
+	const isCriticalHit = Math.random() < getCriticalHitRate(attacker.level);
+	const multiplier = attackMultiplier(attacker.level) * (isCriticalHit ? 2 : 1);
+	const { finalDamage, remainingHealth } = getDamage(attacker, defender, multiplier);
+	defender.totalHealth = remainingHealth;
+	logs.push(`\`${attacker.playerName}\` hits \`${defender.playerName}\` for ${Math.round(finalDamage)}${isCriticalHit ? ' (critical hit!)' : ''}.`);
+};
+
+/**
+ * Uses one of the fighter's consumables if their health is low. Each consumable
+ * is { itemName, totalHealth, totalAttack, totalDefense, consume }, where
+ * consume() takes one from the inventory and resolves false if none is left.
+ */
+const useConsumable = async (fighter, consumables, state, logs) => {
+	if (state.used >= MAX_CONSUMABLES || fighter.totalHealth <= 0) return;
+	if (fighter.totalHealth >= fighter.maxHealth * CONSUMABLE_THRESHOLD) return;
+
+	while (consumables.length) {
+		const item = consumables[0];
+		if (!await item.consume()) {
+			consumables.shift();
+			continue;
+		}
+		state.used += 1;
+		fighter.totalHealth = Math.min(fighter.totalHealth + item.totalHealth, fighter.maxHealth + item.totalHealth);
+		fighter.totalAttack += item.totalAttack;
+		fighter.totalDefense += item.totalDefense;
+		const effects = [
+			item.totalHealth && `+${item.totalHealth} HP`,
+			item.totalAttack && `+${item.totalAttack} ATK`,
+			item.totalDefense && `+${item.totalDefense} DEF`,
+		].filter(Boolean).join(', ');
+		logs.push(`🧪 \`${fighter.playerName}\` uses ${item.itemName} (${effects}).`);
+		return;
 	}
-	await wait(2000);
+};
 
-	let rounds = 0;
-	while (remainingHealthA > 0 && remainingHealthB > 0) {
-		if (++rounds > MAX_ROUNDS) {
-			// neither side is getting anywhere: call it a draw (no winner)
-			await interaction.channel.send('Both fighters are exhausted. The battle ends in a draw.');
-			break;
+/**
+ * Fights player1 against player2, player1 striking first, and returns the
+ * winner (player1 or player2 as passed in), or '' for a draw. The inputs are
+ * not changed.
+ *
+ * options.render(embed) shows each turn (default: one message in the channel),
+ * options.consumables are player1's (see useConsumable), options.delay waits between turns.
+ */
+const simulateBattle = async (interaction, player1, player2, options = {}) => {
+	const {
+		render = channelRenderer(interaction),
+		consumables = [],
+		delay = require('node:timers/promises').setTimeout,
+		title,
+		thumbnail,
+	} = options;
+	const a = toFighter(player1);
+	const b = toFighter(player2);
+	const logs = [];
+	const consumableState = { used: 0 };
+	const show = () => render(battleEmbed(a, b, logs, { title, thumbnail }));
+
+	await show();
+	for (let rounds = 1; rounds <= MAX_ROUNDS; rounds++) {
+		await delay(TURN_DELAY);
+		strike(a, b, logs);
+		if (b.totalHealth <= 0) {
+			logs.push(`\`${b.playerName}\` is defeated!`);
+			await show();
+			return player1;
 		}
-
-		const attackResultB = await attack(
-			interaction,
-			playerB,
-			playerA,
-			criticalHitRateB,
-			battleLogs,
-			message,
-		);
-		remainingHealthA = attackResultB.remainingHealth;
-		battleLogs = attackResultB.battleLogs;
-		message = attackResultB.message;
-
-		if (remainingHealthA <= 0) {
-			winner = playerB;
-			break;
+		strike(b, a, logs);
+		if (a.totalHealth <= 0) {
+			logs.push(`\`${a.playerName}\` is defeated!`);
+			await show();
+			return player2;
 		}
-
-		await wait(2000);
-
-		const attackResultA = await attack(
-			interaction,
-			playerA,
-			playerB,
-			criticalHitRateA,
-			battleLogs,
-			message,
-		);
-		remainingHealthB = attackResultA.remainingHealth;
-		battleLogs = attackResultA.battleLogs;
-		message = attackResultA.message;
-
-		if (remainingHealthB <= 0) {
-			winner = playerA;
-			break;
-		}
-
-		await wait(2000);
+		await useConsumable(a, consumables, consumableState, logs);
+		await show();
 	}
-	return winner;
+
+	// neither side is getting anywhere: call it a draw (no winner)
+	logs.push('Both fighters are exhausted. The battle ends in a draw.');
+	await show();
+	return '';
 };
 
 module.exports = {
 	simulateBattle,
 	getDamage,
+	hpBar,
+	battleEmbed,
+	CONSUMABLE_THRESHOLD,
+	MAX_CONSUMABLES,
 };

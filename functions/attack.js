@@ -5,9 +5,10 @@ const {
 	EmbedBuilder,
 	userMention,
 } = require('discord.js');
-const { Player, Monster, Iura, sequelize } = require('../src/db');
+const { Player, Monster, sequelize } = require('../src/db');
 const { simulateBattle } = require('./battle');
-const { expPoints } = require('../src/vars');
+const { expPoints, monsterStats } = require('../src/vars');
+const { rollLoot, loadConsumables } = require('./loot');
 const leveling = require('./level');
 const levelcheck = require('./levelup');
 
@@ -47,8 +48,31 @@ const getRandomDefeatQuote = () => {
 	return defeatQuotes[randomIndex];
 };
 
-const executeAttack = async (interaction) => {
-	const wait = require('node:timers/promises').setTimeout;
+const resultButtons = () => new ActionRowBuilder().addComponents(
+	new ButtonBuilder()
+		.setCustomId('attack')
+		.setEmoji('⚔️')
+		.setLabel('Attack Again')
+		.setStyle(ButtonStyle.Danger),
+	new ButtonBuilder()
+		.setCustomId('profile')
+		.setEmoji('👤')
+		.setLabel('Profile')
+		.setStyle(ButtonStyle.Success),
+	new ButtonBuilder()
+		.setCustomId('inventory')
+		.setEmoji('🛄')
+		.setLabel('Inventory')
+		.setStyle(ButtonStyle.Primary),
+	new ButtonBuilder()
+		.setCustomId('shop')
+		.setEmoji('🛒')
+		.setLabel('Shop')
+		.setStyle(ButtonStyle.Primary),
+);
+
+// The whole fight happens in the command's own reply, edited turn by turn.
+const executeAttack = async (interaction, { delay } = {}) => {
 	const { member, guild } = interaction;
 
 	await interaction.deferReply();
@@ -65,100 +89,61 @@ const executeAttack = async (interaction) => {
 		order: sequelize.random(),
 		limit: 1,
 	});
+	if (!monster) {
+		throw new Error('no monsters configured');
+	}
 
 	const playerObj = {
-		guildID: player.guildID,
-		discordID: player.discordID,
 		playerName: player.playerName,
 		level: player.level,
 		totalHealth: player.totalHealth,
 		totalAttack: player.totalAttack,
 		totalDefense: player.totalDefense,
-		expGained: player.expGained,
 	};
+	const monsterObj = { playerName: monster.monsterName, ...monsterStats(monster, player.level) };
 
-	const scalingFactor = 1 + player.level * 0.25;
+	const title = `⚔️ A wild ${monster.monsterName} appears!`;
+	let lastEmbed;
+	const winner = await simulateBattle(interaction, playerObj, monsterObj, {
+		title,
+		thumbnail: monster.imageURL,
+		consumables: await loadConsumables(player.accountID),
+		render: (embed) => {
+			lastEmbed = embed;
+			return interaction.editReply({ embeds: [embed] });
+		},
+		...(delay && { delay }),
+	});
 
-	const monsterObj = {
-		playerName: monster.monsterName,
-		level: monster.level,
-		totalHealth: Math.round(monster.totalHealth * scalingFactor),
-		totalAttack: Math.round(monster.totalAttack * scalingFactor),
-		totalDefense: Math.round(monster.totalDefense * scalingFactor),
-		expDropped: monster.expDropped,
-		iuraDropped: monster.iuraDropped,
-	};
-
-	const embed1 = new EmbedBuilder()
-		.setColor(0xcd7f32)
-		.setDescription('Searching for a monster...');
-	await interaction.editReply({ embeds: [embed1] });
-
-	await wait(1000);
-
-	const embed2 = new EmbedBuilder()
-		.setColor(0xcd7f32)
-		.setDescription(`Target locked. A **${monster.monsterName}** has appeared! Engaging in 5 seconds...`);
-	await interaction.channel.send({ embeds: [embed2] });
-
-	const imageEmbed = new EmbedBuilder()
-		.setColor(0xcd7f32)
-		.setImage(monster.imageURL);
-	await interaction.channel.send({ embeds: [imageEmbed] });
-
-	await wait(5000);
-	const winner = await simulateBattle(interaction, playerObj, monsterObj);
-
-	const button = new ActionRowBuilder().addComponents(
-		new ButtonBuilder()
-			.setCustomId('attack')
-			.setEmoji('⚔️')
-			.setLabel('Attack Again')
-			.setStyle(ButtonStyle.Danger),
-		new ButtonBuilder()
-			.setCustomId('profile')
-			.setEmoji('👤')
-			.setLabel('Profile')
-			.setStyle(ButtonStyle.Success),
-		new ButtonBuilder()
-			.setCustomId('inventory')
-			.setEmoji('🛄')
-			.setLabel('Inventory')
-			.setStyle(ButtonStyle.Primary),
-		new ButtonBuilder()
-			.setCustomId('shop')
-			.setEmoji('🛒')
-			.setLabel('Shop')
-			.setStyle(ButtonStyle.Primary),
-	);
-
+	let result;
 	if (winner === playerObj) {
-		const victoryQuote = getRandomVictoryQuote();
-		await interaction.channel.send('The battle has concluded.');
-		await interaction.followUp({
-			content: `${userMention(interaction.member.id)}\n\n🎉 **WELL DONE!** You received the following from the battle: \n\n- \`${monsterObj.iuraDropped} IURA\`\n- \`${monsterObj.expDropped} EXP\`\n\n> “${victoryQuote}”`,
-			components: [button],
-		});
-
-		await Iura.increment(
-			{ walletAmount: monsterObj.iuraDropped },
-			{ where: { accountID: player.accountID } },
-		);
+		await player.addIura(monsterObj.iuraDropped);
 		await player.increment({
 			iuraEarned: monsterObj.iuraDropped,
 			expGained: monsterObj.expDropped,
 			monsterKills: 1,
 		});
+		const loot = await rollLoot(player, monster.monsterName);
+		const rewards = [
+			`- \`${monsterObj.iuraDropped} IURA\``,
+			`- \`${monsterObj.expDropped} EXP\``,
+			loot && `- 🎁 \`${loot}\``,
+		].filter(Boolean).join('\n');
+		result = `🎉 **WELL DONE!** You received:\n${rewards}\n\n> “${getRandomVictoryQuote()}”`;
+	}
+	else if (winner === monsterObj) {
+		result = `😔 **Better luck next time!** You retreat to patch yourself up.\n\n> “${getRandomDefeatQuote()}”`;
+	}
+	else {
+		result = '🤝 Neither side could finish the fight.';
 	}
 
-	if (winner === monsterObj) {
-		const defeatQuote = getRandomDefeatQuote();
-		await interaction.channel.send('The battle has concluded.');
-		await interaction.followUp({
-			content: `${userMention(interaction.member.id)}\n\n😔 **Better luck next time!**\n\n> “${defeatQuote}”`,
-			components: [button],
-		});
-	}
+	const finalEmbed = EmbedBuilder.from(lastEmbed).addFields({ name: 'Result', value: result });
+	await interaction.editReply({
+		content: userMention(member.id),
+		embeds: [finalEmbed],
+		components: [resultButtons()],
+	});
 
 	// check the EXP as it is now, after this battle's reward
 	await player.reload();

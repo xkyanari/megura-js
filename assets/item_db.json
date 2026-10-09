@@ -680,5 +680,38 @@
     "price": 43210,
     "description": "In latin means “in a blink of an eye”. A flash sword",
     "item_ID": "oculi"
+  },
+  {
+    "itemName": "Healing Potion",
+    "level": 1,
+    "category": "consumables",
+    "totalHealth": 400,
+    "totalAttack": 0,
+    "totalDefense": 0,
+    "price": 60,
+    "description": "Tastes like cough syrup. Works like a second wind.",
+    "item_ID": "hpotion"
+  },
+  {
+    "itemName": "Attack Potion",
+    "level": 1,
+    "category": "consumables",
+    "totalHealth": 0,
+    "totalAttack": 100,
+    "totalDefense": 0,
+    "price": 80,
+    "description": "Bubbles angrily. So will you.",
+    "item_ID": "apotion"
+  },
+  {
+    "itemName": "Defense Potion",
+    "level": 1,
+    "category": "consumables",
+    "totalHealth": 0,
+    "totalAttack": 0,
+    "totalDefense": 100,
+    "price": 80,
+    "description": "Thick as porridge. Your skin feels the same way.",
+    "item_ID": "dpotion"
   }
 ]

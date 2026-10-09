@@ -42,6 +42,26 @@ const attackPerLevel = (level) => Math.round(baseAttack * (1 + attackIncreasePer
 const defensePerLevel = (level) => baseDefense + levelDefenseMultiplier * (level - 1);
 const healthPerLevel = (level) => baseHealth + levelHealthMultiplier * (level - 1);
 
+// monsters (/attack): sized against a player with no gear at the same level, so
+// a fight takes about the same number of hits at every level and gear tips it
+const MONSTER_HITS_TO_KILL = 4;
+const MONSTER_HITS_TO_DIE = 5;
+const monsterStats = (mob, level) => {
+	const totalDefense = Math.round(defensePerLevel(level) * mob.totalDefense / baseDefense);
+	const playerHit = Math.max(attackPerLevel(level) * attackMultiplier(level) - totalDefense, 1);
+	return {
+		level,
+		totalHealth: Math.round(playerHit * MONSTER_HITS_TO_KILL * mob.totalHealth / baseHealth),
+		totalAttack: Math.round(
+			(healthPerLevel(level) / MONSTER_HITS_TO_DIE + defensePerLevel(level)) / attackMultiplier(level)
+			* mob.totalAttack / baseAttack,
+		),
+		totalDefense,
+		expDropped: mob.expDropped * level,
+		iuraDropped: mob.iuraDropped * level,
+	};
+};
+
 // Dahlia chat settings
 const dahliaName = 'Dahlia';
 const dahliaPrefix = 'Dahlia';
@@ -76,6 +96,7 @@ module.exports = {
 	attackPerLevel,
 	defensePerLevel,
 	healthPerLevel,
+	monsterStats,
 	attackMultiplier,
 	getCriticalHitRate,
 	dahliaName,

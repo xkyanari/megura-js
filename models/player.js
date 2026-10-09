@@ -91,6 +91,15 @@ module.exports = (sequelize, DataTypes) => {
 				type: DataTypes.INTEGER,
 				defaultValue: 0,
 			},
+			dailyStreak: {
+				type: DataTypes.INTEGER,
+				defaultValue: 0,
+				allowNull: false,
+			},
+			lastDailyAt: {
+				type: DataTypes.DATE,
+				allowNull: true,
+			},
 			memoriaEarned: {
 				type: DataTypes.INTEGER,
 				defaultValue: 0,

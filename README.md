@@ -216,16 +216,16 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 
 ## Commands (work in progress)
 
-- `/attack`: Initiate attack against a random monster.
+- `/attack`: Fight a random monster sized to your level. Wins pay IURA and EXP, sometimes drop an item, and consumables in your inventory are used automatically when your health runs low.
 - `/auction`: Start, view, or manage auction activity.
 - `/brawl`: Start or join a brawl challenge.
 - `/buy`: Lets player to buy items in bulk.
 - `/changenick`: Updates player name.
 - `/checkprofile`: Check whether your player profile exists.
 - `/close`: Closes a portal prematurely.
-- `/daily`: Do a random quest to increase/decrease stats or gain Iura.
+- `/daily`: Do a random quest to gain IURA. Claiming within 48 hours keeps a streak going, worth up to +60%.
 - `/duel`: Initiate a duel against another player.
-- `/equip`: Equip an inventory item.
+- `/equip`: Equip an inventory item: one copy each, in 1 weapon, 3 armor and 1 accessory slot.
 - `/info`: Shows the list of commands.
 - `/inventory`: Opens your inventory.
 - `/invite`: Shows the bot invite link.
