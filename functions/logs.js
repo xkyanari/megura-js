@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { EmbedBuilder, userMention } = require('discord.js');
 const path = require('path');
 const { logDir } = require('../src/vars');
 const { Guild } = require('../src/db');
@@ -36,46 +37,93 @@ const cleanupOldLogs = async () => {
 	}
 };
 
+const logFilePrefix = (guildId) => `guildID${guildId}_`;
+
+// Appends one line to the server's log file for today (logs/guildID<id>_<date>.log).
 const writeLogs = async (guildId, logEntry) => {
 	try {
 		const date = new Date().toISOString().split('T')[0];
 		const resolvedLogDir = getResolvedLogDir();
-		const logFile = path.join(resolvedLogDir, `guildID${guildId}_${date}.log`);
-
-		if (!fs.existsSync(resolvedLogDir)) {
-			fs.mkdirSync(resolvedLogDir);
-		}
-
-		fs.appendFile(logFile, `${logEntry}\n`, (err) => {
-			if (err) {
-				console.error(`Failed to write log entry to file: ${err}`);
-			}
-			else {
-				console.log('Log entry written to file successfully.');
-			}
-		});
+		await fs.promises.mkdir(resolvedLogDir, { recursive: true });
+		await fs.promises.appendFile(path.join(resolvedLogDir, `${logFilePrefix(guildId)}${date}.log`), `${logEntry}\n`);
 	}
 	catch (error) {
-		console.error(error);
+		console.error(`Failed to write log entry to file: ${error}`);
 	}
 };
 
-module.exports = async (client, guildId, embed, logEntry) => {
+// Returns the server's most recent log entries, newest first.
+// Entries are kept for LOG_RETENTION_DAYS (see cleanupOldLogs).
+const readRecentLogs = async (guildId, count) => {
+	const resolvedLogDir = getResolvedLogDir();
+	let files;
+	try {
+		files = await fs.promises.readdir(resolvedLogDir);
+	}
+	catch (error) {
+		if (error.code === 'ENOENT') return [];
+		throw error;
+	}
+
+	// file names end in YYYY-MM-DD, so a reverse sort is newest first
+	const guildFiles = files
+		.filter((file) => file.startsWith(logFilePrefix(guildId)) && file.endsWith('.log'))
+		.sort()
+		.reverse();
+
+	const entries = [];
+	for (const file of guildFiles) {
+		const content = await fs.promises.readFile(path.join(resolvedLogDir, file), 'utf8');
+		entries.push(...content.split('\n').filter(Boolean).reverse());
+		if (entries.length >= count) break;
+	}
+	return entries.slice(0, count);
+};
+
+// Records an event in the server's log history, and posts it to the
+// /setup logs channel when one is set.
+const sendLogs = async (client, guildId, embed, logEntry) => {
+	const sentAt = new Date();
+	await writeLogs(guildId, `<${sentAt.toISOString()}> : ${logEntry}`);
+
 	try {
 		const data = await Guild.findOne({ where: { guildID: guildId } });
 		if (!data || !data.logsChannelID) return;
 
-		const channel = client.channels.cache.get(data.logsChannelID);
-
+		const channel = client.channels.cache.get(data.logsChannelID)
+			?? await client.channels.fetch(data.logsChannelID).catch(() => null);
 		if (!channel) return;
-		embed.setTimestamp();
-		const sentAt = new Date();
+
+		embed.setTimestamp(sentAt);
 		await channel.send({ embeds: [embed] });
-		writeLogs(guildId, `<${sentAt.toISOString()}> : ${logEntry}`);
 	}
 	catch (error) {
 		console.error(error);
 	}
 };
 
+/**
+ * Logs a /setup change: who made it, what changed and the new values.
+ * `changes` is a list of { name, value, text }: `value` is shown in the logs
+ * channel embed (mentions are fine), `text` is written to the log file.
+ */
+const logSetupChange = (interaction, action, changes = []) => {
+	const { user } = interaction;
+	const embed = new EmbedBuilder()
+		.setTitle(`Setup: ${action}`)
+		.setColor('Blue')
+		.setDescription(`Changed by ${userMention(user.id)}`);
+	if (changes.length) {
+		embed.addFields(changes.map(({ name, value }) => ({ name, value: String(value), inline: true })));
+	}
+
+	const summary = changes.map(({ name, text, value }) => `${name}: ${text ?? value}`).join(', ');
+	const logEntry = `${user.tag ?? user.username} (${user.id}) ${action}${summary ? ` [${summary}]` : ''}`;
+
+	return sendLogs(interaction.client, interaction.guild.id, embed, logEntry);
+};
+
+module.exports = sendLogs;
 module.exports.cleanupOldLogs = cleanupOldLogs;
+module.exports.readRecentLogs = readRecentLogs;
+module.exports.logSetupChange = logSetupChange;

@@ -10,6 +10,18 @@ const captcha = require('../../functions/verify');
 const rules = require('../../functions/rules');
 const { validateFeature } = require('../../src/feature');
 const { changeChannel } = require('../../functions/webhook');
+const { logSetupChange, readRecentLogs } = require('../../functions/logs');
+
+const channelChange = (name, channel) => ({ name, value: channelMention(channel.id), text: `#${channel.name ?? channel.id} (${channel.id})` });
+const roleChange = (name, role) => ({ name, value: roleMention(role.id), text: `@${role.name ?? role.id} (${role.id})` });
+
+// Turns '<2026-10-09T05:00:00.000Z> : text' into '<t:unix:f> text' for Discord.
+const formatLogEntry = (entry) => {
+	const match = entry.match(/^<([^>]+)> : (.*)$/);
+	const time = match && Date.parse(match[1]);
+	const text = (match ? match[2] : entry).slice(0, 180);
+	return time ? `<t:${Math.floor(time / 1000)}:f> ${text}` : text;
+};
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -142,6 +154,19 @@ module.exports = {
 		)
 		.addSubcommand((subcommand) =>
 			subcommand.setName('settings').setDescription('Show current server settings.'),
+		)
+		.addSubcommand((subcommand) =>
+			subcommand
+				.setName('history')
+				.setDescription('Show recent setup changes and server events.')
+				.addIntegerOption((option) =>
+					option
+						.setName('count')
+						.setDescription('How many entries to show (default 10).')
+						.setMinValue(1)
+						.setMaxValue(25)
+						.setRequired(false),
+				),
 		),
 	cooldown: 3000,
 	async execute(interaction) {
@@ -166,6 +191,7 @@ module.exports = {
 					content: 'Guild registered.',
 					flags: 64,
 				});
+				await logSetupChange(interaction, 'registered the server');
 				break;
 			}
 
@@ -175,6 +201,9 @@ module.exports = {
 				}
 
 				await interaction.deferReply({ flags: 64 });
+
+				// logged first: the reset below also clears the logs channel
+				await logSetupChange(interaction, 'reset all server configuration');
 
 				await guildCheck.update({
 					verifyChannelID: '',
@@ -196,14 +225,14 @@ module.exports = {
 					intro: '',
 					rules: '',
 					closing: '',
-					arenaBoss: '',
+					arenaBoss: false,
 					customToken: '',
 					twitterID: '',
 					username: '',
 					accessToken: '',
 					refreshToken: '',
 					expiresIn: '',
-					expirationTime: '',
+					expirationTime: null,
 					walletAmount: 500000,
 					webhookId: '',
 					webhookToken: '',
@@ -214,7 +243,6 @@ module.exports = {
 					brawlChannelID: '',
 					brawlwebhookId: '',
 					brawlwebhookToken: '',
-					where: { guildID: interaction.guild.id },
 				});
 				await interaction.editReply({
 					content: 'Guild has been reset.',
@@ -237,6 +265,7 @@ module.exports = {
 					content: 'Audit Logs channel assigned.',
 					flags: 64,
 				});
+				await logSetupChange(interaction, 'set the logs channel', [channelChange('Channel', logsChannel)]);
 				break;
 			}
 
@@ -259,10 +288,11 @@ module.exports = {
 				const moderationChannel = await changeChannel(interaction, interaction.guild.id, modsChannel.id, fieldsToUpdate);
 
 				if (moderationChannel) {
-					return await interaction.editReply({
+					await interaction.editReply({
 						content: 'Moderation Logs channel assigned.',
 						flags: 64,
 					});
+					return await logSetupChange(interaction, 'set the orders channel', [channelChange('Channel', modsChannel)]);
 				}
 				break;
 			}
@@ -287,6 +317,11 @@ module.exports = {
 					content: 'Captcha settings saved!',
 					flags: 64,
 				});
+				await logSetupChange(interaction, 'changed the CAPTCHA settings', [
+					{ name: 'Type', value: type },
+					channelChange('Channel', verifyChannel),
+					roleChange('Verified role', role),
+				]);
 				break;
 			}
 
@@ -309,10 +344,11 @@ module.exports = {
 				const specialChannel = await changeChannel(interaction, interaction.guild.id, specialShop.id, fieldsToUpdate);
 
 				if (specialChannel) {
-					return await interaction.editReply({
+					await interaction.editReply({
 						content: 'Special Shop announcement channel saved!',
 						flags: 64,
 					});
+					return await logSetupChange(interaction, 'set the shop updates channel', [channelChange('Channel', specialShop)]);
 				}
 				break;
 			}
@@ -358,6 +394,10 @@ module.exports = {
 					content: 'Factions roles have been set successfully!',
 					flags: 64,
 				});
+				await logSetupChange(interaction, 'set the faction roles', [
+					roleChange('Margaretha', margaretha),
+					roleChange('Cerberon', cerberon),
+				]);
 				break;
 			}
 
@@ -515,6 +555,11 @@ module.exports = {
 						content: responseMsg,
 						flags: 64,
 					});
+					await logSetupChange(interaction, disable ? 'disabled chat' : 'changed the chat settings', [
+						...(prefix && !disable ? [{ name: 'Prefix', value: prefix }] : []),
+						...(channel && !disable ? [channelChange('Channel', channel)] : []),
+						...(prompt && !disable ? [{ name: 'Prompt', value: prompt.slice(0, 100) }] : []),
+					]);
 				}
 				else {
 					await interaction.reply({
@@ -522,6 +567,22 @@ module.exports = {
 						flags: 64,
 					});
 				}
+				break;
+			}
+
+			case 'history': {
+				const count = options.getInteger('count') ?? 10;
+				const entries = await readRecentLogs(interaction.guild.id, count);
+
+				const embed = new EmbedBuilder()
+					.setTitle('Setup history')
+					.setColor('Blue')
+					.setDescription(entries.length
+						? entries.map(formatLogEntry).join('\n').slice(0, 4000)
+						: 'No setup changes or server events in the last 30 days.')
+					.setFooter({ text: 'Newest first. Entries are kept for 30 days.' });
+
+				await interaction.reply({ embeds: [embed], flags: 64 });
 				break;
 			}
 		}
