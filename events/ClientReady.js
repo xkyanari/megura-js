@@ -9,7 +9,8 @@ const { redisURL } = require('../redis');
 const { cleanupOldLogs } = require('../functions/logs');
 const { processBrawlJob } = require('../functions/brawlWager');
 const { processGiveawayJob } = require('../functions/giveaway');
-const { Giveaway } = require('../src/db');
+const { processRaffleJob } = require('../functions/raffle');
+const { Giveaway, Raffle } = require('../src/db');
 
 let Discord;
 try {
@@ -139,6 +140,19 @@ module.exports = {
 				{ giveawayId: giveaway.id },
 				{ jobId: `giveaway-${giveaway.id}`, delay: Math.max(0, giveaway.endsAt - Date.now()), removeOnComplete: true },
 			).catch((error) => console.error(`Could not schedule giveaway ${giveaway.id}:`, error));
+		}
+
+		// Raffle endings (see functions/raffle.js), re-scheduled at startup like giveaways
+		const raffleQueue = new Queue('raffleQueue', redisURL);
+		client.raffleQueue = raffleQueue;
+		raffleQueue.process((job) => processRaffleJob(client, job.data));
+
+		const runningRaffles = await Raffle.findAll({ where: { status: 'running' } });
+		for (const raffle of runningRaffles) {
+			await raffleQueue.add(
+				{ raffleId: raffle.id },
+				{ jobId: `raffle-${raffle.id}`, delay: Math.max(0, raffle.endsAt - Date.now()), removeOnComplete: true },
+			).catch((error) => console.error(`Could not schedule raffle ${raffle.id}:`, error));
 		}
 
 		const auctionQueue = new Queue('auctionQueue', redisURL);

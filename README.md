@@ -48,7 +48,7 @@ Before running the bot, you will need the following:
 
 - [x] Verification with Captcha
 - [x] Create and manage Giveaways
-- [ ] Create and manage Raffles
+- [x] Create and manage Raffles
 - [x] Post announcements for orders, etc.
 - [x] Mini games (arena, etc.)
 - [x] View server setup logs
