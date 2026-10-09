@@ -5,7 +5,8 @@ const {
 	EmbedBuilder,
 	userMention,
 } = require('discord.js');
-const { Player, Monster, Guild, sequelize } = require('../src/db');
+const { Player, Guild } = require('../src/db');
+const { currentLocation, monsterAt } = require('./explore');
 const { simulateBattle } = require('./battle');
 const { expPoints, monsterStats } = require('../src/vars');
 const { rollLoot, loadConsumables } = require('./loot');
@@ -74,7 +75,7 @@ const resultButtons = () => new ActionRowBuilder().addComponents(
 );
 
 // The whole fight happens in the command's own reply, edited turn by turn.
-const executeAttack = async (interaction, { delay } = {}) => {
+const executeAttack = async (interaction, { delay, ambush = false } = {}) => {
 	const { member, guild } = interaction;
 
 	await interaction.deferReply();
@@ -87,10 +88,9 @@ const executeAttack = async (interaction, { delay } = {}) => {
 		throw new Error('profile not found');
 	}
 
-	const [monster] = await Monster.findAll({
-		order: sequelize.random(),
-		limit: 1,
-	});
+	// monsters come from where the player is exploring (anywhere, if they never have)
+	const location = await currentLocation(player.accountID);
+	const monster = await monsterAt(location);
 	if (!monster) {
 		throw new Error('no monsters configured');
 	}
@@ -108,8 +108,18 @@ const executeAttack = async (interaction, { delay } = {}) => {
 		totalDefense: player.totalDefense,
 	};
 	const monsterObj = { playerName: monster.monsterName, ...monsterStats(monster, player.level) };
+	// deeper locations pay more
+	if (location?.rewardBonus) {
+		monsterObj.iuraDropped = Math.round(monsterObj.iuraDropped * (1 + location.rewardBonus));
+		monsterObj.expDropped = Math.round(monsterObj.expDropped * (1 + location.rewardBonus));
+	}
 
-	const title = `⚔️ A wild ${monster.monsterName} appears!${rival ? ` (rival: ${factionLabel(monster.faction, guildRow)})` : ''}`;
+	const opening = ambush ? `⚠️ Ambush! A ${monster.monsterName} attacks!` : `⚔️ A wild ${monster.monsterName} appears!`;
+	const title = [
+		opening,
+		rival && `(rival: ${factionLabel(monster.faction, guildRow)})`,
+		location && `· ${location.name}`,
+	].filter(Boolean).join(' ').slice(0, 256);
 	let lastEmbed;
 	const winner = await simulateBattle(interaction, playerObj, monsterObj, {
 		title,
@@ -131,7 +141,7 @@ const executeAttack = async (interaction, { delay } = {}) => {
 			monsterKills: 1,
 		});
 		const loot = await rollLoot(player, monster.monsterName);
-		if (rival) await addFactionPoint(guild.id, faction);
+		if (rival) await addFactionPoint(guild.id, faction, Date.now(), player.accountID);
 
 		const quests = [
 			...await recordProgress(player.accountID, 'monsterWin'),

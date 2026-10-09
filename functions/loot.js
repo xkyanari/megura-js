@@ -39,10 +39,11 @@ const dropPool = async (monsterName, level) => {
 
 /**
  * Rolls for a drop and, on a hit, adds the item to the player's inventory.
- * Returns the item name, or null when nothing dropped.
+ * Returns the item name, or null when nothing dropped. `guaranteed` skips the
+ * roll (e.g. an item found by /explore search).
  */
-const rollLoot = async (player, monsterName, { random = Math.random } = {}) => {
-	if (random() >= DROP_CHANCE) return null;
+const rollLoot = async (player, monsterName, { random = Math.random, guaranteed = false } = {}) => {
+	if (!guaranteed && random() >= DROP_CHANCE) return null;
 
 	const pool = await dropPool(monsterName, player.level);
 	if (!pool.length) return null;

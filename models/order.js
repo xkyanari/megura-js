@@ -17,6 +17,17 @@ module.exports = (sequelize, DataTypes) => {
 				defaultValue: 'pending',
 			},
 			messageID: DataTypes.STRING,
+			// ores paid; null for orders placed before sales tracking
+			price: {
+				type: DataTypes.INTEGER,
+				allowNull: true,
+			},
+			// null for orders placed before sales tracking
+			orderedAt: {
+				type: DataTypes.DATE,
+				allowNull: true,
+				defaultValue: DataTypes.NOW,
+			},
 		},
 		{
 			freezeTableName: true,

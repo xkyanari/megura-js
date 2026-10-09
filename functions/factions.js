@@ -1,5 +1,5 @@
 const { Op } = require('sequelize');
-const { FactionScore } = require('../src/db');
+const { sequelize, FactionScore, FactionContribution } = require('../src/db');
 const { wanderer } = require('../src/vars');
 const { weekKey, previousWeekKey } = require('./period');
 
@@ -51,11 +51,30 @@ const isRival = (faction, monsterFaction) =>
 const factionLabel = (faction, guild) =>
 	(faction === 'Margaretha' ? guild?.margarethaName : guild?.cerberonName) || faction;
 
-const addFactionPoint = async (guildID, faction, now = Date.now()) => {
-	const where = { guildID, faction, weekKey: weekKey(now) };
-	await FactionScore.findOrCreate({ where, defaults: { ...where, score: 0 } });
-	await FactionScore.increment({ score: 1 }, { where });
-};
+/**
+ * Scores a point for the faction this week, and for the player who scored it
+ * (accountID, for season rewards). Each count is one atomic insert-or-add, so
+ * wins landing at the same moment are all counted.
+ */
+const addFactionPoint = (guildID, faction, now = Date.now(), accountID = null) => sequelize.transaction(async (transaction) => {
+	const week = weekKey(now);
+	await sequelize.query(
+		'INSERT INTO `FactionScore` (`guildID`, `faction`, `weekKey`, `score`, `createdAt`, `updatedAt`) VALUES (?, ?, ?, 1, NOW(), NOW()) '
+		+ 'ON DUPLICATE KEY UPDATE `score` = `score` + 1, `updatedAt` = NOW()',
+		{ replacements: [guildID, faction, week], transaction },
+	);
+	if (accountID) {
+		await sequelize.query(
+			'INSERT INTO `FactionContribution` (`guildID`, `accountID`, `faction`, `weekKey`, `points`, `createdAt`, `updatedAt`) VALUES (?, ?, ?, ?, 1, NOW(), NOW()) '
+			+ 'ON DUPLICATE KEY UPDATE `points` = `points` + 1, `updatedAt` = NOW()',
+			{ replacements: [guildID, accountID, faction, week], transaction },
+		);
+	}
+});
+
+// The player's points this week (any faction).
+const pointsThisWeek = async (guildID, accountID, now = Date.now()) =>
+	(await FactionContribution.sum('points', { where: { guildID, accountID, weekKey: weekKey(now) } })) ?? 0;
 
 // { thisWeek: { Margaretha, Cerberon }, lastWeek: { … } } for a server.
 const standings = async (guildID, now = Date.now()) => {
@@ -66,4 +85,4 @@ const standings = async (guildID, now = Date.now()) => {
 	return { thisWeek: table(keys.thisWeek), lastWeek: table(keys.lastWeek) };
 };
 
-module.exports = { FACTIONS, RIVAL_DAMAGE_BONUS, playerFaction, syncFaction, isRival, factionLabel, addFactionPoint, standings };
+module.exports = { FACTIONS, RIVAL_DAMAGE_BONUS, playerFaction, syncFaction, isRival, factionLabel, addFactionPoint, pointsThisWeek, standings };

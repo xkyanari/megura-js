@@ -59,11 +59,11 @@ Before running the bot, you will need the following:
 - [x] Creating and closing private channels
 - [x] Scheduling events
 - [x] Ticketing system
-- [ ] Sales tracking
+- [x] Sales tracking for the special shop (`/sales`)
 - [x] Slash-command RPG profile and inventory system
 - [x] Brawls
 - [ ] Auctions (switched off. To bring them back, set `"enableAuctions": true` in `config.json` **and** `"hasAuction": true` for the tiers that should have them in `assets/features.json`, then run `node deploy.js`)
-- [ ] Exploration mode
+- [x] Exploration mode (`/explore`)
 - [ ] World bosses
 
 All of these may not require having administrator role on the bot for security, but they are subject to change without prior notice.
@@ -177,6 +177,7 @@ mysql -u <user> -p <database> < scripts/migrations/2026-10-auction-bigint.sql
 docker compose run --rm bot node scripts/migrations/2026-10-gameplay.js
 docker compose run --rm bot node scripts/migrations/2026-10-health-curve.js
 docker compose run --rm bot node scripts/migrations/2026-10-remove-crypto.js
+docker compose run --rm bot node scripts/migrations/2026-10-order-sales.js
 docker compose up -d
 ```
 
@@ -186,6 +187,7 @@ docker compose up -d
 | `2026-10-gameplay.js` | Adds the daily-streak columns and new shop items, and unequips stacked or over-limit gear. |
 | `2026-10-health-curve.js` | Moves players onto the new health curve, keeping health from gear. |
 | `2026-10-remove-crypto.js` | Drops the unused NFT link columns from `Player`, and moves special-shop items from the removed Whitelist, NFTs and Cryptocurrencies categories to Digital Items. |
+| `2026-10-order-sales.js` | Adds the price paid and the order date to special-shop orders, for `/sales`. **Run it before starting this version**: the bot reads those columns. |
 
 **Vote rewards (top.gg and discordbotlist).** `/vote` pays 50 IURA per vote through a small webhook server inside the bot. It only starts when `VOTE_PORT` is set:
 
@@ -232,7 +234,8 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/daily`: Do a random quest to gain IURA. Claiming within 48 hours keeps a streak going, worth up to +60%.
 - `/duel`: Initiate a duel against another player.
 - `/equip`: Equip an inventory item: one copy each, in 1 weapon, 3 armor and 1 accessory slot.
-- `/factions`: `join` picks your faction; `standings` shows this week's faction points (from defeating the rival faction's monsters).
+- `/explore`: `map` shows the places of Eldelvain, `travel` moves you to one you have unlocked (monsters for `/attack` then come from there), and `search` looks around every 30 minutes.
+- `/factions`: `join` picks your faction; `standings` shows this week's faction points and last season's result; `setup` (moderators) sets where weekly season results are posted and an optional champion role.
 - `/info`: Shows the list of commands.
 - `/inventory`: Opens your inventory.
 - `/invite`: Shows the bot invite link.
@@ -244,6 +247,7 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/ranks`: Show leaderboards.
 - `/requestduel`: Respond to a duel request.
 - `/reset`: Delete voyager profile.
+- `/sales`: (Moderators) Special shop sales for the last 7 or 30 days or all time, with an optional CSV export.
 - `/sell`: Sell inventory items back to the shop for 40% of their price.
 - `/sendgift`: Send a gift to another player.
 - `/setup`: Setup server for moderation tools.
