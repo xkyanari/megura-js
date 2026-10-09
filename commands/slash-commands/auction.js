@@ -78,7 +78,7 @@ module.exports = {
 		let attachmentUrl = null;
 
 		switch (subCommand) {
-			case 'start':
+			case 'start': {
 				await interaction.deferReply();
 				if (!guildCheck) {
 					throw new Error('guild not found');
@@ -112,6 +112,7 @@ module.exports = {
 					await interaction.editReply({ content: 'Sorry, there was a problem starting the auction.', flags: 64 });
 				}
 				break;
+			}
 
 			case 'end':
 				// this command only updates the auction end time and gets the highest bidder

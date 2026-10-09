@@ -11,7 +11,7 @@ module.exports = {
 		const closing = interaction.fields.getTextInputValue('closing');
 
 		try {
-			const getRules = async (intro, rules = null, closing = null) => {
+			const getRules = async () => {
 				const guild = await Guild.findOne({
 					where: { guildID: interaction.guild.id },
 				});
@@ -35,7 +35,7 @@ module.exports = {
 			const embed = new EmbedBuilder()
 				.setTitle(`👋 Welcome to __${interaction.guild.name}__!`)
 				.setColor(0xcd7f32)
-				.setDescription(await getRules(intro, rules, closing));
+				.setDescription(await getRules());
 
 			await interaction.reply({
 				content: 'Rules have been saved in the server.',

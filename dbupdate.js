@@ -1,3 +1,5 @@
+// Each model is used by one of the commented-out migration blocks below; uncomment the one you need.
+/* eslint-disable no-unused-vars */
 const {
 	Monster,
 	Shop,
@@ -13,6 +15,7 @@ const {
 	Bid,
 	Brawl,
 } = require('./src/db');
+/* eslint-enable no-unused-vars */
 const fs = require('fs');
 const path = require('path');
 
