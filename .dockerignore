@@ -17,6 +17,7 @@ logs
 .github
 .devcontainer
 test
+scripts
 Dockerfile
 docker-compose.yml
 .dockerignore

@@ -75,5 +75,6 @@ const rest = new REST({ version: '9' }).setToken(token);
 	}
 	catch (error) {
 		console.error(error);
+		process.exitCode = 1;
 	}
 })();

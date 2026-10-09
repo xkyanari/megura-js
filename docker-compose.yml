@@ -28,8 +28,20 @@ services:
       NODE_OPTIONS: --max-old-space-size=384
     mem_limit: 768m
     volumes:
-      - ./config.json:/app/config.json:ro
-      - ./assets/features.json:/app/assets/features.json:ro
+      # create_host_path: false makes a missing file an error instead of
+      # Docker silently creating an empty directory in its place
+      - type: bind
+        source: ./config.json
+        target: /app/config.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ./assets/features.json
+        target: /app/assets/features.json
+        read_only: true
+        bind:
+          create_host_path: false
       - megura-logs:/app/logs
     logging:
       driver: json-file

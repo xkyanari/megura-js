@@ -103,15 +103,44 @@ docker compose version   # needs v2.24 or later
 
 **Switching from pm2:**
 
-```sh
-git pull
-docker compose build
-pm2 stop <app>        # your pm2 app name, see `pm2 list`
-docker compose up -d
-docker compose logs -f   # wait for "You're now connected as ..."
-```
+1. **Update the code.** If `git pull` stops because of local changes, run `git stash` and pull again; `git stash show -p` shows what was set aside.
+   ```sh
+   git pull
+   ```
+2. **Check the server.** This changes nothing. It prints every problem with the command that fixes it, and exits non-zero until everything is ready.
+   ```sh
+   bash scripts/docker-preflight.sh
+   ```
+   It covers:
+   - Docker and Compose versions;
+   - `config.json` and `assets/features.json` (present, valid, readable by the container's uid 1000);
+   - the Discord token;
+   - MySQL and Redis reachable;
+   - `isTestnet`;
+   - swap and disk space;
+   - whether pm2 is still running the bot.
+3. **Build while the old bot keeps running:**
+   ```sh
+   docker compose build
+   ```
+4. **Switch over at a quiet moment,** when no brawl challenge is open: challenges opened by the old version don't hold their stakes.
+   ```sh
+   pm2 stop <app>           # your pm2 app name, see `pm2 list`
+   docker compose up -d
+   docker compose logs -f   # wait for "You're now connected as ..."
+   ```
+5. **Re-register the slash commands.** Their options changed, for example amounts must now be at least 1.
+   ```sh
+   docker compose run --rm bot node deploy.js
+   ```
+6. **Make it permanent:**
+   ```sh
+   pm2 delete <app>
+   pm2 save
+   ```
+   Docker restarts the container after crashes and reboots (`restart: unless-stopped`), as long as the Docker service is enabled (`sudo systemctl enable docker`).
 
-Once the bot is running in Docker, `pm2 delete <app>` and `pm2 save` stop pm2 from starting it again at boot. Docker restarts the container after crashes and reboots (`restart: unless-stopped`), provided the Docker service is enabled (`sudo systemctl enable docker`).
+**Rolling back:** `docker compose down`, then `pm2 start <app>`. pm2 still has the app until step 6.
 
 **Everyday commands:**
 
