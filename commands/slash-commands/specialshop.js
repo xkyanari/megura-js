@@ -1,6 +1,6 @@
 const { SlashCommandBuilder, PermissionFlagsBits, userMention } = require('discord.js');
 const specialshop = require('../../functions/specialshop');
-const { Guild, Shop, Player } = require('../../src/db');
+const { Guild, Shop, grantOres } = require('../../src/db');
 
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -22,11 +22,13 @@ module.exports = {
 				.addIntegerOption(option =>
 					option.setName('price')
 						.setDescription('Enter the item price.')
+						.setMinValue(1)
 						.setRequired(true),
 				)
 				.addIntegerOption(option =>
 					option.setName('stock')
 						.setDescription('Set initial stock level.')
+						.setMinValue(0)
 						.setRequired(true),
 				)
 				.addStringOption(option =>
@@ -69,6 +71,7 @@ module.exports = {
 				.addIntegerOption(option =>
 					option.setName('price')
 						.setDescription('Enter the item price.')
+						.setMinValue(1)
 						.setRequired(true),
 				),
 		)
@@ -84,6 +87,7 @@ module.exports = {
 				.addIntegerOption(option =>
 					option.setName('stock')
 						.setDescription('Enter stock amount.')
+						.setMinValue(0)
 						.setRequired(true),
 				),
 		)
@@ -99,6 +103,7 @@ module.exports = {
 				.addIntegerOption(option =>
 					option.setName('amount')
 						.setDescription('Enter amount.')
+						.setMinValue(1)
 						.setRequired(true),
 				),
 		),
@@ -114,7 +119,7 @@ module.exports = {
 		const stock = options.getInteger('stock');
 		const itemID = options.getString('itemid');
 		const category = options.getString('category');
-		const recipient = options.getMember('user');
+		const recipient = options.getUser('user');
 		const amount = options.getInteger('amount');
 
 		const guild = await Guild.findOne({ where: { guildID: interaction.guild.id } });
@@ -129,47 +134,51 @@ module.exports = {
 				break;
 			case 'additem': {
 				await interaction.deferReply();
-				await Shop.addItem(item, price, stock, itemID, category, interaction.guild.id);
+				if (!await Shop.addItem(item, price, stock, itemID, category, interaction.guild.id)) {
+					return await interaction.editReply({ content: `An item with the ID \`${itemID}\` or the name \`${item}\` already exists. Pick a different one.` });
+				}
 				return await interaction.editReply({ content: `Item \`${item}\` added to the Special Shop.` });
 			}
 			case 'removeitem': {
 				await interaction.deferReply();
-				const getItem = await Shop.getItem(itemID);
+				const getItem = await Shop.getItem(itemID, interaction.guild.id);
 
 				if (!getItem) return await interaction.editReply({ content: 'Item not found.' });
 
-				await Shop.removeItem(itemID);
+				await Shop.removeItem(itemID, interaction.guild.id);
 				return await interaction.editReply({ content: `Item \`${getItem.itemName}\` removed from the Special Shop.` });
 			}
 			case 'setprice': {
 				await interaction.deferReply();
-				const getItem = await Shop.getItem(itemID);
+				const getItem = await Shop.getItem(itemID, interaction.guild.id);
 
 				if (!getItem) return await interaction.editReply({ content: 'Item not found.' });
 
-				await Shop.updateItem({ item_ID: itemID, price });
+				await Shop.updateItem({ item_ID: itemID, guildID: interaction.guild.id, price });
 				return await interaction.editReply({ content: `Item \`${getItem.itemName}\` updated. New price set is \`${price}\` ${oreEmoji}` });
 			}
 			case 'setstock': {
 				await interaction.deferReply();
-				const getItem = await Shop.getItem(itemID);
+				const getItem = await Shop.getItem(itemID, interaction.guild.id);
 
 				if (!getItem) return await interaction.editReply({ content: 'Item not found.' });
 
-				await Shop.updateItem({ item_ID: itemID, stock });
+				await Shop.updateItem({ item_ID: itemID, guildID: interaction.guild.id, stock });
 				return await interaction.editReply({ content: `Item \`${getItem.itemName}\` updated. New stock set is \`${stock}\`.` });
 			}
 
 			case 'transfer': {
 				await interaction.deferReply();
-				const user = await Player.findOne({ where: { discordID: recipient.id, guildID: interaction.guild.id } });
-				if (!user) {
-					throw new Error('profile not found');
+				try {
+					await grantOres(recipient.id, interaction.guild.id, amount);
 				}
-
-				await guild.decrement({ walletAmount: amount });
-				await user.increment({ oresEarned: amount });
-				return await interaction.editReply({ content: `\`${amount}\` ${oreEmoji} has been transferred to ${userMention(user.discordID)}.` });
+				catch (error) {
+					if (error.message === 'insufficient funds') {
+						return await interaction.editReply({ content: `The server wallet doesn't have \`${amount}\` ${oreEmoji} to give.` });
+					}
+					throw error;
+				}
+				return await interaction.editReply({ content: `\`${amount}\` ${oreEmoji} has been transferred to ${userMention(recipient.id)}.` });
 			}
 		}
 

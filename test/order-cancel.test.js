@@ -20,6 +20,7 @@ const click = (messageID) => {
 		message: { id: messageID },
 		guild: { id: G },
 		user: { id: 'ADMIN' },
+		member: { permissions: { has: () => true } },
 		async reply(payload) { rec.push('reply', payload); },
 	};
 };
@@ -43,7 +44,7 @@ test('a double click on Cancel refunds only once', async () => {
 	assert.equal(await guildWallet(), 970);
 	assert.equal(await stock(), 1);
 	const replies = [first.rec.content(0), second.rec.content(0)];
-	assert.equal(replies.filter((r) => /already marked/.test(r)).length, 1);
+	assert.equal(replies.filter((r) => /already cancelled/.test(r)).length, 1);
 });
 
 test('cancelling for a buyer who reset their profile keeps the ores in the guild', async () => {
@@ -64,4 +65,32 @@ test('a failed refund puts the order back to its previous status', async () => {
 	await assert.rejects(cancelled.execute(click('m3')), /item not found/);
 
 	assert.equal((await Order.findOne({ where: { messageID: 'm3' } })).status, 'processing');
+});
+
+test('a finished order can\'t be reopened, so it can\'t be refunded or delivered twice', async () => {
+	const processing = require('../components/buttons/processing');
+	const completed = require('../components/buttons/completed');
+	await Order.create({ messageID: 'm4', guildID: G, discordID: 'B', itemName: 'Role', status: 'pending' });
+	const oresBefore = (await Player.findOne({ where: { discordID: 'B' } })).oresEarned;
+
+	await cancelled.execute(click('m4'));
+	const reopen = click('m4');
+	await processing.execute(reopen);
+	assert.match(reopen.rec.content(0), /already cancelled/);
+	const complete = click('m4');
+	await completed.execute(complete);
+	assert.match(complete.rec.content(0), /already cancelled/);
+	await cancelled.execute(click('m4'));
+
+	assert.equal((await Player.findOne({ where: { discordID: 'B' } })).oresEarned, oresBefore + 30, 'refunded once');
+	assert.equal((await Order.findOne({ where: { messageID: 'm4' } })).status, 'cancelled');
+});
+
+test('order buttons are staff-only', async () => {
+	await Order.create({ messageID: 'm5', guildID: G, discordID: 'B', itemName: 'Role', status: 'pending' });
+	const member = click('m5');
+	member.member = { permissions: { has: () => false } };
+	await cancelled.execute(member);
+	assert.match(member.rec.content(0), /Only staff/);
+	assert.equal((await Order.findOne({ where: { messageID: 'm5' } })).status, 'pending');
 });

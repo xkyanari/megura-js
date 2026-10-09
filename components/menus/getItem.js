@@ -19,7 +19,9 @@ module.exports = {
 			throw new Error('profile not found');
 		}
 
-		const shopItem = await Shop.findOne({ where: { itemName: selected } });
+		// this server's special shop first, then the global shop
+		const shopItem = await Shop.findOne({ where: { itemName: selected, guildID: guild.id } })
+			?? await Shop.findOne({ where: { itemName: selected, guildID: null } });
 		if (!shopItem) return interaction.editReply('Item not found.');
 
 		const { price, guildID } = shopItem;

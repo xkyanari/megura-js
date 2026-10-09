@@ -44,7 +44,8 @@ module.exports = {
 			throw new Error('profile not found');
 		}
 
-		const shopItem = await Shop.findOne({ where: { item_ID: id } });
+		// /buy is for the global shop; special-shop items go through the shop menu and orders
+		const shopItem = await Shop.findOne({ where: { item_ID: id, guildID: null } });
 		if (!shopItem) {
 			return interaction.reply({ content: 'Item not found.', flags: 64 });
 		}
