@@ -26,6 +26,9 @@
 # See "Updating" and "Automatic updates" in README.md.
 
 set -euo pipefail
+# files git writes here are copied into the image, which runs as another user,
+# so keep them readable whatever umask the caller has (release-watch.sh: 077)
+umask 022
 # REPO_DIR: the checkout, when this runs from a copy outside it (release-watch.sh)
 cd "${REPO_DIR:-$(dirname "$0")/..}"
 
