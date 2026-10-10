@@ -91,7 +91,7 @@ if [ -f "$file" ]; then cp "$file" "$out"; printf 200; else echo '{}' > "$out"; 
 	execFileSync('git', ['init', '-q', '--bare', '-b', 'main', ORIGIN]);
 	fs.mkdirSync(path.join(SEED, 'scripts'), { recursive: true });
 	git(SEED, 'init', '-q', '-b', 'main');
-	fs.writeFileSync(path.join(SEED, 'scripts', 'update.sh'), 'echo "update $* repo=$REPO_DIR owner=$DEPLOY_OWNER" >> "$UPDATE_LOG"\n[ -n "${FAIL_UPDATE:-}" ] && { echo "FAILED: the new version did not become healthy"; exit 1; }\nexit 0\n');
+	fs.writeFileSync(path.join(SEED, 'scripts', 'update.sh'), 'echo "update $* repo=$REPO_DIR owner=$DEPLOY_OWNER" >> "$UPDATE_LOG"\n[ -n "${FAIL_UPDATE:-}" ] && { echo "FAILED: the new version did not become healthy"; exit 1; }\n# like update.sh: moves to the commit, or leaves a checkout that already has it alone\ngit -C "$REPO_DIR" merge -q --ff-only "$1"\n');
 	fs.copyFileSync(WATCH, path.join(SEED, 'scripts', 'release-watch.sh'));
 	fs.writeFileSync(path.join(SEED, 'version.txt'), 'v0');
 	git(SEED, 'add', '.');
@@ -242,5 +242,24 @@ describe('scripts/release-watch.sh', () => {
 		assert.equal(run.status, 0, run.output);
 		assert.match(run.output, /Last release handled: v5\.0\.0 \([0-9a-f]{7}\): deployed/);
 		assert.match(run.output, /Latest release on GitHub: v5\.0\.0/);
+	});
+
+	test('a release of a commit the server already has is reported as included, not deployed', () => {
+		tag('v4.1.0', 'main~1');
+		release('v4.1.0');
+		testRuns([['completed', 'success', '2026-10-10T09:00:00Z']]);
+		const head = git(SERVER, 'rev-parse', 'HEAD');
+		let run = watch();
+		assert.equal(run.status, 0, run.output);
+		assert.equal(run.updates.length, 1);
+		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), head, 'nothing moved backwards');
+		assert.match(state(), /^result=included$/m);
+		assert.match(run.webhook, /ℹ️ \*\*v4\.1\.0\*\* .* is already included in the deployed version/);
+		assert.ok(!run.webhook.includes('✅'));
+
+		// like a deployed release, it isn't retried
+		run = watch(['--retry']);
+		assert.match(run.output, /already handled \(included\)/);
+		assert.deepEqual(run.updates, []);
 	});
 });

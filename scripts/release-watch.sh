@@ -17,8 +17,11 @@
 # A release that failed or was skipped isn't tried again until a newer one is
 # published, or someone runs --retry.
 #
-# Git always runs as the checkout's owner, and root only runs update.sh as it
-# is in the release's commit, never the copy in the checkout.
+# Git always runs as the checkout's owner. Root runs update.sh and the
+# pre-flight check as they are in the release's commit, never the copies in
+# the working tree. Docker still builds and starts from the working tree's
+# Dockerfile, docker-compose.yml and .env, which the owner can edit, so the
+# checkout's owner must be someone you'd trust as root.
 
 set -euo pipefail
 
@@ -126,7 +129,7 @@ fi
 LAST_TAG=$(state_get tag)
 LAST_RESULT=$(state_get result)
 if [ "$TAG" = "$LAST_TAG" ]; then
-	if [ "$MODE" = retry ] && [ "$LAST_RESULT" != deployed ]; then
+	if [ "$MODE" = retry ] && [ "$LAST_RESULT" != deployed ] && [ "$LAST_RESULT" != included ]; then
 		log "Retrying $TAG (last time: $LAST_RESULT)."
 	else
 		log "Nothing new: $TAG was already handled ($LAST_RESULT)."
@@ -174,6 +177,7 @@ if ! git show "$SHA:scripts/release-watch.sh" 2>/dev/null | cmp -s - "$0"; then
 fi
 
 FROM=$(git log -1 --format='%h')
+BEFORE=$(git rev-parse HEAD)
 git show "$SHA:scripts/update.sh" > "$WORK/update.sh"
 log "Deploying $TAG ($SHORT) with scripts/update.sh from that commit."
 set +e
@@ -181,7 +185,13 @@ REPO_DIR="$REPO_DIR" DEPLOY_OWNER="$DEPLOY_OWNER" bash "$WORK/update.sh" "$SHA" 
 RC=${PIPESTATUS[0]}
 set -e
 
-if [ "$RC" = 0 ]; then
+if [ "$RC" = 0 ] && [ "$(git rev-parse HEAD)" = "$BEFORE" ]; then
+	# update.sh exits 0 without touching anything when the checkout already has
+	# this commit (an older commit was released, or it was deployed by hand)
+	record "$TAG" "$SHA" included
+	log "$TAG ($SHORT) is already included in $FROM; nothing to deploy."
+	notify "ℹ️ **$TAG** (\`$SHORT\`) is already included in the deployed version (\`$FROM\`); nothing to deploy. ${RELEASE_URL}${NOTE}"
+elif [ "$RC" = 0 ] && [ "$(git rev-parse HEAD)" = "$SHA" ]; then
 	record "$TAG" "$SHA" deployed
 	log "Deployed $TAG."
 	notify "✅ **$TAG** (\`$SHORT\`) is deployed and the bot is healthy (was \`$FROM\`). ${RELEASE_URL}${NOTE}"

@@ -5,9 +5,10 @@
 #   sudo bash /path/to/megura-js/scripts/install-release-watcher.sh
 #
 # It installs scripts/release-watch.sh as /usr/local/sbin/megura-watch (owned
-# by root, so the checkout's owner can't change what root runs), writes its
+# by root, so the checkout's owner can't change the watcher itself), writes its
 # settings to /etc/megura/watch.env, and starts a systemd timer that runs it
-# every 5 minutes. Run it again after a release changes release-watch.sh; the
+# every 5 minutes. Deploys still use the checkout's Docker files, so the
+# checkout's owner must be someone you'd trust as root. Run it again after a release changes release-watch.sh; the
 # settings are kept. See "Automatic updates" in README.md.
 
 set -euo pipefail

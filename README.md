@@ -192,7 +192,7 @@ If the pre-flight check, build or backup fails, the bot isn't touched. If a migr
 
 1. Checks that the release's tag points at a commit on `main`, and that the **Tests** workflow passed on that commit. If the tests are still running, it waits for them. If they failed, it skips the release.
 2. Runs `scripts/update.sh` for that exact commit. That script backs up the database, runs the migrations, waits for the bot to be healthy, and rolls back if it isn't.
-3. Posts the result to a Discord channel: deployed, skipped or failed (with the update's last log lines).
+3. Posts the result to a Discord channel: deployed, skipped, failed (with the update's last log lines), or already included when the server already runs that commit or a newer one.
 
 A release that failed or was skipped isn't tried again until a newer release is published, or someone runs `sudo megura-watch --retry`.
 
@@ -218,7 +218,10 @@ It asks for a Discord webhook URL (channel settings → **Integrations → Webho
 | Check for a release now | `sudo systemctl start megura-watch` |
 | Pause automatic deploys | `sudo systemctl stop megura-watch.timer` (`start` to resume) |
 
-The watcher runs as root because it has to run `docker`. Git commands, logs and backups run as the checkout's owner, so the owner keeps owning every file in the checkout. Root also only runs the `update.sh` stored in the release's commit, never the copy in the working tree. Even so, **anyone who can publish a release can run code as root on the server**, for example by changing `docker-compose.yml`. That holds for any automatic Docker deploy. Use two-factor authentication on GitHub and limit who can publish releases. Also note that during an update, the working tree's `Dockerfile` and `docker-compose.yml` are used. Anyone who can edit them while an update runs controls that update too.
+The watcher runs as root because it has to run `docker`. Git commands, logs and backups run as the checkout's owner, so the owner keeps owning every file in the checkout. Root runs `update.sh` and the pre-flight check as they are in the release's commit, never the copies in the working tree. Docker, though, builds and starts from the working tree's `Dockerfile`, `docker-compose.yml` and `.env`, and whoever controls those controls root (for example with `privileged: true` or by mounting `/`). So:
+
+- **The checkout's owner must be someone you'd trust as root.** In practice they're usually in the `docker` group anyway, which amounts to the same thing.
+- **Anyone who can publish a release can run code as root on the server**, for example by changing `docker-compose.yml`. That holds for any automatic Docker deploy. Use two-factor authentication on GitHub and limit who can publish releases.
 
 **Database migrations.** The bot creates new tables by itself but never changes existing ones, so some updates ship a script in `scripts/migrations/`. `scripts/update.sh` runs the new ones for you through `scripts/migrate.js`, which records each one in the `_migrations` table so it runs only once. Every migration is safe to run again, so on a server where some were run by hand, the first run just records them. To run them yourself, stop the bot and back up first:
 

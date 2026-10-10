@@ -183,6 +183,25 @@ describe('scripts/update.sh', () => {
 		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), tip);
 	});
 
+	test('the pre-flight check is the committed one, not the working tree\'s copy', () => {
+		// stands in for the owner editing it after the local-changes check passed
+		const preflight = path.join(SERVER, 'scripts', 'preflight-ok.sh');
+		git(SERVER, 'update-index', '--assume-unchanged', 'scripts/preflight-ok.sh');
+		fs.writeFileSync(preflight, 'echo edited preflight\nexit 1\n');
+		try {
+			const tip = pushCommit('v7');
+			const run = update();
+			assert.equal(run.status, 0, run.output);
+			assert.match(run.output, /preflight ok/);
+			assert.ok(!run.output.includes('edited preflight'));
+			assert.equal(git(SERVER, 'rev-parse', 'HEAD'), tip);
+		}
+		finally {
+			git(SERVER, 'update-index', '--no-assume-unchanged', 'scripts/preflight-ok.sh');
+			git(SERVER, 'checkout', '--', 'scripts/preflight-ok.sh');
+		}
+	});
+
 	test('only a commit ID on main is deployed', () => {
 		const notOnMain = update({}, ['0123456789abcdef0123456789abcdef01234567']);
 		assert.equal(notOnMain.status, 1);

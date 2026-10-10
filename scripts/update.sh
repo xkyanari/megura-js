@@ -8,7 +8,9 @@
 # On a server where the checkout's owner can't run docker, root runs it with
 # DEPLOY_OWNER=<owner>: git and every file it writes (logs, backups) then go
 # through that user, so nothing in the checkout becomes root's.
-# scripts/release-watch.sh does this when a release is published.
+# scripts/release-watch.sh does this when a release is published. Docker still
+# builds and starts from the checkout's Dockerfile, docker-compose.yml and
+# .env, so the owner must be someone you'd trust as root.
 #
 # Steps: pull → pre-flight check → build the new image (the old bot keeps
 # running) → back up the database → stop the bot → run new migrations →
@@ -117,7 +119,9 @@ start_previous() {
 }
 
 step "Pre-flight check"
-if ! bash "$PREFLIGHT"; then
+# the committed script, not the working tree's copy, which the checkout's owner
+# could change after the local-changes check; $0 is its path, so it finds the repo
+if ! PREFLIGHT_SCRIPT=$(git show "$NEW:$PREFLIGHT") || ! bash -c "$PREFLIGHT_SCRIPT" "$PREFLIGHT"; then
 	revert_code
 	die "the pre-flight check found problems (listed above); the bot was not touched"
 fi
