@@ -10,6 +10,8 @@ logs
 *.sqlite
 *.db
 *.sql
+# ...except the schema migrations, which scripts/migrate.js runs in the container
+!scripts/migrations/*.sql
 *.rdb
 
 # not needed in the image
@@ -17,7 +19,7 @@ logs
 .github
 .devcontainer
 test
-scripts
+backups
 Dockerfile
 docker-compose.yml
 .dockerignore

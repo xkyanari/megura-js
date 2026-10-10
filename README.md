@@ -149,7 +149,7 @@ docker compose version   # needs v2.24 or later
 
 | Task | Command |
 |---|---|
-| Update after `git pull` | `bash scripts/docker-preflight.sh`, then `docker compose up -d --build`, then `docker compose run --rm bot node deploy.js` if commands changed |
+| Update to the latest `main` | `bash scripts/update.sh` (see **Updating** below) |
 | Follow output | `docker compose logs -f` |
 | Register slash commands | `docker compose run --rm bot node deploy.js` |
 | Restart | `docker compose restart` |
@@ -169,17 +169,52 @@ docker compose version   # needs v2.24 or later
 - **Check which database you run** with `mysqld --version`. On Debian 12, `mysql-server` installs MariaDB 10.11, which is already light and needs no tuning. On MySQL 8, add `performance_schema = OFF` and `innodb_buffer_pool_size = 128M` under `[mysqld]`, then restart MySQL.
 - **Clean up old images** after updates with `docker image prune -f`.
 
-**Database migrations.** The bot creates new tables by itself but never changes existing ones, so a few updates ship a one-off script in `scripts/migrations/`. Run each once, in date order, with the bot stopped and after a backup. The `.js` scripts take `--dry-run` to show what they would change, and remember that they have run:
+**Updating.** One command does a whole update:
+
+```sh
+bash scripts/update.sh            # does nothing if main has no new commits
+bash scripts/update.sh --force    # runs every step anyway
+```
+
+It runs these steps in order:
+1. Pulls `main`.
+2. Runs the pre-flight check.
+3. Builds the new image while the old bot keeps running.
+4. Backs up the database to `backups/` (the last 10 are kept).
+5. Stops the bot.
+6. Runs any new database migrations.
+7. Registers the slash commands.
+8. Starts the bot and checks that it stays up.
+
+If the pre-flight check, build or backup fails, the bot isn't touched. If a migration fails or the new bot doesn't stay up, the previous code and image are started again, and the backup's path is printed so the database can be restored if needed. Everything is logged to `logs/update.log`. It needs `mysqldump` (or `mariadb-dump`) on the host, from the `mysql-client` or `mariadb-client` package.
+
+**Automatic updates.** The **Deploy** GitHub workflow runs `scripts/update.sh` on the server over SSH every time the tests pass on `main`. It deploys the exact commit that passed, never a newer one whose tests are still running, and it never goes back to an older commit. It can also be run by hand from the Actions tab, which deploys the tip of `main`. Setting it up takes one time:
+
+1. On the server, as the user that owns the checkout and can run `docker`, make a key just for deploys:
+   ```sh
+   ssh-keygen -t ed25519 -N '' -f ~/.ssh/megura_deploy -C megura-deploy
+   ```
+2. Allow that key to run the update and nothing else. Add this line to `~/.ssh/authorized_keys`, with the checkout's real path:
+   ```
+   command="cd /home/<user>/megura-js && bash scripts/update.sh",no-pty,no-port-forwarding,no-agent-forwarding,no-X11-forwarding ssh-ed25519 AAAA... megura-deploy
+   ```
+   The last part is the content of `~/.ssh/megura_deploy.pub`. With this restriction, `update.sh` only takes a commit ID from what the workflow sends.
+3. In GitHub, go to **Settings → Secrets and variables → Actions** and add these repository secrets:
+   - `DEPLOY_HOST`: the server's address
+   - `DEPLOY_USER`: that user
+   - `DEPLOY_SSH_KEY`: the content of `~/.ssh/megura_deploy` (the private key)
+   - `DEPLOY_KNOWN_HOSTS`: the output of `ssh-keyscan <server address>`, run from another machine
+   - Optional: `DEPLOY_PORT` if SSH isn't on port 22, and `DEPLOY_PATH` if the checkout isn't `~/megura-js`
+4. Run the **Deploy** workflow once from the Actions tab to check it works.
+
+Without the secrets, the workflow skips itself. To approve each deploy by hand, add required reviewers to the `production` environment under **Settings → Environments**.
+
+**Database migrations.** The bot creates new tables by itself but never changes existing ones, so some updates ship a script in `scripts/migrations/`. `scripts/update.sh` runs the new ones for you through `scripts/migrate.js`, which records each one in the `_migrations` table so it runs only once. Every migration is safe to run again, so on a server where some were run by hand, the first run just records them. To run them yourself, stop the bot and back up first:
 
 ```sh
 docker compose down
-mysqldump -u <user> -p <database> > backup-$(date +%F).sql
-mysql -u <user> -p <database> < scripts/migrations/2026-10-auction-bigint.sql
-docker compose run --rm bot node scripts/migrations/2026-10-gameplay.js
-docker compose run --rm bot node scripts/migrations/2026-10-health-curve.js
-docker compose run --rm bot node scripts/migrations/2026-10-remove-crypto.js
-docker compose run --rm bot node scripts/migrations/2026-10-order-sales.js
-docker compose run --rm bot node scripts/migrations/2026-10-crafting.js
+docker compose run --rm bot node scripts/migrate.js --dry-run   # lists what would run
+docker compose run --rm bot node scripts/migrate.js
 docker compose up -d
 ```
 

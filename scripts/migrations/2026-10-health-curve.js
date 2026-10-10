@@ -11,15 +11,15 @@
  * It records itself in the _migrations table, so running it again does nothing.
  */
 
+const { ensureTable, isApplied } = require('../migrate');
 const { sequelize, Player } = require('../../src/db');
 const { healthPerLevel, legacyHealthPerLevel } = require('../../src/vars');
 
 const NAME = '2026-10-health-curve';
 
 const migrate = async ({ dryRun = false, log = console.log } = {}) => {
-	await sequelize.query('CREATE TABLE IF NOT EXISTS `_migrations` (`name` VARCHAR(100) PRIMARY KEY, `appliedAt` DATETIME NOT NULL)');
-	const [done] = await sequelize.query('SELECT `name` FROM `_migrations` WHERE `name` = ?', { replacements: [NAME] });
-	if (done.length) {
+	// reads only, so a dry run changes nothing
+	if (await isApplied(sequelize, NAME)) {
 		log(`${NAME} has already been applied.`);
 		return 0;
 	}
@@ -34,6 +34,7 @@ const migrate = async ({ dryRun = false, log = console.log } = {}) => {
 		return changes.length;
 	}
 
+	await ensureTable(sequelize);
 	await sequelize.transaction(async (transaction) => {
 		for (const { player, gain } of changes) {
 			await Player.increment({ totalHealth: gain }, { where: { accountID: player.accountID }, transaction });
