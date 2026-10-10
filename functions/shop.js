@@ -1,13 +1,13 @@
-const { EmbedBuilder, StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder } = require('discord.js');
-const { footer, shopImage } = require('../src/vars');
+const { StringSelectMenuBuilder, StringSelectMenuOptionBuilder, ActionRowBuilder } = require('discord.js');
+const { shopImage } = require('../src/vars');
+
+const { gameEmbed } = require('./embedStyle');
 
 module.exports = async (interaction) => {
-	const embed = new EmbedBuilder()
-		.setColor(0xcd7f32)
-		.setTitle('🛒 **ITEM SHOP:** 🛒')
-		.setDescription('Type `/buy <item ID> <amount>` to buy in bulk.')
-		.setImage(shopImage)
-		.setFooter(footer);
+	const embed = gameEmbed()
+		.setTitle('🛒 Item Shop')
+		.setDescription('Choose a category below to browse gear and supplies.\nUse `/buy` with an item ID and amount to purchase.')
+		.setImage(shopImage);
 
 	const select = new StringSelectMenuBuilder()
 		.setCustomId('category')

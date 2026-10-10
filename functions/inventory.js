@@ -1,6 +1,5 @@
-const { EmbedBuilder } = require('discord.js');
 const { Player, Shop } = require('../src/db');
-const { footer } = require('../src/vars');
+const { gameEmbed } = require('./embedStyle');
 const buttonPages = require('./paginator');
 
 module.exports = async (interaction) => {
@@ -24,18 +23,16 @@ module.exports = async (interaction) => {
 	await interaction.deferReply();
 
 	const embeds = [];
-	let currentEmbed = new EmbedBuilder()
-		.setColor(0xcd7f32)
+	let currentEmbed = gameEmbed('inventory')
 		.setAuthor({ name: `${interaction.user.tag}` })
 		.setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
-		.setTitle('**🛄 INVENTORY LIST**')
-		.setDescription('Type `/equip` or `/unequip` to apply them to your stats.')
-		.setFooter(footer);
+		.setTitle('🛄 Voyager Inventory')
+		.setDescription('Your gear and supplies. Use `/equip` or `/unequip` to change your loadout.');
 
 	if (items.length === 0) {
 		currentEmbed.addFields({
-			name: '\u200b',
-			value: 'Nothing here!',
+			name: 'Your pack is empty',
+			value: 'Fight monsters with `/attack` or visit `/shop` to find your first items.',
 			inline: false,
 		});
 	}
@@ -43,13 +40,11 @@ module.exports = async (interaction) => {
 	for (let i = 0; i < items.length; i++) {
 		if (i !== 0 && i % itemsPerPage === 0) {
 			embeds.push(currentEmbed);
-			currentEmbed = new EmbedBuilder()
-				.setColor(0xcd7f32)
+			currentEmbed = gameEmbed('inventory')
 				.setAuthor({ name: `${interaction.user.tag}` })
 				.setThumbnail(`${member.displayAvatarURL({ extension: 'png', size: 512 })}`)
-				.setTitle('**🛄 INVENTORY LIST**')
-				.setDescription('Type `/equip` or `/unequip` to apply them to your stats.')
-				.setFooter(footer);
+				.setTitle('🛄 Voyager Inventory')
+				.setDescription('Your gear and supplies. Use `/equip` or `/unequip` to change your loadout.');
 		}
 
 		const item = items[i];
@@ -61,10 +56,10 @@ module.exports = async (interaction) => {
 
 		let fieldValue;
 		if (guildID) {
-			fieldValue = `__Total Amount:__ **${item.quantity + item.equippedAmount}**`;
+			fieldValue = `**${item.quantity + item.equippedAmount}** owned`;
 		}
 		else {
-			fieldValue = `Unequipped: ${item.quantity}\nEquipped: ${item.equippedAmount}\n__Total Amount:__ **${item.quantity + item.equippedAmount}**\nItem ID: \`${item_ID}\``;
+			fieldValue = `**${item.quantity}** in pack · **${item.equippedAmount}** equipped\nItem ID: \`${item_ID}\``;
 		}
 
 		currentEmbed.addFields({

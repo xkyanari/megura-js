@@ -1,8 +1,8 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder } = require('discord.js');
 const ms = require('ms');
 const redis = require('../../redis');
 const { Player } = require('../../src/db');
-const { footer } = require('../../src/vars');
+const { gameEmbed } = require('../../functions/embedStyle');
 const E = require('../../functions/explore');
 const { executeAttack } = require('../../functions/attack');
 const { recordProgress, completedLines } = require('../../functions/quests');
@@ -46,16 +46,22 @@ module.exports = {
 
 		if (subcommand === 'map') {
 			const here = (await E.currentLocation(player.accountID)) ?? E.LOCATIONS[0];
-			const lines = E.LOCATIONS.map((location) => {
-				if (location.name === here.name) return `📍 **${location.name}**${percent(location.rewardBonus)}`;
-				if (location.unlockLevel <= player.level) return `▫️ ${location.name}${percent(location.rewardBonus)}`;
-				return `🔒 ${location.name} (level ${location.unlockLevel})`;
-			});
-			const embed = new EmbedBuilder()
-				.setColor(0xcd7f32)
-				.setTitle('🗺️ ELDELVAIN')
-				.setDescription(`**You are at ${here.name}.**\n${here.description}\n\n${lines.join('\n')}`)
-				.setFooter(footer);
+			const available = E.LOCATIONS.filter((location) => location.unlockLevel <= player.level);
+			const locked = E.LOCATIONS.filter((location) => location.unlockLevel > player.level);
+			const embed = gameEmbed('explore')
+				.setTitle('🗺️ Eldelvain')
+				.setDescription(`📍 **${here.name}**\n${here.description}`)
+				.addFields({
+					name: 'Open to explore',
+					value: available.map((location) => `${location.name === here.name ? '📍' : '▫️'} **${location.name}**${percent(location.rewardBonus)}`).join('\n') || 'No destinations available.',
+				});
+			if (locked.length) {
+				embed.addFields({
+					name: 'Beyond your reach',
+					value: locked.map((location) => `🔒 ${location.name} · **Lv ${location.unlockLevel}**`).join('\n'),
+				});
+			}
+			embed.addFields({ name: 'Your next move', value: 'Use `/explore travel` to choose a destination, then `/explore search` or `/attack`.' });
 			return interaction.reply({ embeds: [embed], flags: 64 });
 		}
 
@@ -68,8 +74,7 @@ module.exports = {
 				return interaction.reply({ content, flags: 64 });
 			}
 			const discovery = result.discovered ? `\n\n✨ **New place discovered!** +${result.bonus} IURA` : '';
-			const embed = new EmbedBuilder()
-				.setColor(0xcd7f32)
+			const embed = gameEmbed('explore')
 				.setTitle(`🧭 You arrive at ${result.location.name}`)
 				.setDescription(`${result.location.description}${discovery}\n\nMonsters you fight with /attack now come from here.`);
 			return interaction.reply({ embeds: [embed] });
@@ -107,8 +112,7 @@ module.exports = {
 				lore: `📜 ${found.text}`,
 				nothing: 'You search carefully, but find nothing this time.',
 			}[found.type];
-			const embed = new EmbedBuilder()
-				.setColor(0xcd7f32)
+			const embed = gameEmbed('explore')
 				.setTitle(`🔎 Searching ${found.location.name}`)
 				.setDescription([text, ...quests].join('\n\n'));
 			return interaction.reply({ embeds: [embed] });

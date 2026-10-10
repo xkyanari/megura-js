@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { gameEmbed, formatNumber, progressBar } = require('./embedStyle');
 const { attackMultiplier, getCriticalHitRate } = require('../src/vars');
 
 // A battle where neither side can hurt the other would never end.
@@ -9,7 +9,6 @@ const TURN_DELAY = 1500;
 // Consumables are used when health drops below this share, at most MAX_CONSUMABLES times a battle.
 const CONSUMABLE_THRESHOLD = 0.35;
 const MAX_CONSUMABLES = 2;
-const HP_BAR_LENGTH = 10;
 
 const getDamage = (player1, player2, criticalHitMultiplier) => {
 	const damage =
@@ -21,20 +20,21 @@ const getDamage = (player1, player2, criticalHitMultiplier) => {
 	return { finalDamage, remainingHealth };
 };
 
-const hpBar = (current, max) => {
-	const ratio = max > 0 ? Math.min(Math.max(current / max, 0), 1) : 0;
-	const filled = Math.round(ratio * HP_BAR_LENGTH);
-	return `${'▰'.repeat(filled)}${'▱'.repeat(HP_BAR_LENGTH - filled)}`;
-};
+const hpBar = progressBar;
 
 const hpLine = (fighter) =>
-	`**${fighter.playerName}** (Lv ${fighter.level})\n${hpBar(fighter.totalHealth, fighter.maxHealth)} ${Math.max(0, Math.round(fighter.totalHealth))}/${Math.round(fighter.maxHealth)} HP`;
+	`\`${hpBar(fighter.totalHealth, fighter.maxHealth)}\`\n**${formatNumber(Math.max(0, Math.round(fighter.totalHealth)))}** / ${formatNumber(Math.round(fighter.maxHealth))} HP`;
 
 const battleEmbed = (a, b, logs, { title = 'Battle', thumbnail } = {}) => {
-	const embed = new EmbedBuilder()
-		.setColor(0xcd7f32)
+	const embed = gameEmbed()
 		.setTitle(title)
-		.setDescription(`${hpLine(a)}\n\n${hpLine(b)}\n\n${logs.slice(-MAX_LOG_LINES).join('\n')}`.slice(0, 4000));
+		.addFields(
+			{ name: `⚔️ ${a.playerName} · Lv ${a.level}`.slice(0, 256), value: hpLine(a), inline: true },
+			{ name: `🛡️ ${b.playerName} · Lv ${b.level}`.slice(0, 256), value: hpLine(b), inline: true },
+		)
+		.setDescription(logs.length
+			? `**Combat log**\n${logs.slice(-MAX_LOG_LINES).join('\n')}`.slice(0, 4000)
+			: '*The fighters take their positions…*');
 	if (thumbnail) embed.setThumbnail(thumbnail);
 	return embed;
 };

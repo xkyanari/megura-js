@@ -20,7 +20,8 @@ module.exports = {
                 
                 **Profile**
                 > **_/start_** - Initiate creating own character.
-                > **_/profile <username>_** -  Show profile of a user (blank for self).
+                > **_/profile view [player]_** -  Show profile of a user (blank for self).
+                > **_/profile delete_** - Permanently delete your character in this server after confirmation.
                 > **_/changenick_** -  Updates player name.
                 **Quests**
                 > **_/daily_** - Do a random quest to increase/decrease stats or gain Iura.
