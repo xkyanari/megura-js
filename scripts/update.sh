@@ -5,6 +5,11 @@
 #   bash scripts/update.sh <commit>   # update to that commit of main (what CI tested)
 #   bash scripts/update.sh --force    # run every step even if nothing is new
 #
+# On a server where the checkout's owner can't run docker, root runs it with
+# DEPLOY_OWNER=<owner>: git and every file it writes (logs, backups) then go
+# through that user, so nothing in the checkout becomes root's.
+# scripts/release-watch.sh does this when a release is published.
+#
 # Steps: pull → pre-flight check → build the new image (the old bot keeps
 # running) → back up the database → stop the bot → run new migrations →
 # register slash commands → start the bot → check it stays up.
@@ -14,15 +19,18 @@
 # up, the previous code and image are started again and the backup's path is
 # printed. Everything is logged to logs/update.log.
 #
-# The GitHub "Deploy" workflow runs this over SSH when main goes green; see
-# "Automatic updates" in README.md.
+# See "Updating" and "Automatic updates" in README.md.
 
 set -euo pipefail
-cd "$(dirname "$0")/.."
+# REPO_DIR: the checkout, when this runs from a copy outside it (release-watch.sh)
+cd "${REPO_DIR:-$(dirname "$0")/..}"
 
 BRANCH="${DEPLOY_BRANCH:-main}"
 IMAGE="megura-bot"
 CONTAINER="megura-bot"
+HEALTH_TIMEOUT="${HEALTH_TIMEOUT:-180}"
+HEALTH_POLL="${HEALTH_POLL:-5}"
+# an image without a HEALTHCHECK only has to stay up this long
 HEALTH_WAIT="${HEALTH_WAIT:-20}"
 KEEP_BACKUPS="${KEEP_BACKUPS:-10}"
 PREFLIGHT="${PREFLIGHT:-scripts/docker-preflight.sh}"
@@ -34,20 +42,28 @@ for arg in "$@"; do
 		*) TARGET="$arg" ;;
 	esac
 done
-# Through a deploy key restricted with command="…" in authorized_keys, the
-# workflow's command arrives in SSH_ORIGINAL_COMMAND: only a commit ID is
-# taken from it, nothing else.
-if [ -z "$TARGET" ] && [ -n "${SSH_ORIGINAL_COMMAND:-}" ]; then
-	TARGET=$(grep -oE '\b[0-9a-f]{40}\b' <<<"$SSH_ORIGINAL_COMMAND" | head -n 1 || true)
-fi
 
-mkdir -p logs backups
-exec 9>logs/update.lock
+# Runs a command as DEPLOY_OWNER when this runs as root, otherwise as is.
+OWNER="${DEPLOY_OWNER:-}"
+if [ "$(id -u)" = 0 ] && [ -n "$OWNER" ] && [ "$OWNER" != root ]; then
+	OWNER_HOME=$(getent passwd "$OWNER" | cut -d: -f6)
+	[ -n "$OWNER_HOME" ] || { echo "No such user: $OWNER" >&2; exit 1; }
+	as_owner() { runuser -u "$OWNER" -- env HOME="$OWNER_HOME" "$@"; }
+else
+	as_owner() { "$@"; }
+fi
+git() { as_owner env git "$@"; }
+# always this file: a docker-compose.override.yml lying around is ignored
+compose() { docker compose -f docker-compose.yml "$@"; }
+
+as_owner mkdir -p logs backups
+as_owner touch logs/update.lock
+exec 9>>logs/update.lock
 if ! flock -n 9; then
 	echo "Another update is already running." >&2
 	exit 1
 fi
-exec > >(tee -a logs/update.log) 2>&1
+exec > >(as_owner tee -a logs/update.log) 2>&1
 
 step() { printf '\n[%s] %s\n' "$(date -u '+%F %T UTC')" "$*"; }
 die() { printf '[%s] FAILED: %s\n' "$(date -u '+%F %T UTC')" "$*" >&2; exit 1; }
@@ -96,7 +112,7 @@ start_previous() {
 	revert_code
 	if [ -n "$RUNNING_IMAGE" ]; then
 		restore_latest
-		docker compose up -d --no-build && echo "The previous version is running again."
+		compose up -d --no-build && echo "The previous version is running again."
 	fi
 }
 
@@ -108,7 +124,7 @@ fi
 
 step "Building the new image (the bot keeps running)"
 if [ -n "$RUNNING_IMAGE" ]; then docker tag "$RUNNING_IMAGE" "$IMAGE:previous"; fi
-if ! docker compose build; then
+if ! compose build; then
 	restore_latest
 	revert_code
 	die "the build failed; the bot was not touched"
@@ -127,7 +143,7 @@ DUMP=$(command -v mysqldump || command -v mariadb-dump || true)
 BACKUP="backups/$DB_NAME-$(date -u '+%Y%m%d-%H%M%S')-$(git rev-parse --short "$OLD").sql.gz"
 # the password goes through the environment, never on the command line
 if ! MYSQL_PWD="$DB_PASS" "$DUMP" --single-transaction --no-tablespaces --routines \
-	-h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" "$DB_NAME" | gzip > "$BACKUP"; then
+	-h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" "$DB_NAME" | gzip | as_owner sh -c 'umask 077 && cat > "$1"' sh "$BACKUP"; then
 	rm -f "$BACKUP"
 	restore_latest
 	revert_code
@@ -137,33 +153,45 @@ echo "Saved $BACKUP ($(du -h "$BACKUP" | cut -f1))."
 { ls -1t backups/*.sql.gz 2>/dev/null || true; } | tail -n +"$((KEEP_BACKUPS + 1))" | xargs -r rm -f
 
 step "Stopping the bot"
-docker compose down
+compose down
 
 step "Running database migrations"
-if ! docker compose run --rm bot node scripts/migrate.js; then
+if ! compose run --rm bot node scripts/migrate.js; then
 	start_previous
 	die "a migration failed. The database backup from just before is $BACKUP (restore: gunzip -c $BACKUP | mysql -u $DB_USER -p $DB_NAME)"
 fi
 
 step "Registering slash commands"
 COMMANDS_OK=true
-docker compose run --rm bot node deploy.js || COMMANDS_OK=false
+compose run --rm bot node deploy.js || COMMANDS_OK=false
 
-step "Starting the bot"
-docker compose up -d --no-build
-sleep "$HEALTH_WAIT"
-STATE=$(docker inspect -f '{{.State.Running}} {{.RestartCount}}' "$CONTAINER" 2>/dev/null || echo "false 0")
-if [ "${STATE%% *}" != "true" ] || [ "${STATE##* }" != "0" ]; then
-	docker compose logs --tail 40 bot || true
-	docker compose down || true
+step "Starting the bot and waiting for it to be healthy (up to ${HEALTH_TIMEOUT}s)"
+compose up -d --no-build
+# healthy: the container's HEALTHCHECK passes, i.e. the bot is logged in to
+# Discord (functions/health.js). A crash, a restart or "unhealthy" fails at once.
+HEALTHY=false
+STARTED=$SECONDS
+while :; do
+	STATE=$(docker inspect -f '{{.State.Running}} {{.RestartCount}} {{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$CONTAINER" 2>/dev/null || echo "false 0 none")
+	read -r RUNNING RESTARTS HEALTH <<<"$STATE"
+	if [ "$RUNNING" != "true" ] || [ "$RESTARTS" != "0" ] || [ "$HEALTH" = "unhealthy" ]; then break; fi
+	if [ "$HEALTH" = "healthy" ]; then HEALTHY=true; break; fi
+	if [ "$HEALTH" = "none" ] && [ $((SECONDS - STARTED)) -ge "$HEALTH_WAIT" ]; then HEALTHY=true; break; fi
+	if [ $((SECONDS - STARTED)) -ge "$HEALTH_TIMEOUT" ]; then HEALTH="still ${HEALTH} after ${HEALTH_TIMEOUT}s"; break; fi
+	sleep "$HEALTH_POLL"
+done
+if [ "$HEALTHY" = false ]; then
+	echo "State: running=$RUNNING restarts=$RESTARTS health=$HEALTH"
+	compose logs --tail 40 bot || true
+	compose down || true
 	start_previous
-	die "the new version didn't stay up (logs above). Migrations already ran; the backup from before them is $BACKUP"
+	die "the new version didn't become healthy (logs above). Migrations already ran; the backup from before them is $BACKUP"
 fi
 echo "Running $(git log -1 --format='%h %s')."
 
 docker image prune -f >/dev/null || true
 
 if [ "$COMMANDS_OK" = false ]; then
-	die "the bot is running, but registering slash commands failed (see above); retry with: docker compose run --rm bot node deploy.js"
+	die "the bot is running, but registering slash commands failed (see above); retry with: docker compose -f docker-compose.yml run --rm bot node deploy.js"
 fi
 step "Update complete"

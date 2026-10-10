@@ -184,30 +184,41 @@ It runs these steps in order:
 5. Stops the bot.
 6. Runs any new database migrations.
 7. Registers the slash commands.
-8. Starts the bot and checks that it stays up.
+8. Starts the bot and waits until it's healthy, meaning it's logged in to Discord (up to 3 minutes).
 
-If the pre-flight check, build or backup fails, the bot isn't touched. If a migration fails or the new bot doesn't stay up, the previous code and image are started again, and the backup's path is printed so the database can be restored if needed. Everything is logged to `logs/update.log`. It needs `mysqldump` (or `mariadb-dump`) on the host, from the `mysql-client` or `mariadb-client` package.
+If the pre-flight check, build or backup fails, the bot isn't touched. If a migration fails or the new bot doesn't become healthy, the previous code and image are started again, and the backup's path is printed so the database can be restored if needed. Everything is logged to `logs/update.log`. Run it as a user who can run `docker`. If the checkout belongs to a user who can't, run it with `sudo DEPLOY_OWNER=<owner> bash scripts/update.sh`. Git and the files it writes then stay owned by that user. It needs `mysqldump` (or `mariadb-dump`) on the host, from the `mysql-client` or `mariadb-client` package.
 
-**Automatic updates.** The **Deploy** GitHub workflow runs `scripts/update.sh` on the server over SSH every time the tests pass on `main`. It deploys the exact commit that passed, never a newer one whose tests are still running, and it never goes back to an older commit. It can also be run by hand from the Actions tab, which deploys the tip of `main`. Setting it up takes one time:
+**Automatic updates.** A watcher on the server deploys each new GitHub **release**. Nothing on GitHub needs access to the server. Every 5 minutes, a systemd timer checks the repository's latest release (drafts and prereleases don't count). When there's a new one, the watcher:
 
-1. On the server, as the user that owns the checkout and can run `docker`, make a key just for deploys:
-   ```sh
-   ssh-keygen -t ed25519 -N '' -f ~/.ssh/megura_deploy -C megura-deploy
-   ```
-2. Allow that key to run the update and nothing else. Add this line to `~/.ssh/authorized_keys`, with the checkout's real path:
-   ```
-   command="cd /home/<user>/megura-js && bash scripts/update.sh",no-pty,no-port-forwarding,no-agent-forwarding,no-X11-forwarding ssh-ed25519 AAAA... megura-deploy
-   ```
-   The last part is the content of `~/.ssh/megura_deploy.pub`. With this restriction, `update.sh` only takes a commit ID from what the workflow sends.
-3. In GitHub, go to **Settings → Secrets and variables → Actions** and add these repository secrets:
-   - `DEPLOY_HOST`: the server's address
-   - `DEPLOY_USER`: that user
-   - `DEPLOY_SSH_KEY`: the content of `~/.ssh/megura_deploy` (the private key)
-   - `DEPLOY_KNOWN_HOSTS`: the output of `ssh-keyscan <server address>`, run from another machine
-   - Optional: `DEPLOY_PORT` if SSH isn't on port 22, and `DEPLOY_PATH` if the checkout isn't `~/megura-js`
-4. Run the **Deploy** workflow once from the Actions tab to check it works.
+1. Checks that the release's tag points at a commit on `main`, and that the **Tests** workflow passed on that commit. If the tests are still running, it waits for them. If they failed, it skips the release.
+2. Runs `scripts/update.sh` for that exact commit. That script backs up the database, runs the migrations, waits for the bot to be healthy, and rolls back if it isn't.
+3. Posts the result to a Discord channel: deployed, skipped or failed (with the update's last log lines).
 
-Without the secrets, the workflow skips itself. To approve each deploy by hand, add required reviewers to the `production` environment under **Settings → Environments**.
+A release that failed or was skipped isn't tried again until a newer release is published, or someone runs `sudo megura-watch --retry`.
+
+To ship a version, publish a release on GitHub (**Releases → Draft a new release**, with a new tag such as `v1.4.0`, targeting `main`), or run:
+
+```sh
+gh release create v1.4.0 --target main --generate-notes
+```
+
+Setting it up takes one time. As a user with sudo, run:
+
+```sh
+sudo bash /home/<owner>/megura-js/scripts/install-release-watcher.sh
+```
+
+It asks for a Discord webhook URL (channel settings → **Integrations → Webhooks**) and sends a test message. It installs the watcher as `/usr/local/sbin/megura-watch`, stores its settings in `/etc/megura/watch.env` and starts the `megura-watch.timer`. If a release changes `scripts/release-watch.sh`, the Discord message says so; run the installer again to pick up the change.
+
+| To | Run |
+|---|---|
+| See the last result and the latest release | `sudo megura-watch --status` |
+| Follow what it's doing | `journalctl -u megura-watch -f` |
+| Try a failed or skipped release again | `sudo megura-watch --retry` |
+| Check for a release now | `sudo systemctl start megura-watch` |
+| Pause automatic deploys | `sudo systemctl stop megura-watch.timer` (`start` to resume) |
+
+The watcher runs as root because it has to run `docker`. Git commands, logs and backups run as the checkout's owner, so the owner keeps owning every file in the checkout. Root also only runs the `update.sh` stored in the release's commit, never the copy in the working tree. Even so, **anyone who can publish a release can run code as root on the server**, for example by changing `docker-compose.yml`. That holds for any automatic Docker deploy. Use two-factor authentication on GitHub and limit who can publish releases. Also note that during an update, the working tree's `Dockerfile` and `docker-compose.yml` are used. Anyone who can edit them while an update runs controls that update too.
 
 **Database migrations.** The bot creates new tables by itself but never changes existing ones, so some updates ship a script in `scripts/migrations/`. `scripts/update.sh` runs the new ones for you through `scripts/migrate.js`, which records each one in the `_migrations` table so it runs only once. Every migration is safe to run again, so on a server where some were run by hand, the first run just records them. To run them yourself, stop the bot and back up first:
 

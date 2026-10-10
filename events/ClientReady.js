@@ -17,6 +17,7 @@ const { processScheduledPost, syncScheduledPosts } = require('../functions/sched
 const { processAutoSpawn, syncAutoSpawns, closeInterruptedFights } = require('../functions/boss');
 const { Giveaway, Raffle } = require('../src/db');
 const { runSeasonJob, SEASON_CRON } = require('../functions/factionSeason');
+const { startHeartbeat } = require('../functions/health');
 
 let Discord;
 try {
@@ -169,5 +170,8 @@ module.exports = {
 			await scheduleAuctionEnd(auctionQueue, auction)
 				.catch((error) => console.error(`Could not schedule auction ${auction.id}:`, error));
 		}
+
+		// last: the container only reports healthy once everything above has started
+		startHeartbeat(client);
 	},
 };

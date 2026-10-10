@@ -14,5 +14,10 @@ COPY . .
 RUN mkdir -p logs && chown node:node logs
 USER node
 
+# healthy while the bot is connected to Discord: functions/health.js refreshes
+# this file every 30s. scripts/update.sh waits for "healthy" before an update counts.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=3 \
+	CMD find /tmp/megura-alive -mmin -2 | grep -q .
+
 # config.json and assets/features.json are mounted at runtime, never baked into the image
 CMD ["node", "index.js"]
