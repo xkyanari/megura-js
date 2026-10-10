@@ -20,6 +20,7 @@ const SEED = path.join(tmp, 'seed');
 const SERVER = path.join(tmp, 'server');
 const CALLS = path.join(tmp, 'docker-calls.log');
 const DUMP_ENV = path.join(tmp, 'dump-env.log');
+const COMMANDS = 'compose -f docker-compose.yml run --rm --name megura-bot-commands bot node deploy.js';
 
 const gitEnv = { ...process.env, GIT_AUTHOR_NAME: 't', GIT_AUTHOR_EMAIL: 't@t', GIT_COMMITTER_NAME: 't', GIT_COMMITTER_EMAIL: 't@t' };
 const git = (cwd, ...args) => execFileSync('git', args, { cwd, env: gitEnv, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
@@ -45,12 +46,13 @@ const update = (env = {}, args = []) => {
 
 before(() => {
 	fs.mkdirSync(STUBS);
-	// docker: logs each call; FAIL_BUILD / FAIL_MIGRATE / HEALTH_STATE steer it.
+	// docker: logs each call; FAIL_BUILD / FAIL_MIGRATE / HANG_MIGRATE / HANG_COMMANDS / HEALTH_STATE steer it.
 	// HEALTH_STATE is "running restarts health", as update.sh asks docker inspect.
 	stub('docker', `echo "$*" >> ${JSON.stringify(CALLS)}
 case "$*" in
 	"compose -f docker-compose.yml build") [ -n "\${FAIL_BUILD:-}" ] && exit 1 ;;
-	"compose -f docker-compose.yml run --rm bot node scripts/migrate.js") [ -n "\${FAIL_MIGRATE:-}" ] && exit 1 ;;
+	"compose -f docker-compose.yml run --rm bot node scripts/migrate.js") [ -n "\${HANG_MIGRATE:-}" ] && exec sleep 30; [ -n "\${FAIL_MIGRATE:-}" ] && exit 1 ;;
+	*"node deploy.js") [ -n "\${HANG_COMMANDS:-}" ] && exec sleep 30 ;;
 	"inspect -f {{.Image}} megura-bot") echo "sha256:old" ;;
 	inspect*) echo "\${HEALTH_STATE:-true 0 healthy}" ;;
 esac
@@ -86,7 +88,7 @@ describe('scripts/update.sh', () => {
 		const run = update();
 		assert.equal(run.status, 0, run.output);
 		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), head);
-		const order = ['compose -f docker-compose.yml build', 'compose -f docker-compose.yml down', 'compose -f docker-compose.yml run --rm bot node scripts/migrate.js', 'compose -f docker-compose.yml run --rm bot node deploy.js', 'compose -f docker-compose.yml up -d --no-build'];
+		const order = ['compose -f docker-compose.yml build', 'compose -f docker-compose.yml down', 'compose -f docker-compose.yml run --rm bot node scripts/migrate.js', COMMANDS, 'compose -f docker-compose.yml up -d --no-build'];
 		const positions = order.map((call) => run.calls.indexOf(call));
 		assert.ok(positions.every((p) => p >= 0), `all steps ran: ${run.calls.join(' | ')}`);
 		assert.deepEqual(positions, [...positions].sort((a, b) => a - b), 'in order');
@@ -120,7 +122,7 @@ describe('scripts/update.sh', () => {
 		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), previous);
 		assert.ok(run.calls.includes('tag sha256:old megura-bot:latest'));
 		assert.equal(run.calls.at(-1), 'compose -f docker-compose.yml up -d --no-build');
-		assert.ok(!run.calls.includes('compose -f docker-compose.yml run --rm bot node deploy.js'));
+		assert.ok(!run.calls.includes(COMMANDS));
 	});
 
 	for (const [why, env] of [
@@ -209,6 +211,44 @@ describe('scripts/update.sh', () => {
 		const junk = update({}, ['main; rm -rf /']);
 		assert.equal(junk.status, 1);
 		assert.match(junk.output, /not a commit ID/);
+	});
+
+	test('registering commands that hangs is cut off, and the bot is still started', () => {
+		const tip = pushCommit('v8');
+		const run = update({ HANG_COMMANDS: '1', COMMANDS_TIMEOUT: '1' });
+		assert.equal(run.status, 1);
+		assert.match(run.output, /registering slash commands failed or took over 1s/);
+		assert.ok(run.calls.includes('rm -f megura-bot-commands'), 'the cut-off run is removed');
+		assert.ok(run.calls.indexOf('compose -f docker-compose.yml up -d --no-build') > run.calls.indexOf(COMMANDS), 'the bot is started after it');
+		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), tip, 'the new version stays');
+	});
+
+	test('an interrupted update starts the previous version again and puts the code back', async () => {
+		const previous = git(SERVER, 'rev-parse', 'HEAD');
+		pushCommit('v9');
+		fs.rmSync(CALLS, { force: true });
+		// its own process group, so the signal reaches everything, like Ctrl-C in a terminal
+		const child = spawn('bash', ['scripts/update.sh'], {
+			cwd: SERVER,
+			detached: true,
+			stdio: 'ignore',
+			env: { ...gitEnv, PATH: `${STUBS}:${process.env.PATH}`, HEALTH_WAIT: '0', HEALTH_POLL: '0.1', PREFLIGHT: 'scripts/preflight-ok.sh', HANG_MIGRATE: '1' },
+		});
+		const exited = new Promise((resolve) => child.on('exit', (code) => resolve(code)));
+		const migrating = () => fs.existsSync(CALLS) && fs.readFileSync(CALLS, 'utf8').includes('node scripts/migrate.js');
+		for (let i = 0; i < 100 && !migrating(); i++) await new Promise((resolve) => setTimeout(resolve, 100));
+		assert.ok(migrating(), 'reached the migrations');
+		process.kill(-child.pid, 'SIGINT');
+		assert.notEqual(await exited, 0);
+
+		const calls = fs.readFileSync(CALLS, 'utf8').trim().split('\n');
+		assert.ok(calls.includes('tag sha256:old megura-bot:latest'));
+		assert.equal(calls.at(-1), 'compose -f docker-compose.yml up -d --no-build', 'the previous version is started');
+		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), previous);
+		// the terminal may be gone, so this only goes to the log
+		const log = fs.readFileSync(path.join(SERVER, 'logs', 'update.log'), 'utf8');
+		assert.match(log, /Interrupted; putting the previous version back/);
+		assert.match(log, /FAILED: the update was interrupted\. The database backup from before any migrations is backups\/megura-/);
 	});
 
 	test('only one update runs at a time', () => {

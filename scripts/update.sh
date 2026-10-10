@@ -19,7 +19,9 @@
 # If the build or the pre-flight check fails, nothing is stopped and the code
 # goes back to where it was. If a migration fails, or the new bot doesn't stay
 # up, the previous code and image are started again and the backup's path is
-# printed. Everything is logged to logs/update.log.
+# printed. The same happens when the update is interrupted (Ctrl-C, a closed
+# terminal, systemd stopping the watcher), so the bot is never left stopped.
+# Everything is logged to logs/update.log.
 #
 # See "Updating" and "Automatic updates" in README.md.
 
@@ -35,6 +37,7 @@ HEALTH_POLL="${HEALTH_POLL:-5}"
 # an image without a HEALTHCHECK only has to stay up this long
 HEALTH_WAIT="${HEALTH_WAIT:-20}"
 KEEP_BACKUPS="${KEEP_BACKUPS:-10}"
+COMMANDS_TIMEOUT="${COMMANDS_TIMEOUT:-120}"
 PREFLIGHT="${PREFLIGHT:-scripts/docker-preflight.sh}"
 FORCE=false
 TARGET=""
@@ -118,6 +121,28 @@ start_previous() {
 	fi
 }
 
+# Interrupted: puts the previous version back instead of leaving the bot
+# stopped, or the code ahead of what's running (the next update would then
+# think there's nothing to do).
+BOT_STOPPED=false
+interrupted() {
+	trap '' INT TERM HUP
+	set +e
+	# the terminal, and the tee copying output to it, may be gone: log only
+	exec > >(as_owner tee -a logs/update.log >/dev/null) 2>&1
+	step "Interrupted; putting the previous version back"
+	docker rm -f "$CONTAINER-commands" >/dev/null 2>&1
+	if [ "$BOT_STOPPED" = true ]; then
+		compose down
+		start_previous
+	else
+		restore_latest
+		revert_code
+	fi
+	die "the update was interrupted${BACKUP:+. The database backup from before any migrations is $BACKUP}"
+}
+trap interrupted INT TERM HUP
+
 step "Pre-flight check"
 # the committed script, not the working tree's copy, which the checkout's owner
 # could change after the local-changes check; $0 is its path, so it finds the repo
@@ -157,6 +182,7 @@ echo "Saved $BACKUP ($(du -h "$BACKUP" | cut -f1))."
 { ls -1t backups/*.sql.gz 2>/dev/null || true; } | tail -n +"$((KEEP_BACKUPS + 1))" | xargs -r rm -f
 
 step "Stopping the bot"
+BOT_STOPPED=true
 compose down
 
 step "Running database migrations"
@@ -165,9 +191,14 @@ if ! compose run --rm bot node scripts/migrate.js; then
 	die "a migration failed. The database backup from just before is $BACKUP (restore: gunzip -c $BACKUP | mysql -u $DB_USER -p $DB_NAME)"
 fi
 
-step "Registering slash commands"
+step "Registering slash commands (up to ${COMMANDS_TIMEOUT}s)"
+# a time limit, so a hang can't keep the bot stopped; the name lets a run
+# that was cut off be removed
 COMMANDS_OK=true
-compose run --rm bot node deploy.js || COMMANDS_OK=false
+if ! timeout "$COMMANDS_TIMEOUT" docker compose -f docker-compose.yml run --rm --name "$CONTAINER-commands" bot node deploy.js; then
+	COMMANDS_OK=false
+	docker rm -f "$CONTAINER-commands" >/dev/null 2>&1 || true
+fi
 
 step "Starting the bot and waiting for it to be healthy (up to ${HEALTH_TIMEOUT}s)"
 compose up -d --no-build
@@ -191,11 +222,12 @@ if [ "$HEALTHY" = false ]; then
 	start_previous
 	die "the new version didn't become healthy (logs above). Migrations already ran; the backup from before them is $BACKUP"
 fi
+trap - INT TERM HUP
 echo "Running $(git log -1 --format='%h %s')."
 
 docker image prune -f >/dev/null || true
 
 if [ "$COMMANDS_OK" = false ]; then
-	die "the bot is running, but registering slash commands failed (see above); retry with: docker compose -f docker-compose.yml run --rm bot node deploy.js"
+	die "the bot is running, but registering slash commands failed or took over ${COMMANDS_TIMEOUT}s (see above); retry with: docker compose -f docker-compose.yml run --rm bot node deploy.js"
 fi
 step "Update complete"
