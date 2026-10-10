@@ -13,6 +13,7 @@ const { rollLoot, loadConsumables } = require('./loot');
 const { rollMaterial } = require('./crafting');
 const { RIVAL_DAMAGE_BONUS, syncFaction, isRival, factionLabel, addFactionPoint } = require('./factions');
 const { recordProgress, completedLines } = require('./quests');
+const { colors } = require('./embedStyle');
 const leveling = require('./level');
 const levelcheck = require('./levelup');
 
@@ -168,7 +169,9 @@ const executeAttack = async (interaction, { delay, ambush = false } = {}) => {
 		result = '🤝 Neither side could finish the fight.';
 	}
 
-	const finalEmbed = EmbedBuilder.from(lastEmbed).addFields({ name: 'Result', value: result });
+	const finalEmbed = EmbedBuilder.from(lastEmbed)
+		.setColor(winner === playerObj ? colors.victory : winner === monsterObj ? colors.defeat : colors.default)
+		.addFields({ name: 'Result', value: result });
 	await interaction.editReply({
 		content: userMention(member.id),
 		embeds: [finalEmbed],

@@ -65,7 +65,7 @@ module.exports = {
 		);
 
 		const embed2 = new EmbedBuilder().setDescription(
-			'I will carry your Voyagers ID so you will be reminded of your identity.\nUse `/profile` for yourself or when you find your friends and enemies.\n\nIf you\'re searching for a Conflict, use `/attack`. There\'s also `/duel` to challenge other voyagers.\n\nI highly recommend that you explore the areas outside Eldelvain or challenge other voyagers using `/open` so you don\'t interfere with other voyagers. Take heed that it closes momentarily.\n\nIf you need to leave early, use the `/close` command. You will be reminded how to use them with care.\n\nLastly, you can use `/info` to see the list of commands to call me.',
+			'I will carry your Voyagers ID so you will be reminded of your identity.\nUse `/profile view` for yourself or when you find your friends and enemies.\n\nIf you\'re searching for a Conflict, use `/attack`. There\'s also `/duel` to challenge other voyagers.\n\nI highly recommend that you explore the areas outside Eldelvain or challenge other voyagers using `/open` so you don\'t interfere with other voyagers. Take heed that it closes momentarily.\n\nIf you need to leave early, use the `/close` command. You will be reminded how to use them with care.\n\nLastly, you can use `/info` to see the list of commands to call me.',
 		);
 
 		await interaction.reply({

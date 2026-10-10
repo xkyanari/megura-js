@@ -313,11 +313,12 @@ Dahlia does not request Message Content, Server Members, or Presence intents. Fe
 - `/iura`: Check your wallet or bank.
 - `/open <name of channel>`: Creates a private channel, auto-closes in 10 minutes.
 - `/privacy`: Shows the privacy notice.
-- `/profile`: Show profile of a user (blank for self): stats, faction, where they're exploring, and this week's quests, discoveries and faction points.
+- `/profile view`: Show profile of a user (blank for self): stats, faction, where they're exploring, and this week's quests, discoveries and faction points.
 - `/quests`: See your daily and weekly quest objectives and their rewards.
 - `/rankings`: Server leaderboards: duel wins, level, monster kills, top earners, quests finished this week, places discovered, and faction points this week.
 - `/requestduel`: Respond to a duel request.
-- `/reset`: Delete voyager profile.
+- `/profile delete`: Permanently delete your own voyager in this server after confirming your character name and typing `DELETE`. Gear, balances, quests and exploration progress are removed; use `/start` to begin again. One character is allowed per server. Finish pending brawls, boss fights and special-shop orders first.
+- `/reset`: Admin command to delete a voyager profile.
 - `/sales`: (Moderators) Special shop sales for the last 7 or 30 days or all time, with an optional CSV export.
 - `/salvage`: Break unequipped gear into crafting materials.
 - `/sell`: Sell inventory items back to the shop for 40% of their price.

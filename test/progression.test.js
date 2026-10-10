@@ -211,7 +211,7 @@ describe('factions', () => {
 
 		const final = rec.calls.at(-1)[1].embeds[0].data;
 		assert.match(final.title, /rival: Dawnguard/);
-		assert.match(final.fields[0].value, /\+1 for Ironmind this week/);
+		assert.match(final.fields.find((field) => field.name === 'Result').value, /\+1 for Ironmind this week/);
 		assert.equal((await FactionScore.findOne({ where: { guildID: G, faction: 'Cerberon' } })).score, 1);
 		assert.ok(await QuestProgress.count({ where: { accountID: player.accountID } }) >= 1);
 	});
