@@ -69,8 +69,11 @@ jobs:
 
       - name: Run scripts/update.sh on the server
         if: steps.settings.outputs.ready == 'true'
+        env:
+          # the commit the tests passed on (empty when run by hand: the tip of main)
+          TESTED_SHA: ${{ github.event.workflow_run.head_sha }}
         run: |
           ssh -i ~/.ssh/deploy_key -p "${DEPLOY_PORT:-22}" \
             -o StrictHostKeyChecking=yes -o BatchMode=yes -o ServerAliveInterval=30 \
             "$DEPLOY_USER@$DEPLOY_HOST" \
-            "cd '${DEPLOY_PATH:-megura-js}' && bash scripts/update.sh"
+            "cd '${DEPLOY_PATH:-megura-js}' && bash scripts/update.sh $TESTED_SHA"

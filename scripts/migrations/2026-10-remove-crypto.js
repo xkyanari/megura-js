@@ -14,6 +14,7 @@
  * It records itself in the _migrations table, so running it again does nothing.
  */
 
+const { ensureTable, isApplied } = require('../migrate');
 const { sequelize, Shop } = require('../../src/db');
 
 const NAME = '2026-10-remove-crypto';
@@ -21,9 +22,8 @@ const PLAYER_COLUMNS = ['linked', 'walletAddress', 'contractAddress', 'tokenID']
 const OLD_CATEGORIES = ['whitelist', 'nfts', 'crypto'];
 
 const migrate = async ({ dryRun = false, log = console.log } = {}) => {
-	await sequelize.query('CREATE TABLE IF NOT EXISTS `_migrations` (`name` VARCHAR(100) PRIMARY KEY, `appliedAt` DATETIME NOT NULL)');
-	const [done] = await sequelize.query('SELECT `name` FROM `_migrations` WHERE `name` = ?', { replacements: [NAME] });
-	if (done.length) {
+	// reads only, so a dry run changes nothing
+	if (await isApplied(sequelize, NAME)) {
 		log(`${NAME} has already been applied.`);
 		return;
 	}
@@ -37,6 +37,7 @@ const migrate = async ({ dryRun = false, log = console.log } = {}) => {
 
 	// MySQL commits ALTER TABLE on its own, so these run before the marker is written
 	for (const column of columns) await sequelize.getQueryInterface().removeColumn('Player', column);
+	await ensureTable(sequelize);
 	await sequelize.transaction(async (transaction) => {
 		await Shop.update({ category: 'digital' }, { where: { category: OLD_CATEGORIES }, transaction });
 		await sequelize.query('INSERT INTO `_migrations` (`name`, `appliedAt`) VALUES (?, NOW())', { replacements: [NAME], transaction });

@@ -50,10 +50,11 @@ before(() => {
 case "$*" in
 	"compose build") [ -n "\${FAIL_BUILD:-}" ] && exit 1 ;;
 	"compose run --rm bot node scripts/migrate.js") [ -n "\${FAIL_MIGRATE:-}" ] && exit 1 ;;
+	"inspect -f {{.Image}} megura-bot") echo "sha256:old" ;;
 	inspect*) echo "\${HEALTH_STATE:-true 0}" ;;
 esac
 exit 0`);
-	stub('mysqldump', `echo "MYSQL_PWD=$MYSQL_PWD args=$*" > ${JSON.stringify(DUMP_ENV)}; echo "-- dump"`);
+	stub('mysqldump', `[ -n "\${FAIL_DUMP:-}" ] && exit 1; echo "MYSQL_PWD=$MYSQL_PWD args=$*" > ${JSON.stringify(DUMP_ENV)}; echo "-- dump"`);
 
 	execFileSync('git', ['init', '-q', '--bare', '-b', 'main', ORIGIN]);
 	fs.mkdirSync(path.join(SEED, 'scripts'), { recursive: true });
@@ -88,7 +89,7 @@ describe('scripts/update.sh', () => {
 		const positions = order.map((call) => run.calls.indexOf(call));
 		assert.ok(positions.every((p) => p >= 0), `all steps ran: ${run.calls.join(' | ')}`);
 		assert.deepEqual(positions, [...positions].sort((a, b) => a - b), 'in order');
-		assert.ok(run.calls.includes('tag megura-bot:latest megura-bot:previous'), 'the old image is kept for rollback');
+		assert.ok(run.calls.includes('tag sha256:old megura-bot:previous'), 'the old image is kept for rollback');
 
 		// the backup: password only through the environment, never in arguments or the log
 		const backups = fs.readdirSync(path.join(SERVER, 'backups'));
@@ -116,7 +117,7 @@ describe('scripts/update.sh', () => {
 		assert.equal(run.status, 1);
 		assert.match(run.output, /a migration failed\. The database backup from just before is backups\/megura-/);
 		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), previous);
-		assert.ok(run.calls.includes('tag megura-bot:previous megura-bot:latest'));
+		assert.ok(run.calls.includes('tag sha256:old megura-bot:latest'));
 		assert.equal(run.calls.at(-1), 'compose up -d --no-build');
 		assert.ok(!run.calls.includes('compose run --rm bot node deploy.js'));
 	});
@@ -127,7 +128,46 @@ describe('scripts/update.sh', () => {
 		assert.equal(run.status, 1);
 		assert.match(run.output, /didn't stay up/);
 		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), previous);
-		assert.ok(run.calls.includes('tag megura-bot:previous megura-bot:latest'));
+		assert.ok(run.calls.includes('tag sha256:old megura-bot:latest'));
+	});
+
+	test('a failed backup leaves the running bot alone, and :latest back on the running image', () => {
+		const previous = git(SERVER, 'rev-parse', 'HEAD');
+		const run = update({ FAIL_DUMP: '1' });
+		assert.equal(run.status, 1);
+		assert.match(run.output, /the backup failed; the bot was not touched/);
+		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), previous);
+		assert.equal(run.calls.at(-1), 'tag sha256:old megura-bot:latest');
+		assert.ok(!run.calls.includes('compose down'));
+	});
+
+	test('with a commit, exactly that commit is deployed, even when main has moved on', () => {
+		update();
+		const tested = pushCommit('v4-tested');
+		pushCommit('v5-untested');
+		const run = update({}, [tested]);
+		assert.equal(run.status, 0, run.output);
+		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), tested);
+
+		// a run for an older commit after a newer one went out doesn't go backwards
+		const older = update({}, [git(SERVER, 'rev-parse', 'HEAD~1')]);
+		assert.equal(older.status, 0);
+		assert.match(older.output, /Already running/);
+		assert.deepEqual(older.calls, [], 'nothing touched');
+	});
+
+	test('through a restricted deploy key, only a commit ID is taken from the SSH command', () => {
+		const tip = git(SEED, 'rev-parse', 'HEAD');
+		const run = update({ SSH_ORIGINAL_COMMAND: `cd x && bash scripts/update.sh ${tip}; rm -rf /` });
+		assert.equal(run.status, 0, run.output);
+		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), tip);
+
+		const notOnMain = update({}, ['0123456789abcdef0123456789abcdef01234567']);
+		assert.equal(notOnMain.status, 1);
+		assert.match(notOnMain.output, /isn't in this checkout's history/);
+		const junk = update({}, ['main; rm -rf /']);
+		assert.equal(junk.status, 1);
+		assert.match(junk.output, /not a commit ID/);
 	});
 
 	test('only one update runs at a time', () => {

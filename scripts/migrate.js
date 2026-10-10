@@ -35,9 +35,25 @@ const sqlStatements = (content) => content
 	.map((statement) => statement.trim())
 	.filter(Boolean);
 
+const hasTable = async (sequelize) => {
+	const [found] = await sequelize.query('SELECT 1 FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?', { replacements: [TABLE] });
+	return found.length > 0;
+};
+
+const ensureTable = (sequelize) =>
+	sequelize.query(`CREATE TABLE IF NOT EXISTS \`${TABLE}\` (\`name\` VARCHAR(100) PRIMARY KEY, \`appliedAt\` DATETIME NOT NULL)`);
+
+// Whether the migration is recorded as run (false if the table doesn't exist yet). Reads only.
+const isApplied = async (sequelize, name) => {
+	if (!await hasTable(sequelize)) return false;
+	const [rows] = await sequelize.query(`SELECT 1 FROM \`${TABLE}\` WHERE \`name\` = ?`, { replacements: [name] });
+	return rows.length > 0;
+};
+
 const runMigrations = async ({ sequelize, dir = MIGRATIONS_DIR, dryRun = false, log = console.log } = {}) => {
-	await sequelize.query(`CREATE TABLE IF NOT EXISTS \`${TABLE}\` (\`name\` VARCHAR(100) PRIMARY KEY, \`appliedAt\` DATETIME NOT NULL)`);
-	const [rows] = await sequelize.query(`SELECT \`name\` FROM \`${TABLE}\``);
+	// a dry run changes nothing, not even this table: missing means nothing has run
+	if (!dryRun) await ensureTable(sequelize);
+	const [rows] = await hasTable(sequelize) ? await sequelize.query(`SELECT \`name\` FROM \`${TABLE}\``) : [[]];
 	const done = new Set(rows.map((row) => row.name));
 	const pending = listMigrations(dir).filter((migration) => !done.has(migration.name));
 
@@ -78,4 +94,4 @@ if (require.main === module) {
 		.finally(() => sequelize.close());
 }
 
-module.exports = { MIGRATIONS_DIR, listMigrations, sqlStatements, runMigrations };
+module.exports = { MIGRATIONS_DIR, listMigrations, sqlStatements, ensureTable, isApplied, runMigrations };

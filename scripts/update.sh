@@ -2,6 +2,7 @@
 # Updates the bot on this server to the latest main, in one command:
 #
 #   bash scripts/update.sh            # update if main has new commits
+#   bash scripts/update.sh <commit>   # update to that commit of main (what CI tested)
 #   bash scripts/update.sh --force    # run every step even if nothing is new
 #
 # Steps: pull → pre-flight check → build the new image (the old bot keeps
@@ -26,7 +27,19 @@ HEALTH_WAIT="${HEALTH_WAIT:-20}"
 KEEP_BACKUPS="${KEEP_BACKUPS:-10}"
 PREFLIGHT="${PREFLIGHT:-scripts/docker-preflight.sh}"
 FORCE=false
-[ "${1:-}" = "--force" ] && FORCE=true
+TARGET=""
+for arg in "$@"; do
+	case "$arg" in
+		--force) FORCE=true ;;
+		*) TARGET="$arg" ;;
+	esac
+done
+# Through a deploy key restricted with command="…" in authorized_keys, the
+# workflow's command arrives in SSH_ORIGINAL_COMMAND: only a commit ID is
+# taken from it, nothing else.
+if [ -z "$TARGET" ] && [ -n "${SSH_ORIGINAL_COMMAND:-}" ]; then
+	TARGET=$(grep -oE '\b[0-9a-f]{40}\b' <<<"$SSH_ORIGINAL_COMMAND" | head -n 1 || true)
+fi
 
 mkdir -p logs backups
 exec 9>logs/update.lock
@@ -42,7 +55,18 @@ die() { printf '[%s] FAILED: %s\n' "$(date -u '+%F %T UTC')" "$*" >&2; exit 1; }
 step "Checking for updates on $BRANCH"
 git fetch --quiet origin "$BRANCH"
 OLD=$(git rev-parse HEAD)
-NEW=$(git rev-parse "origin/$BRANCH")
+if [ -n "$TARGET" ]; then
+	# deploy exactly the commit that was tested, never a newer untested one
+	[[ "$TARGET" =~ ^[0-9a-f]{7,40}$ ]] || die "not a commit ID: $TARGET"
+	NEW=$(git rev-parse --verify --quiet "$TARGET^{commit}") || die "commit $TARGET isn't in this checkout's history (git fetch)"
+	git merge-base --is-ancestor "$NEW" "origin/$BRANCH" || die "commit $TARGET isn't on $BRANCH"
+	if git merge-base --is-ancestor "$NEW" "$OLD" && [ "$FORCE" = false ]; then
+		echo "Already running $(git log -1 --format='%h %s'), which includes $(git rev-parse --short "$NEW")."
+		exit 0
+	fi
+else
+	NEW=$(git rev-parse "origin/$BRANCH")
+fi
 if [ "$OLD" = "$NEW" ] && [ "$FORCE" = false ]; then
 	echo "Already up to date ($(git log -1 --format='%h %s'))."
 	exit 0
@@ -50,7 +74,7 @@ fi
 if ! git diff --quiet || ! git diff --cached --quiet; then
 	die "this checkout has local changes to tracked files; commit or discard them first (git status)"
 fi
-git merge --quiet --ff-only "origin/$BRANCH" || die "can't fast-forward to origin/$BRANCH (local commits?)"
+git merge --quiet --ff-only "$NEW" || die "can't fast-forward to $(git rev-parse --short "$NEW") (local commits?)"
 echo "$(git log -1 --format='%h' "$OLD") → $(git log -1 --format='%h %s')"
 
 # Puts the previous code back (the database is left as it is).
@@ -58,11 +82,20 @@ revert_code() {
 	git reset --quiet --keep "$OLD" && echo "Code is back at $(git log -1 --format='%h %s')."
 }
 
+# The image the bot is running now: the one to go back to, whatever
+# :latest says (an earlier update may have built an image it never started).
+RUNNING_IMAGE=$(docker inspect -f '{{.Image}}' "$CONTAINER" 2>/dev/null || true)
+
+# Points :latest back at the running image, so nothing starts the new build by accident.
+restore_latest() {
+	if [ -n "$RUNNING_IMAGE" ]; then docker tag "$RUNNING_IMAGE" "$IMAGE:latest"; fi
+}
+
 # Starts the previous image again, if there is one.
 start_previous() {
 	revert_code
-	if docker image inspect "$IMAGE:previous" >/dev/null 2>&1; then
-		docker tag "$IMAGE:previous" "$IMAGE:latest"
+	if [ -n "$RUNNING_IMAGE" ]; then
+		restore_latest
 		docker compose up -d --no-build && echo "The previous version is running again."
 	fi
 }
@@ -74,10 +107,9 @@ if ! bash "$PREFLIGHT"; then
 fi
 
 step "Building the new image (the bot keeps running)"
-if docker image inspect "$IMAGE:latest" >/dev/null 2>&1; then
-	docker tag "$IMAGE:latest" "$IMAGE:previous"
-fi
+if [ -n "$RUNNING_IMAGE" ]; then docker tag "$RUNNING_IMAGE" "$IMAGE:previous"; fi
 if ! docker compose build; then
+	restore_latest
 	revert_code
 	die "the build failed; the bot was not touched"
 fi
@@ -86,16 +118,18 @@ step "Backing up the database"
 config() { python3 -c "import json, sys; c = json.load(open('config.json')); print(c.get(sys.argv[1]) or sys.argv[2])" "$1" "${2:-}"; }
 if ! { DB_HOST=$(config mysql_host 127.0.0.1) && DB_PORT=$(config mysql_port 3306) && DB_USER=$(config mysql_dbuser) \
 	&& DB_NAME=$(config mysql_dbname) && DB_PASS=$(config mysql_dbpass); }; then
+	restore_latest
 	revert_code
 	die "couldn't read the database settings from config.json"
 fi
 DUMP=$(command -v mysqldump || command -v mariadb-dump || true)
-[ -n "$DUMP" ] || { revert_code; die "mysqldump (or mariadb-dump) isn't installed; install mysql-client, or the backup can't be made"; }
+[ -n "$DUMP" ] || { restore_latest; revert_code; die "mysqldump (or mariadb-dump) isn't installed; install mysql-client, or the backup can't be made"; }
 BACKUP="backups/$DB_NAME-$(date -u '+%Y%m%d-%H%M%S')-$(git rev-parse --short "$OLD").sql.gz"
 # the password goes through the environment, never on the command line
 if ! MYSQL_PWD="$DB_PASS" "$DUMP" --single-transaction --no-tablespaces --routines \
 	-h "$DB_HOST" -P "$DB_PORT" -u "$DB_USER" "$DB_NAME" | gzip > "$BACKUP"; then
 	rm -f "$BACKUP"
+	restore_latest
 	revert_code
 	die "the backup failed; the bot was not touched"
 fi

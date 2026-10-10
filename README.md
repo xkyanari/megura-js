@@ -188,7 +188,7 @@ It runs these steps in order:
 
 If the pre-flight check, build or backup fails, the bot isn't touched. If a migration fails or the new bot doesn't stay up, the previous code and image are started again, and the backup's path is printed so the database can be restored if needed. Everything is logged to `logs/update.log`. It needs `mysqldump` (or `mariadb-dump`) on the host, from the `mysql-client` or `mariadb-client` package.
 
-**Automatic updates.** The **Deploy** GitHub workflow runs `scripts/update.sh` on the server over SSH every time the tests pass on `main`. It can also be run by hand from the Actions tab. Setting it up takes one time:
+**Automatic updates.** The **Deploy** GitHub workflow runs `scripts/update.sh` on the server over SSH every time the tests pass on `main`. It deploys the exact commit that passed, never a newer one whose tests are still running, and it never goes back to an older commit. It can also be run by hand from the Actions tab, which deploys the tip of `main`. Setting it up takes one time:
 
 1. On the server, as the user that owns the checkout and can run `docker`, make a key just for deploys:
    ```sh
@@ -198,7 +198,7 @@ If the pre-flight check, build or backup fails, the bot isn't touched. If a migr
    ```
    command="cd /home/<user>/megura-js && bash scripts/update.sh",no-pty,no-port-forwarding,no-agent-forwarding,no-X11-forwarding ssh-ed25519 AAAA... megura-deploy
    ```
-   The last part is the content of `~/.ssh/megura_deploy.pub`.
+   The last part is the content of `~/.ssh/megura_deploy.pub`. With this restriction, `update.sh` only takes a commit ID from what the workflow sends.
 3. In GitHub, go to **Settings → Secrets and variables → Actions** and add these repository secrets:
    - `DEPLOY_HOST`: the server's address
    - `DEPLOY_USER`: that user

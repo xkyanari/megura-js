@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { sequelize } = require('../src/db');
-const { listMigrations, sqlStatements, runMigrations } = require('../scripts/migrate');
+const { listMigrations, sqlStatements, runMigrations, isApplied } = require('../scripts/migrate');
 const { closeAll } = require('./helpers');
 
 const DB = path.resolve(__dirname, '../src/db');
@@ -27,10 +27,11 @@ const recorded = async () => (await sequelize.query('SELECT name FROM `_migratio
 const quiet = { log: () => undefined };
 
 before(async () => {
+	await sequelize.sync();
 	await sequelize.query('DROP TABLE IF EXISTS mt_log, mt_sql');
 	await sequelize.query('CREATE TABLE mt_log (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50))');
-	await sequelize.query('CREATE TABLE IF NOT EXISTS `_migrations` (`name` VARCHAR(100) PRIMARY KEY, `appliedAt` DATETIME NOT NULL)');
-	await sequelize.query('DELETE FROM `_migrations` WHERE name LIKE \'9999-%\'');
+	// this test database only: the first test checks a dry run doesn't create the table
+	await sequelize.query('DROP TABLE IF EXISTS `_migrations`');
 });
 after(async () => {
 	await sequelize.query('DROP TABLE IF EXISTS mt_log, mt_sql');
@@ -53,7 +54,22 @@ describe('migration runner', () => {
 		assert.deepEqual(sqlStatements('-- a comment\nUPDATE a SET b = 1;\n\nALTER TABLE a\n\tMODIFY b INT;\n'), ['UPDATE a SET b = 1', 'ALTER TABLE a\n\tMODIFY b INT']);
 	});
 
+	test('a dry run on a database that never ran one doesn\'t even create the table', async () => {
+		const dir = dirFor('fresh', { '9999-00-fresh.js': jsMigration('fresh') });
+		assert.deepEqual(await runMigrations({ sequelize, dir, dryRun: true, ...quiet }), ['9999-00-fresh']);
+		const [tables] = await sequelize.query('SHOW TABLES');
+		assert.ok(!tables.some((row) => Object.values(row).includes('_migrations')), 'no _migrations table');
+		assert.equal(await isApplied(sequelize, '9999-00-fresh'), false);
+		assert.deepEqual(await logged(), []);
+		// the shipped migrations that record themselves are read-only in a dry run too
+		const { migrate } = require('../scripts/migrations/2026-10-remove-crypto');
+		await migrate({ dryRun: true, ...quiet });
+		const [tablesAfter] = await sequelize.query('SHOW TABLES');
+		assert.ok(!tablesAfter.some((row) => Object.values(row).includes('_migrations')));
+	});
+
 	test('a dry run changes nothing; a real run applies pending ones in order, once', async () => {
+		await sequelize.query('CREATE TABLE IF NOT EXISTS `_migrations` (`name` VARCHAR(100) PRIMARY KEY, `appliedAt` DATETIME NOT NULL)');
 		const dir = dirFor('ok', {
 			'9999-02-second.js': jsMigration('second'),
 			'9999-01-first.js': jsMigration('first'),
