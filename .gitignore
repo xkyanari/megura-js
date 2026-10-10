@@ -4,6 +4,9 @@
 # Logs
 /logs/*
 
+# Database backups made by scripts/update.sh
+/backups
+
 # Environment files
 .env
 
