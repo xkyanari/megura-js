@@ -184,7 +184,7 @@ It runs these steps in order:
 5. Stops the bot.
 6. Runs any new database migrations.
 7. Registers the slash commands.
-8. Starts the bot and waits until it's healthy, meaning it's logged in to Discord (up to 3 minutes).
+8. Starts the bot and waits until it's healthy, meaning it's logged in to Discord and has finished starting up (up to 3 minutes). The bot only reports healthy once every startup step has finished, such as syncing the database and re-queuing running giveaways and raffles. If one of them fails, the update rolls back, even if the bot otherwise answers commands.
 
 If the pre-flight check, build or backup fails, the bot isn't touched. If a migration fails or the new bot doesn't become healthy, the previous code and image are started again, and the backup's path is printed so the database can be restored if needed. Everything is logged to `logs/update.log`. Run it as a user who can run `docker`. If the checkout belongs to a user who can't, run it with `sudo DEPLOY_OWNER=<owner> bash scripts/update.sh`. Git and the files it writes then stay owned by that user. It needs `mysqldump` (or `mariadb-dump`) on the host, from the `mysql-client` or `mariadb-client` package.
 
