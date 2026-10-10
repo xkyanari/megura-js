@@ -37,7 +37,7 @@ const update = (env = {}, args = []) => {
 	const result = spawnSync('bash', ['scripts/update.sh', ...args], {
 		cwd: SERVER,
 		encoding: 'utf8',
-		env: { ...gitEnv, PATH: `${STUBS}:${process.env.PATH}`, HEALTH_WAIT: '0', PREFLIGHT: 'scripts/preflight-ok.sh', ...env },
+		env: { ...gitEnv, PATH: `${STUBS}:${process.env.PATH}`, HEALTH_WAIT: '0', HEALTH_POLL: '0.1', PREFLIGHT: 'scripts/preflight-ok.sh', ...env },
 	});
 	const calls = fs.existsSync(CALLS) ? fs.readFileSync(CALLS, 'utf8').trim().split('\n') : [];
 	return { ...result, output: result.stdout + result.stderr, calls };
@@ -45,13 +45,14 @@ const update = (env = {}, args = []) => {
 
 before(() => {
 	fs.mkdirSync(STUBS);
-	// docker: logs each call; FAIL_BUILD / FAIL_MIGRATE / HEALTH_STATE steer it
+	// docker: logs each call; FAIL_BUILD / FAIL_MIGRATE / HEALTH_STATE steer it.
+	// HEALTH_STATE is "running restarts health", as update.sh asks docker inspect.
 	stub('docker', `echo "$*" >> ${JSON.stringify(CALLS)}
 case "$*" in
-	"compose build") [ -n "\${FAIL_BUILD:-}" ] && exit 1 ;;
-	"compose run --rm bot node scripts/migrate.js") [ -n "\${FAIL_MIGRATE:-}" ] && exit 1 ;;
+	"compose -f docker-compose.yml build") [ -n "\${FAIL_BUILD:-}" ] && exit 1 ;;
+	"compose -f docker-compose.yml run --rm bot node scripts/migrate.js") [ -n "\${FAIL_MIGRATE:-}" ] && exit 1 ;;
 	"inspect -f {{.Image}} megura-bot") echo "sha256:old" ;;
-	inspect*) echo "\${HEALTH_STATE:-true 0}" ;;
+	inspect*) echo "\${HEALTH_STATE:-true 0 healthy}" ;;
 esac
 exit 0`);
 	stub('mysqldump', `[ -n "\${FAIL_DUMP:-}" ] && exit 1; echo "MYSQL_PWD=$MYSQL_PWD args=$*" > ${JSON.stringify(DUMP_ENV)}; echo "-- dump"`);
@@ -85,7 +86,7 @@ describe('scripts/update.sh', () => {
 		const run = update();
 		assert.equal(run.status, 0, run.output);
 		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), head);
-		const order = ['compose build', 'compose down', 'compose run --rm bot node scripts/migrate.js', 'compose run --rm bot node deploy.js', 'compose up -d --no-build'];
+		const order = ['compose -f docker-compose.yml build', 'compose -f docker-compose.yml down', 'compose -f docker-compose.yml run --rm bot node scripts/migrate.js', 'compose -f docker-compose.yml run --rm bot node deploy.js', 'compose -f docker-compose.yml up -d --no-build'];
 		const positions = order.map((call) => run.calls.indexOf(call));
 		assert.ok(positions.every((p) => p >= 0), `all steps ran: ${run.calls.join(' | ')}`);
 		assert.deepEqual(positions, [...positions].sort((a, b) => a - b), 'in order');
@@ -108,7 +109,7 @@ describe('scripts/update.sh', () => {
 		assert.equal(run.status, 1);
 		assert.match(run.output, /the build failed; the bot was not touched/);
 		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), previous);
-		assert.ok(!run.calls.includes('compose down'));
+		assert.ok(!run.calls.includes('compose -f docker-compose.yml down'));
 	});
 
 	test('a failed migration starts the previous version again and names the backup', () => {
@@ -118,18 +119,24 @@ describe('scripts/update.sh', () => {
 		assert.match(run.output, /a migration failed\. The database backup from just before is backups\/megura-/);
 		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), previous);
 		assert.ok(run.calls.includes('tag sha256:old megura-bot:latest'));
-		assert.equal(run.calls.at(-1), 'compose up -d --no-build');
-		assert.ok(!run.calls.includes('compose run --rm bot node deploy.js'));
+		assert.equal(run.calls.at(-1), 'compose -f docker-compose.yml up -d --no-build');
+		assert.ok(!run.calls.includes('compose -f docker-compose.yml run --rm bot node deploy.js'));
 	});
 
-	test('a bot that doesn\'t stay up is rolled back too', () => {
-		const previous = git(SERVER, 'rev-parse', 'HEAD');
-		const run = update({ HEALTH_STATE: 'true 3' });
-		assert.equal(run.status, 1);
-		assert.match(run.output, /didn't stay up/);
-		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), previous);
-		assert.ok(run.calls.includes('tag sha256:old megura-bot:latest'));
-	});
+	for (const [why, env] of [
+		['keeps restarting', { HEALTH_STATE: 'true 3 starting' }],
+		['is unhealthy', { HEALTH_STATE: 'true 0 unhealthy' }],
+		['never becomes healthy', { HEALTH_STATE: 'true 0 starting', HEALTH_TIMEOUT: '1' }],
+	]) {
+		test(`a bot that ${why} is rolled back too`, () => {
+			const previous = git(SERVER, 'rev-parse', 'HEAD');
+			const run = update(env);
+			assert.equal(run.status, 1);
+			assert.match(run.output, /didn't become healthy/);
+			assert.equal(git(SERVER, 'rev-parse', 'HEAD'), previous);
+			assert.ok(run.calls.includes('tag sha256:old megura-bot:latest'));
+		});
+	}
 
 	test('a failed backup leaves the running bot alone, and :latest back on the running image', () => {
 		const previous = git(SERVER, 'rev-parse', 'HEAD');
@@ -138,7 +145,13 @@ describe('scripts/update.sh', () => {
 		assert.match(run.output, /the backup failed; the bot was not touched/);
 		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), previous);
 		assert.equal(run.calls.at(-1), 'tag sha256:old megura-bot:latest');
-		assert.ok(!run.calls.includes('compose down'));
+		assert.ok(!run.calls.includes('compose -f docker-compose.yml down'));
+	});
+
+	test('an image without a healthcheck only has to stay up', () => {
+		const run = update({ HEALTH_STATE: 'true 0 none' });
+		assert.equal(run.status, 0, run.output);
+		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), git(SEED, 'rev-parse', 'HEAD'));
 	});
 
 	test('with a commit, exactly that commit is deployed, even when main has moved on', () => {
@@ -156,12 +169,40 @@ describe('scripts/update.sh', () => {
 		assert.deepEqual(older.calls, [], 'nothing touched');
 	});
 
-	test('through a restricted deploy key, only a commit ID is taken from the SSH command', () => {
-		const tip = git(SEED, 'rev-parse', 'HEAD');
-		const run = update({ SSH_ORIGINAL_COMMAND: `cd x && bash scripts/update.sh ${tip}; rm -rf /` });
-		assert.equal(run.status, 0, run.output);
+	test('run from a copy outside the checkout, REPO_DIR points it at the checkout', () => {
+		const tip = pushCommit('v6');
+		const copy = path.join(tmp, 'update-copy.sh');
+		fs.copyFileSync(path.join(SERVER, 'scripts', 'update.sh'), copy);
+		fs.rmSync(CALLS, { force: true });
+		const run = spawnSync('bash', [copy, tip], {
+			cwd: tmp,
+			encoding: 'utf8',
+			env: { ...gitEnv, PATH: `${STUBS}:${process.env.PATH}`, HEALTH_POLL: '0.1', PREFLIGHT: 'scripts/preflight-ok.sh', REPO_DIR: SERVER },
+		});
+		assert.equal(run.status, 0, run.stdout + run.stderr);
 		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), tip);
+	});
 
+	test('the pre-flight check is the committed one, not the working tree\'s copy', () => {
+		// stands in for the owner editing it after the local-changes check passed
+		const preflight = path.join(SERVER, 'scripts', 'preflight-ok.sh');
+		git(SERVER, 'update-index', '--assume-unchanged', 'scripts/preflight-ok.sh');
+		fs.writeFileSync(preflight, 'echo edited preflight\nexit 1\n');
+		try {
+			const tip = pushCommit('v7');
+			const run = update();
+			assert.equal(run.status, 0, run.output);
+			assert.match(run.output, /preflight ok/);
+			assert.ok(!run.output.includes('edited preflight'));
+			assert.equal(git(SERVER, 'rev-parse', 'HEAD'), tip);
+		}
+		finally {
+			git(SERVER, 'update-index', '--no-assume-unchanged', 'scripts/preflight-ok.sh');
+			git(SERVER, 'checkout', '--', 'scripts/preflight-ok.sh');
+		}
+	});
+
+	test('only a commit ID on main is deployed', () => {
 		const notOnMain = update({}, ['0123456789abcdef0123456789abcdef01234567']);
 		assert.equal(notOnMain.status, 1);
 		assert.match(notOnMain.output, /isn't in this checkout's history/);
