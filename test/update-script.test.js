@@ -251,6 +251,20 @@ describe('scripts/update.sh', () => {
 		assert.match(log, /FAILED: the update was interrupted\. The database backup from before any migrations is backups\/megura-/);
 	});
 
+	test('files the update writes stay readable by others, even under a strict umask', () => {
+		const tip = pushCommit('v10');
+		// as the watcher calls it: release-watch.sh runs with umask 077
+		const run = spawnSync('bash', ['-c', 'umask 077 && exec bash scripts/update.sh'], {
+			cwd: SERVER,
+			encoding: 'utf8',
+			env: { ...gitEnv, PATH: `${STUBS}:${process.env.PATH}`, HEALTH_WAIT: '0', HEALTH_POLL: '0.1', PREFLIGHT: 'scripts/preflight-ok.sh' },
+		});
+		assert.equal(run.status, 0, run.stdout + run.stderr);
+		assert.equal(git(SERVER, 'rev-parse', 'HEAD'), tip);
+		// the container's user isn't the checkout's owner
+		assert.equal(fs.statSync(path.join(SERVER, 'version.txt')).mode & 0o044, 0o044);
+	});
+
 	test('only one update runs at a time', () => {
 		const holder = spawn('flock', [path.join(SERVER, 'logs', 'update.lock'), 'sleep', '5']);
 		try {
