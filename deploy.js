@@ -79,6 +79,8 @@ const deploy = async () => {
 	}
 };
 
-if (require.main === module) deploy();
+// exit once done: loading the commands opens connections (Redis) that would
+// otherwise keep Node running forever, and with it scripts/update.sh
+if (require.main === module) deploy().finally(() => process.exit());
 
 module.exports = { collectCommands };
