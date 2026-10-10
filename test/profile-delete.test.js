@@ -25,7 +25,7 @@ test('deletes character data, leaves other characters intact and permits /start 
 	const player = await create('restart');
 	const other = await create('restart', 'OTHER');
 	await Iura.create({ accountID: player.accountID, walletAmount: 500 });
-	await Item.create({ accountID: player.accountID, itemName: 'Simple Rock' });
+	await Item.create({ accountID: player.accountID, itemName: 'Simple Rock', quantity: 1 });
 	await Exploration.create({ accountID: player.accountID, location: 'homestead' });
 	await QuestProgress.create({ accountID: player.accountID, periodKey: 'd:2026-10-10', objective: 'kills' });
 	await FactionContribution.create({ accountID: player.accountID, guildID: 'G', faction: 'Margaretha', weekKey: 'w:2026-W41', points: 5 });
