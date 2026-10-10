@@ -252,10 +252,27 @@ docker compose up -d
 
 The integration tests cover the IURA, shop, order and brawl money paths and the interaction handler. They run against a real MySQL database and Redis, and they **drop and recreate every table**, so use a separate database. The name must contain `test`, or the suite refuses to run.
 
+Create the database and a user that can only use it, as a MySQL admin:
+
 ```sh
-mysql -e "CREATE DATABASE megura_test; GRANT ALL ON megura_test.* TO 'megura'@'127.0.0.1' IDENTIFIED BY 'megura';"
+mysql -u <admin> -p -e "
+CREATE DATABASE IF NOT EXISTS megura_test CHARACTER SET utf8mb4;
+CREATE USER IF NOT EXISTS 'megura_test'@'localhost' IDENTIFIED BY '<password>';
+GRANT ALL PRIVILEGES ON megura_test.* TO 'megura_test'@'localhost';"
+```
+
+- MySQL 8 no longer creates a user with `GRANT … IDENTIFIED BY`, so it takes `CREATE USER` first.
+- On a server with the default password policy (`validate_password.policy` MEDIUM), the password needs a mixed-case letter, a digit and a special character.
+- Use `'localhost'` even though the tests connect to `127.0.0.1`: MySQL matches that address to `localhost` accounts unless `skip_name_resolve` is on. If a user with the same name exists for `'%'`, the `localhost` one takes precedence.
+
+Then run the suite with that user:
+
+```sh
+export TEST_MYSQL_USER=megura_test TEST_MYSQL_PASS='<password>'
 npm run test:integration
 ```
+
+`npm test` isn't the test suite: it registers the slash commands and starts the bot with the real `config.json`.
 
 The tests never read `config.json`; they use `test/config.js`. Override the defaults with `TEST_MYSQL_DB`, `TEST_MYSQL_USER`, `TEST_MYSQL_PASS`, `TEST_MYSQL_HOST`, `TEST_MYSQL_PORT` and `TEST_REDIS_URL` (default `redis://127.0.0.1:6379/15`; the suite flushes this Redis database).
 
