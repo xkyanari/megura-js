@@ -17,11 +17,11 @@ Giveaways, raffles, custom server shops, scheduled posts, private voyager channe
 
 ## Local setup
 
-Use Node 22 or 24, MySQL 8 and Redis 7. Run `npm ci`, copy `config-example.json` to `config.json`, and copy `assets/features-example.json` to `assets/features.json`. Fill in your own bot, database and Redis settings. Keep credentials out of Git. Register your bot's commands with `node deploy.js`, then start with `node index.js`.
+Use Node 22 or 24, MySQL 8 and Redis 7. Run `npm ci`, copy `config-example.json` to `config.json`, and copy `assets/features-example.json` to `assets/features.json`. Fill in your own bot, database and Redis settings. Keep credentials out of Git. Run `node dbupdate.js` once to create the schema and seed monsters, quests and shop items; rerunning it adds only missing seed rows. Register your bot's commands with `node deploy.js`, then start with `node index.js`.
 
 Use a separate application and database for this self-hosted edition. It is not a drop-in downgrade of a managed Premium bot with outstanding jobs or rewards.
 
-For Docker, configure the mounted runtime files in `docker-compose.yml`, then run `docker compose up -d --build`. Command registration remains a separate step: `docker compose run --rm bot node deploy.js`.
+For Docker, configure the mounted runtime files in `docker-compose.yml`, run `docker compose build`, then `docker compose run --rm bot node dbupdate.js` to seed the database. Start the bot with `docker compose up -d`. Command registration remains a separate step: `docker compose run --rm bot node deploy.js`.
 
 ## Validation
 
