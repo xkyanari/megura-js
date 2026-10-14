@@ -1,0 +1,45 @@
+const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+
+module.exports = {
+	data: new SlashCommandBuilder()
+		.setName('info')
+		.setDescription('List of Commands'),
+	cooldown: 3000,
+	// works in DMs too (everything else is server-only)
+	dm: true,
+	async execute(interaction) {
+
+		const embed = new EmbedBuilder()
+			.setTitle('🛡️ **COMMANDS:** 🛡️')
+			.setColor(0xcd7f32)
+			.setImage(
+				'https://res.cloudinary.com/dnjaazvr7/image/upload/v1684522493/megura/dahlia-twitter_yae5go.png',
+			)
+			.setDescription(
+				`> **_/info_** - Shows this message.
+
+                **Profile**
+                > **_/start_** - Initiate creating own character.
+                > **_/profile view [player]_** -  Show profile of a user (blank for self).
+                > **_/profile delete_** - Permanently delete your character in this server after confirmation.
+                > **_/changenick_** -  Updates player name.
+                **Quests**
+                > **_/daily_** - Do a random quest to increase/decrease stats or gain Iura.
+
+                **Battle**
+                > **_/attack_** - Initiate attack against a random monster.
+                > **_/duel_** - Initiate a duel against another player.
+
+                **Basics**
+                > **_/iura_**  - Check your wallet or bank.
+                > **_/shop_**  - Opens the Item Shop.
+                > **_/inventory_**  - Opens your inventory.
+                > **_/buy_** - Lets player to buy items in bulk.
+
+                **Messinia Graciene: Project DAHLIA**
+                [Invite Me](https://discord.com/api/oauth2/authorize?client_id=1108464420465692795&permissions=139855260823&scope=bot)🔸[Docs](https://docs.megura.xyz)🔸[Support Server](https://discord.gg/X9eEW6yuhq)🔸[Vote for Us!](https://discordbotlist.com/bots/dahlia/upvote)`,
+			);
+
+		await interaction.reply({ embeds: [embed] });
+	},
+};

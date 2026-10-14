@@ -1,0 +1,23 @@
+{
+  "port": "",
+  "website_test": "",
+  "website": "",
+  "mysql_dbname": "",
+  "mysql_dbuser": "",
+  "mysql_dbpass": "",
+  "mysql_host": "127.0.0.1",
+  "mysql_port": 3306,
+  "redis_url": "redis://127.0.0.1:6379",
+  "token": "",
+  "clientId": "",
+  "guildId": "",
+  "ENCRYPTION_KEY": "",
+  "cloudName": "",
+  "cloudApiKey": "",
+  "cloudApiSecret": "",
+  "dblApiKey": "",
+  "dblWebhookSecret": "",
+  "topWebhookSecret": "",
+  "testMode": true,
+  "enableAuctions": false
+}

@@ -1,0 +1,74 @@
+[
+  {
+    "name": "Homestead Ruins",
+    "unlockLevel": 1,
+    "rewardBonus": 0,
+    "description": "What is left of the first settlement, where the portal first tore open. Weeds grow through the hearths, and something still stirs in the cellars."
+  },
+  {
+    "name": "Wanderer's Trail",
+    "unlockLevel": 1,
+    "rewardBonus": 0,
+    "description": "The old road out of the ruins, worn smooth by voyagers who never came back the same way."
+  },
+  {
+    "name": "Wayfarer's Camp",
+    "unlockLevel": 3,
+    "rewardBonus": 0.05,
+    "description": "A ring of tents and dying fires. Travelers trade stories here, and the night watch is never quiet."
+  },
+  {
+    "name": "Timber Grove",
+    "unlockLevel": 5,
+    "rewardBonus": 0.1,
+    "description": "Ancient trees older than the timelines themselves. The paths shift when no one is looking."
+  },
+  {
+    "name": "Farmer's Fields",
+    "unlockLevel": 8,
+    "rewardBonus": 0.15,
+    "description": "Golden fields that should be peaceful. The harvest has been strange since the portals began to open."
+  },
+  {
+    "name": "Traveler's Rest",
+    "unlockLevel": 11,
+    "rewardBonus": 0.2,
+    "description": "An inn at the crossroads of every era. The innkeeper never seems to age."
+  },
+  {
+    "name": "Lost Artifact's Crypt",
+    "unlockLevel": 15,
+    "rewardBonus": 0.25,
+    "description": "A sealed tomb where relics from forgotten timelines were buried, and where their guardians still wait."
+  },
+  {
+    "name": "The Carpenter's Guild",
+    "unlockLevel": 20,
+    "rewardBonus": 0.3,
+    "description": "The workshop that built the first portal frames. Its halls echo with hammering, though the guild left long ago."
+  },
+  {
+    "name": "The Mechanist's Lab",
+    "unlockLevel": 25,
+    "rewardBonus": 0.35,
+    "description": "Cerberon's first laboratory, full of half-finished machines that still hum when you walk past."
+  },
+  {
+    "name": "Abandoned Outpost",
+    "unlockLevel": 30,
+    "rewardBonus": 0.4,
+    "description": "A watchtower at the edge of the known timelines. Its last report was never finished."
+  },
+  {
+    "name": "Hero's Haven",
+    "unlockLevel": 40,
+    "rewardBonus": 0.45,
+    "description": "A frozen sanctuary where the greatest voyagers rest between lives. Not all of them rest peacefully."
+  },
+  {
+    "name": "Dahlia's Core",
+    "unlockLevel": 50,
+    "rewardBonus": 0.5,
+    "description": "The heart of Project D.A.H.L.I.A. Few voyagers have seen it, and fewer still have understood it."
+  }
+]

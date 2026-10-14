@@ -1,0 +1,8 @@
+{
+  "free": {
+    "hasButtonRoles": true,
+    "hasTickets": true,
+    "hasForms": true,
+    "hasBosses": false
+  }
+}

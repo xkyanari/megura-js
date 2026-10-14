@@ -1,0 +1,68 @@
+# Node modules
+/node_modules
+
+# Logs
+/logs/*
+
+# Database backups made by scripts/update.sh
+/backups
+
+# Environment files
+.env
+
+# Redacted System
+/memoria
+
+# Database files
+*.sqlite
+*.db
+*.sql
+# ...except the one-off schema migrations, which ship with the code
+!scripts/migrations/*.sql
+*.rdb
+
+# Config files
+config.json
+pm2.config.js
+
+# Specific features
+/assets/features.json
+
+# Development containers
+/.devcontainer
+
+# Secrets and local exports
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.sql.gz
+*.dump
+*.bundle
+/.repo-split/
+
+# Internal design, unreleased authored content and Premium development
+/docs/roadmap/
+/docs/storyboard/
+/assets/story/
+/chapters/
+/private/
+
+# Paid implementations belong only in private development
+/docs/internal/
+/commands/slash-commands/analytics.js
+/commands/slash-commands/arena.js
+/commands/slash-commands/boss.js
+/commands/slash-commands/giveaway.js
+/commands/slash-commands/open.js
+/commands/slash-commands/close.js
+/commands/slash-commands/raffle.js
+/commands/slash-commands/sales.js
+/commands/slash-commands/schedule.js
+/commands/slash-commands/sendGift.js
+/commands/slash-commands/specialshop.js
+/commands/slash-commands/story.js
+/commands/slash-commands/storytelling.js
+/commands/slash-commands/transfer.js

@@ -1,0 +1,35 @@
+# secrets and local config: mounted at runtime instead
+config.json
+.env
+assets/features.json
+pm2.config.js
+
+# local state
+node_modules
+logs
+*.sqlite
+*.db
+*.sql
+# ...except the schema migrations, which scripts/migrate.js runs in the container
+!scripts/migrations/*.sql
+*.rdb
+
+# not needed in the image
+.git
+.github
+.devcontainer
+test
+backups
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+.env.*
+!.env.example
+*.pem
+*.key
+*.bundle
+docs/roadmap
+docs/storyboard
+assets/story
+private

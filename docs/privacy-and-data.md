@@ -1,0 +1,48 @@
+# 🔐 Privacy and Data
+
+Dahlia is designed to run without Discord's privileged Message Content, Server Members, or Presence gateway intents.
+
+This means Dahlia does not scan normal channel conversations, does not track users' presence or activity status, and does not rely on the full server member list. Users interact with Dahlia through slash commands, buttons, select menus, modals, and other explicit Discord interactions.
+
+## Data Dahlia stores
+
+Dahlia stores the data needed to operate server tools and game features:
+
+* Discord user IDs, guild IDs, channel IDs, role IDs, and message IDs supplied through bot interactions
+* Character names and player profiles
+* Player stats, levels, experience, balances, inventory, shop purchases, and rewards
+* Battle, duel, and brawl activity
+* Server setup settings such as log channels, CAPTCHA channels, verification roles, rules, shop channels, and faction roles
+* Giveaway records: the prize, the host's Discord user ID, and the Discord user IDs of the members who entered and won
+* Raffle records: the prize, the host's Discord user ID, and for each member who bought tickets their Discord user ID, ticket count, and the winners
+* Ticket records: the Discord user ID of the member who opened each ticket and of who closed it, the ticket channel's ID, and when it was opened and closed. Dahlia does not store the messages sent in ticket channels
+* Form submissions: answers are posted to the server's chosen channel with the member's username and user ID; Dahlia stores the form's questions but not the answers
+* Scheduled posts: the message, its channel and schedule, and the Discord user ID of the member who scheduled it
+* Setup change logs: the Discord username and user ID of the member who changed a `/setup` setting, what changed (including channel and role names), and when
+* Timestamps related to gameplay, setup, and bot activity
+
+## Message content
+
+Dahlia does not collect normal channel message text for commands, AI chat, or deleted-message logging. Legacy message-prefix commands and open channel AI chat are disabled.
+
+## Retention
+
+Local log files are removed after 30 days.
+
+Game and server configuration data may be kept while it is needed to provide bot features, maintain player progress, prevent abuse, or support server setup.
+
+## AI training
+
+Message content and gameplay data are not used to train machine learning or AI models.
+
+## Deletion requests
+
+Users can request deletion of their activity or player data through the support server listed by Dahlia's `/support` command. Include your Discord user ID and, when relevant, the server/guild ID so the request can be located.
+
+Server administrators can remove server configuration data by using `/setup disable`.
+
+## Personal story activity
+
+Personal story runs retain your scene progress and choices so you can resume or replay. Episode reward claims and learned skills remain with your server character. Gameplay analytics record character and server identifiers, run identifiers, timestamps and structured gameplay actions such as scene advancement, choices, rewards and image generation. Channel conversations are not collected by this analytics feature. Raw activity events are retained for at most 90 days through scheduled cleanup. Server administrators can view aggregate gameplay reports for their server. Character deletion removes its story runs, reward claims, learned skills and linked analytics records.
+
+Journey cards are delivered privately until you choose to share them. They expose your character name and gameplay milestones, without story choices or Discord identifiers.
